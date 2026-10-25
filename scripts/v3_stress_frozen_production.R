@@ -21,6 +21,8 @@ first<-TRUE
 for(training_seed in 0:9) {
   source_file<-file.path(input,family,sprintf('seed%02d',training_seed),sprintf('n%d',n),'discovery.rds')
   if(!file.exists(source_file))stop('Missing frozen Discovery: ',source_file)
+  t3_stage_require(file.path(dirname(source_file),'stage_contract.rds'),
+     'discovery',sprintf('b3_%s_n%d',family,n),family,training_seed,n)
   fit<-t2_read_rds(source_file)
   if(length(fit$engines)!=4L)stop('Incomplete frozen engine registry')
   baselines<-lapply(ESTIMATOR_NAMES,function(nm)new_frozen_model(nm,component=nm))
@@ -46,6 +48,10 @@ summary<-read.csv(file.path(out,'scores.csv'))
 if(any(!is.finite(summary$mse)) || any(!is.finite(summary$q95)))stop('Invalid stress scores')
 write.csv(aggregate(cbind(mse,q95)~model+training_seed,data=summary,FUN=mean),
   file.path(out,'training_comparison.csv'),row.names=FALSE)
+t3_stage_publish('stress',sprintf('b3_%s_n%d',family,n),
+ list(scores_path=file.path(out,'scores.csv'),
+      score_sha256=t2_sha256(file.path(out,'scores.csv')),scenario_ids=0:320),
+ family,seed,n,500L,file.path(out,'stage_contract.rds'))
 cat('V3_STRESS_SHARD_PASS',family,seed,n,'\\n')
 
 # Publish canonical B3-named counterparts without breaking existing downstream references.
