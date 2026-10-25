@@ -1,6 +1,6 @@
 # Deterministic, scenario-level stratification for strict B3 nested validation.
 # Read only immutable scenario metadata; no outcome or optimizer fitness used.
-t2_b3_stratified_folds <- function(family, seed, ids=0:120, k=5L,n=1000L) {
+t2_b3_stratified_folds <- function(family, seed, ids=0:320, k=5L,n=1000L) {
  stopifnot(k>=2L,length(ids)>=k,anyDuplicated(ids)==0L)
  meta<-lapply(ids,function(id){
    p<-file.path(t2_v3_block_dir('discovery',family,seed,n),
@@ -37,7 +37,7 @@ t2_b3_stratified_folds <- function(family, seed, ids=0:120, k=5L,n=1000L) {
 }
 t2_b3_nested_partitions <- function(family,seed,outer,inner=NULL,n=1000L) {
  stopifnot(outer%in%1:5)
- ext<-t2_b3_stratified_folds(family,seed,0:120,5L,n=n)
+ ext<-t2_b3_stratified_folds(family,seed,0:320,5L,n=n)
  train<-ext$scenario_id[ext$fold!=outer]
  valid<-ext$scenario_id[ext$fold==outer]
  if(is.null(inner))return(list(training=train,validation=valid,outer=ext))
