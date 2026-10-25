@@ -1,0 +1,19 @@
+source("R/05_validation/t3_selection_aware_validation.R")
+obs<-data.frame(model=c("ga","de"),statistic=c(2,1))
+set.seed(19)
+replays<-lapply(1:99,function(i)list(reselected=TRUE,independent_confirmation=TRUE,
+ statistics=data.frame(model=c("ga","de"),statistic=rnorm(2))))
+x<-t3_calibrate_selection_fpr(obs,replays)
+stopifnot(nrow(x)==2L,all(x$p_maxT>=x$p_empirical),all(x$replay_count==99L))
+bad<-replays;bad[[1]]$reselected<-FALSE
+stopifnot(inherits(try(t3_calibrate_selection_fpr(obs,bad),silent=TRUE),"try-error"))
+grid<-expand.grid(rate=c(0.01,0.1,0.2),scale=c(3,9),mechanism=c("upper","lower"))
+grid$scenario_id<-seq_len(nrow(grid))
+part<-t3_transfer_partition(grid,"lower",data.frame(rate=0.1,scale=9))
+stopifnot(any(part$group=="both"),any(part$group=="training"),
+          !any(part$in_training & part$group!="training"))
+scores<-expand.grid(scenario_id=grid$scenario_id,model=c("ga","mean"))
+scores$mse<-1;scores$q95<-2
+z<-t3_transfer_score(part,scores)
+stopifnot(nrow(z)>=4L,all(z$n_scenarios>0L))
+cat("T3_SELECTION_AWARE_TRANSFER_CONTRACT_PASS\\n")
