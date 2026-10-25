@@ -5,7 +5,7 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
  cfg<-t3_equal_budget_config(cfg);scales<-t3_training_reference_scales(training_scenarios);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda,
   dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
- O<-fitness(W); trace<-list(t3_convergence_point(O,n,scales)); archiveW<-W; archiveO<-O; history<-numeric(); best<-Inf; stale<-0L
+ O<-fitness(W); trace<-list(t3_convergence_point(O,n,scales)); archiveW<-W; archiveO<-O; history<-numeric(); best<- -Inf; stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'ga',cfg)
  if(!is.null(resume)) {
@@ -34,11 +34,11 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
    archiveW<-cbind(archiveW,children); archiveO<-rbind(archiveO,childO)
    front<-pareto_front(archiveO); archiveW<-archiveW[,front,drop=FALSE]; archiveO<-archiveO[front,,drop=FALSE]
    trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L),scales)
-   indicator<-min(scalar_score(O)); history<-c(history,indicator)
-   if(indicator < best - cfg$improvement*max(1,abs(best)) || !is.finite(best)) {best<-indicator;stale<-0L} else stale<-stale+1L
+   indicator<- -unname(tail(trace,1)[[1L]]['joint_normalized']); history<-c(history,indicator)
+   if(!is.finite(best)||indicator>best+cfg$improvement*max(1,abs(best))) {best<-indicator;stale<-0L} else stale<-stale+1L
    t2_optimizer_save(shard,'ga',cfg,g,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
      history=history,best=best,stale=stale,trace=trace))
-   if(t2_adaptive_stop(-history,stale,cfg)) break
+   if(t2_adaptive_stop(history,stale,cfg)) break
  }
  t2_optimizer_save(shard,'ga',cfg,last_generation,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
    history=history,best=best,stale=stale,trace=trace),force=TRUE)
@@ -81,7 +81,7 @@ de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
   archiveW<-cbind(archiveW,kids);archiveO<-rbind(archiveO,childO)
   front<-pareto_front(archiveO);archiveW<-archiveW[,front,drop=FALSE];archiveO<-archiveO[front,,drop=FALSE]
   trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L),scales)
-  indicator<- -min(rowSums(sweep(O,2L,pmax(colMeans(abs(O)),1e-12),'/')))
+  indicator<- -unname(tail(trace,1)[[1L]]['joint_normalized'])
   history<-c(history,indicator)
   if(!is.finite(best)||indicator>best+cfg$improvement*max(1,abs(best))) {best<-indicator;stale<-0L} else stale<-stale+1L
   t2_optimizer_save(shard,'de',cfg,g,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
@@ -101,7 +101,7 @@ dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligib
  if(n_draws!=t3_common_budget(cfg))stop('Dirichlet budget must equal the common objective budget')
  W<-matrix(numeric(),nrow=26L,ncol=0L); O<-matrix(numeric(),nrow=0L,ncol=2L)
  next_draw<-1L; chunk<-max(1L,as.integer(cfg$population))
- trace<-list();history<-numeric();best<-Inf;stale<-0L
+ trace<-list();history<-numeric();best<- -Inf;stale<-0L
  resume<-t2_optimizer_restore(shard,'dirichlet',cfg)
  if(!is.null(resume)) {
   W<-resume$state$W; O<-resume$state$O; next_draw<-as.integer(resume$state$next_draw)
@@ -117,12 +117,12 @@ dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligib
   W<-cbind(W,Wi); O<-rbind(O,Oi); next_draw<-next_draw+take
   trace[[length(trace)+1L]]<-t3_convergence_point(O,next_draw-1L,scales)
   indicator<- -trace[[length(trace)]]['joint_normalized'];history<-c(history,indicator)
-  if(!is.finite(best)||-indicator<best-cfg$improvement*max(1,abs(best))) {best<- -indicator;stale<-0L} else stale<-stale+1L
+  if(!is.finite(best)||indicator>best+cfg$improvement*max(1,abs(best))) {best<-indicator;stale<-0L} else stale<-stale+1L
   t2_optimizer_save(shard,'dirichlet',cfg,ceiling((next_draw-1L)/chunk),
     list(W=W,O=O,next_draw=next_draw,trace=trace,history=history,best=best,stale=stale))
   if(t2_adaptive_stop(history,stale,cfg))break
  }
- t2_optimizer_save(shard,'dirichlet',cfg,ceiling(n_draws/chunk),list(W=W,O=O,next_draw=next_draw,trace=trace,history=history,best=best,stale=stale),force=TRUE)
+ t2_optimizer_save(shard,'dirichlet',cfg,ceiling((next_draw-1L)/chunk),list(W=W,O=O,next_draw=next_draw,trace=trace,history=history,best=best,stale=stale),force=TRUE)
  ix<-pareto_front(O)
  t3_budget_finalize(list(weights=W[,ix,drop=FALSE],objectives=O[ix,,drop=FALSE],
       draws=next_draw-1L,evaluations_used=next_draw-1L,
