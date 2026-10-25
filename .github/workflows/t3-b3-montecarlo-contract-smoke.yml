@@ -62,4 +62,4 @@ jobs:
           print('T3_MC_ARTIFACT_30DAY_INDEPENDENT_RUNNER_SHA256_PASS')
           PY
 
-# Rerun after fixing undefined family helper in production V3 scientific adapter.
+# Trigger requested bounded Monte Carlo contract test; no production Monte Carlo.
