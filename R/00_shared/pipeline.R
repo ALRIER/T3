@@ -259,10 +259,16 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  if (!all(selected %in% names(dispatch))) stop('Unknown discovery engine')
  engines <- setNames(lapply(selected, function(name) dispatch[[name]]()), selected)
  source('R/02_discovery/t3_predeclared_w_selection.R')
+ # Non-evolutionary controls are separate diagnostics: preserve 26+4 frozen production models.
+ controls<-list(
+   convex_mse=t3_control_optimize(s,cfg,t2_seed(shard,205),method='convex_mse'),
+   local_deterministic=t3_control_optimize(s,cfg,t2_seed(shard,206),method='local_deterministic')
+ )
  selected_models<-t3_select_models(engines,s)
- budget_audit<-t3_assert_engine_budget_parity(engines)
- convergence_audit<-t3_compare_convergence(engines,s)
- list(engines=engines,models=selected_models$models,
+ all_optimizers<-c(engines,controls)
+ budget_audit<-t3_assert_engine_budget_parity(all_optimizers)
+ convergence_audit<-t3_compare_convergence(all_optimizers,s)
+ list(engines=engines,non_evolutionary_controls=controls,models=selected_models$models,
       objective_budget_audit=budget_audit,convergence_audit=convergence_audit,
       selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=cfg,
       budget_registry=t2_discovery_budget_registry(cfg),seed=t2_seed(shard,200),
