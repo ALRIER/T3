@@ -39,8 +39,8 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/b3-fixture"
           printf 'b3 contract fixture %s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/b3-fixture/fixture.txt"
-          python3 scripts/t3_b3_azure_artifacts.py upload --experiment "$EXPERIMENT" --stage discovery --family normal --seed 0 --n 200 --directory "$RUNNER_TEMP/b3-fixture" | tee "$RUNNER_TEMP/published.json"
+          python3 scripts/t3_b3_azure_artifacts.py upload --experiment "${EXPERIMENT}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" --stage discovery --family normal --seed 0 --n 200 --directory "$RUNNER_TEMP/b3-fixture" | tee "$RUNNER_TEMP/published.json"
           SHA=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["sha256"])' "$RUNNER_TEMP/published.json")
-          python3 scripts/t3_b3_azure_artifacts.py download --experiment "$EXPERIMENT" --stage discovery --family normal --seed 0 --n 200 --sha256 "$SHA" --directory "$RUNNER_TEMP/b3-retrieved"
+          python3 scripts/t3_b3_azure_artifacts.py download --experiment "${EXPERIMENT}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" --stage discovery --family normal --seed 0 --n 200 --sha256 "$SHA" --directory "$RUNNER_TEMP/b3-retrieved"
           cmp "$RUNNER_TEMP/b3-fixture/fixture.txt" "$RUNNER_TEMP/b3-retrieved/fixture.txt"
           echo 'B3_AZURE_KEYVAULT_OIDC_UPLOAD_DOWNLOAD_SHA256_PASS'
