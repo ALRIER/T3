@@ -9,6 +9,7 @@ source('R/00_shared/v3_downstream.R')
 source('R/00_shared/t2_v3_b3_resources.R')
 if(!seed %in% t2_v3_indices('heldout') || !n %in% t2_v3_sample_sizes('heldout'))
   stop('Held-out reserved seed/sample-size contract violated')
+t3_stage_preflight('heldout',family,seed,n,require_scenarios=TRUE)
 root<-file.path('artifacts','discovery_v3')
 out<-file.path('artifacts','heldout_v3',family,sprintf('seed%02d_n%d',seed,n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
@@ -76,6 +77,7 @@ t3_stage_publish('heldout',sprintf('b3_%s_n%d',family,n),
  list(scores_path=outcsv,score_sha256=t2_sha256(outcsv),scenario_ids=0:320),
  family,seed,n,500L,file.path(out,'stage_contract.rds'),
  parents=sprintf('discovery__%s__%02d',family,t2_v3_indices('discovery')))
+t3_stage_postflight(file.path(out,'stage_contract.rds'),'heldout',family,seed,n,expected_files=outcsv)
 cat('V3_HELDOUT_SHARD_PASS',family,seed,n,'\n')
 
 # Publish canonical B3-named counterparts without breaking existing downstream references.
