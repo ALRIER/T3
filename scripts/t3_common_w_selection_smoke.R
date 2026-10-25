@@ -58,3 +58,15 @@ st<-t3_w_stability(registry)
 stopifnot(setequal(st$contrast,c('seed','fold','sample_n')),
  all(st$l1>=0),all(st$cosine<=1+1e-12))
 cat('T3_FROZEN_W_STABILITY_SMOKE_PASS\\n')
+
+# Global preregistered seed partition guard for all four experiment stages.
+t2_assert_seed_plan_v3()
+stopifnot(identical(t2_v3_indices('discovery'),0:9),
+ identical(t2_v3_indices('heldout'),10:19),
+ identical(t2_v3_indices('stress'),20:29),
+ identical(t2_v3_indices('realworld'),30:39))
+for(role in c('discovery','heldout','stress','realworld')) {
+ for(other in setdiff(c('discovery','heldout','stress','realworld'),role))
+  stopifnot(!any(t2_v3_indices(role)%in%t2_v3_indices(other)))
+}
+cat('T3_FORTY_DISJOINT_SEEDS_PASS\\n')
