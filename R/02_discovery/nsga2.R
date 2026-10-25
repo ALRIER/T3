@@ -88,9 +88,9 @@ nsga_evaluate_scenarios <- function(W,training_scenarios,batch_size=32L,lambda=0
  colnames(accum)<-c('mse','q95');accum
 }
 nsga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),shard=NULL) {
- cfg<-t3_equal_budget_config(cfg);set.seed(seed);n<-cfg$population; W<-nsga_initial(n,eligible)
+ cfg<-t3_equal_budget_config(cfg);scales<-t3_training_reference_scales(training_scenarios);set.seed(seed);n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
- O<-fitness(W);trace<-list(t3_convergence_point(O,n));history<-numeric();archiveW<-W;archiveO<-O; best_prior<- -Inf;stale<-0L
+ O<-fitness(W);trace<-list(t3_convergence_point(O,n,scales));history<-numeric();archiveW<-W;archiveO<-O; best_prior<- -Inf;stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'nsga2',cfg)
  if(!is.null(resume)) {
@@ -112,7 +112,7 @@ nsga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=re
    W<-joined[,keep,drop=FALSE];O<-obj[keep,,drop=FALSE]
    archiveW<-cbind(archiveW,children);archiveO<-rbind(archiveO,obj[(n+1L):nrow(obj),,drop=FALSE])
    front<-pareto_front(archiveO);archiveW<-archiveW[,front,drop=FALSE];archiveO<-archiveO[front,,drop=FALSE]
-  trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L))
+  trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L),scales)
    # bounded convergence proxy (training-only), positive improvement = lower normalized objectives
    indicator<- -min(rowSums(sweep(O,2L,pmax(colMeans(abs(O)),1e-12),'/')))
    history<-c(history,indicator)
