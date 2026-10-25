@@ -1,6 +1,10 @@
 name: T3 B3 Integration Smoke (manual only)
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/t3-b3-integration-smoke.yml'
 permissions:
   contents: read
 jobs:
