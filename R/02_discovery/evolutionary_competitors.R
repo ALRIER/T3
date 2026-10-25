@@ -2,10 +2,10 @@
 # from NSGA-II: scalar tournament selection and scalar elitist replacement are
 # used, while the same prepared scenarios and evaluation budget are retained.
 ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),shard=NULL) {
- cfg<-t3_equal_budget_config(cfg);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
+ cfg<-t3_equal_budget_config(cfg);scales<-t3_training_reference_scales(training_scenarios);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda,
   dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
- O<-fitness(W); trace<-list(t3_convergence_point(O,n)); archiveW<-W; archiveO<-O; history<-numeric(); best<-Inf; stale<-0L
+ O<-fitness(W); trace<-list(t3_convergence_point(O,n,scales)); archiveW<-W; archiveO<-O; history<-numeric(); best<-Inf; stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'ga',cfg)
  if(!is.null(resume)) {
@@ -33,7 +33,7 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
    W<-joined[,keep,drop=FALSE]; O<-obj[keep,,drop=FALSE]
    archiveW<-cbind(archiveW,children); archiveO<-rbind(archiveO,childO)
    front<-pareto_front(archiveO); archiveW<-archiveW[,front,drop=FALSE]; archiveO<-archiveO[front,,drop=FALSE]
-   trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L))
+   trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L),scales)
    indicator<-min(scalar_score(O)); history<-c(history,indicator)
    if(indicator < best - cfg$improvement*max(1,abs(best)) || !is.finite(best)) {best<-indicator;stale<-0L} else stale<-stale+1L
    t2_optimizer_save(shard,'ga',cfg,g,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
@@ -51,10 +51,10 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
 # Differential evolution (DE/rand/1/bin) with Pareto environmental selection.
 # Identical T matrices and objectives to NSGA-II; no use of held-out data.
 de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),F=.6,CR=.9,shard=NULL) {
- cfg<-t3_equal_budget_config(cfg);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
+ cfg<-t3_equal_budget_config(cfg);scales<-t3_training_reference_scales(training_scenarios);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda,
   dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
- O<-fitness(W);trace<-list(t3_convergence_point(O,n));history<-numeric(); archiveW<-W;archiveO<-O; best<- -Inf;stale<-0L
+ O<-fitness(W);trace<-list(t3_convergence_point(O,n,scales));history<-numeric(); archiveW<-W;archiveO<-O; best<- -Inf;stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'de',cfg)
  if(!is.null(resume)) {
@@ -80,7 +80,7 @@ de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
   keep<-nsga_select(co,n);W<-combined[,keep,drop=FALSE];O<-co[keep,,drop=FALSE]
   archiveW<-cbind(archiveW,kids);archiveO<-rbind(archiveO,childO)
   front<-pareto_front(archiveO);archiveW<-archiveW[,front,drop=FALSE];archiveO<-archiveO[front,,drop=FALSE]
-  trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L))
+  trace[[length(trace)+1L]]<-t3_convergence_point(archiveO,n*(g+1L),scales)
   indicator<- -min(rowSums(sweep(O,2L,pmax(colMeans(abs(O)),1e-12),'/')))
   history<-c(history,indicator)
   if(!is.finite(best)||indicator>best+cfg$improvement*max(1,abs(best))) {best<-indicator;stale<-0L} else stale<-stale+1L
@@ -97,7 +97,7 @@ de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
 }
 # Random Dirichlet search is a frozen control, not an evolutionary GA.
 dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),n_draws=NULL,alpha=1,shard=NULL) {
- cfg<-t3_equal_budget_config(cfg);set.seed(seed);if(is.null(n_draws))n_draws<-t3_common_budget(cfg)
+ cfg<-t3_equal_budget_config(cfg);scales<-t3_training_reference_scales(training_scenarios);set.seed(seed);if(is.null(n_draws))n_draws<-t3_common_budget(cfg)
  if(n_draws!=t3_common_budget(cfg))stop('Dirichlet budget must equal the common objective budget')
  W<-matrix(numeric(),nrow=26L,ncol=0L); O<-matrix(numeric(),nrow=0L,ncol=2L)
  next_draw<-1L; chunk<-max(1L,as.integer(cfg$population))
@@ -115,7 +115,7 @@ dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligib
   Wi<-normalize_weights(Wi,eligible); Oi<-nsga_evaluate_scenarios(Wi,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda,
   dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
   W<-cbind(W,Wi); O<-rbind(O,Oi); next_draw<-next_draw+take
-  trace[[length(trace)+1L]]<-t3_convergence_point(O,next_draw-1L)
+  trace[[length(trace)+1L]]<-t3_convergence_point(O,next_draw-1L,scales)
   indicator<- -trace[[length(trace)]]['joint_normalized'];history<-c(history,indicator)
   if(!is.finite(best)||-indicator<best-cfg$improvement*max(1,abs(best))) {best<- -indicator;stale<-0L} else stale<-stale+1L
   t2_optimizer_save(shard,'dirichlet',cfg,ceiling((next_draw-1L)/chunk),
