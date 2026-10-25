@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 # Strict T2 V3 B3 5-fold refit: five independent train/validation partitions.
 args<-commandArgs(trailingOnly=TRUE)
-if(length(args)!=3L)stop('Usage: FAMILY DISCOVERY_SEED FOLD_1_TO_5')
-fam<-args[[1L]];seed<-as.integer(args[[2L]]);fold<-as.integer(args[[3L]])
+if(length(args)!=4L)stop('Usage: FAMILY DISCOVERY_SEED FOLD_1_TO_5 N')
+fam<-args[[1L]];seed<-as.integer(args[[2L]]);fold<-as.integer(args[[3L]]);n<-as.integer(args[[4L]])
 if(!fam%in%c('normal','lognormal','weibull','invgauss','exgaussian','exwald')||
    is.na(seed)||!seed%in%0:9||is.na(fold)||!fold%in%1:5)stop('Invalid CV shard')
 source('R/00_shared/load_all.R');t2_load('.')
@@ -11,26 +11,26 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t2_v3_b3_naming.R')
-stopifnot(ga_config$discovery_cv_folds==5L)
+stopifnot(ga_config$discovery_cv_folds==5L,n%in%t2_v3_sample_sizes('discovery'))
 source('R/02_discovery/t2_v3_b3_nested_folds.R')
-parts<-t2_b3_nested_partitions(fam,seed,fold)
+parts<-t2_b3_nested_partitions(fam,seed,fold,n=n)
 ids<-parts$outer$scenario_id
 foldid<-parts$outer$fold
 training<-parts$training
 validation<-parts$validation
 stopifnot(length(training)+length(validation)==121L,!any(training%in%validation))
-out<-file.path('artifacts','T2_V3_B3_discovery_cv5_refit',fam,sprintf('seed%02d',seed),sprintf('fold%02d',fold))
+out<-file.path('artifacts','T2_V3_B3_discovery_cv5_refit',fam,sprintf('seed%02d',seed),sprintf('fold%02d',fold),sprintf('n%d',n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
-source_root<-t2_v3_block_dir('discovery',fam,seed,1000L)
+source_root<-t2_v3_block_dir('discovery',fam,seed,n)
 t2_b3_inputs_manifest(file.path(source_root,sprintf('scenario_%04d.rds',ids)),out,'discovery_cv5_refit')
 t2_b3_ram_guard('discovery_cv5_refit',out,'start')
-d<-t2_v3_discovery_input(fam,seed,1000L,500L,training)
-shard<-sprintf('T2_V3_B3_cv5_%s_seed%02d_fold%d',fam,seed,fold)
+d<-t2_v3_discovery_input(fam,seed,n,500L,training)
+shard<-sprintf('T2_V3_B3_cv5_%s_seed%02d_fold%d_n%d',fam,seed,fold,n)
 # Outer fold is never supplied to Optuna. Refit each engine with the
 # configurations selected by three internal folds.
 if(!requireNamespace('jsonlite',quietly=TRUE))stop('jsonlite required')
 hpo_root<-file.path('artifacts','T2_V3_B3_nested_optuna',fam,
- sprintf('seed%02d',seed),sprintf('fold%02d',fold))
+ sprintf('seed%02d',seed),sprintf('fold%02d',fold),sprintf('n%d',n))
 engines<-list()
 for(engine in c('ga','nsga2','de','dirichlet')){
  selected<-file.path(hpo_root,paste0(engine,'_best.json'))
@@ -59,7 +59,7 @@ for(m in Filter(function(x)!is.null(x$weights),fit$models))
    stop('Fold-trained W invalid')
 scores<-file.path(out,'out_of_fold_scores.csv')
 for(i in seq_along(validation)){
- sc<-t2_v3_read_scenario('discovery',fam,seed,1000L,validation[[i]])
+ sc<-t2_v3_read_scenario('discovery',fam,seed,n,validation[[i]])
  z<-score_model_set(sc$T,fit$models,sc$target)
  z$family<-fam;z$seed<-seed;z$fold<-fold;z$scenario_id<-validation[[i]]
  z$training_scenarios<-length(training)
