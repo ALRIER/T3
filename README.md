@@ -59,3 +59,43 @@ Este índice registra cambios propuestos o incorporados durante la revisión rec
 
 ### Protocolo para desarrollar cada apartado
 Para cada punto: **(i)** hipótesis o finalidad, **(ii)** definiciones y fórmulas, **(iii)** implementación y restricciones, **(iv)** supuestos y riesgos, **(v)** validaciones y criterios de aceptación, **(vi)** tablas/figuras previstas, **(vii)** estado de verificación. Este índice no autoriza un deployment completo: hace falta demostrar CI satisfactoria y revisar las rutas de producción.
+
+
+## Azure artifact exchange (prospective B3)
+
+The GitHub Actions / Azure Key Vault / Blob contract is specified in
+`scripts/t3_b3_azure_artifacts.py` and
+`.github/workflows/t3-b3-azure-persistence.yml`. It remains **unverified against
+the target Azure account** until the dedicated manual OIDC roundtrip succeeds.
+
+Configure GitHub Actions environment `b3-persistence` with repository or
+environment variables `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`,
+`AZURE_SUBSCRIPTION_ID`, and `B3_KEY_VAULT`. Configure the workload
+identity federated credential for repository `ALRIER/T3` and environment
+`b3-persistence`, with the audience `api://AzureADTokenExchange`.
+Grant the identity Key Vault Secrets User on the named vault and Storage Blob
+Data Contributor on the target container or storage account. Create vault
+secrets `B3-Storage-Account` and `B3-Storage-Container`.
+Do not put storage keys, SAS URLs, or secret values into repository files.
+
+The stage exchange is immutable and per seed: `b3/<experiment>/<stage>/
+<seed_role>/<family>/seedXX/nNNN/<archive_sha256>/`. Each upload writes
+`payload.tar.gz` and then `COMMITTED.json` with source revision and
+per-file SHA-256. Consumers must identify the exact archive SHA-256 and
+revalidate the archive, per-file hashes, and role-specific seed range after
+download. Monte Carlo accepts only synthetic seed roles (Discovery, Held-out,
+Stress); Real World never consumes synthetic Monte Carlo arrays.
+
+Typical producer (after finishing a stage on the same runner with Azure OIDC login):
+`python3 scripts/t3_b3_azure_artifacts.py upload --experiment b3-prod-v1
+--stage discovery --family normal --seed 0 --n 200 --directory artifacts/discovery_v3/normal/seed00/n200`.
+The command emits a content-addressed `prefix` and `sha256`. Downstream
+jobs must obtain this pair from an approved stage-completion manifest, then
+run the same command with `download`, `--sha256 <exact_digest>`, and a
+fresh target directory; they must fail closed if a manifest or hash is
+missing. Do not dispatch the full experiment merely because the cloud
+roundtrip passes.
+
+The dedicated manual workflow tests only an isolated synthetic fixture.
+Store/cloud retention, immutability policies, and per-stage job wiring need
+separate validation on the actual Azure deployment before production.
