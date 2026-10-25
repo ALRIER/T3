@@ -29,10 +29,10 @@ de=de_discover(training,cfg,seed=sample.int(1000000000,1),
  F=as.numeric(params$F),CR=as.numeric(params$CR),shard=NULL),
 dirichlet=dirichlet_discover(training,cfg,seed=sample.int(1000000000,1),
  alpha=as.numeric(params$alpha),n_draws=cfg$population*cfg$generations,shard=NULL))
-O<-as.matrix(fit$objectives);W<-as.matrix(fit$weights)
-scale<-pmax(colMeans(abs(O)),1e-12)
-winner<-which.min(rowSums(sweep(O,2L,scale,'/')))
-w<-W[,winner,drop=FALSE]
+source('R/02_discovery/t3_predeclared_w_selection.R')
+training_scales<-t3_training_reference_scales(training)
+chosen<-t3_select_weights(fit,training_scales)
+w<-matrix(chosen$weights,ncol=1L)
 rm(training,fit);invisible(gc(FALSE))
 val<-t2_v3_discovery_input(fam,seed,n=n,selected=validation_ids)$scenarios
 stats<-t(vapply(val,function(sc)as.numeric(evaluate_weights(sc$T,w,sc$target)$objectives[1,]),numeric(2)))
@@ -40,6 +40,6 @@ base<-t(vapply(val,function(sc){
  e<-(sc$T[,1L]-sc$target)^2
  c(mean(e),unname(quantile(e,.95,type=8)))
 },numeric(2)))
-score<-mean(stats[,1]/pmax(base[,1],1e-12))+mean(stats[,2]/pmax(base[,2],1e-12))
+score<-0.5*mean(stats[,1]/pmax(base[,1],1e-12))+0.5*mean(stats[,2]/pmax(base[,2],1e-12))
 cat(jsonlite::toJSON(list(score=score,outer=outer,inner=inner,engine=engine,
  validation_scenarios=length(validation_ids)),auto_unbox=TRUE),'\n')
