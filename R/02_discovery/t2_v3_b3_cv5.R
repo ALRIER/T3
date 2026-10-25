@@ -2,11 +2,11 @@
 # Diagnostic stage: held-fold scoring of frozen candidate W; no reoptimization
 # and no independent confirmation claim.
 t2_b3_discovery_cv <- function(scenarios,models,k=5L) {
- stopifnot(length(scenarios)==121L,identical(as.integer(k),5L))
+ stopifnot(length(scenarios)==321L,identical(as.integer(k),5L))
  ids<-vapply(scenarios,function(z)as.integer(z$scenario_id),integer(1))
- if(anyDuplicated(ids)||!identical(sort(ids),0:120))stop('CV scenario contract mismatch')
+ if(anyDuplicated(ids)||!identical(sort(ids),0:320))stop('CV scenario contract mismatch')
  fold<-as.integer(ids %% k)+1L
- stopifnot(length(unique(fold))==5L,all(tabulate(fold,k)>=24L))
+ stopifnot(length(unique(fold))==5L,all(tabulate(fold,k)>=64L))
  rows<-vector('list',length(scenarios))
  for(i in seq_along(scenarios)){
    z<-score_model_set(scenarios[[i]]$T,models,scenarios[[i]]$target)
