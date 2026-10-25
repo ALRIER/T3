@@ -219,7 +219,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/discovery/${{ matrix.family }}/seed${{ format('{0}', matrix.seed) }}/
+          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/discovery/${{ matrix.family }}/seed*/n*_r500/
           retention-days: 30
           if-no-files-found: warn
   mc-heldout:
@@ -432,7 +432,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: b3-mc-heldout-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/heldout/${{ matrix.family }}/seed${{ format('{0}', matrix.seed) }}/
+          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/heldout/${{ matrix.family }}/seed*/n*_r500/
           retention-days: 30
           if-no-files-found: warn
   mc-stress:
@@ -645,6 +645,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: b3-mc-stress-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/stress/${{ matrix.family }}/seed${{ format('{0}', matrix.seed) }}/
+          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/stress/${{ matrix.family }}/seed*/n*_r500/
           retention-days: 30
           if-no-files-found: warn
