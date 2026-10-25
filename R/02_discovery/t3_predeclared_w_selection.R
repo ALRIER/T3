@@ -181,3 +181,45 @@ t3_compare_convergence <- function(engines, training_scenarios) {
     z
   }))
 }
+
+
+# B3 stability audit on frozen 26-component weights. Only compare within the
+# same family and optimizer; separate seed, fold and sample-n effects.
+t3_w_stability <- function(registry) {
+  required<-c("family","engine","seed","fold","sample_n","weights")
+  if(!is.data.frame(registry)||!all(required%in%names(registry))||
+     !is.list(registry$weights))stop("Invalid frozen W registry")
+  if(anyDuplicated(registry[c("family","engine","seed","fold","sample_n")]))
+    stop("Duplicate W registry key")
+  W<-lapply(registry$weights,function(w) {
+    w<-as.numeric(w)
+    if(length(w)!=26L||any(!is.finite(w))||any(w<0)||
+       abs(sum(w)-1)>1e-8)stop("Invalid simplex weights")
+    w
+  })
+  groups<-split(seq_len(nrow(registry)),interaction(registry$family,
+     registry$engine,drop=TRUE))
+  out<-list()
+  for(ids in groups)if(length(ids)>1L) {
+    for(a in seq_len(length(ids)-1L))for(b in (a+1L):length(ids)) {
+      i<-ids[a];j<-ids[b]
+      differences<-c(seed=registry$seed[i]!=registry$seed[j],
+        fold=registry$fold[i]!=registry$fold[j],
+        sample_n=registry$sample_n[i]!=registry$sample_n[j])
+      if(sum(differences)!=1L)next
+      out[[length(out)+1L]]<-data.frame(
+        family=registry$family[i],engine=registry$engine[i],
+        contrast=names(which(differences)),
+        seed_a=registry$seed[i],seed_b=registry$seed[j],
+        fold_a=registry$fold[i],fold_b=registry$fold[j],
+        n_a=registry$sample_n[i],n_b=registry$sample_n[j],
+        l1=sum(abs(W[[i]]-W[[j]])),
+        l2=sqrt(sum((W[[i]]-W[[j]])^2)),
+        max_absolute=max(abs(W[[i]]-W[[j]])),
+        cosine=sum(W[[i]]*W[[j]])/
+          sqrt(sum(W[[i]]^2)*sum(W[[j]]^2)))
+    }
+  }
+  if(!length(out))return(data.frame())
+  do.call(rbind,out)
+}
