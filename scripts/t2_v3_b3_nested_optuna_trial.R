@@ -8,6 +8,7 @@ source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
+source('R/02_discovery/t3_predeclared_w_selection.R')
 params<-jsonlite::fromJSON(path)
 source('R/02_discovery/t2_v3_b3_nested_folds.R')
 parts<-t2_b3_nested_partitions(fam,seed,outer,inner,n=n)
@@ -30,7 +31,7 @@ de=de_discover(training,cfg,seed=sample.int(1000000000,1),
  F=as.numeric(params$F),CR=as.numeric(params$CR),shard=NULL),
 dirichlet=dirichlet_discover(training,cfg,seed=sample.int(1000000000,1),
  alpha=as.numeric(params$alpha),n_draws=t3_common_budget(cfg),shard=NULL))
-source('R/02_discovery/t3_predeclared_w_selection.R')
+
 training_scales<-t3_training_reference_scales(training)
 chosen<-t3_select_weights(fit,training_scales)
 trial_evaluations<-as.integer(fit$evaluations_used)
