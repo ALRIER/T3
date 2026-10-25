@@ -27,6 +27,7 @@ t3_select_weights <- function(result,scales) {
       scales=scales,policy='T3_EQUAL_MSE_Q95_BASELINE26_TRAIN_ONLY_V1')
 }
 t3_select_models <- function(engines,training_scenarios) {
+ if(length(engines)>1L)t3_assert_engine_budget_parity(engines)
  scales<-t3_training_reference_scales(training_scenarios)
  chosen<-lapply(names(engines),function(engine)
    t3_select_weights(engines[[engine]],scales))
