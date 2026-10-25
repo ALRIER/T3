@@ -42,7 +42,7 @@ t2_v3_generate <- function(role,family,index,n,R=500L,n_scenarios=120L,
                            root="artifacts/mc_v3_real26") {
  if(!role%in%c("discovery","heldout","stress")||
     !index%in%t2_v3_indices(role))stop("Unassigned stage seed")
- allowed_n<-t2_v3_stage_sizes(role)
+ allowed_n<-t2_v3_sample_sizes(role)
  if(!(n%in%allowed_n))stop("Invalid stage sample size")
  if(R<2L||n_scenarios<8L)stop("Invalid simulation size")
  design<-t2_v3_design(role,family,index,n,n_scenarios)
