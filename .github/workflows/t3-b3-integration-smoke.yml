@@ -39,4 +39,4 @@ jobs:
           test -s scripts/v3_realworld_frozen_production.R
           test -s scripts/v3_stage_aggregate.R
 
-# Run using the existing pinned v2 image, separating package build from R checks.
+# Bounded smoke triggered after fixing R scalar-comparison assertion; scientific runs remain disabled.
