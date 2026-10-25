@@ -8,6 +8,7 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 source('R/00_shared/t2_v3_b3_resources.R')
 if(!seed%in%t2_v3_indices('stress') || !n%in%t2_v3_sample_sizes('stress'))stop('Reserved stress role contract violated')
+t3_stage_preflight('stress',family,seed,n,require_scenarios=TRUE)
 out<-file.path('artifacts','v3_stress_scoring',family,sprintf('seed%02d_n%d',seed,n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 input<-file.path('artifacts','discovery_v3')
@@ -52,6 +53,7 @@ t3_stage_publish('stress',sprintf('b3_%s_n%d',family,n),
  list(scores_path=file.path(out,'scores.csv'),
       score_sha256=t2_sha256(file.path(out,'scores.csv')),scenario_ids=0:320),
  family,seed,n,500L,file.path(out,'stage_contract.rds'))
+t3_stage_postflight(file.path(out,'stage_contract.rds'),'stress',family,seed,n,expected_files=file.path(out,'scores.csv'))
 cat('V3_STRESS_SHARD_PASS',family,seed,n,'\\n')
 
 # Publish canonical B3-named counterparts without breaking existing downstream references.
