@@ -88,10 +88,10 @@ cat('T3_FAIR_CONVERGENCE_AND_BUDGET_LEDGER_PASS\\n')
 source('R/05_audits/stage_inference.R')
 
 # Out-of-support exclusion is deterministic and disjoint.
-grid<-expand.grid(rate=c(0,.1,.2),scale=c(3,6),
+grid<-expand.grid(contamination=c(0,.1,.2),mad_scale=c(3,6),
                   mechanism=c('none','upper_tail','lower_tail'),
                   stringsAsFactors=FALSE)
-grid<-subset(grid,rate!=0 | (scale==3 & mechanism=='none'))
+grid<-subset(grid,contamination!=0 | (mad_scale==3 & mechanism=='none'))
 grid$scenario_id<-seq_len(nrow(grid))-1L
 partition<-t3_exclusion_design(grid,excluded_mechanisms='lower_tail',
                               excluded_rates=.2)
