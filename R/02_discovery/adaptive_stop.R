@@ -28,18 +28,42 @@ t3_common_budget <- function(cfg) {
   as.integer(n*(g+1L))
 }
 t3_equal_budget_config <- function(cfg) {
-  cfg$early_stop_enabled<-FALSE
+  # Preserve original adaptive stopping; only cap the maximum budget.
   cfg$t3_equal_budget<-TRUE
   cfg
 }
 t3_budget_finalize <- function(result, cfg, engine, convergence=NULL) {
   expected<-t3_common_budget(cfg)
-  if(is.null(result$evaluations_used)||result$evaluations_used!=expected)
+  if(is.null(result$evaluations_used)||!is.finite(result$evaluations_used)||result$evaluations_used<1L||result$evaluations_used>expected)
     stop(sprintf("Budget parity failure %s: %s versus %s",engine,
       result$evaluations_used,expected))
-  result$budget_policy<-"B3_EQUAL_CANDIDATE_EVALUATIONS_V1"
+  result$budget_policy<-"B3_EQUAL_MAX_BUDGET_ADAPTIVE_V2"
   result$evaluation_budget<-expected
-  result$early_stop_enabled<-FALSE
+  result$early_stop_enabled<-isTRUE(cfg$early_stop_enabled)
   if(!is.null(convergence))result$convergence<-convergence
   result
+}
+
+# Training-only, comparable convergence at actual candidate-evaluation counts.
+# The same prospectively fixed reference scales apply to all four engines.
+t3_convergence_point <- function(objectives, evaluations, scales=NULL) {
+  O<-as.matrix(objectives)
+  if(ncol(O)!=2L||!nrow(O)||any(!is.finite(O)))stop("Invalid convergence objectives")
+  if(!is.null(colnames(O))&&all(c("mse","q95")%in%colnames(O)))
+    O<-O[,c("mse","q95"),drop=FALSE]
+  if(is.null(scales))scales<-c(mse=1,q95=1)
+  if(any(!is.finite(scales))||any(scales<=0))stop("Invalid reference scales")
+  j<-which.min(rowMeans(sweep(O,2L,as.numeric(scales[c("mse","q95")]),"/")))
+  c(evaluations=as.numeric(evaluations),mse=O[j,1L],q95=O[j,2L],
+    joint_normalized=mean(O[j,]/as.numeric(scales[c("mse","q95")])))
+}
+t3_convergence_table <- function(result, scales) {
+  trace<-result$convergence
+  if(is.null(trace)||!length(trace))stop("Missing actual convergence trace")
+  z<-as.data.frame(do.call(rbind,trace))
+  if(any(diff(z$evaluations)<=0)||tail(z$evaluations,1)!=result$evaluations_used)
+    stop("Invalid cumulative evaluation steps")
+  z$joint_normalized<-rowMeans(sweep(as.matrix(z[,c("mse","q95")]),2L,
+    as.numeric(scales[c("mse","q95")]),"/"))
+  z
 }
