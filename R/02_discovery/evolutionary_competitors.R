@@ -126,3 +126,86 @@ dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligib
       evaluation_steps=vapply(trace,function(x)unname(x['evaluations']),numeric(1)),convergence=trace,
       seed=seed,engine='Dirichlet',stage='training_only'),cfg,'dirichlet')
 }
+
+
+# Non-evolutionary baselines kept in the existing Discovery implementation.
+# Each objective call evaluates exactly one candidate W on identical scenarios.
+t3_project_simplex <- function(x) {
+  u<-sort(as.numeric(x),decreasing=TRUE)
+  rho<-max(which(u-(cumsum(u)-1)/seq_along(u)>0))
+  pmax(x-(sum(u[seq_len(rho)])-1)/rho,0)
+}
+t3_control_optimize <- function(training_scenarios,cfg=ga_config,seed=101L,
+                                method=c('convex_mse','local_deterministic'),
+                                eligible=rep(TRUE,26L)) {
+  method<-match.arg(method)
+  cfg<-t3_equal_budget_config(cfg)
+  budget<-t3_common_budget(cfg)
+  if(length(eligible)!=26L||!any(eligible))stop('Invalid eligible set')
+  active<-which(eligible);k<-length(active)
+  set.seed(seed)
+  # Convex objective: balanced mean of scenario MSEs; local objective:
+  # frozen normalized joint MSE/Q95 policy, trained on the same scenarios.
+  scales<-t3_training_reference_scales(training_scenarios)
+  evaluate<-function(w) {
+    W<-matrix(w,26L,1L)
+    as.numeric(nsga_evaluate_scenarios(W,training_scenarios,cfg$batch_size,
+      if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else
+        cfg$discovery_weight_regularization_lambda)[1L,])
+  }
+  reference<-if(method=='convex_mse') function(o)o[1L] else
+    function(o)mean(o/as.numeric(scales[c('mse','q95')]))
+  w<-numeric(26L);w[active]<-1/k
+  start<-proc.time()[['elapsed']]
+  obj<-evaluate(w);used<-1L
+  best<-reference(obj);trace<-list(c(evaluations=used,mse=obj[1],q95=obj[2]))
+  history<-numeric();stale<-0L;step<-0.2
+  W<-matrix(w,26L,1L);O<-matrix(obj,nrow=1L,dimnames=list(NULL,c('mse','q95')))
+  while(used<budget) {
+    prev<-best
+    if(method=='convex_mse') {
+      # Deterministic projected finite-difference descent for convex MSE.
+      # KKT-compatible simplex projection; each finite difference is counted.
+      g<-numeric(k);base<-obj[1L]
+      for(j in seq_len(k)) {
+        if(used>=budget)break
+        trial<-w;trial[active[j]]<-trial[active[j]]+1e-5
+        trial[active]<-t3_project_simplex(trial[active])
+        eo<-evaluate(trial);used<-used+1L
+        g[j]<-(eo[1L]-base)/max(sum(abs(trial-w)),1e-12)
+      }
+      trial<-w;trial[active]<-t3_project_simplex(w[active]-step*g)
+      if(used<budget) {
+        eo<-evaluate(trial);used<-used+1L
+        W<-cbind(W,trial);O<-rbind(O,eo)
+        if(reference(eo)<best){w<-trial;obj<-eo;best<-reference(eo)}
+      }
+    } else {
+      # Deterministic simplex coordinate-transfer search; no RNG mutation.
+      improved<-FALSE
+      for(j in seq_len(k)) {
+        if(used>=budget)break
+        trial<-w
+        from<-active[j];to<-active[(j%%k)+1L]
+        delta<-min(step,trial[from])
+        trial[from]<-trial[from]-delta;trial[to]<-trial[to]+delta
+        eo<-evaluate(trial);used<-used+1L
+        W<-cbind(W,trial);O<-rbind(O,eo)
+        if(reference(eo)<best){w<-trial;obj<-eo;best<-reference(eo);improved<-TRUE}
+      }
+      if(!improved)step<-step/2
+    }
+    stale<-if(best<prev-cfg$improvement*max(1,abs(prev)))0L else stale+1L
+    history<-c(history,-best)
+    trace[[length(trace)+1L]]<-c(evaluations=used,mse=obj[1],q95=obj[2])
+    if(t2_adaptive_stop(history,stale,cfg))break
+    if(step<1e-10)break
+  }
+  # One returned candidate is the best W; selection policy remains common.
+  res<-list(weights=matrix(w,ncol=1L),objectives=matrix(obj,nrow=1L,
+              dimnames=list(NULL,c('mse','q95'))),
+            evaluations_used=used,convergence=trace,
+            seed=seed,stage='training_only',engine=method,
+            elapsed_seconds=proc.time()[['elapsed']]-start)
+  t3_budget_finalize(res,cfg,method)
+}
