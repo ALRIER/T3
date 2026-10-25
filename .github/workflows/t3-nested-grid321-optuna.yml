@@ -1,5 +1,13 @@
 name: T3 Nested Optuna 5x3 Grid321
 on:
+  workflow_call:
+    inputs:
+      mc_run_id:
+        required: true
+        type: string
+      outer_fold:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       mc_run_id:
