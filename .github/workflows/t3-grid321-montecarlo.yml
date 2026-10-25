@@ -49,7 +49,13 @@ jobs:
       - name: Validate 321-condition manifest
         run: |
           python3 scripts/t2_v3_b3_generate_grid321.py
-          git diff --exit-code -- config/T2_V3_B3_prospective_321_grid.csv
+          git show HEAD:config/T2_V3_B3_prospective_321_grid.csv > /tmp/t3_frozen_grid.csv
+          python3 - <<'PY'
+          import csv
+          a=list(csv.DictReader(open('/tmp/t3_frozen_grid.csv',newline='')))
+          b=list(csv.DictReader(open('config/T2_V3_B3_prospective_321_grid.csv',newline='')))
+          assert a==b, 'Prospective grid differs from frozen manifest'
+          PY
       - name: Generate independent Monte Carlo shard
         env:
           T2_V3_REPS: '500'
