@@ -249,6 +249,7 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  cfg<-ga_config
  if(mode=='smoke'){cfg$population<-8L;cfg$generations<-2L;cfg$patience<-2L;cfg$bootstrap_B<-100L}
  s<-data$scenarios
+ source('R/02_discovery/t3_predeclared_w_selection.R')
  dispatch <- list(
    ga=function() ga_discover(s,cfg,t2_seed(shard,201),shard=shard),
    nsga2=function() nsga_discover(s,cfg,t2_seed(shard,202),shard=shard),
@@ -258,7 +259,7 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  selected <- if (engine == 'all') names(dispatch) else engine
  if (!all(selected %in% names(dispatch))) stop('Unknown discovery engine')
  engines <- setNames(lapply(selected, function(name) dispatch[[name]]()), selected)
- source('R/02_discovery/t3_predeclared_w_selection.R')
+
  # Non-evolutionary controls are separate diagnostics: preserve 26+4 frozen production models.
  controls<-list(
    convex_mse=t3_control_optimize(s,cfg,t2_seed(shard,205),method='convex_mse'),
