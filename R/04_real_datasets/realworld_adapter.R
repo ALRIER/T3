@@ -50,7 +50,9 @@ t2_realworld_load_vector <- function(row) {
        transform = transform, x = x)
 }
 
-t2_run_realworld_public <- function(discovery, mode = 'smoke', shard = 'realworld') {
+t2_run_realworld_public <- function(discovery, mode = 'smoke', shard = 'realworld', seed_index=NULL) {
+  if(!is.null(seed_index)&&!seed_index%in%t2_v3_indices('realworld'))
+    stop('Real World seed outside reserved 30-39 range')
   tab <- t2_realworld_validate_manifest(t2_realworld_manifest(), mode)
   sample_sizes <- if (mode == 'smoke') c(200L, 1000L, 3000L) else {
     raw <- Sys.getenv('T2_REALWORLD_SAMPLE_SIZES', unset = '200,1000,3000')
@@ -75,7 +77,8 @@ t2_run_realworld_public <- function(discovery, mode = 'smoke', shard = 'realworl
     dataset_ids <- names(datasets)
     prepared <- lapply(seq_along(datasets), function(i) {
       realworld_prepare(datasets[[i]]$x, sample_sizes = sample_sizes, R = reps,
-                        seed = t2_seed('realworld_canonical_bundle', 502L + i))
+                        seed = if(is.null(seed_index))t2_seed('realworld_canonical_bundle', 502L+i) else
+                          t2_seed_for_v3('realworld','normal',seed_index,sample_sizes[1L],i))
     })
     names(prepared) <- dataset_ids
   }
@@ -95,5 +98,6 @@ t2_run_realworld_public <- function(discovery, mode = 'smoke', shard = 'realworl
        results = list(realworld_inference = audit$condition_rows),
        stage = 'realworld_external_battery', reps = reps,
        sample_sizes = sample_sizes, empirical_target = 'full_dataset_mean_proxy',
-       final_battery = TRUE, prepared_bundle = if (is.null(bundle)) 'local_canonical' else bundle$bundle_id)
+       final_battery = TRUE, prepared_bundle = if (is.null(bundle)) 'local_canonical' else bundle$bundle_id,
+       seed_index=seed_index)
 }
