@@ -7,7 +7,7 @@ source("R/00_shared/load_all.R");t2_load(".");source("R/00_shared/pipeline.R")
 t2_assert_seed_plan_v3()
 if(!role %in% c("discovery","heldout","stress"))stop("Invalid role")
 if(!index %in% t2_v3_indices(role))stop("Seed not assigned to requested role")
-if(!n %in% if(role=="discovery")1000L else c(200L,1000L,3000L))
+if(!n %in% t2_v3_stage_sizes(role))
  stop("Sample size not assigned to requested role")
 # Cache namespace segregates the revised 26-column library from historical matrices.
 Sys.setenv(T2_CANONICAL_MC_ROOT="artifacts/mc_v3_real26")
