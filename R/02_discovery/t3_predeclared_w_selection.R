@@ -223,3 +223,35 @@ t3_w_stability <- function(registry) {
   if(!length(out))return(data.frame())
   do.call(rbind,out)
 }
+
+
+# Prospective exclusion partitions operate on contamination scenario coordinates,
+# never on simplex regions. Excluded cells cannot enter training or model tuning.
+t3_exclusion_design <- function(grid,excluded_mechanisms=character(),
+                                excluded_rates=numeric(),excluded_mad=numeric()) {
+ req<-c('scenario_id','mechanism','rate','scale')
+ if(!is.data.frame(grid)||!all(req%in%names(grid))||anyDuplicated(grid$scenario_id))
+   stop('Invalid prospective scenario grid')
+ if(!length(excluded_mechanisms)&&!length(excluded_rates)&&!length(excluded_mad))
+   stop('Exclusion must be prespecified')
+ mechanism<-grid$mechanism%in%excluded_mechanisms
+ neighborhood<-grid$rate%in%excluded_rates | (!is.na(grid$scale)&grid$scale%in%excluded_mad)
+ held<-mechanism|neighborhood
+ if(any(held & grid$rate==0))stop('Clean control cannot be excluded')
+ if(!any(held)||!any(!held))stop('Degenerate exclusion design')
+ data.frame(scenario_id=grid$scenario_id,
+    role=ifelse(held,'excluded_transfer','discovery_training'),
+    exclusion=ifelse(mechanism&neighborhood,'joint',
+              ifelse(mechanism,'mechanism',ifelse(neighborhood,'neighborhood','none'))),
+    stringsAsFactors=FALSE)
+}
+t3_assert_exclusion_partition <- function(partition,training_ids,transfer_ids) {
+ if(anyDuplicated(partition$scenario_id)||anyDuplicated(training_ids)||
+    anyDuplicated(transfer_ids)||length(intersect(training_ids,transfer_ids)))
+   stop('Transfer data leakage')
+ expected_train<-partition$scenario_id[partition$role=='discovery_training']
+ expected_test<-partition$scenario_id[partition$role=='excluded_transfer']
+ if(!setequal(training_ids,expected_train)||!setequal(transfer_ids,expected_test))
+   stop('Incomplete or contaminated exclusion partition')
+ invisible(TRUE)
+}
