@@ -7,6 +7,7 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends python3 \
  && rm -rf /var/lib/apt/lists/* \
  && R -q -e "install.packages('https://cran.r-project.org/src/contrib/statmod_1.5.2.tar.gz', repos=NULL, type='source')" \
- && R -q -e "stopifnot(as.character(packageVersion('statmod')) == '1.5.2')"
+ && R -q -e "stopifnot(as.character(packageVersion('statmod')) == '1.5.2')" \
+ && R -q -e "install.packages('jsonlite',repos='https://cloud.r-project.org')"
 
 WORKDIR /github/workspace
