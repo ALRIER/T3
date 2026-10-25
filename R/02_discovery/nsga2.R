@@ -79,7 +79,7 @@ nsga_evaluate_scenarios <- function(W,training_scenarios,batch_size=32L,lambda=0
  colnames(accum)<-c('mse','q95');accum
 }
 nsga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),shard=NULL) {
- set.seed(seed);n<-cfg$population; W<-nsga_initial(n,eligible)
+ cfg<-t3_equal_budget_config(cfg);set.seed(seed);n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
  O<-fitness(W);history<-numeric();archiveW<-W;archiveO<-O; best_prior<- -Inf;stale<-0L
  start_g<-1L; last_generation<-0L
@@ -112,5 +112,8 @@ nsga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=re
  }
  t2_optimizer_save(shard,'nsga2',cfg,last_generation,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
    history=history,best_prior=best_prior,stale=stale),force=TRUE)
- list(weights=archiveW,objectives=archiveO,history=history,generations_ran=length(history),seed=seed,stage='training_only')
+ t3_budget_finalize(list(weights=archiveW,objectives=archiveO,history=history,
+      generations_ran=length(history),evaluations_used=n*(1L+length(history)),
+      evaluation_steps=n*seq.int(0L,length(history)),
+      seed=seed,stage='training_only',engine='NSGA-II'),cfg,'nsga2')
 }
