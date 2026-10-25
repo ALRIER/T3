@@ -4,13 +4,13 @@ import argparse,csv,json,math,os,pathlib,subprocess,tempfile
 from collections import defaultdict
 import optuna
 p=argparse.ArgumentParser()
-p.add_argument('family');p.add_argument('seed',type=int);p.add_argument('outer',type=int)
-p.add_argument('n',type=int)
+p.add_argument('family',nargs='?',default='all');p.add_argument('seed',nargs='?',type=int,default=0);p.add_argument('outer',nargs='?',type=int,default=0)
+p.add_argument('n',nargs='?',type=int,default=0)
 p.add_argument('--trials',type=int,default=8)
 p.add_argument('--aggregate-only',action='store_true',help='Combine completed fold ledgers without running optimizers')
 a=p.parse_args()
-if a.n not in (200,1000,3000): raise SystemExit('Invalid sample n')
-if a.seed not in range(10) or a.outer not in range(1,6) or a.trials<1:raise SystemExit('Invalid nested CV configuration')
+if not a.aggregate_only and a.n not in (200,1000,3000): raise SystemExit('Invalid sample n')
+if not a.aggregate_only and (a.seed not in range(10) or a.outer not in range(1,6) or a.trials<1):raise SystemExit('Invalid nested CV configuration')
 out=pathlib.Path('artifacts/T2_V3_B3_nested_optuna')/a.family/f'seed{a.seed:02d}'/f'fold{a.outer:02d}'/f'n{a.n}'
 out.mkdir(parents=True,exist_ok=True)
 # Audit every completed inner-fold execution; never impute failed trials.
