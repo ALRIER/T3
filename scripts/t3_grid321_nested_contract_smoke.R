@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 source('R/00_shared/load_all.R');t2_load('.')
+source('R/00_shared/pipeline.R')
 source('R/01_monte_carlo/v3_generation.R')
 source('R/00_shared/v3_scientific_adapter.R')
 ids<-0:320
