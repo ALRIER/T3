@@ -72,6 +72,12 @@ for(i in seq_along(validation)){
  rm(sc,z);if(i%%10L==0L)invisible(gc(verbose=FALSE))
 }
 saveRDS(fit,file.path(out,'cv5_refit_models.rds'))
+# Fold-specific W is diagnostic only, never a production model replacement.
+w_registry<-do.call(rbind,lapply(Filter(function(m)!is.null(m$weights),fit$models),
+ function(m)data.frame(family=fam,engine=m$id,seed=seed,fold=fold,
+                        sample_n=n,component=seq_len(26L),
+                        weight=as.numeric(m$weights),stringsAsFactors=FALSE)))
+write.csv(w_registry,file.path(out,'fold_w_registry.csv'),row.names=FALSE)
 write.csv(data.frame(scenario_id=ids,fold=foldid,
   role=ifelse(foldid==fold,'validation','training')),file.path(out,'cv5_partition.csv'),row.names=FALSE)
 writeLines(c('Strict out-of-fold 5-fold refitting; no heldout/stress seeds used',
