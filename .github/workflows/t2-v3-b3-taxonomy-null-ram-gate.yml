@@ -1,0 +1,14 @@
+name: T2 V3 B3 Taxonomy Null RAM Gate
+on:
+  push:
+    branches: [t2-v3-contract-adapter-20261024]
+    paths: ['.github/workflows/t2-v3-b3-taxonomy-null-ram-gate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/t2_v3_b3_taxonomy_ram_gate.py
