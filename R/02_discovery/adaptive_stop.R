@@ -18,3 +18,28 @@ t2_adaptive_stop <- function(history,stale,cfg) {
  effective<-min(upper,lower+extra)
  stale>=effective
 }
+
+# B3 confirmation-comparison budget: one objective evaluation per candidate W
+# over the complete, identical training-scenario collection.
+t3_common_budget <- function(cfg) {
+  n<-as.integer(cfg$population); g<-as.integer(cfg$generations)
+  if(length(n)!=1L||length(g)!=1L||is.na(n)||is.na(g)||n<4L||g<1L)
+    stop("Invalid common optimization budget")
+  as.integer(n*(g+1L))
+}
+t3_equal_budget_config <- function(cfg) {
+  cfg$early_stop_enabled<-FALSE
+  cfg$t3_equal_budget<-TRUE
+  cfg
+}
+t3_budget_finalize <- function(result, cfg, engine, convergence=NULL) {
+  expected<-t3_common_budget(cfg)
+  if(is.null(result$evaluations_used)||result$evaluations_used!=expected)
+    stop(sprintf("Budget parity failure %s: %s versus %s",engine,
+      result$evaluations_used,expected))
+  result$budget_policy<-"B3_EQUAL_CANDIDATE_EVALUATIONS_V1"
+  result$evaluation_budget<-expected
+  result$early_stop_enabled<-FALSE
+  if(!is.null(convergence))result$convergence<-convergence
+  result
+}
