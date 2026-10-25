@@ -86,7 +86,7 @@ for(j in seq_len(nrow(profile))) {
   depths<-rw_depths(x)
   for(depth in names(depths)) {
   xx<-depths[[depth]]
-  for(n in if(smoke)200L else c(200L,1000L)) {
+  for(n in if(smoke)200L else t2_v3_sample_sizes('realworld')) {
     # Number of bootstrap children per parent/depth/sample-size; frozen by run env.
     R<-if(smoke)100L else as.integer(Sys.getenv('T2_B3_RW_CHILD_REPS','500'))
     if(!is.finite(R)||R<100L||R>10000L)stop('Children must be in [100,10000]')
