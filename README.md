@@ -17,3 +17,45 @@ See `docs/T3_READINESS_AND_MIGRATION.md` for the precise gates and remediation. 
 - The prospective method gate runs the MAD cutoff, partition separation, full benchmark Pareto, stability and ablation synthetic smoke tests.
 - The image build is an isolated publishing task, **not** scientific Monte Carlo.
 - Before any full run, the 321-scenario end-to-end smoke, provenance checks, versioned outputs, storage capacity and scientific comparability requirements must pass.
+
+
+## Índice de ampliaciones metodológicas B3 — registro de desarrollo (2026-10-25)
+
+Este índice registra cambios propuestos o incorporados durante la revisión reciente de T3/B3. **No constituye evidencia de validación experimental.** Cada punto deberá desarrollarse después con definición matemática, motivación, pseudocódigo cuando aplique, criterios de aceptación y resultados reproducibles. Los artefactos históricos de T2 no son insumos permitidos para la nueva ejecución.
+
+### A. Diseño experimental y generación Monte Carlo
+1. **Diseño prospectivo de 321 escenarios**: contaminación, escala MAD, mecanismos y caso limpio; enumeración y balance del grid. Verificar coherencia entre generador, metadatos y consumidores.
+2. **Calibración y sensibilidad al umbral MAD**: definición del umbral, análisis de puntos de corte y justificación frente a mecanismos y magnitudes de contaminación.
+3. **Reutilización controlada de muestras Monte Carlo**: semillas, números aleatorios comunes cuando proceda, trazabilidad, reproducibilidad y prevención de filtraciones.
+4. **Contrato universal versionado de datos**: interfaz común, integridad/procedencia, identificadores, 26 componentes y pesos W; permitir ejecución independiente de Monte Carlo, Discovery, Held-out, Stress y Real World sin depender de artefactos de T2.
+5. **Separación estricta de roles experimentales**: semillas de entrenamiento, folds anidados, confirmación Held-out, Stress y Real World; particiones disjuntas y pruebas automáticas.
+
+### B. Discovery: modelos y optimización
+6. **Inventario y evaluación comparable de 26 estimadores clásicos**: definiciones, elegibilidad y comparación completa frente a cuatro motores principales y dos controles no evolutivos.
+7. **Regla predefinida común de elección de W**: normalización MSE/Q95 mediante referencias calculadas solo en entrenamiento; objetivo combinado, desempates, pesos no negativos y suma unitaria.
+8. **Cuatro motores principales**: GA, NSGA-II, DE y Dirichlet; diferencias de búsqueda y condiciones compartidas.
+9. **Controles no evolutivos**: optimización convexa restringida de MSE mediante descenso proyectado aproximado y búsqueda local determinista. Distinguir solución aproximada de prueba de optimalidad global.
+10. **Equidad del presupuesto de optimización**: mismo techo de evaluaciones por candidato y escenarios comparables; registrar evaluaciones efectivas, tiempo, recursos y presupuesto total de búsqueda de hiperparámetros.
+11. **Early stopping inteligente**: generaciones mínimas, paciencia adaptativa, ventanas de mejora y ahorro de evaluaciones. Declarar cómo se aplica a los cuatro motores y a los controles por bloques; auditar reanudaciones.
+12. **Curvas de convergencia MSE/Q95**: trayectoria frente a evaluaciones acumuladas, normalización común y comparaciones sobre puntos equivalentes, sin ocultar paradas anticipadas.
+13. **Optimización anidada 5×3 y Optuna**: búsqueda interior, reajuste en folds exteriores, selección prospectiva de hiperparámetros y controles contra fuga de información.
+14. **Ablaciones factoriales de regularización y DRO**: cuatro condiciones on/on, on/off, off/on y off/off. Precisar que el DRO actualmente propuesto combina promedio y peor banda de contaminación; evaluar su significado y sensibilidad. Distinguir prueba exploratoria acotada de ablación confirmatoria.
+15. **Estabilidad de W**: comparar pesos congelados por motor y familia entre semillas, folds y tamaños muestrales mediante L1, L2, máximo absoluto y similitud coseno; agregar intervalos y variabilidad.
+
+### C. Inferencia y transferencia fuera de muestra
+16. **Calibración de falsos positivos que repite la selección completa**: cada réplica nula debe repetir búsqueda, ajuste, selección de W y confirmación con muestras independientes; valores p empíricos y ajuste maxT sujeto a supuestos del nulo.
+17. **Transferencia a vecindarios y mecanismos excluidos**: excluir prospectivamente combinaciones del entrenamiento y evaluar mecanismos exclusivos, vecindarios exclusivos y exclusiones simultáneas.
+18. **Held-out independiente con 32 referencias**: los 26 clásicos, los cuatro motores y dos controles convencionales; modelos congelados, semillas reservadas, sin reentrenar sobre confirmación. Aclarar que Held-out no debe utilizarse como validación para volver a escoger W.
+19. **Stress Test independiente**: bandas extremas, mecanismos no vistos, sensibilidad del rendimiento y fidelidad de las condiciones respecto del diseño preregistrado.
+20. **Real World externo e independiente**: manifiesto de datasets, ausencia de solapamiento o selección retrospectiva, comparación completa y límites de generalización.
+21. **Incertidumbre y multiplicidad**: intervalos de confianza para MSE/Q95, dependencia jerárquica por semilla/familia/escenario, corrección por comparaciones múltiples y distinción entre exploración y confirmación.
+22. **Controles negativos y recuperación near-gate**: diagnósticos de decisiones próximas al umbral y pruebas capaces de detectar falsos positivos o contaminación del protocolo.
+
+### D. Integridad de ejecución
+23. **Autonomía e independencia de etapas**: cada etapa debe poder ejecutarse, verificarse, publicarse y reanudarse por separado mediante el contrato común.
+24. **Preservación de resultados y checkpointing**: trazabilidad, almacenamiento externo/versionado, límites de Actions, integridad de hashes y reglas de recuperación sin duplicar resultados.
+25. **Gates científicos antes de deployment**: pruebas sintéticas, contratos de 321 escenarios, no mezcla 121/321, separación de datos, reproducibilidad, integridad de modelos y verificación de CI.
+26. **Separación entre código y evidencia**: T3 conserva código, documentación y fixtures sintéticos mínimos; ninguna afirmación científica se considerará demostrada sin resultados de la nueva ejecución B3.
+
+### Protocolo para desarrollar cada apartado
+Para cada punto: **(i)** hipótesis o finalidad, **(ii)** definiciones y fórmulas, **(iii)** implementación y restricciones, **(iv)** supuestos y riesgos, **(v)** validaciones y criterios de aceptación, **(vi)** tablas/figuras previstas, **(vii)** estado de verificación. Este índice no autoriza un deployment completo: hace falta demostrar CI satisfactoria y revisar las rutas de producción.
