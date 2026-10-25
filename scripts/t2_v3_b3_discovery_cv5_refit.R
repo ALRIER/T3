@@ -51,8 +51,9 @@ for(engine in c('ga','nsga2','de','dirichlet')){
        alpha=chosen$alpha,n_draws=t3_common_budget(cfg),shard=NULL))
 }
 source('R/02_discovery/t3_predeclared_w_selection.R')
+budget_audit<-t3_assert_engine_budget_parity(engines)
 chosen<-t3_select_models(engines,d$scenarios)
-fit<-list(engines=engines,models=chosen$models,
+fit<-list(engines=engines,models=chosen$models,objective_budget_audit=budget_audit,
  selection_policy=chosen$selection,selection_scales=chosen$scales,config=ga_config,
  training_seed_index=seed,nested_cv=TRUE,outer_fold=fold)
 rm(d);invisible(gc(verbose=FALSE))
