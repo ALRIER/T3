@@ -18,8 +18,7 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
    last_generation<-as.integer(resume$generation)
  }
  scalar_score<-function(obj) {
-   scale<-pmax(colMeans(abs(obj)),1e-12)
-   rowSums(sweep(obj,2L,scale,'/'))
+   rowMeans(sweep(obj,2L,as.numeric(scales[c('mse','q95')]),'/'))
  }
  if(start_g<=cfg$generations) for(g in seq.int(start_g,cfg$generations)) {
    last_generation<-g
