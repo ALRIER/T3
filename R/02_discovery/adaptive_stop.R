@@ -57,8 +57,8 @@ t3_convergence_point <- function(objectives,evaluations,scales=NULL) {
     any(scales[c("mse","q95")]<=0))stop("Invalid reference scales")
  normalized<-rowMeans(sweep(O,2L,as.numeric(scales[c("mse","q95")]),"/"))
  j<-order(normalized,O[,1L],O[,2L],seq_len(nrow(O)))[1L]
- c(evaluations=as.numeric(evaluations),mse=O[j,1L],q95=O[j,2L],
-   joint_normalized=normalized[j])
+ c(evaluations=as.numeric(evaluations),mse=unname(O[j,1L]),
+   q95=unname(O[j,2L]),joint_normalized=unname(normalized[j]))
 }
 
 t3_convergence_table <- function(result, scales) {
