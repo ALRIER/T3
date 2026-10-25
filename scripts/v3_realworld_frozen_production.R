@@ -24,6 +24,19 @@ for(train_seed in t2_v3_indices('discovery')) {
   fit<-t2_read_rds(frozen)
   if(length(fit$engines)!=4L||length(fit$models)!=30L)
     stop('Expected frozen 26 classical plus four primary optimization models')
+  controls<-fit$non_evolutionary_controls
+  if(!is.list(controls)||!setequal(names(controls),c('convex_mse','local_deterministic')))
+    stop('Frozen Real World control registry incomplete')
+  control_models<-lapply(names(controls),function(id) {
+    w<-as.matrix(controls[[id]]$weights)
+    if(nrow(w)!=26L||ncol(w)!=1L||any(!is.finite(w))||
+       any(w<0)||abs(sum(w)-1)>1e-8)stop('Invalid frozen control weights')
+    new_frozen_model(id,weights=as.numeric(w[,1L]),family=id)
+  })
+  fit$models<-c(fit$models,control_models)
+  if(length(fit$models)!=32L||
+     anyDuplicated(vapply(fit$models,function(m)m$id,character(1))))
+    stop('Real World 32-model registry mismatch')
   result<-t2_run_realworld_public(fit,mode='full',
       shard=sprintf('b3_realworld_%s_%d_%d_%d',family,seed,n,train_seed),
       seed_index=seed)
