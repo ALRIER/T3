@@ -146,3 +146,28 @@ t3_contract_consume <- function(path,required_stage,experiment_id,
     stop("Code revision mismatch")
   x
 }
+
+# Strict per-stage artifact emission; immutable stage provenance.
+t3_stage_publish <- function(stage,experiment_id,payload,family,seed,n,reps,
+                             path,parents=character(),seed_role=NULL) {
+  role<-if(stage=="montecarlo")seed_role else stage
+  if(length(role)!=1L||!role%in%c("discovery","heldout","stress","realworld"))
+    stop("Stage seed role required")
+  if(!seed%in%t2_v3_indices(role))stop("Seed belongs to another stage")
+  provenance<-list(family=family,seed=as.integer(seed),sample_n=as.integer(n),
+     replications=as.integer(reps),
+     code_revision=Sys.getenv("GITHUB_SHA","unverified-local"),
+     seed_role=role,seed_plan="B3_40_DISJOINT_V1")
+  envelope<-t3_contract_new(stage,experiment_id,payload,provenance,parents)
+  t3_contract_write(envelope,path)
+}
+t3_stage_require <- function(path,stage,experiment_id,family,seed,n) {
+  x<-t3_contract_consume(path,stage,experiment_id,
+                         expected_family=family,expected_n=n)
+  role<-if(stage=="montecarlo")x$provenance$seed_role else stage
+  if(!identical(as.integer(x$provenance$seed),as.integer(seed))||
+     !seed%in%t2_v3_indices(role)||
+     !identical(x$provenance$seed_plan,"B3_40_DISJOINT_V1"))
+    stop("Cross-stage artifact/seed-plan provenance mismatch")
+  x
+}
