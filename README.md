@@ -61,41 +61,13 @@ Este índice registra cambios propuestos o incorporados durante la revisión rec
 Para cada punto: **(i)** hipótesis o finalidad, **(ii)** definiciones y fórmulas, **(iii)** implementación y restricciones, **(iv)** supuestos y riesgos, **(v)** validaciones y criterios de aceptación, **(vi)** tablas/figuras previstas, **(vii)** estado de verificación. Este índice no autoriza un deployment completo: hace falta demostrar CI satisfactoria y revisar las rutas de producción.
 
 
-## Azure artifact exchange (prospective B3)
 
-The GitHub Actions / Azure Key Vault / Blob contract is specified in
-`scripts/t3_b3_azure_artifacts.py` and
-`.github/workflows/t3-b3-azure-persistence.yml`. It remains **unverified against
-the target Azure account** until the dedicated manual OIDC roundtrip succeeds.
+## GitHub Actions-only stage exchange (30-day operational window)
 
-Configure GitHub Actions environment `b3-persistence` with repository or
-environment variables `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`,
-`AZURE_SUBSCRIPTION_ID`, and `B3_KEY_VAULT`. Configure the workload
-identity federated credential for repository `ALRIER/T3` and environment
-`b3-persistence`, with the audience `api://AzureADTokenExchange`.
-Grant the identity Key Vault Secrets User on the named vault and Storage Blob
-Data Contributor on the target container or storage account. Create vault
-secrets `B3-Storage-Account` and `B3-Storage-Container`.
-Do not put storage keys, SAS URLs, or secret values into repository files.
+Each stage writes outputs to its runner's working directory and **must upload** them with `actions/upload-artifact@v4` before its job ends. A runner's ephemeral disk does not persist across independent jobs. Set `retention-days: 30` and `if: always()` for diagnostics/checkpoints (while excluding secrets). A subsequent stage uses `actions/download-artifact@v4` with the specific producer run ID and artifact name, or the GitHub Actions artifact API, and validates stage/seed/manifest hashes before consumption. Artifacts are tied to workflow runs, not to Git commits or runner disks. Cross-run downloads may require `actions: read` on GITHUB_TOKEN. Do not depend on artifact availability after the configured retention interval.
 
-The stage exchange is immutable and per seed: `b3/<experiment>/<stage>/
-<seed_role>/<family>/seedXX/nNNN/<archive_sha256>/`. Each upload writes
-`payload.tar.gz` and then `COMMITTED.json` with source revision and
-per-file SHA-256. Consumers must identify the exact archive SHA-256 and
-revalidate the archive, per-file hashes, and role-specific seed range after
-download. Monte Carlo accepts only synthetic seed roles (Discovery, Held-out,
-Stress); Real World never consumes synthetic Monte Carlo arrays.
+The user's separate local backup workflow via Codex is intentionally **out of scope** for repository code: no automatic export, personal device credentials, or self-hosted runner configuration is required. Never assume local files can be fetched automatically by Actions.
 
-Typical producer (after finishing a stage on the same runner with Azure OIDC login):
-`python3 scripts/t3_b3_azure_artifacts.py upload --experiment b3-prod-v1
---stage discovery --family normal --seed 0 --n 200 --directory artifacts/discovery_v3/normal/seed00/n200`.
-The command emits a content-addressed `prefix` and `sha256`. Downstream
-jobs must obtain this pair from an approved stage-completion manifest, then
-run the same command with `download`, `--sha256 <exact_digest>`, and a
-fresh target directory; they must fail closed if a manifest or hash is
-missing. Do not dispatch the full experiment merely because the cloud
-roundtrip passes.
+Operational stages: Monte Carlo publishes a complete and verified dataset artifact; Discovery consumes that artifact and publishes frozen model artifacts; Held-out, Stress, and Real World consume frozen models independently (and their own applicable input datasets). No Azure OIDC, Key Vault, Blob Storage, or other third-party service is required. Each output includes role, seed index, family, sample size, source revision, SHA-256 and a completion marker. A final stage should only use artifacts marked complete. Large artifacts may need sharding and capacity checks.
 
-The dedicated manual workflow tests only an isolated synthetic fixture.
-Store/cloud retention, immutability policies, and per-stage job wiring need
-separate validation on the actual Azure deployment before production.
+**Status:** GitHub artifact exchange is the agreed contract. It must be wired and tested separately in every production workflow before claiming production readiness. The bounded statistical smoke succeeded in run 40224954621; it did not validate cross-run artifact injection.
