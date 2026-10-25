@@ -1,6 +1,6 @@
 # T3 prospectively frozen 321-condition grid, shared across all stages.
 t2_v3_design <- function(role,family,index,n,n_scenarios=320L) {
- stopifnot(role%in%c("discovery","heldout","stress","realworld"),
+ stopifnot(role%in%c("discovery","heldout","stress"),
    index%in%t2_v3_indices(role),family%in%t2_families(),
    identical(as.integer(n_scenarios),320L))
  path<-"config/T2_V3_B3_prospective_321_grid.csv"
@@ -24,8 +24,7 @@ t2_v3_design <- function(role,family,index,n,n_scenarios=320L) {
  boundaries<-switch(role,
    discovery=list(rate=c(0,.30),mad=c(1.5,30),perturb=.15),
    heldout=list(rate=c(0,.30),mad=c(1.5,30),perturb=.22),
-   stress=list(rate=c(0,.30),mad=c(1.5,30),perturb=.30),
-   realworld=list(rate=c(0,.30),mad=c(1.5,30),perturb=.30))
+   stress=list(rate=c(0,.30),mad=c(1.5,30),perturb=.30))
  list(grid=tab,bounds=boundaries,protocol="t3_b3_grid321_v1")
 }
 t2_v3_params <- function(role,family,index,n,strength) {
@@ -39,7 +38,7 @@ t2_v3_params <- function(role,family,index,n,strength) {
 }
 t2_v3_generate <- function(role,family,index,n,R=500L,n_scenarios=320L,
                            root="artifacts/mc_t3_grid321") {
- if(!role%in%c("discovery","heldout","stress","realworld")||
+ if(!role%in%c("discovery","heldout","stress")||
     !index%in%t2_v3_indices(role))stop("Unassigned stage seed")
  allowed_n<-t2_v3_sample_sizes(role)
  if(!(n%in%allowed_n))stop("Invalid stage sample size")
