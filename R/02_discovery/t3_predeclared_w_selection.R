@@ -163,10 +163,21 @@ t3_assert_engine_budget_parity <- function(engines) {
   if(!length(engines))stop('No optimization results')
   evaluations<-vapply(engines,function(x)as.integer(x$evaluations_used),integer(1))
   budgets<-vapply(engines,function(x)as.integer(x$evaluation_budget),integer(1))
-  if(anyNA(evaluations)||anyNA(budgets)||length(unique(evaluations))!=1L||
-     any(evaluations!=budgets)||any(vapply(engines,function(x)
-       !identical(x$budget_policy,'B3_EQUAL_CANDIDATE_EVALUATIONS_V1'),logical(1))))
-    stop('Discovery engine objective-budget mismatch')
+  if(anyNA(evaluations)||anyNA(budgets)||length(unique(budgets))!=1L||
+     any(evaluations>budgets)||any(evaluations<1L)||
+     any(vapply(engines,function(x)
+       !identical(x$budget_policy,'B3_EQUAL_MAX_BUDGET_ADAPTIVE_V2'),logical(1))))
+    stop('Discovery engine maximum objective-budget mismatch')
   data.frame(engine=names(engines),candidate_evaluations=evaluations,
-             planned_evaluations=budgets,stringsAsFactors=FALSE)
+             maximum_evaluations=budgets,
+             saved_evaluations=budgets-evaluations,stringsAsFactors=FALSE)
+}
+t3_compare_convergence <- function(engines, training_scenarios) {
+  t3_assert_engine_budget_parity(engines)
+  scales<-t3_training_reference_scales(training_scenarios)
+  do.call(rbind,lapply(names(engines),function(name) {
+    z<-t3_convergence_table(engines[[name]],scales)
+    z$engine<-name
+    z
+  }))
 }
