@@ -37,3 +37,53 @@ assess_frozen_models <- function(T,models,target,baseline_id='mean',stage='heldo
  })
  apply_stage_fdr(do.call(rbind,rows),stage=stage,alpha=alpha)
 }
+
+
+# Confirmation-only paired bootstrap: MSE and Q95 deltas (candidate minus
+# comparator). Resample independent replication units within a frozen shard.
+t3_paired_dual_metric_ci <- function(candidate_errors,reference_errors,
+                                     B=500L,seed=1L,level=.95) {
+ x<-as.numeric(candidate_errors);y<-as.numeric(reference_errors)
+ if(length(x)!=length(y)||length(x)<30L||any(!is.finite(x))||
+    any(!is.finite(y))||any(x<0)||any(y<0)||B<200L||
+    level<=0||level>=1)stop('Invalid paired inference input')
+ q95<-function(z)unname(stats::quantile(z,.95,type=8))
+ set.seed(seed)
+ boot<-replicate(B,{
+   k<-sample.int(length(x),length(x),replace=TRUE)
+   c(mse_delta=mean(x[k]-y[k]),q95_delta=q95(x[k])-q95(y[k]))
+ })
+ limits<-t(apply(boot,1,stats::quantile,
+   probs=c((1-level)/2,1-(1-level)/2),type=8))
+ data.frame(metric=c('mse','q95'),
+   difference=c(mean(x-y),q95(x)-q95(y)),
+   lower=limits[,1],upper=limits[,2],
+   level=level,bootstrap_B=B,
+   method='paired_replication_percentile_bootstrap',
+   evidence_role='descriptive_until_prespecified_confirmation')
+}
+# Negative controls require known null labels; near-gate flags are
+# sensitivity diagnostics, never retrospective threshold optimization.
+t3_gate_diagnostics <- function(df,alpha=.05,bandwidth=.01,
+                                group_cols=c('stage','metric')) {
+ needed<-c('model','p_value','negative_control')
+ if(!is.data.frame(df)||!all(needed%in%names(df))||
+    any(!is.finite(df$p_value))||any(df$p_value<0|df$p_value>1)||
+    anyNA(df$negative_control)||!is.logical(df$negative_control)||
+    alpha<=0||alpha>=1||bandwidth<0)
+   stop('Invalid near-gate/negative-control inputs')
+ keys<-intersect(group_cols,names(df))
+ grp<-if(length(keys))interaction(df[keys],drop=TRUE) else
+   factor(rep('all',nrow(df)))
+ df$q_value<-NA_real_
+ for(k in levels(grp)){
+   ix<-which(grp==k)
+   df$q_value[ix]<-p.adjust(df$p_value[ix],method='BH')
+ }
+ df$near_gate<-abs(df$q_value-alpha)<=bandwidth
+ df$passes_gate<-df$q_value<=alpha
+ df$negative_control_false_win<-df$negative_control&df$passes_gate
+ df$gate_alpha<-alpha
+ df$near_gate_bandwidth<-bandwidth
+ df
+}
