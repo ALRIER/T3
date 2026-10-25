@@ -50,6 +50,10 @@ for(m in Filter(function(x)!is.null(x$weights),fit$models))
 out<-file.path('artifacts','discovery_v3',family,sprintf('seed%02d',seed),sprintf('n%d',n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 saveRDS(fit,file.path(out,'discovery.rds'))
+if(!is.null(fit$computational_ledger))
+ write.csv(fit$computational_ledger,file.path(out,'computational_budget_ledger.csv'),row.names=FALSE)
+if(!is.null(fit$convergence_audit))
+ write.csv(fit$convergence_audit,file.path(out,'normalized_convergence.csv'),row.names=FALSE)
 # Publish only the frozen training W; no heldout/stress data enters this audit.
 w_registry<-do.call(rbind,lapply(Filter(function(m)!is.null(m$weights),fit$models),
  function(m)data.frame(family=family,engine=m$id,seed=seed,fold=0L,
