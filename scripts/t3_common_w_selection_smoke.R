@@ -84,3 +84,29 @@ stopifnot(all(cost$evaluations_used==20L),
  all(cost$objective_scenario_evaluations==6420L),
  all(cost$tuning_max_objective_calls==900L))
 cat('T3_FAIR_CONVERGENCE_AND_BUDGET_LEDGER_PASS\\n')
+
+source('R/05_audits/stage_inference.R')
+
+# Out-of-support exclusion is deterministic and disjoint.
+grid<-expand.grid(rate=c(0,.1,.2),scale=c(3,6),
+                  mechanism=c('none','upper_tail','lower_tail'),
+                  stringsAsFactors=FALSE)
+grid<-subset(grid,rate!=0 | (scale==3 & mechanism=='none'))
+grid$scenario_id<-seq_len(nrow(grid))-1L
+partition<-t3_exclusion_design(grid,excluded_mechanisms='lower_tail',
+                              excluded_rates=.2)
+train_ids<-partition$scenario_id[partition$role=='discovery_training']
+transfer_ids<-partition$scenario_id[partition$role=='excluded_transfer']
+t3_assert_exclusion_partition(partition,train_ids,transfer_ids)
+stopifnot(inherits(try(t3_assert_exclusion_partition(partition,
+       c(train_ids,transfer_ids[1L]),transfer_ids),silent=TRUE),'try-error'))
+set.seed(54L)
+x<-rexp(80);y<-rexp(80)
+ci<-t3_paired_dual_metric_ci(x,y,B=200L,seed=8L)
+stopifnot(identical(as.character(ci$metric),c('mse','q95')),
+          all(ci$lower<=ci$upper))
+gates<-t3_gate_diagnostics(data.frame(model=c('null','candidate'),
+ p_value=c(.001,.049),negative_control=c(TRUE,FALSE)),
+ alpha=.05,bandwidth=.01)
+stopifnot(gates$negative_control_false_win[1L],is.logical(gates$near_gate))
+cat('T3_TRANSFER_NEGATIVE_GATE_DUAL_CI_SMOKE_PASS\\n')
