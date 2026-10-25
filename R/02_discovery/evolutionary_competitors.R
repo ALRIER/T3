@@ -2,7 +2,7 @@
 # from NSGA-II: scalar tournament selection and scalar elitist replacement are
 # used, while the same prepared scenarios and evaluation budget are retained.
 ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),shard=NULL) {
- set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
+ cfg<-t3_equal_budget_config(cfg);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
  O<-fitness(W); archiveW<-W; archiveO<-O; history<-numeric(); best<-Inf; stale<-0L
  start_g<-1L; last_generation<-0L
@@ -39,14 +39,16 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
  }
  t2_optimizer_save(shard,'ga',cfg,last_generation,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
    history=history,best=best,stale=stale),force=TRUE)
- list(weights=archiveW,objectives=archiveO,history=history,generations_ran=length(history),
-      seed=seed,stage='training_only',engine='GA-original')
+ t3_budget_finalize(list(weights=archiveW,objectives=archiveO,history=history,
+      generations_ran=length(history),evaluations_used=n*(1L+length(history)),
+      evaluation_steps=n*seq.int(0L,length(history)),seed=seed,
+      stage='training_only',engine='GA-original'),cfg,'ga')
 }
 
 # Differential evolution (DE/rand/1/bin) with Pareto environmental selection.
 # Identical T matrices and objectives to NSGA-II; no use of held-out data.
 de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),F=.6,CR=.9,shard=NULL) {
- set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
+ cfg<-t3_equal_budget_config(cfg);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
  fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
  O<-fitness(W);history<-numeric(); archiveW<-W;archiveO<-O; best<- -Inf;stale<-0L
  start_g<-1L; last_generation<-0L
@@ -82,11 +84,15 @@ de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
  }
  t2_optimizer_save(shard,'de',cfg,last_generation,list(W=W,O=O,archiveW=archiveW,archiveO=archiveO,
    history=history,best=best,stale=stale),force=TRUE)
- list(weights=archiveW,objectives=archiveO,history=history,generations_ran=length(history),seed=seed,stage='training_only',engine='DE-Pareto')
+ t3_budget_finalize(list(weights=archiveW,objectives=archiveO,history=history,
+      generations_ran=length(history),evaluations_used=n*(1L+length(history)),
+      evaluation_steps=n*seq.int(0L,length(history)),seed=seed,
+      stage='training_only',engine='DE-Pareto'),cfg,'de')
 }
 # Random Dirichlet search is a frozen control, not an evolutionary GA.
 dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),n_draws=NULL,alpha=1,shard=NULL) {
- set.seed(seed);if(is.null(n_draws))n_draws<-cfg$population*cfg$generations
+ cfg<-t3_equal_budget_config(cfg);set.seed(seed);if(is.null(n_draws))n_draws<-t3_common_budget(cfg)
+ if(n_draws!=t3_common_budget(cfg))stop('Dirichlet budget must equal the common objective budget')
  W<-matrix(numeric(),nrow=26L,ncol=0L); O<-matrix(numeric(),nrow=0L,ncol=2L)
  next_draw<-1L; chunk<-max(1L,as.integer(cfg$population))
  resume<-t2_optimizer_restore(shard,'dirichlet',cfg)
@@ -104,5 +110,8 @@ dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligib
  }
  t2_optimizer_save(shard,'dirichlet',cfg,ceiling(n_draws/chunk),list(W=W,O=O,next_draw=next_draw),force=TRUE)
  ix<-pareto_front(O)
- list(weights=W[,ix,drop=FALSE],objectives=O[ix,,drop=FALSE],draws=n_draws,seed=seed,engine='Dirichlet',stage='training_only')
+ t3_budget_finalize(list(weights=W[,ix,drop=FALSE],objectives=O[ix,,drop=FALSE],
+      draws=n_draws,evaluations_used=next_draw-1L,
+      evaluation_steps=unique(pmin(n_draws,c(seq.int(chunk,n_draws,by=chunk),n_draws))),
+      seed=seed,engine='Dirichlet',stage='training_only'),cfg,'dirichlet')
 }
