@@ -153,10 +153,8 @@ t3_control_optimize <- function(training_scenarios,cfg=ga_config,seed=101L,
   evaluate<-function(w) {
     W<-matrix(w,26L,1L)
     as.numeric(nsga_evaluate_scenarios(W,training_scenarios,cfg$batch_size,
-      if(is.null(cfg$discovery_weight_regularization_lambda,
-  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)) 0 else
-        cfg$discovery_weight_regularization_lambda,
-  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)[1L,])
+      lambda=if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda,
+      dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)[1L,])
   }
   reference<-if(method=='convex_mse') function(o)o[1L] else
     function(o)mean(o/as.numeric(scales[c('mse','q95')]))
