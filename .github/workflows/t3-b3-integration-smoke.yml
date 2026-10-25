@@ -1,0 +1,27 @@
+name: T3 B3 Integration Smoke (manual only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  code-and-contract-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build project R runtime locally
+        run: docker build -t t3-b3-smoke-runtime -f docker/Dockerfile.r-runtime .
+      - name: Run small synthetic statistical and seed-contract checks
+        env:
+          T2_R_IMAGE: t3-b3-smoke-runtime
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_common_w_selection_smoke.R
+      - name: Check Python Optuna driver parses
+        run: python3 -m py_compile scripts/t2_v3_b3_nested_optuna.py
+      - name: Verify safe stage scripts exist without running production
+        run: |
+          test -s scripts/v3_discovery_production.R
+          test -s scripts/v3_heldout_frozen_production.R
+          test -s scripts/v3_stress_frozen_production.R
+          test -s scripts/v3_realworld_frozen_production.R
+          test -s scripts/v3_stage_aggregate.R
