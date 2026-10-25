@@ -253,7 +253,7 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
    ga=function() ga_discover(s,cfg,t2_seed(shard,201),shard=shard),
    nsga2=function() nsga_discover(s,cfg,t2_seed(shard,202),shard=shard),
    de=function() de_discover(s,cfg,t2_seed(shard,203),shard=shard),
-   dirichlet=function() dirichlet_discover(s,cfg,t2_seed(shard,204),n_draws=cfg$population*(cfg$generations+1L),shard=shard)
+   dirichlet=function() dirichlet_discover(s,cfg,t2_seed(shard,204),n_draws=t3_common_budget(cfg),shard=shard)
  )
  selected <- if (engine == 'all') names(dispatch) else engine
  if (!all(selected %in% names(dispatch))) stop('Unknown discovery engine')
