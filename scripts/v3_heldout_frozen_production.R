@@ -19,6 +19,8 @@ t2_b3_inputs_manifest(c(
 ),out,'heldout')
 t2_b3_ram_guard('heldout',out,'start')
 first<-TRUE
+control_first<-TRUE
+controlcsv<-file.path(out,'non_evolutionary_control_scores.csv')
 for(train_seed in 0:9) {
   frozen_file<-file.path(root,family,sprintf('seed%02d',train_seed),sprintf('n%d',n),'discovery.rds')
   if(!file.exists(frozen_file)) stop('Missing immutable discovery model: ',frozen_file)
@@ -30,6 +32,28 @@ for(train_seed in 0:9) {
   if(length(models)!=30L)stop('B3 requires all 26 benchmarks and four frozen learners')
   z<-t2_v3_stream_scores('heldout',family,seed,n,models,
                         reps=500L,selected=0:320)
+  # Controls are fitted in Discovery only. Held-out never tunes their weights.
+  controls<-fit$non_evolutionary_controls
+  if(!is.list(controls)||!setequal(names(controls),c('convex_mse','local_deterministic')))
+    stop('Missing two frozen non-evolutionary controls in Discovery artifact')
+  control_models<-lapply(names(controls),function(name) {
+    W<-controls[[name]]$weights
+    if(!is.matrix(W)||nrow(W)!=26L||ncol(W)!=1L ||
+       any(!is.finite(W))||any(W<0)||abs(sum(W)-1)>1e-8)
+      stop('Invalid frozen control W')
+    new_frozen_model(name,weights=as.numeric(W[,1L]),family=name)
+  })
+  cz<-t2_v3_stream_scores('heldout',family,seed,n,
+       c(baselines,learned,control_models),reps=500L,selected=0:320)
+  cz$training_seed<-train_seed
+  cz$heldout_seed<-seed
+  cz$discovery_sha256<-t2_sha256(frozen_file)
+  if(nrow(cz)!=321L*32L||any(!is.finite(cz$mse))||any(!is.finite(cz$q95)))
+    stop('Invalid 32-model heldout comparison')
+  write.table(cz,controlcsv,append=!control_first,col.names=control_first,
+              row.names=FALSE,sep=',',quote=TRUE)
+  control_first<-FALSE
+  rm(cz,control_models,controls)
   z$training_seed<-train_seed
   z$heldout_seed<-seed
   z$discovery_sha256<-t2_sha256(frozen_file)
