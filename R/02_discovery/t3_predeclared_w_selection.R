@@ -156,3 +156,16 @@ t3_full_selection_replay <- function(B, null_training, null_confirmation,
          selection_policy=selected$w_policy)
   })
 }
+
+# Equal evaluation accounting before any downstream model comparison.
+t3_assert_engine_budget_parity <- function(engines) {
+  if(!length(engines))stop('No optimization results')
+  evaluations<-vapply(engines,function(x)as.integer(x$evaluations_used),integer(1))
+  budgets<-vapply(engines,function(x)as.integer(x$evaluation_budget),integer(1))
+  if(anyNA(evaluations)||anyNA(budgets)||length(unique(evaluations))!=1L||
+     any(evaluations!=budgets)||any(vapply(engines,function(x)
+       !identical(x$budget_policy,'B3_EQUAL_CANDIDATE_EVALUATIONS_V1'),logical(1))))
+    stop('Discovery engine objective-budget mismatch')
+  data.frame(engine=names(engines),candidate_evaluations=evaluations,
+             planned_evaluations=budgets,stringsAsFactors=FALSE)
+}
