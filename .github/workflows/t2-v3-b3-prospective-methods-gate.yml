@@ -1,4 +1,4 @@
-name: T2 V3 B3 Prospective Grid MAD and Nested CV Validation
+name: T3 B3 Prospective Grid MAD and Nested CV Validation
 on:
   push:
     branches: [main]
