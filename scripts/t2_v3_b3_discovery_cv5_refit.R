@@ -50,7 +50,10 @@ for(engine in c('ga','nsga2','de','dirichlet')){
    dirichlet=dirichlet_discover(d$scenarios,cfg,seed=engine_seed,
        alpha=chosen$alpha,n_draws=cfg$population*cfg$generations,shard=NULL))
 }
-fit<-list(engines=engines,models=t2_models(engines),config=ga_config,
+source('R/02_discovery/t3_predeclared_w_selection.R')
+chosen<-t3_select_models(engines,d$scenarios)
+fit<-list(engines=engines,models=chosen$models,
+ selection_policy=chosen$selection,selection_scales=chosen$scales,config=ga_config,
  training_seed_index=seed,nested_cv=TRUE,outer_fold=fold)
 rm(d);invisible(gc(verbose=FALSE))
 stopifnot(length(fit$engines)==4L)
