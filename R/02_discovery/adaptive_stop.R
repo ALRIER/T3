@@ -46,17 +46,21 @@ t3_budget_finalize <- function(result, cfg, engine, convergence=NULL) {
 
 # Training-only, comparable convergence at actual candidate-evaluation counts.
 # The same prospectively fixed reference scales apply to all four engines.
-t3_convergence_point <- function(objectives, evaluations, scales=NULL) {
-  O<-as.matrix(objectives)
-  if(ncol(O)!=2L||!nrow(O)||any(!is.finite(O)))stop("Invalid convergence objectives")
-  if(!is.null(colnames(O))&&all(c("mse","q95")%in%colnames(O)))
-    O<-O[,c("mse","q95"),drop=FALSE]
-  if(is.null(scales))scales<-c(mse=1,q95=1)
-  if(any(!is.finite(scales))||any(scales<=0))stop("Invalid reference scales")
-  j<-which.min(rowMeans(sweep(O,2L,as.numeric(scales[c("mse","q95")]),"/")))
-  c(evaluations=as.numeric(evaluations),mse=O[j,1L],q95=O[j,2L],
-    joint_normalized=mean(O[j,]/as.numeric(scales[c("mse","q95")])))
+t3_convergence_point <- function(objectives,evaluations,scales=NULL) {
+ O<-as.matrix(objectives)
+ if(ncol(O)!=2L||!nrow(O)||any(!is.finite(O)))stop("Invalid convergence objectives")
+ if(!is.null(colnames(O))&&all(c("mse","q95")%in%colnames(O)))
+   O<-O[,c("mse","q95"),drop=FALSE]
+ if(is.null(scales))stop("Training-only reference scales are required")
+ if(!all(c("mse","q95")%in%names(scales))||
+    any(!is.finite(scales[c("mse","q95")]))||
+    any(scales[c("mse","q95")]<=0))stop("Invalid reference scales")
+ normalized<-rowMeans(sweep(O,2L,as.numeric(scales[c("mse","q95")]),"/"))
+ j<-order(normalized,O[,1L],O[,2L],seq_len(nrow(O)))[1L]
+ c(evaluations=as.numeric(evaluations),mse=O[j,1L],q95=O[j,2L],
+   joint_normalized=normalized[j])
 }
+
 t3_convergence_table <- function(result, scales) {
   trace<-result$convergence
   if(is.null(trace)||!length(trace))stop("Missing actual convergence trace")
@@ -66,4 +70,28 @@ t3_convergence_table <- function(result, scales) {
   z$joint_normalized<-rowMeans(sweep(as.matrix(z[,c("mse","q95")]),2L,
     as.numeric(scales[c("mse","q95")]),"/"))
   z
+}
+
+# Shared scalar stop signal is the best-so-far training-only normalized loss.
+t3_fair_stop_signal <- function(archive_objectives,actual_evaluations,scales) {
+ point<-t3_convergence_point(archive_objectives,actual_evaluations,scales)
+ list(point=point,history_value=-unname(point["joint_normalized"]))
+}
+# Audit objective calls separately from total tuning trials.
+t3_budget_ledger <- function(engines,full_scenarios,outer_folds=1L,
+                             inner_folds=1L,hyperparameter_trials=1L) {
+ z<-data.frame(engine=names(engines),
+  evaluations_used=vapply(engines,function(v)as.numeric(v$evaluations_used),numeric(1)),
+  evaluations_cap=vapply(engines,function(v)as.numeric(v$evaluation_budget),numeric(1)))
+ if(any(!is.finite(z$evaluations_used))||any(z$evaluations_used>z$evaluations_cap))
+  stop("Invalid optimizer budget ledger")
+ if(any(c(outer_folds,inner_folds,hyperparameter_trials)<1)||
+    any(!is.finite(c(outer_folds,inner_folds,hyperparameter_trials))))stop("Invalid tuning design")
+ z$scenarios_per_objective<-as.integer(full_scenarios)
+ z$objective_scenario_evaluations<-z$evaluations_used*full_scenarios
+ z$tuning_max_objective_calls<-z$evaluations_cap*outer_folds*inner_folds*hyperparameter_trials
+ z$tuning_max_scenario_evaluations<-z$tuning_max_objective_calls*full_scenarios
+ z$tuning_actual_objective_calls<-NA_real_
+ z$tuning_actual_status<-"PENDING_TRIAL_LEDGER"
+ z
 }
