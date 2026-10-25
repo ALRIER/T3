@@ -258,7 +258,10 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  selected <- if (engine == 'all') names(dispatch) else engine
  if (!all(selected %in% names(dispatch))) stop('Unknown discovery engine')
  engines <- setNames(lapply(selected, function(name) dispatch[[name]]()), selected)
- list(engines=engines,models=t2_models(engines),config=cfg,
+ source('R/02_discovery/t3_predeclared_w_selection.R')
+ selected_models<-t3_select_models(engines,s)
+ list(engines=engines,models=selected_models$models,
+      selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=cfg,
       budget_registry=t2_discovery_budget_registry(cfg),seed=t2_seed(shard,200),
       training_seed_index=if (length(data$seed_index)) as.integer(data$seed_index) else 0L,
       mc_canonical_id=if(is.null(data$canonical_id)) NA_character_ else data$canonical_id)
