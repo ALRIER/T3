@@ -7,7 +7,6 @@ stopifnot(nrow(grid)==321L,identical(as.integer(grid$scenario_id),0:320))
 old<-Sys.getenv('T2_V3_SCIENTIFIC_ROOT',unset=NA_character_)
 root<-tempfile('t3-mc321-r-smoke-')
 Sys.setenv(T2_V3_SCIENTIFIC_ROOT=root)
-on.exit({if(is.na(old))Sys.unsetenv('T2_V3_SCIENTIFIC_ROOT') else Sys.setenv(T2_V3_SCIENTIFIC_ROOT=old);unlink(root,recursive=TRUE)},add=TRUE)
 family<-t2_families()[1L];seed<-0L;n<-200L;reps<-3L
 set.seed(912L)
 scenarios<-lapply(0:320,function(id){
@@ -30,3 +29,5 @@ stopifnot(inherits(try(t2_v3_block_dir('discovery',family,10L,n,reps),
 stopifnot(inherits(try(t2_v3_read_block('discovery',family,seed,n,reps,
  selected=c(0L,321L)),silent=TRUE),'try-error'))
 cat('T3_MC_321_R_CANONICAL_DISCOVERY_READER_PASS\\n')
+if(is.na(old))Sys.unsetenv('T2_V3_SCIENTIFIC_ROOT') else Sys.setenv(T2_V3_SCIENTIFIC_ROOT=old)
+unlink(root,recursive=TRUE)
