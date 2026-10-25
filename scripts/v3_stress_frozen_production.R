@@ -30,6 +30,17 @@ for(training_seed in 0:9) {
   learned<-Filter(function(m)!is.null(m$weights),fit$models)
   models<-c(baselines,learned)
   if(length(models)!=30L)stop('B3 requires all 26 benchmarks and four frozen learners')
+  controls<-fit$non_evolutionary_controls
+  if(!is.list(controls)||!setequal(names(controls),c('convex_mse','local_deterministic')))
+    stop('Stress requires two frozen non-evolutionary controls')
+  extra<-lapply(names(controls),function(id) {
+    w<-as.matrix(controls[[id]]$weights)
+    if(nrow(w)!=26L||ncol(w)!=1L||any(!is.finite(w))||
+       any(w<0)||abs(sum(w)-1)>1e-8)stop('Invalid frozen stress control')
+    new_frozen_model(id,weights=as.numeric(w[,1L]),family=id)
+  })
+  models<-c(models,extra)
+  if(length(models)!=32L)stop('Stress comparison must contain 32 models')
   if(length(models)<8L || anyDuplicated(vapply(models,function(m)m$id,character(1))))
     stop('Invalid frozen candidate registry')
   z<-t2_v3_stream_scores('stress',family,seed,n,models,reps=500L,selected=0:320)
