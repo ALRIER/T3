@@ -7,6 +7,7 @@ p=argparse.ArgumentParser()
 p.add_argument('family');p.add_argument('seed',type=int);p.add_argument('outer',type=int)
 p.add_argument('n',type=int)
 p.add_argument('--trials',type=int,default=8)
+p.add_argument('--aggregate-only',action='store_true',help='Combine completed fold ledgers without running optimizers')
 a=p.parse_args()
 if a.n not in (200,1000,3000): raise SystemExit('Invalid sample n')
 if a.seed not in range(10) or a.outer not in range(1,6) or a.trials<1:raise SystemExit('Invalid nested CV configuration')
@@ -46,6 +47,50 @@ def validated_fold(raw,engine,trial,inner):
              training_scenarios=scenarios,scenario_evaluations=calls,
              elapsed_seconds=elapsed,early_stop_saved=maximum-used,
              budget_policy=raw['budget_policy'])
+# Aggregate completed fold ledgers across all finished seeds/outer folds,
+# without reading candidate weights or treating incomplete trials as complete.
+if a.aggregate_only:
+ root=pathlib.Path('artifacts/T2_V3_B3_nested_optuna')
+ source_files=sorted(root.glob('*/seed*/fold*/n*/all_inner_fold_costs.csv'))
+ gathered=[]
+ for source in source_files:
+  with source.open(newline='') as fh:
+   for record in csv.DictReader(fh):
+    record={k:record[k] for k in LEDGER_FIELDS}
+    record.update({key:int(record[key]) for key in
+       ('seed','outer_fold','sample_n','trial','inner_fold',
+        'objective_evaluations','maximum_objective_evaluations',
+        'training_scenarios','scenario_evaluations','early_stop_saved')})
+    record.update({key:float(record[key]) for key in ('score','elapsed_seconds')})
+    validated_fold(record,record['engine'],record['trial'],record['inner_fold'])
+    gathered.append(record)
+ if not gathered:raise SystemExit('No completed Optuna fold ledgers found')
+ keys=[(row['family'],row['seed'],row['outer_fold'],row['sample_n'],
+        row['engine'],row['trial'],row['inner_fold']) for row in gathered]
+ if len(set(keys))!=len(keys):raise SystemExit('Duplicate Optuna cost entries')
+ grouped=defaultdict(list)
+ for row in gathered:
+  grouped[row['engine']].append(row)
+ combined=[]
+ for engine,rows in sorted(grouped.items()):
+  completed_trials=len(set((r['family'],r['seed'],r['outer_fold'],
+                             r['sample_n'],r['trial']) for r in rows))
+  combined.append(dict(engine=engine,completed_trial_groups=completed_trials,
+    observed_inner_folds=len(rows),
+    objective_evaluations=sum(x['objective_evaluations'] for x in rows),
+    maximum_objective_evaluations=sum(x['maximum_objective_evaluations'] for x in rows),
+    early_stop_saved=sum(x['early_stop_saved'] for x in rows),
+    scenario_evaluations=sum(x['scenario_evaluations'] for x in rows),
+    elapsed_seconds=sum(x['elapsed_seconds'] for x in rows),
+    audit_scope='OBSERVED_COMPLETED_FOLD_ROWS_ONLY'))
+ atomic_csv(root/'global_optuna_fold_costs.csv',gathered,LEDGER_FIELDS)
+ atomic_csv(root/'global_optuna_budget_summary.csv',combined,
+  ('engine','completed_trial_groups','observed_inner_folds',
+   'objective_evaluations','maximum_objective_evaluations','early_stop_saved',
+   'scenario_evaluations','elapsed_seconds','audit_scope'))
+ print(json.dumps(dict(status='AGGREGATED',rows=len(gathered),
+                       engines=len(combined),inference='NONE')))
+ raise SystemExit(0)
 all_rows=[]
 summary=[]
 for engine in ('ga','nsga2','de','dirichlet'):
