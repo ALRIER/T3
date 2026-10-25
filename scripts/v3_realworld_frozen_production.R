@@ -8,6 +8,7 @@ source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
 if(!family%in%t2_families()||!seed%in%t2_v3_indices('realworld')||
    !n%in%t2_v3_sample_sizes('realworld'))stop('B3 Real World role/seed/n mismatch')
+Sys.setenv(T2_REALWORLD_SAMPLE_SIZES=as.character(n),T2_REALWORLD_REPS='500')
 if(!file.exists(Sys.getenv('T2_REALWORLD_MANIFEST','config/public_datasets.csv')))
  stop('Reviewed external dataset manifest not available; fail closed')
 out<-file.path('artifacts','realworld_v3',family,sprintf('seed%02d_n%d',seed,n))
