@@ -16,6 +16,33 @@ start_ram <- gc(reset=TRUE)
 fit<-t2_run_discovery(d,'full',shard,'all')
 source('R/02_discovery/t2_v3_b3_cv5.R')
 cv5<-t2_b3_discovery_cv(d$scenarios,fit$models,k=ga_config$discovery_cv_folds)
+# Optional, capped 2x2 scientific ablation. It uses Discovery inputs only.
+# Run on prospectively chosen representative seeds; never select production W from it.
+if(identical(Sys.getenv('T3_RUN_ABLATION','0'),'1')) {
+  abr<-file.path('artifacts','discovery_v3',family,sprintf('seed%02d',seed),
+                 sprintf('n%d',n),'ablation')
+  dir.create(abr,recursive=TRUE,showWarnings=FALSE)
+  subids<-seq_len(min(length(d$scenarios),as.integer(
+     Sys.getenv('T3_ABLATION_SCENARIOS','32'))))
+  if(length(subids)<4L)stop('Ablation requires at least four scenarios')
+  absc<-d$scenarios[subids]
+  for(reg in c(FALSE,TRUE))for(dro in c(FALSE,TRUE)) {
+    acfg<-ga_config
+    acfg$population<-min(12L,as.integer(ga_config$population))
+    acfg$generations<-min(6L,as.integer(ga_config$generations))
+    acfg$discovery_weight_regularization_lambda<-
+      if(reg)ga_config$discovery_weight_regularization_lambda else 0
+    acfg$discovery_dro_tail_fraction<-
+      if(dro)ga_config$discovery_dro_tail_fraction else 0
+    name<-sprintf('reg%s_dro%s',as.integer(reg),as.integer(dro))
+    z<-ga_discover(absc,acfg,seed=t2_seed(paste(shard,'ablation',name),131L),shard=NULL)
+    attr(z,'ablation_config')<-list(regularization=reg,DRO=dro,
+       role='discovery_training_diagnostic',n_scenarios=length(absc))
+    saveRDS(z,file.path(abr,paste0(name,'.rds')))
+  }
+  writeLines('Exploratory training-only ablation; no selection or inference on heldout.',
+             file.path(abr,'README.txt'))
+}
 rm(d); invisible(gc(verbose=FALSE))
 stopifnot(length(fit$engines)==4L,length(fit$models)>=8L)
 for(m in Filter(function(x)!is.null(x$weights),fit$models))
