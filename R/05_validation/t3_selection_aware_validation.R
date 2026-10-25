@@ -23,8 +23,8 @@ t3_calibrate_selection_fpr <- function(observed, null_replays, alpha=0.05) {
   null <- t(vapply(null_replays, extract, numeric(length(ids))))
   # Larger statistic = stronger evidence. Familywise maxT adjustment.
   maximum <- apply(null,1L,max)
-  raw <- vapply(observed$statistic,function(x)
-    (1+sum(null[,match(x,observed$statistic)]>=x))/(nrow(null)+1),numeric(1))
+  raw <- vapply(seq_along(ids),function(j)
+    (1+sum(null[,j]>=observed$statistic[j]))/(nrow(null)+1),numeric(1))
   adjusted <- vapply(observed$statistic,function(x)
     (1+sum(maximum>=x))/(nrow(null)+1),numeric(1))
   data.frame(model=ids,statistic=observed$statistic,p_empirical=raw,
