@@ -50,6 +50,12 @@ for(m in Filter(function(x)!is.null(x$weights),fit$models))
 out<-file.path('artifacts','discovery_v3',family,sprintf('seed%02d',seed),sprintf('n%d',n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 saveRDS(fit,file.path(out,'discovery.rds'))
+# Publish only the frozen training W; no heldout/stress data enters this audit.
+w_registry<-do.call(rbind,lapply(Filter(function(m)!is.null(m$weights),fit$models),
+ function(m)data.frame(family=family,engine=m$id,seed=seed,fold=0L,
+                        sample_n=n,component=seq_len(26L),
+                        weight=as.numeric(m$weights),stringsAsFactors=FALSE)))
+write.csv(w_registry,file.path(out,'frozen_w_registry.csv'),row.names=FALSE)
 write.csv(cv5$folds,file.path(out,'cv5_fold_performance.csv'),row.names=FALSE)
 write.csv(cv5$assignments,file.path(out,'cv5_scenario_assignments.csv'),row.names=FALSE)
 writeLines(cv5$scope,file.path(out,'cv5_scope.txt'))
