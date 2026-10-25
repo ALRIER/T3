@@ -67,6 +67,12 @@ write.csv(data.frame(family=family,seed=seed,n=n,reps=500L,scenarios=321L,
 write.csv(data.frame(stage='Discovery',version='T2_V3_B3',family=family,seed=seed,
  memory_used_mb=sum(gc()[,2]),r_max_vcells_mb=max(gc()[,6])),
  file.path(out,'resource_report.csv'),row.names=FALSE)
+# Separate immutable cross-stage envelope; never store training matrices in it.
+t3_stage_publish('discovery',sprintf('b3_%s_n%d',family,n),
+  list(model_path=file.path(out,'discovery.rds'),
+       model_sha256=t2_sha256(file.path(out,'discovery.rds')),
+       scenario_ids=0:320),
+  family,seed,n,500L,file.path(out,'stage_contract.rds'))
 cat('V3_DISCOVERY_PASS',family,seed,'\n')
 
 # Publish canonical B3-named counterparts without breaking existing downstream references.
