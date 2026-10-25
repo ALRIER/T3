@@ -1,0 +1,650 @@
+name: T3 B3 FULL Monte Carlo 321 x 500
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/t3-b3-montecarlo-full.yml'
+permissions:
+  contents: read
+  packages: read
+jobs:
+  mc-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - {family: normal, seed: 0, n: 200}
+          - {family: normal, seed: 0, n: 1000}
+          - {family: normal, seed: 0, n: 3000}
+          - {family: normal, seed: 1, n: 200}
+          - {family: normal, seed: 1, n: 1000}
+          - {family: normal, seed: 1, n: 3000}
+          - {family: normal, seed: 2, n: 200}
+          - {family: normal, seed: 2, n: 1000}
+          - {family: normal, seed: 2, n: 3000}
+          - {family: normal, seed: 3, n: 200}
+          - {family: normal, seed: 3, n: 1000}
+          - {family: normal, seed: 3, n: 3000}
+          - {family: normal, seed: 4, n: 200}
+          - {family: normal, seed: 4, n: 1000}
+          - {family: normal, seed: 4, n: 3000}
+          - {family: normal, seed: 5, n: 200}
+          - {family: normal, seed: 5, n: 1000}
+          - {family: normal, seed: 5, n: 3000}
+          - {family: normal, seed: 6, n: 200}
+          - {family: normal, seed: 6, n: 1000}
+          - {family: normal, seed: 6, n: 3000}
+          - {family: normal, seed: 7, n: 200}
+          - {family: normal, seed: 7, n: 1000}
+          - {family: normal, seed: 7, n: 3000}
+          - {family: normal, seed: 8, n: 200}
+          - {family: normal, seed: 8, n: 1000}
+          - {family: normal, seed: 8, n: 3000}
+          - {family: normal, seed: 9, n: 200}
+          - {family: normal, seed: 9, n: 1000}
+          - {family: normal, seed: 9, n: 3000}
+          - {family: lognormal, seed: 0, n: 200}
+          - {family: lognormal, seed: 0, n: 1000}
+          - {family: lognormal, seed: 0, n: 3000}
+          - {family: lognormal, seed: 1, n: 200}
+          - {family: lognormal, seed: 1, n: 1000}
+          - {family: lognormal, seed: 1, n: 3000}
+          - {family: lognormal, seed: 2, n: 200}
+          - {family: lognormal, seed: 2, n: 1000}
+          - {family: lognormal, seed: 2, n: 3000}
+          - {family: lognormal, seed: 3, n: 200}
+          - {family: lognormal, seed: 3, n: 1000}
+          - {family: lognormal, seed: 3, n: 3000}
+          - {family: lognormal, seed: 4, n: 200}
+          - {family: lognormal, seed: 4, n: 1000}
+          - {family: lognormal, seed: 4, n: 3000}
+          - {family: lognormal, seed: 5, n: 200}
+          - {family: lognormal, seed: 5, n: 1000}
+          - {family: lognormal, seed: 5, n: 3000}
+          - {family: lognormal, seed: 6, n: 200}
+          - {family: lognormal, seed: 6, n: 1000}
+          - {family: lognormal, seed: 6, n: 3000}
+          - {family: lognormal, seed: 7, n: 200}
+          - {family: lognormal, seed: 7, n: 1000}
+          - {family: lognormal, seed: 7, n: 3000}
+          - {family: lognormal, seed: 8, n: 200}
+          - {family: lognormal, seed: 8, n: 1000}
+          - {family: lognormal, seed: 8, n: 3000}
+          - {family: lognormal, seed: 9, n: 200}
+          - {family: lognormal, seed: 9, n: 1000}
+          - {family: lognormal, seed: 9, n: 3000}
+          - {family: weibull, seed: 0, n: 200}
+          - {family: weibull, seed: 0, n: 1000}
+          - {family: weibull, seed: 0, n: 3000}
+          - {family: weibull, seed: 1, n: 200}
+          - {family: weibull, seed: 1, n: 1000}
+          - {family: weibull, seed: 1, n: 3000}
+          - {family: weibull, seed: 2, n: 200}
+          - {family: weibull, seed: 2, n: 1000}
+          - {family: weibull, seed: 2, n: 3000}
+          - {family: weibull, seed: 3, n: 200}
+          - {family: weibull, seed: 3, n: 1000}
+          - {family: weibull, seed: 3, n: 3000}
+          - {family: weibull, seed: 4, n: 200}
+          - {family: weibull, seed: 4, n: 1000}
+          - {family: weibull, seed: 4, n: 3000}
+          - {family: weibull, seed: 5, n: 200}
+          - {family: weibull, seed: 5, n: 1000}
+          - {family: weibull, seed: 5, n: 3000}
+          - {family: weibull, seed: 6, n: 200}
+          - {family: weibull, seed: 6, n: 1000}
+          - {family: weibull, seed: 6, n: 3000}
+          - {family: weibull, seed: 7, n: 200}
+          - {family: weibull, seed: 7, n: 1000}
+          - {family: weibull, seed: 7, n: 3000}
+          - {family: weibull, seed: 8, n: 200}
+          - {family: weibull, seed: 8, n: 1000}
+          - {family: weibull, seed: 8, n: 3000}
+          - {family: weibull, seed: 9, n: 200}
+          - {family: weibull, seed: 9, n: 1000}
+          - {family: weibull, seed: 9, n: 3000}
+          - {family: invgauss, seed: 0, n: 200}
+          - {family: invgauss, seed: 0, n: 1000}
+          - {family: invgauss, seed: 0, n: 3000}
+          - {family: invgauss, seed: 1, n: 200}
+          - {family: invgauss, seed: 1, n: 1000}
+          - {family: invgauss, seed: 1, n: 3000}
+          - {family: invgauss, seed: 2, n: 200}
+          - {family: invgauss, seed: 2, n: 1000}
+          - {family: invgauss, seed: 2, n: 3000}
+          - {family: invgauss, seed: 3, n: 200}
+          - {family: invgauss, seed: 3, n: 1000}
+          - {family: invgauss, seed: 3, n: 3000}
+          - {family: invgauss, seed: 4, n: 200}
+          - {family: invgauss, seed: 4, n: 1000}
+          - {family: invgauss, seed: 4, n: 3000}
+          - {family: invgauss, seed: 5, n: 200}
+          - {family: invgauss, seed: 5, n: 1000}
+          - {family: invgauss, seed: 5, n: 3000}
+          - {family: invgauss, seed: 6, n: 200}
+          - {family: invgauss, seed: 6, n: 1000}
+          - {family: invgauss, seed: 6, n: 3000}
+          - {family: invgauss, seed: 7, n: 200}
+          - {family: invgauss, seed: 7, n: 1000}
+          - {family: invgauss, seed: 7, n: 3000}
+          - {family: invgauss, seed: 8, n: 200}
+          - {family: invgauss, seed: 8, n: 1000}
+          - {family: invgauss, seed: 8, n: 3000}
+          - {family: invgauss, seed: 9, n: 200}
+          - {family: invgauss, seed: 9, n: 1000}
+          - {family: invgauss, seed: 9, n: 3000}
+          - {family: exgaussian, seed: 0, n: 200}
+          - {family: exgaussian, seed: 0, n: 1000}
+          - {family: exgaussian, seed: 0, n: 3000}
+          - {family: exgaussian, seed: 1, n: 200}
+          - {family: exgaussian, seed: 1, n: 1000}
+          - {family: exgaussian, seed: 1, n: 3000}
+          - {family: exgaussian, seed: 2, n: 200}
+          - {family: exgaussian, seed: 2, n: 1000}
+          - {family: exgaussian, seed: 2, n: 3000}
+          - {family: exgaussian, seed: 3, n: 200}
+          - {family: exgaussian, seed: 3, n: 1000}
+          - {family: exgaussian, seed: 3, n: 3000}
+          - {family: exgaussian, seed: 4, n: 200}
+          - {family: exgaussian, seed: 4, n: 1000}
+          - {family: exgaussian, seed: 4, n: 3000}
+          - {family: exgaussian, seed: 5, n: 200}
+          - {family: exgaussian, seed: 5, n: 1000}
+          - {family: exgaussian, seed: 5, n: 3000}
+          - {family: exgaussian, seed: 6, n: 200}
+          - {family: exgaussian, seed: 6, n: 1000}
+          - {family: exgaussian, seed: 6, n: 3000}
+          - {family: exgaussian, seed: 7, n: 200}
+          - {family: exgaussian, seed: 7, n: 1000}
+          - {family: exgaussian, seed: 7, n: 3000}
+          - {family: exgaussian, seed: 8, n: 200}
+          - {family: exgaussian, seed: 8, n: 1000}
+          - {family: exgaussian, seed: 8, n: 3000}
+          - {family: exgaussian, seed: 9, n: 200}
+          - {family: exgaussian, seed: 9, n: 1000}
+          - {family: exgaussian, seed: 9, n: 3000}
+          - {family: exwald, seed: 0, n: 200}
+          - {family: exwald, seed: 0, n: 1000}
+          - {family: exwald, seed: 0, n: 3000}
+          - {family: exwald, seed: 1, n: 200}
+          - {family: exwald, seed: 1, n: 1000}
+          - {family: exwald, seed: 1, n: 3000}
+          - {family: exwald, seed: 2, n: 200}
+          - {family: exwald, seed: 2, n: 1000}
+          - {family: exwald, seed: 2, n: 3000}
+          - {family: exwald, seed: 3, n: 200}
+          - {family: exwald, seed: 3, n: 1000}
+          - {family: exwald, seed: 3, n: 3000}
+          - {family: exwald, seed: 4, n: 200}
+          - {family: exwald, seed: 4, n: 1000}
+          - {family: exwald, seed: 4, n: 3000}
+          - {family: exwald, seed: 5, n: 200}
+          - {family: exwald, seed: 5, n: 1000}
+          - {family: exwald, seed: 5, n: 3000}
+          - {family: exwald, seed: 6, n: 200}
+          - {family: exwald, seed: 6, n: 1000}
+          - {family: exwald, seed: 6, n: 3000}
+          - {family: exwald, seed: 7, n: 200}
+          - {family: exwald, seed: 7, n: 1000}
+          - {family: exwald, seed: 7, n: 3000}
+          - {family: exwald, seed: 8, n: 200}
+          - {family: exwald, seed: 8, n: 1000}
+          - {family: exwald, seed: 8, n: 3000}
+          - {family: exwald, seed: 9, n: 200}
+          - {family: exwald, seed: 9, n: 1000}
+          - {family: exwald, seed: 9, n: 3000}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate B3 prospective 321 design
+        run: python3 scripts/t2_v3_b3_generate_grid321.py
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull pinned scientific R runtime
+        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+      - name: Monte Carlo full 500 replications per scenario
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_full.R ${{ matrix.family }} discovery ${{ matrix.seed }} 500 ${{ matrix.n }}
+      - name: Persist completed canonical or partial checkpoint for 30 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/discovery/${{ matrix.family }}/seed${{ format('{0}', matrix.seed) }}/
+          retention-days: 30
+          if-no-files-found: warn
+  mc-heldout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - {family: normal, seed: 10, n: 200}
+          - {family: normal, seed: 10, n: 1000}
+          - {family: normal, seed: 10, n: 3000}
+          - {family: normal, seed: 11, n: 200}
+          - {family: normal, seed: 11, n: 1000}
+          - {family: normal, seed: 11, n: 3000}
+          - {family: normal, seed: 12, n: 200}
+          - {family: normal, seed: 12, n: 1000}
+          - {family: normal, seed: 12, n: 3000}
+          - {family: normal, seed: 13, n: 200}
+          - {family: normal, seed: 13, n: 1000}
+          - {family: normal, seed: 13, n: 3000}
+          - {family: normal, seed: 14, n: 200}
+          - {family: normal, seed: 14, n: 1000}
+          - {family: normal, seed: 14, n: 3000}
+          - {family: normal, seed: 15, n: 200}
+          - {family: normal, seed: 15, n: 1000}
+          - {family: normal, seed: 15, n: 3000}
+          - {family: normal, seed: 16, n: 200}
+          - {family: normal, seed: 16, n: 1000}
+          - {family: normal, seed: 16, n: 3000}
+          - {family: normal, seed: 17, n: 200}
+          - {family: normal, seed: 17, n: 1000}
+          - {family: normal, seed: 17, n: 3000}
+          - {family: normal, seed: 18, n: 200}
+          - {family: normal, seed: 18, n: 1000}
+          - {family: normal, seed: 18, n: 3000}
+          - {family: normal, seed: 19, n: 200}
+          - {family: normal, seed: 19, n: 1000}
+          - {family: normal, seed: 19, n: 3000}
+          - {family: lognormal, seed: 10, n: 200}
+          - {family: lognormal, seed: 10, n: 1000}
+          - {family: lognormal, seed: 10, n: 3000}
+          - {family: lognormal, seed: 11, n: 200}
+          - {family: lognormal, seed: 11, n: 1000}
+          - {family: lognormal, seed: 11, n: 3000}
+          - {family: lognormal, seed: 12, n: 200}
+          - {family: lognormal, seed: 12, n: 1000}
+          - {family: lognormal, seed: 12, n: 3000}
+          - {family: lognormal, seed: 13, n: 200}
+          - {family: lognormal, seed: 13, n: 1000}
+          - {family: lognormal, seed: 13, n: 3000}
+          - {family: lognormal, seed: 14, n: 200}
+          - {family: lognormal, seed: 14, n: 1000}
+          - {family: lognormal, seed: 14, n: 3000}
+          - {family: lognormal, seed: 15, n: 200}
+          - {family: lognormal, seed: 15, n: 1000}
+          - {family: lognormal, seed: 15, n: 3000}
+          - {family: lognormal, seed: 16, n: 200}
+          - {family: lognormal, seed: 16, n: 1000}
+          - {family: lognormal, seed: 16, n: 3000}
+          - {family: lognormal, seed: 17, n: 200}
+          - {family: lognormal, seed: 17, n: 1000}
+          - {family: lognormal, seed: 17, n: 3000}
+          - {family: lognormal, seed: 18, n: 200}
+          - {family: lognormal, seed: 18, n: 1000}
+          - {family: lognormal, seed: 18, n: 3000}
+          - {family: lognormal, seed: 19, n: 200}
+          - {family: lognormal, seed: 19, n: 1000}
+          - {family: lognormal, seed: 19, n: 3000}
+          - {family: weibull, seed: 10, n: 200}
+          - {family: weibull, seed: 10, n: 1000}
+          - {family: weibull, seed: 10, n: 3000}
+          - {family: weibull, seed: 11, n: 200}
+          - {family: weibull, seed: 11, n: 1000}
+          - {family: weibull, seed: 11, n: 3000}
+          - {family: weibull, seed: 12, n: 200}
+          - {family: weibull, seed: 12, n: 1000}
+          - {family: weibull, seed: 12, n: 3000}
+          - {family: weibull, seed: 13, n: 200}
+          - {family: weibull, seed: 13, n: 1000}
+          - {family: weibull, seed: 13, n: 3000}
+          - {family: weibull, seed: 14, n: 200}
+          - {family: weibull, seed: 14, n: 1000}
+          - {family: weibull, seed: 14, n: 3000}
+          - {family: weibull, seed: 15, n: 200}
+          - {family: weibull, seed: 15, n: 1000}
+          - {family: weibull, seed: 15, n: 3000}
+          - {family: weibull, seed: 16, n: 200}
+          - {family: weibull, seed: 16, n: 1000}
+          - {family: weibull, seed: 16, n: 3000}
+          - {family: weibull, seed: 17, n: 200}
+          - {family: weibull, seed: 17, n: 1000}
+          - {family: weibull, seed: 17, n: 3000}
+          - {family: weibull, seed: 18, n: 200}
+          - {family: weibull, seed: 18, n: 1000}
+          - {family: weibull, seed: 18, n: 3000}
+          - {family: weibull, seed: 19, n: 200}
+          - {family: weibull, seed: 19, n: 1000}
+          - {family: weibull, seed: 19, n: 3000}
+          - {family: invgauss, seed: 10, n: 200}
+          - {family: invgauss, seed: 10, n: 1000}
+          - {family: invgauss, seed: 10, n: 3000}
+          - {family: invgauss, seed: 11, n: 200}
+          - {family: invgauss, seed: 11, n: 1000}
+          - {family: invgauss, seed: 11, n: 3000}
+          - {family: invgauss, seed: 12, n: 200}
+          - {family: invgauss, seed: 12, n: 1000}
+          - {family: invgauss, seed: 12, n: 3000}
+          - {family: invgauss, seed: 13, n: 200}
+          - {family: invgauss, seed: 13, n: 1000}
+          - {family: invgauss, seed: 13, n: 3000}
+          - {family: invgauss, seed: 14, n: 200}
+          - {family: invgauss, seed: 14, n: 1000}
+          - {family: invgauss, seed: 14, n: 3000}
+          - {family: invgauss, seed: 15, n: 200}
+          - {family: invgauss, seed: 15, n: 1000}
+          - {family: invgauss, seed: 15, n: 3000}
+          - {family: invgauss, seed: 16, n: 200}
+          - {family: invgauss, seed: 16, n: 1000}
+          - {family: invgauss, seed: 16, n: 3000}
+          - {family: invgauss, seed: 17, n: 200}
+          - {family: invgauss, seed: 17, n: 1000}
+          - {family: invgauss, seed: 17, n: 3000}
+          - {family: invgauss, seed: 18, n: 200}
+          - {family: invgauss, seed: 18, n: 1000}
+          - {family: invgauss, seed: 18, n: 3000}
+          - {family: invgauss, seed: 19, n: 200}
+          - {family: invgauss, seed: 19, n: 1000}
+          - {family: invgauss, seed: 19, n: 3000}
+          - {family: exgaussian, seed: 10, n: 200}
+          - {family: exgaussian, seed: 10, n: 1000}
+          - {family: exgaussian, seed: 10, n: 3000}
+          - {family: exgaussian, seed: 11, n: 200}
+          - {family: exgaussian, seed: 11, n: 1000}
+          - {family: exgaussian, seed: 11, n: 3000}
+          - {family: exgaussian, seed: 12, n: 200}
+          - {family: exgaussian, seed: 12, n: 1000}
+          - {family: exgaussian, seed: 12, n: 3000}
+          - {family: exgaussian, seed: 13, n: 200}
+          - {family: exgaussian, seed: 13, n: 1000}
+          - {family: exgaussian, seed: 13, n: 3000}
+          - {family: exgaussian, seed: 14, n: 200}
+          - {family: exgaussian, seed: 14, n: 1000}
+          - {family: exgaussian, seed: 14, n: 3000}
+          - {family: exgaussian, seed: 15, n: 200}
+          - {family: exgaussian, seed: 15, n: 1000}
+          - {family: exgaussian, seed: 15, n: 3000}
+          - {family: exgaussian, seed: 16, n: 200}
+          - {family: exgaussian, seed: 16, n: 1000}
+          - {family: exgaussian, seed: 16, n: 3000}
+          - {family: exgaussian, seed: 17, n: 200}
+          - {family: exgaussian, seed: 17, n: 1000}
+          - {family: exgaussian, seed: 17, n: 3000}
+          - {family: exgaussian, seed: 18, n: 200}
+          - {family: exgaussian, seed: 18, n: 1000}
+          - {family: exgaussian, seed: 18, n: 3000}
+          - {family: exgaussian, seed: 19, n: 200}
+          - {family: exgaussian, seed: 19, n: 1000}
+          - {family: exgaussian, seed: 19, n: 3000}
+          - {family: exwald, seed: 10, n: 200}
+          - {family: exwald, seed: 10, n: 1000}
+          - {family: exwald, seed: 10, n: 3000}
+          - {family: exwald, seed: 11, n: 200}
+          - {family: exwald, seed: 11, n: 1000}
+          - {family: exwald, seed: 11, n: 3000}
+          - {family: exwald, seed: 12, n: 200}
+          - {family: exwald, seed: 12, n: 1000}
+          - {family: exwald, seed: 12, n: 3000}
+          - {family: exwald, seed: 13, n: 200}
+          - {family: exwald, seed: 13, n: 1000}
+          - {family: exwald, seed: 13, n: 3000}
+          - {family: exwald, seed: 14, n: 200}
+          - {family: exwald, seed: 14, n: 1000}
+          - {family: exwald, seed: 14, n: 3000}
+          - {family: exwald, seed: 15, n: 200}
+          - {family: exwald, seed: 15, n: 1000}
+          - {family: exwald, seed: 15, n: 3000}
+          - {family: exwald, seed: 16, n: 200}
+          - {family: exwald, seed: 16, n: 1000}
+          - {family: exwald, seed: 16, n: 3000}
+          - {family: exwald, seed: 17, n: 200}
+          - {family: exwald, seed: 17, n: 1000}
+          - {family: exwald, seed: 17, n: 3000}
+          - {family: exwald, seed: 18, n: 200}
+          - {family: exwald, seed: 18, n: 1000}
+          - {family: exwald, seed: 18, n: 3000}
+          - {family: exwald, seed: 19, n: 200}
+          - {family: exwald, seed: 19, n: 1000}
+          - {family: exwald, seed: 19, n: 3000}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate B3 prospective 321 design
+        run: python3 scripts/t2_v3_b3_generate_grid321.py
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull pinned scientific R runtime
+        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+      - name: Monte Carlo full 500 replications per scenario
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_full.R ${{ matrix.family }} heldout ${{ matrix.seed }} 500 ${{ matrix.n }}
+      - name: Persist completed canonical or partial checkpoint for 30 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b3-mc-heldout-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/heldout/${{ matrix.family }}/seed${{ format('{0}', matrix.seed) }}/
+          retention-days: 30
+          if-no-files-found: warn
+  mc-stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - {family: normal, seed: 20, n: 200}
+          - {family: normal, seed: 20, n: 1000}
+          - {family: normal, seed: 20, n: 3000}
+          - {family: normal, seed: 21, n: 200}
+          - {family: normal, seed: 21, n: 1000}
+          - {family: normal, seed: 21, n: 3000}
+          - {family: normal, seed: 22, n: 200}
+          - {family: normal, seed: 22, n: 1000}
+          - {family: normal, seed: 22, n: 3000}
+          - {family: normal, seed: 23, n: 200}
+          - {family: normal, seed: 23, n: 1000}
+          - {family: normal, seed: 23, n: 3000}
+          - {family: normal, seed: 24, n: 200}
+          - {family: normal, seed: 24, n: 1000}
+          - {family: normal, seed: 24, n: 3000}
+          - {family: normal, seed: 25, n: 200}
+          - {family: normal, seed: 25, n: 1000}
+          - {family: normal, seed: 25, n: 3000}
+          - {family: normal, seed: 26, n: 200}
+          - {family: normal, seed: 26, n: 1000}
+          - {family: normal, seed: 26, n: 3000}
+          - {family: normal, seed: 27, n: 200}
+          - {family: normal, seed: 27, n: 1000}
+          - {family: normal, seed: 27, n: 3000}
+          - {family: normal, seed: 28, n: 200}
+          - {family: normal, seed: 28, n: 1000}
+          - {family: normal, seed: 28, n: 3000}
+          - {family: normal, seed: 29, n: 200}
+          - {family: normal, seed: 29, n: 1000}
+          - {family: normal, seed: 29, n: 3000}
+          - {family: lognormal, seed: 20, n: 200}
+          - {family: lognormal, seed: 20, n: 1000}
+          - {family: lognormal, seed: 20, n: 3000}
+          - {family: lognormal, seed: 21, n: 200}
+          - {family: lognormal, seed: 21, n: 1000}
+          - {family: lognormal, seed: 21, n: 3000}
+          - {family: lognormal, seed: 22, n: 200}
+          - {family: lognormal, seed: 22, n: 1000}
+          - {family: lognormal, seed: 22, n: 3000}
+          - {family: lognormal, seed: 23, n: 200}
+          - {family: lognormal, seed: 23, n: 1000}
+          - {family: lognormal, seed: 23, n: 3000}
+          - {family: lognormal, seed: 24, n: 200}
+          - {family: lognormal, seed: 24, n: 1000}
+          - {family: lognormal, seed: 24, n: 3000}
+          - {family: lognormal, seed: 25, n: 200}
+          - {family: lognormal, seed: 25, n: 1000}
+          - {family: lognormal, seed: 25, n: 3000}
+          - {family: lognormal, seed: 26, n: 200}
+          - {family: lognormal, seed: 26, n: 1000}
+          - {family: lognormal, seed: 26, n: 3000}
+          - {family: lognormal, seed: 27, n: 200}
+          - {family: lognormal, seed: 27, n: 1000}
+          - {family: lognormal, seed: 27, n: 3000}
+          - {family: lognormal, seed: 28, n: 200}
+          - {family: lognormal, seed: 28, n: 1000}
+          - {family: lognormal, seed: 28, n: 3000}
+          - {family: lognormal, seed: 29, n: 200}
+          - {family: lognormal, seed: 29, n: 1000}
+          - {family: lognormal, seed: 29, n: 3000}
+          - {family: weibull, seed: 20, n: 200}
+          - {family: weibull, seed: 20, n: 1000}
+          - {family: weibull, seed: 20, n: 3000}
+          - {family: weibull, seed: 21, n: 200}
+          - {family: weibull, seed: 21, n: 1000}
+          - {family: weibull, seed: 21, n: 3000}
+          - {family: weibull, seed: 22, n: 200}
+          - {family: weibull, seed: 22, n: 1000}
+          - {family: weibull, seed: 22, n: 3000}
+          - {family: weibull, seed: 23, n: 200}
+          - {family: weibull, seed: 23, n: 1000}
+          - {family: weibull, seed: 23, n: 3000}
+          - {family: weibull, seed: 24, n: 200}
+          - {family: weibull, seed: 24, n: 1000}
+          - {family: weibull, seed: 24, n: 3000}
+          - {family: weibull, seed: 25, n: 200}
+          - {family: weibull, seed: 25, n: 1000}
+          - {family: weibull, seed: 25, n: 3000}
+          - {family: weibull, seed: 26, n: 200}
+          - {family: weibull, seed: 26, n: 1000}
+          - {family: weibull, seed: 26, n: 3000}
+          - {family: weibull, seed: 27, n: 200}
+          - {family: weibull, seed: 27, n: 1000}
+          - {family: weibull, seed: 27, n: 3000}
+          - {family: weibull, seed: 28, n: 200}
+          - {family: weibull, seed: 28, n: 1000}
+          - {family: weibull, seed: 28, n: 3000}
+          - {family: weibull, seed: 29, n: 200}
+          - {family: weibull, seed: 29, n: 1000}
+          - {family: weibull, seed: 29, n: 3000}
+          - {family: invgauss, seed: 20, n: 200}
+          - {family: invgauss, seed: 20, n: 1000}
+          - {family: invgauss, seed: 20, n: 3000}
+          - {family: invgauss, seed: 21, n: 200}
+          - {family: invgauss, seed: 21, n: 1000}
+          - {family: invgauss, seed: 21, n: 3000}
+          - {family: invgauss, seed: 22, n: 200}
+          - {family: invgauss, seed: 22, n: 1000}
+          - {family: invgauss, seed: 22, n: 3000}
+          - {family: invgauss, seed: 23, n: 200}
+          - {family: invgauss, seed: 23, n: 1000}
+          - {family: invgauss, seed: 23, n: 3000}
+          - {family: invgauss, seed: 24, n: 200}
+          - {family: invgauss, seed: 24, n: 1000}
+          - {family: invgauss, seed: 24, n: 3000}
+          - {family: invgauss, seed: 25, n: 200}
+          - {family: invgauss, seed: 25, n: 1000}
+          - {family: invgauss, seed: 25, n: 3000}
+          - {family: invgauss, seed: 26, n: 200}
+          - {family: invgauss, seed: 26, n: 1000}
+          - {family: invgauss, seed: 26, n: 3000}
+          - {family: invgauss, seed: 27, n: 200}
+          - {family: invgauss, seed: 27, n: 1000}
+          - {family: invgauss, seed: 27, n: 3000}
+          - {family: invgauss, seed: 28, n: 200}
+          - {family: invgauss, seed: 28, n: 1000}
+          - {family: invgauss, seed: 28, n: 3000}
+          - {family: invgauss, seed: 29, n: 200}
+          - {family: invgauss, seed: 29, n: 1000}
+          - {family: invgauss, seed: 29, n: 3000}
+          - {family: exgaussian, seed: 20, n: 200}
+          - {family: exgaussian, seed: 20, n: 1000}
+          - {family: exgaussian, seed: 20, n: 3000}
+          - {family: exgaussian, seed: 21, n: 200}
+          - {family: exgaussian, seed: 21, n: 1000}
+          - {family: exgaussian, seed: 21, n: 3000}
+          - {family: exgaussian, seed: 22, n: 200}
+          - {family: exgaussian, seed: 22, n: 1000}
+          - {family: exgaussian, seed: 22, n: 3000}
+          - {family: exgaussian, seed: 23, n: 200}
+          - {family: exgaussian, seed: 23, n: 1000}
+          - {family: exgaussian, seed: 23, n: 3000}
+          - {family: exgaussian, seed: 24, n: 200}
+          - {family: exgaussian, seed: 24, n: 1000}
+          - {family: exgaussian, seed: 24, n: 3000}
+          - {family: exgaussian, seed: 25, n: 200}
+          - {family: exgaussian, seed: 25, n: 1000}
+          - {family: exgaussian, seed: 25, n: 3000}
+          - {family: exgaussian, seed: 26, n: 200}
+          - {family: exgaussian, seed: 26, n: 1000}
+          - {family: exgaussian, seed: 26, n: 3000}
+          - {family: exgaussian, seed: 27, n: 200}
+          - {family: exgaussian, seed: 27, n: 1000}
+          - {family: exgaussian, seed: 27, n: 3000}
+          - {family: exgaussian, seed: 28, n: 200}
+          - {family: exgaussian, seed: 28, n: 1000}
+          - {family: exgaussian, seed: 28, n: 3000}
+          - {family: exgaussian, seed: 29, n: 200}
+          - {family: exgaussian, seed: 29, n: 1000}
+          - {family: exgaussian, seed: 29, n: 3000}
+          - {family: exwald, seed: 20, n: 200}
+          - {family: exwald, seed: 20, n: 1000}
+          - {family: exwald, seed: 20, n: 3000}
+          - {family: exwald, seed: 21, n: 200}
+          - {family: exwald, seed: 21, n: 1000}
+          - {family: exwald, seed: 21, n: 3000}
+          - {family: exwald, seed: 22, n: 200}
+          - {family: exwald, seed: 22, n: 1000}
+          - {family: exwald, seed: 22, n: 3000}
+          - {family: exwald, seed: 23, n: 200}
+          - {family: exwald, seed: 23, n: 1000}
+          - {family: exwald, seed: 23, n: 3000}
+          - {family: exwald, seed: 24, n: 200}
+          - {family: exwald, seed: 24, n: 1000}
+          - {family: exwald, seed: 24, n: 3000}
+          - {family: exwald, seed: 25, n: 200}
+          - {family: exwald, seed: 25, n: 1000}
+          - {family: exwald, seed: 25, n: 3000}
+          - {family: exwald, seed: 26, n: 200}
+          - {family: exwald, seed: 26, n: 1000}
+          - {family: exwald, seed: 26, n: 3000}
+          - {family: exwald, seed: 27, n: 200}
+          - {family: exwald, seed: 27, n: 1000}
+          - {family: exwald, seed: 27, n: 3000}
+          - {family: exwald, seed: 28, n: 200}
+          - {family: exwald, seed: 28, n: 1000}
+          - {family: exwald, seed: 28, n: 3000}
+          - {family: exwald, seed: 29, n: 200}
+          - {family: exwald, seed: 29, n: 1000}
+          - {family: exwald, seed: 29, n: 3000}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate B3 prospective 321 design
+        run: python3 scripts/t2_v3_b3_generate_grid321.py
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull pinned scientific R runtime
+        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+      - name: Monte Carlo full 500 replications per scenario
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_full.R ${{ matrix.family }} stress ${{ matrix.seed }} 500 ${{ matrix.n }}
+      - name: Persist completed canonical or partial checkpoint for 30 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b3-mc-stress-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/stress/${{ matrix.family }}/seed${{ format('{0}', matrix.seed) }}/
+          retention-days: 30
+          if-no-files-found: warn
