@@ -6,11 +6,13 @@ family<-args[[1L]];seed<-as.integer(args[[2L]]);n<-as.integer(args[[3L]])
 source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
+source('R/00_shared/v3_downstream.R')
 if(!family%in%t2_families()||!seed%in%t2_v3_indices('realworld')||
    !n%in%t2_v3_sample_sizes('realworld'))stop('B3 Real World role/seed/n mismatch')
 Sys.setenv(T2_REALWORLD_SAMPLE_SIZES=as.character(n),T2_REALWORLD_REPS='500')
 if(!file.exists(Sys.getenv('T2_REALWORLD_MANIFEST','config/public_datasets.csv')))
  stop('Reviewed external dataset manifest not available; fail closed')
+t3_stage_preflight('realworld',family,seed,n,require_scenarios=FALSE)
 out<-file.path('artifacts','realworld_v3',family,sprintf('seed%02d_n%d',seed,n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 for(train_seed in t2_v3_indices('discovery')) {
@@ -37,4 +39,5 @@ t3_stage_publish('realworld',sprintf('b3_%s_n%d',family,n),
   list(score_files=sprintf('train_seed%02d_scores.csv',t2_v3_indices('discovery')),
        target='full_dataset_mean_proxy',seed_role='realworld'),
   family,seed,n,500L,file.path(out,'stage_contract.rds'))
+t3_stage_postflight(file.path(out,'stage_contract.rds'),'realworld',family,seed,n,expected_files=file.path(out,sprintf('train_seed%02d_scores.csv',t2_v3_indices('discovery'))))
 cat('B3_REALWORLD_PASS',family,seed,n,'\\n')
