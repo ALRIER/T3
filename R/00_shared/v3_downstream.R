@@ -42,3 +42,34 @@ t2_v3_discovery_input <- function(family,seed,n=1000L,reps=500L,
        seed_index=seed,n=n,replications=reps,
        scenarios=scenarios,canonical_id=sprintf('v3_discovery_%s_seed%02d_n%d',family,seed,n))
 }
+
+
+# Preflight / postflight structural audit. Does not run Monte Carlo, fit models,
+# change seeds, or read external data; fail closed on missing stage outputs.
+t3_stage_preflight <- function(role,family,seed,n,reps=500L,
+                                require_scenarios=TRUE) {
+ if(!role%in%c('discovery','heldout','stress','realworld')||
+    !family%in%t2_families()||
+    length(seed)!=1L||!seed%in%t2_v3_indices(role)||
+    !n%in%t2_v3_sample_sizes(role))
+   stop('B3 stage role/family/seed/sample size invalid')
+ if(require_scenarios&&role!='realworld') {
+   root<-t2_v3_block_dir(role,family,seed,n,reps)
+   paths<-file.path(root,sprintf('scenario_%04d.rds',0:320))
+   if(!all(file.exists(paths)))stop('Missing 321 scenario shard inputs')
+   if(anyDuplicated(paths))stop('Duplicate scenario shard path')
+ }
+ invisible(TRUE)
+}
+t3_stage_postflight <- function(path,role,family,seed,n,
+                                 expected_files=character()) {
+ x<-t3_stage_require(path,role,sprintf('b3_%s_n%d',family,n),
+                     family,seed,n)
+ if(length(expected_files)) {
+   if(anyDuplicated(expected_files)||!all(file.exists(expected_files)))
+     stop('Missing or duplicate stage result files')
+   hashes<-vapply(expected_files,t2_sha256,character(1))
+   if(anyNA(hashes)||any(!nzchar(hashes)))stop('Invalid result digest')
+ }
+ invisible(x)
+}
