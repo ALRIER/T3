@@ -1,7 +1,7 @@
 FROM rocker/r-ver:4.3.3
 
-LABEL org.opencontainers.image.source="https://github.com/ALRIER/T2"
-LABEL org.opencontainers.image.description="Pinned R runtime for T2 workflows"
+LABEL org.opencontainers.image.source="https://github.com/ALRIER/T3"
+LABEL org.opencontainers.image.description="Pinned R runtime for T3 B3 workflows"
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends python3 \
