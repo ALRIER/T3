@@ -26,4 +26,4 @@ jobs:
           context: .
           file: docker/Dockerfile.r-runtime
           push: true
-          tags: ghcr.io/alrier/t3-r:4.3.3-statmod-v1
+          tags: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
