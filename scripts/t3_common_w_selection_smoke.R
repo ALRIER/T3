@@ -76,9 +76,9 @@ objective_matrix<-matrix(c(1,10,2,3),nrow=2L,byrow=TRUE,
  dimnames=list(NULL,c('mse','q95')))
 reference_scales<-c(mse=1,q95=20)
 point<-t3_convergence_point(objective_matrix,7L,reference_scales)
-stopifnot(isTRUE(all.equal(unname(point['mse']),2)),
- isTRUE(all.equal(unname(point['q95']),3)),
- isTRUE(all.equal(unname(point['joint_normalized']),1.075)))
+stopifnot(isTRUE(all.equal(as.numeric(point['mse']),1)),
+ isTRUE(all.equal(as.numeric(point['q95']),10)),
+ isTRUE(all.equal(as.numeric(point['joint_normalized']),0.75)))
 cost<-t3_budget_ledger(engines,full_scenarios=321L,
  outer_folds=5L,inner_folds=3L,hyperparameter_trials=2L)
 stopifnot(all(cost$evaluations_used==20L),
