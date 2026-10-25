@@ -1,0 +1,10 @@
+seed_index,role,used_for,description
+0,training,discovery,Canonical Monte Carlo training seed
+1,training,discovery,Canonical Monte Carlo training seed
+2,training,discovery,Canonical Monte Carlo training seed
+3,training,discovery,Canonical Monte Carlo training seed
+4,training,discovery,Canonical Monte Carlo training seed
+5,training,discovery,Canonical Monte Carlo training seed
+6,training,discovery,Canonical Monte Carlo training seed
+7,training,discovery,Canonical Monte Carlo training seed
+8,heldout,heldout_and_reserved_stress,Reserved independent Monte Carlo seed; never used for discovery
