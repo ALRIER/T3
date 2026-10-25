@@ -87,3 +87,64 @@ t3_gate_diagnostics <- function(df,alpha=.05,bandwidth=.01,
  df$near_gate_bandwidth<-bandwidth
  df
 }
+
+
+# Post-run only: paired comparisons across independent seed-level summaries.
+# Individual scenario scores are NOT treated as independent inferential units.
+t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
+                                        alpha=.05,near_band=.01) {
+ needed<-c('model','mse','q95','training_seed')
+ if(!is.data.frame(scores)||!all(needed%in%names(scores))||
+    !stage%in%c('heldout','stress','realworld')||
+    any(!is.finite(scores$mse))||any(!is.finite(scores$q95)))
+   stop('Invalid confirmatory stage scores')
+ eval_col<-switch(stage,heldout='heldout_seed',stress='stress_seed',
+                  realworld='realworld_seed')
+ if(!eval_col%in%names(scores))stop('Missing independent evaluation seed')
+ if(!reference%in%as.character(scores$model))stop('Missing benchmark')
+ # Independent evaluation seed is the test unit; training seeds and scenarios
+ # form repeated measures and are averaged before inference.
+ groups<-intersect(c('family','sample_n','dataset_id','parent_dataset_id'),names(scores))
+ keys<-c(groups,eval_col,'model')
+ z<-aggregate(scores[,c('mse','q95'),drop=FALSE],
+              scores[,keys,drop=FALSE],mean)
+ idvars<-c(groups,eval_col)
+ group_id<-if(length(groups))interaction(z[groups],drop=TRUE) else
+   factor(rep('all',nrow(z)))
+ ans<-list()
+ for(group in levels(group_id)) {
+  zz<-z[group_id==group,,drop=FALSE]
+  base<-zz[zz$model==reference,,drop=FALSE]
+  if(anyDuplicated(base[idvars]))stop('Duplicate reference seed')
+  for(model in setdiff(unique(as.character(zz$model)),reference)) {
+    candidate<-zz[zz$model==model,,drop=FALSE]
+    join<-merge(candidate,base,by=idvars,suffixes=c('_candidate','_reference'))
+    if(nrow(join)!=nrow(candidate)||nrow(join)!=nrow(base)||
+       nrow(join)<3L)stop('Unpaired or insufficient independent evaluation seeds')
+    for(metric in c('mse','q95')) {
+      delta<-join[[paste0(metric,'_candidate')]]-
+             join[[paste0(metric,'_reference')]]
+      if(all(delta==delta[1L])) {
+        pv<-if(delta[1L]<0) 0 else 1
+        limits<-rep(delta[1L],2L)
+      } else {
+        test<-stats::t.test(delta,alternative='less')
+        pv<-test$p.value
+        limits<-stats::t.test(delta,conf.level=.95)$conf.int
+      }
+      ans[[length(ans)+1L]]<-data.frame(stage=stage,group=group,
+        model=model,metric=metric,benchmark=reference,
+        independent_seeds=nrow(join),difference=mean(delta),
+        lower=limits[1L],upper=limits[2L],p_value=pv,
+        negative_control=FALSE,
+        inference_unit='evaluation_seed',
+        stringsAsFactors=FALSE)
+    }
+  }
+ }
+ if(!length(ans))stop('No confirmatory comparisons')
+ out<-do.call(rbind,ans)
+ out<-t3_gate_diagnostics(out,alpha,near_band,group_cols=c('stage','group','metric'))
+ out$evidence_status<-'provisional_seed_level_subject_to_design_review'
+ out
+}
