@@ -1,7 +1,7 @@
 # Post-production V3 consumers. Every read is read-only and role-aware.
 t2_v3_dependency_manifest <- function(role,family,seed,n,reps=500L) {
   root <- t2_v3_block_dir(role,family,seed,n,reps)
-  ids <- 0:120
+  ids <- 0:320
   paths <- file.path(root,sprintf('scenario_%04d.rds',ids))
   if (any(!file.exists(paths))) stop('Incomplete V3 scenario shard')
   data.frame(protocol=t2_v3_protocol(),role=role,family=family,
@@ -11,9 +11,9 @@ t2_v3_dependency_manifest <- function(role,family,seed,n,reps=500L) {
              stringsAsFactors=FALSE)
 }
 t2_v3_stream_scores <- function(role,family,seed,n,models,reps=500L,
-                                selected=0:120) {
+                                selected=0:320) {
   if (!role %in% c('heldout','stress')) stop('Scores require independent heldout or stress inputs')
-  if (!length(selected) || anyDuplicated(selected) || !all(selected %in% 0:120))
+  if (!length(selected) || anyDuplicated(selected) || !all(selected %in% 0:320))
     stop('Invalid selected scenarios')
   if (!is.list(models) || !length(models)) stop('Frozen candidate list missing')
   ids <- vapply(models,function(m) m$id,character(1))
@@ -32,11 +32,11 @@ t2_v3_stream_scores <- function(role,family,seed,n,models,reps=500L,
   do.call(rbind,rows)
 }
 t2_v3_discovery_input <- function(family,seed,n=1000L,reps=500L,
-                                  selected=0:120) {
+                                  selected=0:320) {
   # Prefer individual immutable scenario shards, avoiding a redundant canonical
-  # 121-scenario object in RAM alongside the optimizer training list.
+  # 321-scenario object in RAM alongside the optimizer training list.
   ids <- as.integer(selected)
-  if(!length(ids)||anyDuplicated(ids)||!all(ids %in% 0:120))stop('Invalid training IDs')
+  if(!length(ids)||anyDuplicated(ids)||!all(ids %in% 0:320))stop('Invalid training IDs')
   scenarios <- lapply(ids,function(id)t2_v3_read_scenario('discovery',family,seed,n,id,reps))
   list(protocol=t2_v3_protocol(),role='discovery',family=family,
        seed_index=seed,n=n,replications=reps,
