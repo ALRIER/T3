@@ -265,10 +265,20 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
    local_deterministic=t3_control_optimize(s,cfg,t2_seed(shard,206),method='local_deterministic')
  )
  selected_models<-t3_select_models(engines,s)
+ # Identical training-only MSE/q95 evaluation for all 26 baselines + six optimizers.
+ # Confirmatory Held-out must score frozen control W independently before claims.
+ control_selected<-t3_select_models(controls,s)
+ comparison_models<-c(selected_models$models,tail(control_selected$models,length(controls)))
+ discovery_comparison<-do.call(rbind,lapply(s,function(sc) {
+   z<-score_model_set(sc$T,comparison_models,sc$target)
+   z$scenario_id<-sc$scenario_id
+   z
+ }))
  all_optimizers<-c(engines,controls)
  budget_audit<-t3_assert_engine_budget_parity(all_optimizers)
  convergence_audit<-t3_compare_convergence(all_optimizers,s)
- list(engines=engines,non_evolutionary_controls=controls,models=selected_models$models,
+ list(engines=engines,non_evolutionary_controls=controls,training_control_comparison=discovery_comparison,
+      models=selected_models$models,
       objective_budget_audit=budget_audit,convergence_audit=convergence_audit,
       selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=cfg,
       budget_registry=t2_discovery_budget_registry(cfg),seed=t2_seed(shard,200),
