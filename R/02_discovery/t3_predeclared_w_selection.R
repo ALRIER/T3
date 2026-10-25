@@ -229,15 +229,15 @@ t3_w_stability <- function(registry) {
 # never on simplex regions. Excluded cells cannot enter training or model tuning.
 t3_exclusion_design <- function(grid,excluded_mechanisms=character(),
                                 excluded_rates=numeric(),excluded_mad=numeric()) {
- req<-c('scenario_id','mechanism','rate','scale')
+ req<-c('scenario_id','mechanism','contamination','mad_scale')
  if(!is.data.frame(grid)||!all(req%in%names(grid))||anyDuplicated(grid$scenario_id))
    stop('Invalid prospective scenario grid')
  if(!length(excluded_mechanisms)&&!length(excluded_rates)&&!length(excluded_mad))
    stop('Exclusion must be prespecified')
  mechanism<-grid$mechanism%in%excluded_mechanisms
- neighborhood<-grid$rate%in%excluded_rates | (!is.na(grid$scale)&grid$scale%in%excluded_mad)
+ neighborhood<-grid$contamination%in%excluded_rates | (!is.na(grid$mad_scale)&grid$mad_scale%in%excluded_mad)
  held<-mechanism|neighborhood
- if(any(held & grid$rate==0))stop('Clean control cannot be excluded')
+ if(any(held & grid$contamination==0))stop('Clean control cannot be excluded')
  if(!any(held)||!any(!held))stop('Degenerate exclusion design')
  data.frame(scenario_id=grid$scenario_id,
     role=ifelse(held,'excluded_transfer','discovery_training'),
