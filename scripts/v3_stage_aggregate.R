@@ -1,0 +1,18 @@
+#!/usr/bin/env Rscript
+# Post-production evidence aggregation; read-only inputs, no training.
+args<-commandArgs(trailingOnly=TRUE)
+if(length(args)!=3L)stop('Usage: STAGE FAMILY N')
+role<-args[[1L]];family<-args[[2L]];n<-as.integer(args[[3L]])
+source('R/00_shared/load_all.R');t2_load('.')
+source('R/00_shared/pipeline.R')
+source('R/00_shared/v3_scientific_adapter.R')
+source('R/05_audits/stage_inference.R')
+if(!role%in%c('heldout','stress','realworld'))stop('Invalid confirmatory role')
+ans<-t3_aggregate_confirmatory_shards(role,family,n)
+out<-file.path('artifacts','v3_confirmatory_aggregate',role,family,sprintf('n%d',n))
+if(dir.exists(out))stop('Refusing overwrite of existing aggregate: ',out)
+dir.create(out,recursive=TRUE,showWarnings=FALSE)
+write.csv(ans$inference,file.path(out,'seed_level_inference.csv'),row.names=FALSE)
+write.csv(ans$manifest,file.path(out,'seed_coverage.csv'),row.names=FALSE)
+write.csv(ans$scores,file.path(out,'complete_scores.csv'),row.names=FALSE)
+cat('B3_STAGE_AGGREGATE_PASS',role,family,n,'\\n')
