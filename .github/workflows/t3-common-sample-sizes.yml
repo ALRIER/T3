@@ -1,4 +1,4 @@
-name: T3 Common Sample Size Contract
+name: T3 Common Sample Size Contract — Stage Scripts
 on:
   push:
     branches: [main]
