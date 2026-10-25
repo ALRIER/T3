@@ -102,7 +102,10 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
                   realworld='realworld_seed')
  if(!eval_col%in%names(scores))stop('Missing independent evaluation seed')
  if(!reference%in%as.character(scores$model))stop('Missing benchmark')
- if(anyDuplicated(scores[c(groups<-intersect(c('family','sample_n','dataset_id','parent_dataset_id'),names(scores)),eval_col,'training_seed','model',intersect('scenario_id',names(scores)))]))stop('Duplicate stage score keys')
+ key_columns<-c(intersect(c('family','sample_n','dataset_id','parent_dataset_id'),names(scores)),
+                 eval_col,'training_seed','model',
+                 intersect('scenario_id',names(scores)))
+ if(anyDuplicated(scores[key_columns]))stop('Duplicate stage score keys')
  # Independent evaluation seed is the test unit; training seeds and scenarios
  # form repeated measures and are averaged before inference.
  groups<-intersect(c('family','sample_n','dataset_id','parent_dataset_id'),names(scores))
