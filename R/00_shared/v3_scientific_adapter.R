@@ -3,7 +3,7 @@ t2_v3_protocol <- function() 't3_b3_grid321_v1'
 t2_v3_scientific_root <- function() Sys.getenv('T2_V3_SCIENTIFIC_ROOT', 'artifacts/mc_t3_grid321')
 t2_v3_block_dir <- function(role,family,seed,n,reps=500L) {
   if (!role %in% c('discovery','heldout','stress','realworld')) stop('Unknown V3 role')
-  if (!family %in% t2_families()) stop('Unknown V3 family')
+  if (length(family)!=1L || is.na(family) || !family %in% c('normal','lognormal','weibull','invgauss','exgaussian','exwald')) stop('Unknown V3 family')
   valid <- t2_v3_indices(role)
   if (length(seed)!=1L || is.na(seed) || !seed %in% valid) stop('V3 role/seed mismatch')
   if (!n %in% t2_v3_sample_sizes(role)) stop('V3 role/n mismatch')
