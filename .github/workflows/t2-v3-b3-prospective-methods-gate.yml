@@ -1,0 +1,41 @@
+name: T2 V3 B3 Prospective Grid MAD and Nested CV Validation
+on:
+  push:
+    branches: [t2-v3-contract-adapter-20261024]
+    paths: ['.github/workflows/t2-v3-b3-prospective-methods-gate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+jobs:
+  design:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify prospective contamination design
+        run: |
+          python3 scripts/t2_v3_b3_generate_grid321.py
+          python3 - <<'PY'
+          import csv
+          a=list(csv.DictReader(open('config/T2_V3_B3_prospective_321_grid.csv')))
+          assert len(a)==321 and len({x['scenario_id'] for x in a})==321
+          assert len({x['mad_scale'] for x in a if x['band']!='clean'})==9
+          assert len({x['contamination'] for x in a if x['band']!='clean'})==7
+          assert len({x['mechanism'] for x in a if x['band']!='clean'})==8
+          print('T2_B3_DESIGN_COVERAGE_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: T2_B3_PROSPECTIVE_321_GRID
+          path: config/T2_V3_B3_prospective_321_grid.csv
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Outlier literature contract and 5x3 partition leak checks
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_mad_smoke.R
+          bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_nested_folds_smoke.R
+          bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_prospective_diagnostics_smoke.R

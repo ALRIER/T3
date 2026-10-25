@@ -1,0 +1,66 @@
+name: T2 V3 B3 Fresh Real World Recollection
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: t2-v3-realworld-dataset-audit
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    container:
+      image: ghcr.io/alrier/t2-r:4.3.3-statmod-v1
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      batches: ${{ steps.plan.outputs.batches }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Catalog independent external data with outcome-blind rules
+        run: T2_RW_CATALOG_ROOT=artifacts/T2_V3_B3_fresh_profiles Rscript scripts/realworld_v2_catalog.R catalog
+      - id: plan
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import csv,json
+          rows=list(csv.DictReader(open('artifacts/T2_V3_B3_fresh_profiles/catalog.csv')))
+          batches=sorted({int(x['batch']) for x in rows})
+          if not batches: raise ValueError('Real World catalog is empty')
+          print('batches='+json.dumps({'batch':batches},separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: T2_V3_B3_fresh_rw_catalog
+          path: artifacts/T2_V3_B3_fresh_profiles/catalog.*
+          retention-days: 90
+  profile:
+    needs: catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.catalog.outputs.batches) }}
+    container:
+      image: ghcr.io/alrier/t2-r:4.3.3-statmod-v1
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: T2_V3_B3_fresh_rw_catalog
+          path: artifacts/T2_V3_B3_fresh_profiles
+      - name: Audit independent dataset quality and record source hashes
+        run: T2_RW_CATALOG_ROOT=artifacts/T2_V3_B3_fresh_profiles Rscript scripts/realworld_v2_catalog.R profile ${{ matrix.batch }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: T2_V3_B3_fresh_rw_profile-${{ matrix.batch }}
+          path: artifacts/T2_V3_B3_fresh_profiles/profile_batch_*
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,98 @@
+name: T2 V3 B3 Discovery Strict 5-Fold Refit
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  packages: read
+concurrency:
+  group: T2_V3_B3_discovery_cv5_refit
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: make
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          fam=['normal','lognormal','weibull','invgauss','exgaussian','exwald']
+          z=[dict(family=f,seed=s,fold=k) for f in fam for s in range(10) for k in range(1,6)]
+          assert len(z)==300
+          print('matrix='+json.dumps({'include':z},separators=(',',':')))
+          PY
+  cv5:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: mc-v3-discovery-${{ matrix.family }}-seed${{ matrix.seed }}-n1000
+          run-id: 40053612297
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/mc_v3_real26
+      - name: Install Optuna isolated HPO dependency
+        run: python3 -m pip install --user 'optuna>=4,<5'
+      - name: Tune four engines on three inner folds without outer validation leakage
+        env:
+          T2_B3_NESTED_TRIALS: '8'
+        run: python3 scripts/t2_v3_b3_nested_optuna.py "${{ matrix.family }}" "${{ matrix.seed }}" "${{ matrix.fold }}" --trials "$T2_B3_NESTED_TRIALS"
+      - name: Strict train-four-folds test-fifth-fold optimization
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_discovery_cv5_refit.R "${{ matrix.family }}" "${{ matrix.seed }}" "${{ matrix.fold }}"
+      - name: Bootstrap stability and worst-regime risk diagnostics
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_cv5_stability_dro.R "artifacts/T2_V3_B3_discovery_cv5_refit/${{ matrix.family }}/seed$(printf '%02d' ${{ matrix.seed }})/fold$(printf '%02d' ${{ matrix.fold }})"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: T2_V3_B3_cv5_${{ matrix.family }}_seed${{ matrix.seed }}_fold${{ matrix.fold }}
+          path: artifacts/T2_V3_B3_discovery_cv5_refit/
+          if-no-files-found: error
+          retention-days: 90
+
+  component-stability:
+    needs: [plan,cv5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        seed: [0,1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: T2_V3_B3_cv5_${{ matrix.family }}_seed${{ matrix.seed }}_fold*
+          merge-multiple: true
+          path: artifacts/T2_V3_B3_discovery_cv5_refit
+      - name: Stability selection of 26 components across five outer folds
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_stability_selection.R "${{ matrix.family }}" "${{ matrix.seed }}"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: T2_V3_B3_component_stability_${{ matrix.family }}_seed${{ matrix.seed }}
+          path: artifacts/T2_V3_B3_discovery_cv5_refit
+          if-no-files-found: error
+          retention-days: 90

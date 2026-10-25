@@ -1,0 +1,29 @@
+name: T2 V3 B3 Discovery RAM equivalence smoke
+on:
+  push:
+    branches: [t2-v3-contract-adapter-20261024]
+    paths: ['.github/workflows/t2-v3-b3-discovery-ram-smoke.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  ram-equivalence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: mc-v3-discovery-normal-seed0-n1000
+          run-id: 40053612297
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/mc_v3_real26
+      - run: bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_discovery_ram_smoke.R

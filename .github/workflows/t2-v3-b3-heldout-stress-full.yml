@@ -1,0 +1,90 @@
+name: T2 V3 B3 Held-out Stress Full Inferential Production
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  packages: read
+concurrency:
+  group: T2_V3_B3_heldout_stress_inference
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: make
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          fam=['normal','lognormal','weibull','invgauss','exgaussian','exwald']
+          z=[dict(role=role,family=f,seed=s,n=n)
+             for role,seeds in [('heldout',range(10,15)),('stress',range(15,20))]
+             for f in fam for s in seeds for n in [200,1000,3000]]
+          assert len(z)==180
+          print('matrix='+json.dumps({'include':z},separators=(',',':')))
+          PY
+  inference:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t2-v3-discovery-${{ matrix.family }}-seed*
+          merge-multiple: true
+          run-id: 40132811105
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+      - uses: actions/download-artifact@v5
+        with:
+          name: mc-v3-${{ matrix.role }}-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}
+          run-id: 40053612297
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/mc_v3_real26
+      - name: Paired MSE/q95 CIs and Holm-adjusted null calibration with B3 RAM guard
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_confirmatory_inference.R "${{ matrix.role }}" "${{ matrix.family }}" "${{ matrix.seed }}" "${{ matrix.n }}"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: T2_V3_B3_${{ matrix.role }}_${{ matrix.family }}_seed${{ matrix.seed }}_n${{ matrix.n }}
+          path: artifacts/v3_confirmatory_inference
+          if-no-files-found: error
+          retention-days: 90
+
+  false-positive-calibration:
+    name: T2 V3 B3 Post-Heldout Null Calibration
+    needs: inference
+    if: ${{ needs.inference.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: T2_V3_B3_heldout_*
+          merge-multiple: true
+          path: artifacts/v3_confirmatory_inference
+      - name: Require all 90 held-out calibration shards and aggregate null diagnostics
+        run: python3 scripts/t2_v3_b3_null_calibration_aggregate.py artifacts/v3_confirmatory_inference/heldout
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: T2_V3_B3_Heldout_Null_Calibration
+          path: artifacts/T2_V3_B3_calibration/
+          retention-days: 90
+          if-no-files-found: error
