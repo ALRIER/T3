@@ -70,7 +70,7 @@ jobs:
         with:
           name: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold${{ inputs.outer_fold }}
           path: |
-            artifacts/T2_V3_B3_nested_optuna/${{ matrix.family }}/seed${{ matrix.seed }}/
-            artifacts/T2_V3_B3_discovery_cv5_refit/${{ matrix.family }}/seed${{ matrix.seed }}/
+            artifacts/T2_V3_B3_nested_optuna/
+            artifacts/T2_V3_B3_discovery_cv5_refit/
           if-no-files-found: error
           retention-days: 90
