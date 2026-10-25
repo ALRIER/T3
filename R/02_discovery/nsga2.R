@@ -47,9 +47,11 @@ nsga_offspring <- function(W,n,eligible,mutation_rate=.15,crossover_probability=
 # training_scenarios is a list of list(T=R x 26 matrix,target=numeric,
 # band=clean/low/intermediate/high,mechanism=string,eligible=logical).
 # The same prepared Monte Carlo matrices are reused for every generation.
-nsga_evaluate_scenarios <- function(W,training_scenarios,batch_size=32L,lambda=0) {
+nsga_evaluate_scenarios <- function(W,training_scenarios,batch_size=32L,lambda=0,dro_fraction=0) {
  if(!length(training_scenarios)) stop('No training scenarios')
+ if(length(dro_fraction)!=1L||!is.finite(dro_fraction)||dro_fraction<0||dro_fraction>1)stop('Invalid DRO mixture strength')
  bands<-c('clean','low','intermediate','high'); accum<-matrix(0,ncol(W),2L)
+ band_objectives<-list()
  present<-bands[vapply(bands,function(b)any(vapply(training_scenarios,function(z)
   identical(as.character(z$band),b),logical(1))),logical(1))]
  if(!length(present))stop('No valid bands in CV training partition')
@@ -69,7 +71,14 @@ nsga_evaluate_scenarios <- function(W,training_scenarios,batch_size=32L,lambda=0
    # Equal within-band scenario weights, equal total weight across four bands.
    # explicit average avoids depending on replicate/sample counts
    band_result<-Reduce('+',Map(function(v,ix) v*(length(ix)/length(sc)), band_values, groups))
+   band_objectives[[band]]<-band_result
    accum<-accum+band_result/length(present)
+ }
+ if(dro_fraction>0) {
+  # Distributionally robust upper envelope over observed contamination bands.
+  # Same candidate evaluations; no resampling or additional objective calls.
+  worst<-Reduce(pmax,band_objectives)
+  accum<-(1-dro_fraction)*accum+dro_fraction*worst
  }
  if(lambda>0){
   # Same dimensionless regularizer for both objectives after normalization
@@ -80,7 +89,8 @@ nsga_evaluate_scenarios <- function(W,training_scenarios,batch_size=32L,lambda=0
 }
 nsga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),shard=NULL) {
  cfg<-t3_equal_budget_config(cfg);set.seed(seed);n<-cfg$population; W<-nsga_initial(n,eligible)
- fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
+ fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda,
+   dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_weight_regularization_lambda)
  O<-fitness(W);trace<-list(t3_convergence_point(O,n));history<-numeric();archiveW<-W;archiveO<-O; best_prior<- -Inf;stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'nsga2',cfg)
