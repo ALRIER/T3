@@ -14,9 +14,13 @@ mk<-function() {
  W<-matrix(rexp(26L*3L),26L,3L);W<-sweep(W,2,colSums(W),'/')
  O<-matrix(c(1,3,2,2,3,1),ncol=2)
  colnames(O)<-c('mse','q95')
- list(weights=W,objectives=O)
+ list(weights=W,objectives=O,evaluations_used=30L,evaluation_budget=30L,
+      budget_policy='B3_EQUAL_CANDIDATE_EVALUATIONS_V1')
 }
 engines<-setNames(replicate(4,mk(),simplify=FALSE),c('ga','nsga2','de','dirichlet'))
+stopifnot(nrow(t3_assert_engine_budget_parity(engines))==4L)
+broken<-engines;broken$de$evaluations_used<-29L
+stopifnot(inherits(try(t3_assert_engine_budget_parity(broken),silent=TRUE),'try-error'))
 z<-t3_select_models(engines,scenarios)
 stopifnot(length(z$models)==30L,
   identical(vapply(z$models[1:26],function(x)x$id,character(1)),ESTIMATOR_NAMES),
