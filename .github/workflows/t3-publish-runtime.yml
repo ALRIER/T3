@@ -1,0 +1,27 @@
+name: T3 Publish Pinned R Container
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - docker/Dockerfile.r-runtime
+      - .github/workflows/t3-publish-runtime.yml
+permissions:
+  contents: read
+  packages: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.r-runtime
+          push: true
+          tags: ghcr.io/alrier/t3-r:4.3.3-statmod-v1
