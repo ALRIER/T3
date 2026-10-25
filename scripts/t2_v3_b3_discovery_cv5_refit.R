@@ -48,7 +48,7 @@ for(engine in c('ga','nsga2','de','dirichlet')){
    nsga2=nsga_discover(d$scenarios,cfg,seed=engine_seed,shard=NULL),
    de=de_discover(d$scenarios,cfg,seed=engine_seed,F=chosen$F,CR=chosen$CR,shard=NULL),
    dirichlet=dirichlet_discover(d$scenarios,cfg,seed=engine_seed,
-       alpha=chosen$alpha,n_draws=cfg$population*cfg$generations,shard=NULL))
+       alpha=chosen$alpha,n_draws=t3_common_budget(cfg),shard=NULL))
 }
 source('R/02_discovery/t3_predeclared_w_selection.R')
 chosen<-t3_select_models(engines,d$scenarios)
