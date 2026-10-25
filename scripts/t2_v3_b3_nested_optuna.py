@@ -12,7 +12,8 @@ a=p.parse_args()
 if not a.aggregate_only and a.n not in (200,1000,3000): raise SystemExit('Invalid sample n')
 if not a.aggregate_only and (a.seed not in range(10) or a.outer not in range(1,6) or a.trials<1):raise SystemExit('Invalid nested CV configuration')
 out=pathlib.Path('artifacts/T2_V3_B3_nested_optuna')/a.family/f'seed{a.seed:02d}'/f'fold{a.outer:02d}'/f'n{a.n}'
-out.mkdir(parents=True,exist_ok=True)
+if not a.aggregate_only:
+ out.mkdir(parents=True,exist_ok=True)
 # Audit every completed inner-fold execution; never impute failed trials.
 LEDGER_FIELDS=('family','seed','outer_fold','sample_n','engine','trial','inner_fold',
  'score','objective_evaluations','maximum_objective_evaluations',
