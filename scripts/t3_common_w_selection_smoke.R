@@ -70,3 +70,17 @@ for(role in c('discovery','heldout','stress','realworld')) {
   stopifnot(!any(t2_v3_indices(role)%in%t2_v3_indices(other)))
 }
 cat('T3_FORTY_DISJOINT_SEEDS_PASS\\n')
+
+# Frozen baseline scales must control W selection and convergence identically.
+objective_matrix<-matrix(c(1,10,2,3),nrow=2L,byrow=TRUE,
+ dimnames=list(NULL,c('mse','q95')))
+reference_scales<-c(mse=1,q95=20)
+point<-t3_convergence_point(objective_matrix,7L,reference_scales)
+stopifnot(identical(unname(point['mse']),1),
+ abs(unname(point['joint_normalized'])-0.75)<1e-12)
+cost<-t3_budget_ledger(engines,full_scenarios=321L,
+ outer_folds=5L,inner_folds=3L,hyperparameter_trials=2L)
+stopifnot(all(cost$evaluations_used==20L),
+ all(cost$objective_scenario_evaluations==6420L),
+ all(cost$tuning_max_objective_calls==900L))
+cat('T3_FAIR_CONVERGENCE_AND_BUDGET_LEDGER_PASS\\n')
