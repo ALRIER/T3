@@ -91,6 +91,15 @@ t3_contract_validate <- function(x,stage=NULL,experiment_id=NULL) {
   if(!is.null(experiment_id)&&!identical(x$experiment_id,experiment_id))
     stop("Experiment mismatch")
   p<-x$provenance
+  # A stage artifact must identify a seed reserved for its own role.
+  role<-if(x$stage=="montecarlo") {
+    if(is.null(p$seed_role))stop("Monte Carlo requires an explicit downstream seed_role")
+    as.character(p$seed_role)
+  } else x$stage
+  if(!role%in%c("discovery","heldout","stress","realworld")||
+     length(p$seed)!=1L||is.na(p$seed)||
+     !as.integer(p$seed)%in%t2_v3_indices(role))
+    stop("Cross-stage seed leakage or invalid role")
   if(!all(c("family","seed","sample_n","replications","code_revision")%in%names(p))||
      any(vapply(p[c("family","code_revision")],function(y)
        length(y)!=1L||is.na(y)||!nzchar(as.character(y)),logical(1)))||
