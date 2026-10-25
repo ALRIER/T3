@@ -8,6 +8,11 @@ t2_v3_design <- function(role,family,index,n,n_scenarios=320L) {
  tab<-read.csv(path,stringsAsFactors=FALSE)
  if(nrow(tab)!=321L||!identical(as.integer(tab$scenario_id),0:320L)||
     anyDuplicated(tab$scenario_id)) stop("T3 manifest contract mismatch")
+ # Strict 321-design manifest: no duplicate coordinates and a clean control.
+ if(anyNA(tab$contamination)||anyNA(tab$mad_scale)||
+    sum(as.numeric(tab$contamination)==0)!=1L||
+    anyDuplicated(tab[c("contamination","mad_scale","mechanism")]))
+   stop("Invalid prospective contamination manifest")
  tab$rate<-as.numeric(tab$contamination)
  tab$scale<-as.numeric(tab$mad_scale)
  tab$scale[tab$scenario_id==0L]<-NA_real_
@@ -126,4 +131,19 @@ t2_v3_generate <- function(role,family,index,n,R=500L,n_scenarios=320L,
            params=params,target=target,component_names=ESTIMATOR_NAMES)
  t2_atomic_save(out,canonical)
  out
+}
+
+# Prospective MAD sensitivity is descriptive until independent scores exist.
+# The clean control remains in every sensitivity view.
+t3_mad_sensitivity_grid <- function(grid, thresholds=c(2.5,3,4.5,6,9)) {
+  if(!is.data.frame(grid)||!all(c("scenario_id","rate","scale","mechanism")%in%names(grid))||
+     nrow(grid)!=321L||anyDuplicated(grid$scenario_id))
+    stop("Invalid 321-scenario sensitivity grid")
+  if(any(!is.finite(thresholds))||any(thresholds<=0)||anyDuplicated(thresholds))
+    stop("Invalid MAD sensitivity thresholds")
+  do.call(rbind,lapply(thresholds,function(cut) {
+    data.frame(cutoff=cut,scenario_id=grid$scenario_id,
+      included=grid$rate==0 | (!is.na(grid$scale)&grid$scale>=cut),
+      stringsAsFactors=FALSE)
+  }))
 }
