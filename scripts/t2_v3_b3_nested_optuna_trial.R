@@ -21,8 +21,9 @@ cfg$generations<-as.integer(params$generations)
 cfg$mutation_rate<-as.numeric(params$mutation_rate)
 cfg$crossover_probability<-as.numeric(params$crossover_probability)
 cfg$discovery_weight_regularization_lambda<-as.numeric(params$regularization_lambda)
-# Equal-evaluation comparison disables adaptive stopping in all motors.
+# Adaptive early stopping remains enabled; actual and maximum costs are recorded.
 set.seed(t2_seed(paste('B3_nested',fam,seed,outer,inner,engine,basename(path)),821L))
+trial_started<-proc.time()[['elapsed']]
 fit<-switch(engine,ga=ga_discover(training,cfg,seed=sample.int(1000000000,1),shard=NULL),
 nsga2=nsga_discover(training,cfg,seed=sample.int(1000000000,1),shard=NULL),
 de=de_discover(training,cfg,seed=sample.int(1000000000,1),
@@ -32,6 +33,12 @@ dirichlet=dirichlet_discover(training,cfg,seed=sample.int(1000000000,1),
 source('R/02_discovery/t3_predeclared_w_selection.R')
 training_scales<-t3_training_reference_scales(training)
 chosen<-t3_select_weights(fit,training_scales)
+trial_evaluations<-as.integer(fit$evaluations_used)
+trial_budget<-as.integer(fit$evaluation_budget)
+trial_elapsed<-as.numeric(proc.time()[['elapsed']]-trial_started)
+trial_scenarios<-length(training_ids)
+if(is.na(trial_evaluations)||trial_evaluations<1L||trial_evaluations>trial_budget)
+ stop('Invalid observed Optuna trial computational cost')
 w<-matrix(chosen$weights,ncol=1L)
 rm(training,fit);invisible(gc(FALSE))
 val<-t2_v3_discovery_input(fam,seed,n=n,selected=validation_ids)$scenarios
@@ -42,4 +49,9 @@ base<-t(vapply(val,function(sc){
 },numeric(2)))
 score<-0.5*mean(stats[,1]/pmax(base[,1],1e-12))+0.5*mean(stats[,2]/pmax(base[,2],1e-12))
 cat(jsonlite::toJSON(list(score=score,outer=outer,inner=inner,engine=engine,
- validation_scenarios=length(validation_ids)),auto_unbox=TRUE),'\n')
+ validation_scenarios=length(validation_ids),
+ objective_evaluations=trial_evaluations,maximum_objective_evaluations=trial_budget,
+ scenario_evaluations=trial_evaluations*trial_scenarios,
+ training_scenarios=trial_scenarios,elapsed_seconds=trial_elapsed,
+ early_stop_saved=trial_budget-trial_evaluations,
+ budget_policy='B3_EQUAL_MAX_BUDGET_ADAPTIVE_V2'),auto_unbox=TRUE),'\n')
