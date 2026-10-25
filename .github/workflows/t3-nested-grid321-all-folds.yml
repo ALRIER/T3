@@ -1,0 +1,43 @@
+name: T3 Full Nested Optuna 5x3 Grid321
+on:
+  workflow_dispatch:
+    inputs:
+      mc_run_id:
+        description: 'Completed T3 321-grid discovery Monte Carlo run ID'
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  fold_1:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '1'
+    secrets: inherit
+  fold_2:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '2'
+    secrets: inherit
+  fold_3:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '3'
+    secrets: inherit
+  fold_4:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '4'
+    secrets: inherit
+  fold_5:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '5'
+    secrets: inherit
