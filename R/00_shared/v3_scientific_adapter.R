@@ -1,12 +1,12 @@
 # Adapter for the completed V3 Monte Carlo production archive.
-t2_v3_protocol <- function() 'v3_real26_seedplan20_mixedheldout_rlm100'
-t2_v3_scientific_root <- function() Sys.getenv('T2_V3_SCIENTIFIC_ROOT', 'artifacts/mc_v3_real26')
+t2_v3_protocol <- function() 't3_b3_grid321_v1'
+t2_v3_scientific_root <- function() Sys.getenv('T2_V3_SCIENTIFIC_ROOT', 'artifacts/mc_t3_grid321')
 t2_v3_block_dir <- function(role,family,seed,n,reps=500L) {
   if (!role %in% c('discovery','heldout','stress')) stop('Unknown V3 role')
   if (!family %in% t2_families()) stop('Unknown V3 family')
   valid <- switch(role,discovery=0:9,heldout=10:14,stress=15:19)
   if (length(seed)!=1L || is.na(seed) || !seed %in% valid) stop('V3 role/seed mismatch')
-  if (!n %in% if(role=='discovery') 1000L else c(200L,1000L,3000L)) stop('V3 role/n mismatch')
+  if (!n %in% t2_v3_sample_sizes(role)) stop('V3 role/n mismatch')
   file.path(t2_v3_scientific_root(),t2_v3_protocol(),role,family,
             sprintf('seed%02d',as.integer(seed)),sprintf('n%d_r%d',as.integer(n),as.integer(reps)))
 }
@@ -37,11 +37,11 @@ t2_v3_read_block <- function(role,family,seed,n,reps=500L,selected=NULL) {
       !identical(as.integer(z$n),as.integer(n)) ||
       !identical(as.integer(z$replications),as.integer(reps)) ||
       !identical(z$component_names,ESTIMATOR_NAMES) ||
-      !is.data.frame(z$grid) || nrow(z$grid)!=121L ||
-      !identical(as.integer(z$grid$scenario_id),0:120) ||
-      length(z$scenarios)!=121L) stop('V3 canonical provenance mismatch')
+      !is.data.frame(z$grid) || nrow(z$grid)!=321L ||
+      !identical(as.integer(z$grid$scenario_id),0:320) ||
+      length(z$scenarios)!=321L) stop('V3 canonical provenance mismatch')
   ids <- vapply(z$scenarios,function(s) as.integer(s$scenario_id),integer(1))
-  if (!identical(ids,0:120)) stop('V3 scenario order mismatch')
+  if (!identical(ids,0:320)) stop('V3 scenario order mismatch')
   if (is.null(selected)) selected <- ids
   if (anyDuplicated(selected) || !all(selected %in% ids)) stop('V3 selected IDs mismatch')
   for (id in selected) t2_v3_validate_scenario(z$scenarios[[match(id,ids)]],id,reps)
