@@ -24,6 +24,8 @@ controlcsv<-file.path(out,'non_evolutionary_control_scores.csv')
 for(train_seed in 0:9) {
   frozen_file<-file.path(root,family,sprintf('seed%02d',train_seed),sprintf('n%d',n),'discovery.rds')
   if(!file.exists(frozen_file)) stop('Missing immutable discovery model: ',frozen_file)
+  t3_stage_require(file.path(dirname(frozen_file),'stage_contract.rds'),
+     'discovery',sprintf('b3_%s_n%d',family,n),family,train_seed,n)
   fit<-t2_read_rds(frozen_file)
   if(length(fit$engines)!=4L || length(fit$models)<8L)stop('Frozen training registry incomplete')
   baselines<-lapply(ESTIMATOR_NAMES,function(nm)new_frozen_model(nm,component=nm))
@@ -70,6 +72,10 @@ for(train_seed in 0:9) {
 out_data<-read.csv(outcsv)
 write.csv(aggregate(cbind(mse,q95)~model+training_seed,data=out_data,mean),
           file.path(out,'summary.csv'),row.names=FALSE)
+t3_stage_publish('heldout',sprintf('b3_%s_n%d',family,n),
+ list(scores_path=outcsv,score_sha256=t2_sha256(outcsv),scenario_ids=0:320),
+ family,seed,n,500L,file.path(out,'stage_contract.rds'),
+ parents=sprintf('discovery__%s__%02d',family,t2_v3_indices('discovery')))
 cat('V3_HELDOUT_SHARD_PASS',family,seed,n,'\n')
 
 # Publish canonical B3-named counterparts without breaking existing downstream references.
