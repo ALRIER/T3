@@ -10,7 +10,7 @@ ga_config <- list(
  discovery_weight_regularization_lambda=0.001,
  discovery_dro_tail_fraction=0.20,
  discovery_stability_bootstrap=500L,
- training_seed_indices=0:9, heldout_seed_index=10L, bootstrap_B=500L,
+ training_seed_indices=0:9, heldout_seed_indices=10:19, bootstrap_B=500L,
  patience=10L, early_stop_enabled=TRUE, improvement=.001, training_fraction=.8, batch_size=32L,
  objective_names=c('mse','q95'), fdr_primary=.05, fdr_sensitivity=.10,
  mutation_rate=.15, crossover_probability=.9, evaluation_replicates=500L,
@@ -19,13 +19,13 @@ ga_config <- list(
 )
 
 # Prospective v3 partition: immutable master seed roles, with disjoint random streams.
-t2_seed_plan_v3 <- list(discovery=0:9,heldout=10:14,stress=15:19,realworld=20:24,
+t2_seed_plan_v3 <- list(discovery=0:9,heldout=10:19,stress=20:29,realworld=30:39,
                         discovery_n=c(200L,1000L,3000L),validation_n=c(200L,1000L,3000L),
                         realworld_n=c(200L,1000L,3000L),schema="t2_seed_plan_v3")
 t2_assert_seed_plan_v3 <- function(plan=t2_seed_plan_v3) {
  all_indices<-unlist(plan[c("discovery","heldout","stress","realworld")],use.names=FALSE)
- stopifnot(identical(sort(as.integer(all_indices)),0:24),
-           length(unique(all_indices))==25L,
+ stopifnot(identical(sort(as.integer(all_indices)),0:39),
+           length(unique(all_indices))==40L,
            identical(as.integer(plan$discovery_n),c(200L,1000L,3000L)),
            identical(as.integer(plan$validation_n),c(200L,1000L,3000L)))
  invisible(TRUE)
