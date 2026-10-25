@@ -48,3 +48,13 @@ for(z in controls)stopifnot(z$evaluations_used<=t3_common_budget(cfg),
   abs(sum(z$weights)-1)<1e-8,all(z$weights>=0),
   nrow(t3_convergence_table(z,t3_training_reference_scales(training)))>=1L)
 cat('T3_NON_EVOLUTIONARY_CONTROLS_SMOKE_PASS\\n')
+
+# Stability: isolate seed, fold and n effects without mixing model families.
+registry<-data.frame(family=rep('normal',4),engine=rep('ga',4),
+ seed=c(0,1,0,0),fold=c(1,1,2,1),sample_n=c(200,200,200,1000))
+registry$weights<-I(list(rep(1/26,26),c(0.5,rep(0.5/25,25)),
+ rep(1/26,26),rep(1/26,26)))
+st<-t3_w_stability(registry)
+stopifnot(setequal(st$contrast,c('seed','fold','sample_n')),
+ all(st$l1>=0),all(st$cosine<=1+1e-12))
+cat('T3_FROZEN_W_STABILITY_SMOKE_PASS\\n')
