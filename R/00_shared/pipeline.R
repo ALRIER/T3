@@ -260,7 +260,9 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  engines <- setNames(lapply(selected, function(name) dispatch[[name]]()), selected)
  source('R/02_discovery/t3_predeclared_w_selection.R')
  selected_models<-t3_select_models(engines,s)
+ budget_audit<-t3_assert_engine_budget_parity(engines)
  list(engines=engines,models=selected_models$models,
+      objective_budget_audit=budget_audit,
       selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=cfg,
       budget_registry=t2_discovery_budget_registry(cfg),seed=t2_seed(shard,200),
       training_seed_index=if (length(data$seed_index)) as.integer(data$seed_index) else 0L,
