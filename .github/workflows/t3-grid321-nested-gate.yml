@@ -1,4 +1,4 @@
-name: T3 321 Grid and Nested CV Integration Gate
+name: T3 321 Grid and Nested CV Integration Gate (v2)
 on:
   push:
     branches: [main]
