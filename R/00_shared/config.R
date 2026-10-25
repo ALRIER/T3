@@ -1,6 +1,6 @@
 # Prospective fixed budgets; settings apply equally to GA and competitors.
 ga_config <- list(
- train_n=1000L, heldout_n=c(200L,1000L,3000L),
+ train_n=c(200L,1000L,3000L), heldout_n=c(200L,1000L,3000L),
  contamination_rates=c(0,.01,.05,.10,.20,.30),
  mad_scales=c(1.5,3,4.5,6,9,12,15,20,30),
  contamination_types=c('upper_tail','lower_tail','symmetric_t','point_mass','clustered_upper','clustered_symmetric','mixture_bimodal_near','mixture_bimodal_far'),
@@ -20,13 +20,13 @@ ga_config <- list(
 
 # Prospective v3 partition: immutable master seed roles, with disjoint random streams.
 t2_seed_plan_v3 <- list(discovery=0:9,heldout=10:14,stress=15:19,
-                        discovery_n=1000L,validation_n=c(200L,1000L,3000L),
-                        realworld_n=c(200L,1000L),schema="t2_seed_plan_v3")
+                        discovery_n=c(200L,1000L,3000L),validation_n=c(200L,1000L,3000L),
+                        realworld_n=c(200L,1000L,3000L),schema="t2_seed_plan_v3")
 t2_assert_seed_plan_v3 <- function(plan=t2_seed_plan_v3) {
  all_indices<-unlist(plan[c("discovery","heldout","stress")],use.names=FALSE)
  stopifnot(identical(sort(as.integer(all_indices)),0:19),
            length(unique(all_indices))==20L,
-           identical(as.integer(plan$discovery_n),1000L),
+           identical(as.integer(plan$discovery_n),c(200L,1000L,3000L)),
            identical(as.integer(plan$validation_n),c(200L,1000L,3000L)))
  invisible(TRUE)
 }
