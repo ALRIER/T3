@@ -21,14 +21,14 @@ cfg$generations<-as.integer(params$generations)
 cfg$mutation_rate<-as.numeric(params$mutation_rate)
 cfg$crossover_probability<-as.numeric(params$crossover_probability)
 cfg$discovery_weight_regularization_lambda<-as.numeric(params$regularization_lambda)
-# Adaptive stopping remains unchanged.
+# Equal-evaluation comparison disables adaptive stopping in all motors.
 set.seed(t2_seed(paste('B3_nested',fam,seed,outer,inner,engine,basename(path)),821L))
 fit<-switch(engine,ga=ga_discover(training,cfg,seed=sample.int(1000000000,1),shard=NULL),
 nsga2=nsga_discover(training,cfg,seed=sample.int(1000000000,1),shard=NULL),
 de=de_discover(training,cfg,seed=sample.int(1000000000,1),
  F=as.numeric(params$F),CR=as.numeric(params$CR),shard=NULL),
 dirichlet=dirichlet_discover(training,cfg,seed=sample.int(1000000000,1),
- alpha=as.numeric(params$alpha),n_draws=cfg$population*cfg$generations,shard=NULL))
+ alpha=as.numeric(params$alpha),n_draws=t3_common_budget(cfg),shard=NULL))
 source('R/02_discovery/t3_predeclared_w_selection.R')
 training_scales<-t3_training_reference_scales(training)
 chosen<-t3_select_weights(fit,training_scales)
