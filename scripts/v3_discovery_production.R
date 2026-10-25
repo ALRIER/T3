@@ -8,8 +8,8 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 if(!seed %in% 0:9)stop('Discovery cannot use reserved seeds')
 if(!n%in%t2_v3_sample_sizes('discovery'))stop('Invalid discovery n')
-d<-t2_v3_discovery_input(family,seed,n,500L,0:120)
-stopifnot(length(d$scenarios)==121L,all(vapply(d$scenarios,function(s)
+d<-t2_v3_discovery_input(family,seed,n,500L,0:320)
+stopifnot(length(d$scenarios)==321L,all(vapply(d$scenarios,function(s)
  length(s$eligible)==26L && all(s$eligible) && all(is.finite(s$benchmark$mse)),logical(1))))
 shard<-sprintf('v3-discovery-%s-seed%02d-n%d',family,seed,n)
 start_ram <- gc(reset=TRUE)
@@ -27,7 +27,7 @@ write.csv(cv5$folds,file.path(out,'cv5_fold_performance.csv'),row.names=FALSE)
 write.csv(cv5$assignments,file.path(out,'cv5_scenario_assignments.csv'),row.names=FALSE)
 writeLines(cv5$scope,file.path(out,'cv5_scope.txt'))
 rm(cv5);invisible(gc(verbose=FALSE))
-write.csv(data.frame(family=family,seed=seed,n=n,reps=500L,scenarios=121L,
+write.csv(data.frame(family=family,seed=seed,n=n,reps=500L,scenarios=321L,
   engines=paste(names(fit$engines),collapse=';'),
   sha256=t2_sha256(file.path(out,'discovery.rds'))),
  file.path(out,'manifest.csv'),row.names=FALSE)
