@@ -3,7 +3,9 @@
 # used, while the same prepared scenarios and evaluation budget are retained.
 ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),shard=NULL) {
  cfg<-t3_equal_budget_config(cfg);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
- fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
+ fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
  O<-fitness(W); trace<-list(t3_convergence_point(O,n)); archiveW<-W; archiveO<-O; history<-numeric(); best<-Inf; stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'ga',cfg)
@@ -51,7 +53,9 @@ ga_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(
 # Identical T matrices and objectives to NSGA-II; no use of held-out data.
 de_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligible=rep(TRUE,26L),F=.6,CR=.9,shard=NULL) {
  cfg<-t3_equal_budget_config(cfg);set.seed(seed); n<-cfg$population; W<-nsga_initial(n,eligible)
- fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
+ fitness<-function(w) nsga_evaluate_scenarios(w,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
  O<-fitness(W);trace<-list(t3_convergence_point(O,n));history<-numeric(); archiveW<-W;archiveO<-O; best<- -Inf;stale<-0L
  start_g<-1L; last_generation<-0L
  resume<-t2_optimizer_restore(shard,'de',cfg)
@@ -110,7 +114,9 @@ dirichlet_discover <- function(training_scenarios,cfg=ga_config,seed=101L,eligib
  while(next_draw<=n_draws) {
   take<-min(chunk,n_draws-next_draw+1L)
   Wi<-matrix(stats::rgamma(26L*take,shape=alpha),nrow=26L)
-  Wi<-normalize_weights(Wi,eligible); Oi<-nsga_evaluate_scenarios(Wi,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else cfg$discovery_weight_regularization_lambda)
+  Wi<-normalize_weights(Wi,eligible); Oi<-nsga_evaluate_scenarios(Wi,training_scenarios,cfg$batch_size,if(is.null(cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)
   W<-cbind(W,Wi); O<-rbind(O,Oi); next_draw<-next_draw+take
   trace[[length(trace)+1L]]<-t3_convergence_point(O,next_draw-1L)
   indicator<- -trace[[length(trace)]]['joint_normalized'];history<-c(history,indicator)
@@ -150,8 +156,10 @@ t3_control_optimize <- function(training_scenarios,cfg=ga_config,seed=101L,
   evaluate<-function(w) {
     W<-matrix(w,26L,1L)
     as.numeric(nsga_evaluate_scenarios(W,training_scenarios,cfg$batch_size,
-      if(is.null(cfg$discovery_weight_regularization_lambda)) 0 else
-        cfg$discovery_weight_regularization_lambda)[1L,])
+      if(is.null(cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)) 0 else
+        cfg$discovery_weight_regularization_lambda,
+  dro_fraction=if(is.null(cfg$discovery_dro_tail_fraction)) 0 else cfg$discovery_dro_tail_fraction)[1L,])
   }
   reference<-if(method=='convex_mse') function(o)o[1L] else
     function(o)mean(o/as.numeric(scales[c('mse','q95')]))
