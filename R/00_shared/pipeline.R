@@ -277,9 +277,14 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  all_optimizers<-c(engines,controls)
  budget_audit<-t3_assert_engine_budget_parity(all_optimizers)
  convergence_audit<-t3_compare_convergence(all_optimizers,s)
+ computational_ledger<-t3_budget_ledger(all_optimizers,length(s),
+   outer_folds=cfg$discovery_cv_folds,
+   inner_folds=cfg$discovery_cv_inner_folds,
+   hyperparameter_trials=1L)
  list(engines=engines,non_evolutionary_controls=controls,training_control_comparison=discovery_comparison,
       models=selected_models$models,
       objective_budget_audit=budget_audit,convergence_audit=convergence_audit,
+      computational_ledger=computational_ledger,
       selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=cfg,
       budget_registry=t2_discovery_budget_registry(cfg),seed=t2_seed(shard,200),
       training_seed_index=if (length(data$seed_index)) as.integer(data$seed_index) else 0L,
