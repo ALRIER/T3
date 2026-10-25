@@ -1,4 +1,5 @@
 name: T3 B3 FULL Monte Carlo 321 x 500
+run-name: FULL MONTE CARLO PRODUCCION — 540 bloques — 321 escenarios — 500 replicas — ${{ github.sha }}
 on:
   workflow_dispatch:
   push:
@@ -648,3 +649,5 @@ jobs:
           path: artifacts/mc_t3_grid321/t3_b3_grid321_v1/stress/${{ matrix.family }}/seed*/n*_r500/
           retention-days: 30
           if-no-files-found: warn
+
+# User-authorized clean FULL relaunch after prior workflows were manually cancelled.
