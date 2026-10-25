@@ -1,7 +1,7 @@
 name: T2 V3 B3 Prospective Grid MAD and Nested CV Validation
 on:
   push:
-    branches: [t2-v3-contract-adapter-20261024]
+    branches: [main]
     paths: ['.github/workflows/t2-v3-b3-prospective-methods-gate.yml']
   workflow_dispatch:
 permissions:
