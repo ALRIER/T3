@@ -5,6 +5,9 @@ on:
     paths:
       - 'R/05_validation/t3_selection_aware_validation.R'
       - 'tests/test_t3_selection_aware_transfer.R'
+      - 'tests/test_t3_universal_selection_replay.R'
+      - 'R/00_shared/t3_universal_contract.R'
+      - 'R/05_validation/t3_full_selection_replay.R'
       - '.github/workflows/t3-selection-fpr-transfer-gate.yml'
 jobs:
   scientific-contract:
@@ -16,4 +19,6 @@ jobs:
         with:
           r-version: '4.3.3'
       - name: Check selection replay and transfer isolation
-        run: Rscript tests/test_t3_selection_aware_transfer.R
+        run: |
+          Rscript tests/test_t3_selection_aware_transfer.R
+          Rscript tests/test_t3_universal_selection_replay.R
