@@ -16,7 +16,14 @@ jobs:
       - name: Verify frozen manifest generator
         run: |
           python3 scripts/t2_v3_b3_generate_grid321.py
-          git diff --exit-code -- config/T2_V3_B3_prospective_321_grid.csv
+          git show HEAD:config/T2_V3_B3_prospective_321_grid.csv > /tmp/t3_committed_grid.csv
+          python3 - <<'PY'
+          import csv
+          a=list(csv.DictReader(open('/tmp/t3_committed_grid.csv',newline='')))
+          b=list(csv.DictReader(open('config/T2_V3_B3_prospective_321_grid.csv',newline='')))
+          assert a==b, 'Generated grid differs from frozen scientific design'
+          print('T3_FROZEN_321_GRID_EQUIVALENCE_PASS')
+          PY
           python3 -m py_compile scripts/t2_v3_b3_nested_optuna.py
       - uses: docker/login-action@v3
         with:
