@@ -10,14 +10,15 @@ if(!index %in% t2_v3_indices(role))stop("Seed not assigned to requested role")
 if(!n %in% t2_v3_sample_sizes(role))
  stop("Sample size not assigned to requested role")
 # Cache namespace segregates the revised 26-column library from historical matrices.
-Sys.setenv(T2_CANONICAL_MC_ROOT="artifacts/mc_v3_real26")
+Sys.setenv(T2_CANONICAL_MC_ROOT="artifacts/mc_t3_grid321")
 replications<-as.integer(Sys.getenv("T2_V3_REPS","500"))
 if(replications<2L)stop("At least two replications required")
 # New implementation: role-scoped random streams and continuously sampled regimes.
 source("R/01_monte_carlo/v3_generation.R")
-n_scenarios<-as.integer(Sys.getenv("T2_V3_SCENARIOS","120"))
+n_scenarios<-as.integer(Sys.getenv("T2_V3_SCENARIOS","320"))
+if(n_scenarios!=320L)stop("T3 production demands exactly 321 conditions")
 mc<-t2_v3_generate(role,family,index,n,R=replications,n_scenarios=n_scenarios)
-stopifnot(identical(mc$role,role),identical(mc$protocol,"v3_real26_seedplan20_mixedheldout_rlm100"),
+stopifnot(identical(mc$role,role),identical(mc$protocol,"t3_b3_grid321_v1"),
           identical(mc$component_names,ESTIMATOR_NAMES),
           nrow(mc$grid)==n_scenarios+1L)
 cat(sprintf("V3_GENERATED role=%s family=%s seed=%02d n=%d scenarios=%d\\n",
