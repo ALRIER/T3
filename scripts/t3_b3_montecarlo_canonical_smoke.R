@@ -7,7 +7,7 @@ stopifnot(nrow(grid)==321L,identical(as.integer(grid$scenario_id),0:320))
 old<-Sys.getenv('T2_V3_SCIENTIFIC_ROOT',unset=NA_character_)
 root<-tempfile('t3-mc321-r-smoke-')
 Sys.setenv(T2_V3_SCIENTIFIC_ROOT=root)
-family<-t2_families()[1L];seed<-0L;n<-200L;reps<-3L
+family<-'normal';seed<-0L;n<-200L;reps<-3L
 set.seed(912L)
 scenarios<-lapply(0:320,function(id){
  T<-matrix(rnorm(reps*26L),nrow=reps,ncol=26L)
