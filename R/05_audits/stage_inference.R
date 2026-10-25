@@ -149,3 +149,48 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
  out$evidence_status<-'provisional_seed_level_subject_to_design_review'
  out
 }
+
+
+# Aggregate ONLY complete independent evaluation-seed shards. Do not infer
+# significance from scenario rows or training-seed duplicates.
+t3_aggregate_confirmatory_shards <- function(stage,family,n,root='artifacts',
+                                              alpha=.05,near_band=.01) {
+ if(!stage%in%c('heldout','stress','realworld')||
+    !family%in%t2_families()||!n%in%t2_v3_sample_sizes(stage))
+   stop('Invalid aggregate target')
+ seeds<-t2_v3_indices(stage)
+ shard<-function(seed)switch(stage,
+  heldout=file.path(root,'heldout_v3',family,sprintf('seed%02d_n%d',seed,n)),
+  stress=file.path(root,'v3_stress_scoring',family,sprintf('seed%02d_n%d',seed,n)),
+  realworld=file.path(root,'realworld_v3',family,sprintf('seed%02d_n%d',seed,n)))
+ rows<-list()
+ for(seed in seeds){
+   dir<-shard(seed)
+   contract<-file.path(dir,'stage_contract.rds')
+   t3_stage_require(contract,stage,sprintf('b3_%s_n%d',family,n),
+                    family,seed,n)
+   paths<-if(stage=='realworld')
+      file.path(dir,sprintf('train_seed%02d_scores.csv',t2_v3_indices('discovery')))
+      else file.path(dir,if(stage=='heldout')'non_evolutionary_control_scores.csv' else 'scores.csv')
+   if(!all(file.exists(paths)))stop('Missing complete evaluation shard: ',dir)
+   part<-do.call(rbind,lapply(paths,function(path)read.csv(path,stringsAsFactors=FALSE)))
+   seed_col<-paste0(stage,'_seed')
+   if(!all(c('training_seed','model','mse','q95',seed_col)%in%names(part))||
+      any(part[[seed_col]]!=seed)||!setequal(unique(part$training_seed),t2_v3_indices('discovery'))||
+      length(unique(part$model))!=32L)stop('Incomplete 32-model evaluation shard: ',dir)
+   part$family<-family
+   part$sample_n<-n
+   rows[[length(rows)+1L]]<-part
+ }
+ combined<-do.call(rbind,rows)
+ # Real World has a dataset-level reference proxy, not population truth.
+ # The seed-level test is only a descriptive sensitivity diagnostic until
+ # datasets and their parent clusters are prespecified and verified.
+ inference<-t3_confirmatory_seed_summary(combined,stage,alpha=alpha,
+                                         near_band=near_band)
+ if(stage=='realworld')
+   inference$evidence_status<-'descriptive_proxy_not_population_confirmation'
+ list(scores=combined,inference=inference,
+      manifest=data.frame(stage=stage,family=family,n=n,seeds=seeds,
+       evidence_status='complete_40_seed_partition_stage'))
+}
