@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 a<-commandArgs(TRUE)
-if(length(a)!=6L)stop('Usage: FAMILY SEED OUTER_FOLD INNER_FOLD ENGINE PARAMS_JSON')
-fam<-a[1];seed<-as.integer(a[2]);outer<-as.integer(a[3]);inner<-as.integer(a[4]);engine<-a[5];path<-a[6]
+if(length(a)!=7L)stop('Usage: FAMILY SEED OUTER_FOLD INNER_FOLD ENGINE PARAMS_JSON N')
+fam<-a[1];seed<-as.integer(a[2]);outer<-as.integer(a[3]);inner<-as.integer(a[4]);engine<-a[5];path<-a[6];n<-as.integer(a[7])
 if(!engine%in%c('ga','nsga2','de','dirichlet')||!seed%in%0:9||!outer%in%1:5||!inner%in%1:3)stop('Invalid nested fold')
 if(!requireNamespace('jsonlite',quietly=TRUE))stop('jsonlite required')
 source('R/00_shared/load_all.R');t2_load('.')
@@ -10,11 +10,11 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 params<-jsonlite::fromJSON(path)
 source('R/02_discovery/t2_v3_b3_nested_folds.R')
-parts<-t2_b3_nested_partitions(fam,seed,outer,inner)
+parts<-t2_b3_nested_partitions(fam,seed,outer,inner,n=n)
 training_ids<-parts$training
 validation_ids<-parts$validation
 if(length(intersect(training_ids,validation_ids))||length(training_ids)<50L||!length(validation_ids))stop('Nested fold leakage')
-training<-t2_v3_discovery_input(fam,seed,selected=training_ids)$scenarios
+training<-t2_v3_discovery_input(fam,seed,n=n,selected=training_ids)$scenarios
 cfg<-ga_config
 cfg$population<-as.integer(params$population)
 cfg$generations<-as.integer(params$generations)
@@ -34,7 +34,7 @@ scale<-pmax(colMeans(abs(O)),1e-12)
 winner<-which.min(rowSums(sweep(O,2L,scale,'/')))
 w<-W[,winner,drop=FALSE]
 rm(training,fit);invisible(gc(FALSE))
-val<-t2_v3_discovery_input(fam,seed,selected=validation_ids)$scenarios
+val<-t2_v3_discovery_input(fam,seed,n=n,selected=validation_ids)$scenarios
 stats<-t(vapply(val,function(sc)as.numeric(evaluate_weights(sc$T,w,sc$target)$objectives[1,]),numeric(2)))
 base<-t(vapply(val,function(sc){
  e<-(sc$T[,1L]-sc$target)^2
