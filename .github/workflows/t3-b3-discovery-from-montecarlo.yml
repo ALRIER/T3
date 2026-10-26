@@ -1,0 +1,60 @@
+name: T3 B3 Discovery from immutable Monte Carlo
+
+"on":
+  workflow_dispatch:
+    inputs:
+      mc_run_id:
+        description: Successful T3 B3 full Monte Carlo Actions run ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  packages: read
+
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        seed: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify immutable source run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run view ${{ inputs.mc_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 FULL Monte Carlo 321 x 500")'
+      - uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/mc
+      - name: Verify, hash and materialize the 321 source scenarios
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
+      - name: Fit four frozen engines from discovery-only inputs
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_discovery_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/discovery_v3
+          if-no-files-found: error
+          retention-days: 90
