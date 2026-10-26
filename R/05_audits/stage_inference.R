@@ -91,7 +91,7 @@ t3_gate_diagnostics <- function(df,alpha=.05,bandwidth=.01,
 
 # Post-run only: paired comparisons across independent seed-level summaries.
 # Individual scenario scores are NOT treated as independent inferential units.
-t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
+t3_confirmatory_seed_summary <- function(scores,stage,reference='best_eligible',
                                         alpha=.05,near_band=.01) {
  needed<-c('model','mse','q95','training_seed')
  if(!is.data.frame(scores)||!all(needed%in%names(scores))||
@@ -101,7 +101,7 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
  eval_col<-switch(stage,heldout='heldout_seed',stress='stress_seed',
                   realworld='realworld_seed')
  if(!eval_col%in%names(scores))stop('Missing independent evaluation seed')
- if(!reference%in%as.character(scores$model))stop('Missing benchmark')
+ if(reference!='best_eligible'&&!reference%in%as.character(scores$model))stop('Missing benchmark')
  key_columns<-c(intersect(c('family','source_family','evaluation_family','transfer_scope',
                             'sample_n','dataset_id','parent_dataset_id'),names(scores)),
                  eval_col,'training_seed','model',
@@ -120,9 +120,18 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
  ans<-list()
  for(group in levels(group_id)) {
   zz<-z[group_id==group,,drop=FALSE]
-  base<-zz[zz$model==reference,,drop=FALSE]
+  if(reference=='best_eligible') {
+    b<-zz[zz$model%in%ESTIMATOR_NAMES,,drop=FALSE]
+    if(!nrow(b))stop('Eligible classical benchmark panel absent')
+    base<-aggregate(b[,c('mse','q95'),drop=FALSE],b[idvars],min)
+    base$model<-'best_eligible_classical_per_seed_metric'
+    candidates<-setdiff(unique(as.character(zz$model)),ESTIMATOR_NAMES)
+  } else {
+    base<-zz[zz$model==reference,,drop=FALSE]
+    candidates<-setdiff(unique(as.character(zz$model)),reference)
+  }
   if(anyDuplicated(base[idvars]))stop('Duplicate reference seed')
-  for(model in setdiff(unique(as.character(zz$model)),reference)) {
+  for(model in candidates) {
     candidate<-zz[zz$model==model,,drop=FALSE]
     join<-merge(candidate,base,by=idvars,suffixes=c('_candidate','_reference'))
     if(nrow(join)!=nrow(candidate)||nrow(join)!=nrow(base)||
@@ -145,7 +154,7 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
           stats::t.test(gain_pct,conf.level=.95)$conf.int
       }
       row<-data.frame(stage=stage,group=group,
-        model=model,metric=metric,benchmark=reference,
+        model=model,metric=metric,benchmark=base$model[1L],
         independent_seeds=nrow(join),difference=mean(delta),
         lower=limits[1L],upper=limits[2L],p_value=pv,
         reference_loss=mean(reference_loss),candidate_loss=mean(candidate_loss),
@@ -161,6 +170,10 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
  if(!length(ans))stop('No confirmatory comparisons')
  out<-do.call(rbind,ans)
  out<-t3_gate_diagnostics(out,alpha,near_band,group_cols=c('stage','group','metric'))
+ # Primary correction protects the complete predeclared stage panel; q_value
+ # remains the within-stratum descriptive companion.
+ out$q_value_global<-p.adjust(out$p_value,method='BH')
+ out$passes_global_gate<-out$q_value_global<=alpha
   # Discovery is disjoint from these evaluation seeds.  BH is applied only
   # here, to the complete prespecified candidate x metric panel in each
   # family/sample-size/stage group; scenario rows and training seeds were
@@ -174,22 +187,22 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
 # descriptive MSE winner, q95 winner, joint winner, or a joint BH-FDR winner.
 t3_winner_taxonomy <- function(inference,alpha=.05,
                                practical_gain_pct=ga_config$practical_gain_pct) {
- required<-c('stage','group','model','metric','difference','upper','q_value',
+ required<-c('stage','group','model','metric','difference','upper','q_value','q_value_global',
              'gain_pct','gain_pct_lower','gain_pct_upper')
  if(!is.data.frame(inference)||!all(required%in%names(inference)))
    stop('Incomplete confirmatory inference for winner taxonomy')
  ids<-c(intersect(c('stage','group','family','source_family','evaluation_family',
                      'transfer_scope','sample_n','dataset_id','parent_dataset_id','model','benchmark'),names(inference)))
- wide<-reshape(inference[,c(ids,'metric','difference','upper','q_value','gain_pct',
+ wide<-reshape(inference[,c(ids,'metric','difference','upper','q_value','q_value_global','gain_pct',
                             'gain_pct_lower','gain_pct_upper'),drop=FALSE],
    idvar=ids,timevar='metric',direction='wide')
  needed<-c('difference.mse','difference.q95','upper.mse','upper.q95',
-           'q_value.mse','q_value.q95')
+           'q_value_global.mse','q_value_global.q95')
  if(!all(needed%in%names(wide)))stop('Both MSE and q95 are required')
  mse<-wide$difference.mse<0 & wide$upper.mse<0
  q95<-wide$difference.q95<0 & wide$upper.q95<0
- mse_fdr<-mse & wide$q_value.mse<=alpha
- q95_fdr<-q95 & wide$q_value.q95<=alpha
+ mse_fdr<-mse & wide$q_value_global.mse<=alpha
+ q95_fdr<-q95 & wide$q_value_global.q95<=alpha
  wide$winner_mse<-mse
  wide$winner_q95<-q95
  wide$winner_joint_mse_q95<-mse&q95
