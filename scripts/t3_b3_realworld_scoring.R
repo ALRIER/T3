@@ -17,13 +17,20 @@ required<-c('parent_dataset_id','dataset_id','training_family','transfer_scope',
  'license_evidence','license_evidence_sha256','license_evidence_path',
  'source_group',
  'license_basis',
- 'child_selection_rule','variable',
+ 'child_selection_rule','variable','n',
  'empirical_profile','domain','source_url')
 if(!all(required%in%names(tab)))stop('Frozen parent-child schema incomplete')
 if(any(tolower(tab$license_review_status)!='verified'))stop('Real-world scoring requires individually verified source licenses')
 if(any(!grepl('^https://[^/]+',tab$source_url))||any(!grepl('^https://[^/]+',tab$license_url))||
    any(!grepl('^[[:xdigit:]]{40,64}$',tab$catalog_commit)))
  stop('Frozen source/license URL or catalog revision is invalid')
+source_root<-normalizePath(Sys.getenv('T3_REALWORLD_SOURCE_ROOT','.'),mustWork=TRUE)
+resolve_catalog_path<-function(p){p<-as.character(p);if(startsWith(p,'/'))p else file.path(source_root,p)}
+for(i in seq_len(nrow(tab))){
+ evidence<-resolve_catalog_path(tab$license_evidence_path[i])
+ if(!file.exists(evidence)||!identical(tolower(t2_sha256(evidence)),tolower(tab$license_evidence_sha256[i])))
+  stop('License evidence snapshot missing or changed for ',tab$dataset_id[i])
+}
 tab<-tab[tab$training_family==family,,drop=FALSE]
 if(!nrow(tab))stop('No frozen parent-child profile for source family ',family)
 if(anyDuplicated(tab[c('parent_dataset_id','dataset_id')]))stop('Duplicate parent-child frozen identity')
@@ -35,11 +42,12 @@ if(file.exists(score_path))stop('Refusing to overwrite immutable real-world shar
 baselines<-lapply(ESTIMATOR_NAMES,function(nm)new_frozen_model(nm,component=nm))
 first<-TRUE
 for(j in seq_len(nrow(tab))) {
- row<-tab[j,,drop=FALSE];vector_path<-as.character(row$processed_path)
+ row<-tab[j,,drop=FALSE];vector_path<-resolve_catalog_path(row$processed_path)
  if(!file.exists(vector_path)||!identical(t2_sha256(vector_path),as.character(row$processed_sha256)))
   stop('Frozen child vector hash mismatch: ',vector_path)
- if(!file.exists(row$source_path)||!identical(t2_sha256(row$source_path),as.character(row$source_sha256)))
-  stop('Original source hash mismatch: ',row$source_path)
+ source_path<-resolve_catalog_path(row$source_path)
+ if(!file.exists(source_path)||!identical(t2_sha256(source_path),as.character(row$source_sha256)))
+  stop('Original source hash mismatch: ',source_path)
  x<-as.numeric(readRDS(vector_path));x<-x[is.finite(x)]
  if(length(x)<150L)stop('Frozen child has insufficient observations: ',row$dataset_id)
  profile_key<-paste(row$parent_dataset_id,row$dataset_id,as.integer(row$n),

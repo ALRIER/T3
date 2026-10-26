@@ -55,6 +55,7 @@ features<-function(x){
 }
 dir.create(file.path(out,'vectors'),recursive=TRUE,showWarnings=FALSE)
 dir.create(file.path(out,'sources'),recursive=TRUE,showWarnings=FALSE)
+dir.create(file.path(out,'license_evidence'),recursive=TRUE,showWarnings=FALSE)
 rows<-vector('list',nrow(catalog))
 optional_meta<-intersect(c('upstream_license_status','upstream_source_url','source_archive_doi',
   'license_evidence','license_evidence_sha256','license_evidence_path',
@@ -86,7 +87,20 @@ for(i in seq_len(nrow(catalog))){
    empirical_profile=f$empirical_profile,license_name=r$license_name,
    license_url=r$license_url,license_review_status=r$license_review_status,
    catalog_commit=catalog_commit,stringsAsFactors=FALSE)
- for(nm in optional_meta) rows[[i]][[nm]]<-as.character(r[[nm]][1])
+ for(nm in optional_meta){
+   value<-as.character(r[[nm]][1])
+   if(nm=='license_evidence_path'){
+     if(!file.exists(value))stop('Missing license evidence snapshot for ',r$dataset_id)
+     evidence_hash<-t2_sha256(value)
+     expected<-as.character(r$license_evidence_sha256[1])
+     if(!identical(tolower(evidence_hash),tolower(expected)))stop('License evidence hash mismatch for ',r$dataset_id)
+     evidence_target<-file.path(out,'license_evidence',paste0(evidence_hash,'.',tools::file_ext(value)))
+     if(!file.exists(evidence_target)&&!file.copy(value,evidence_target))stop('Failed to retain license evidence')
+     if(!identical(t2_sha256(evidence_target),evidence_hash))stop('Copied license evidence hash mismatch')
+     value<-evidence_target
+   }
+   rows[[i]][[nm]]<-value
+ }
 }
 profile<-do.call(rbind,rows)
 write.csv(profile,file.path(out,'outcome_blind_profiles.csv'),row.names=FALSE)

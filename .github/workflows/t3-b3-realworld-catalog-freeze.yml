@@ -45,6 +45,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-realworld-parent-freeze-run${{ github.run_id }}
-          path: artifacts/T3_B3_realworld_candidates/
+          path: |
+            artifacts/T3_B3_realworld_archive_candidates/
+            artifacts/T3_B3_realworld_uci_candidates/
+            artifacts/T3_B3_realworld_candidates/
           if-no-files-found: error
           retention-days: 90

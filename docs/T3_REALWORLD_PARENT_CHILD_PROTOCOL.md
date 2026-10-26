@@ -85,4 +85,9 @@ the verified license applies to the archive package, while original upstream
 terms remain explicitly unreviewed; do not describe those upstream terms as
 individually cleared. Discovery artifacts must exist before frozen scoring
 can run. The catalog/profile/freeze workflow is
-`.github/workflows/t3-b3-realworld-catalog-freeze.yml`.
+`.github/workflows/t3-b3-realworld-catalog-freeze.yml`. After that workflow
+and production Discovery both succeed, `.github/workflows/t3-b3-realworld-score.yml`
+scores frozen Discovery weights on independent Real-world seeds 30–39,
+retains the source and license evidence with the frozen manifest, and runs one
+parent-level bootstrap/BH aggregation across the family × proximity scope ×
+sample size × model × metric panel.

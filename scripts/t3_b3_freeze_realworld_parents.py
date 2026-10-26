@@ -52,6 +52,10 @@ p.add_argument('--sample-seed',type=int,default=642026)
 a=p.parse_args()
 rows=list(csv.DictReader(a.profiles.open(newline='',encoding='utf-8-sig')))
 if not rows: raise SystemExit('BLOCKED: fresh candidate profile catalog is empty')
+candidate_root=a.profiles.resolve().parent.parent
+def relpath(value):
+ try: return Path(value).resolve().relative_to(candidate_root).as_posix()
+ except ValueError: raise SystemExit(f'BLOCKED: input path is outside the catalog artifact: {value}')
 missing=REQUIRED-set(rows[0])
 if missing: raise SystemExit('BLOCKED: profile schema missing '+', '.join(sorted(missing)))
 parents=defaultdict(list); seen_children=set()
@@ -124,11 +128,11 @@ for pid in sampled:
     'empirical_profile':profile,'transfer_scope':scope,
     'matched_scenario_id':cell['scenario_id'],'matched_mechanism_proxy':cell['mechanism'],
     'contamination_proxy':contamination_proxy,'mad_scale_proxy':mad_proxy,
-    'skewness':child['skewness'],'excess_kurtosis':child['excess_kurtosis'],
+    'n':child['n'],'skewness':child['skewness'],'excess_kurtosis':child['excess_kurtosis'],
     'support_sign':child['support_sign'],'outlier_fraction_3mad':child['outlier_fraction_3mad'],
     'source_url':child['source_url'],'domain':child['domain'],'source_sector':child['source_sector'],
-    'source_path':child['source_path'],'source_sha256':child['source_sha256'],
-    'processed_path':child['processed_path'],'processed_sha256':child['processed_sha256'],
+    'source_path':relpath(child['source_path']),'source_sha256':child['source_sha256'],
+    'processed_path':relpath(child['processed_path']),'processed_sha256':child['processed_sha256'],
     'profile_sha256':child['profile_sha256'],'catalog_commit':child['catalog_commit'],
     'license_name':child['license_name'],
     'license_url':child['license_url'],'license_review_status':child['license_review_status'],
@@ -137,7 +141,7 @@ for pid in sampled:
     'source_archive_doi':child['source_archive_doi'],
     'license_evidence':child['license_evidence'],
     'license_evidence_sha256':child['license_evidence_sha256'],
-    'license_evidence_path':child['license_evidence_path'],
+    'license_evidence_path':relpath(child['license_evidence_path']),
     'source_group':child['source_group'],
     'license_basis':child['license_basis'],
     'child_selection_rule':child['child_selection_rule'],
