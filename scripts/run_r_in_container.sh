@@ -5,7 +5,10 @@ IMAGE="${T2_R_IMAGE:-ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d
 if ! command -v docker >/dev/null 2>&1; then echo "Docker is required for T2 pinned R runtime" >&2; exit 127; fi
 ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
 if [[ ! -d "$ROOT" ]]; then echo "Missing workspace: $ROOT" >&2; exit 2; fi
-args=(run --rm -v "$ROOT:/workspace" -w /workspace)
+# Match the host UID/GID so R-created checkpoints remain writable by later
+# host-side Python steps (Optuna, manifests, and packaging). The previous root
+# container user left artifacts/ owned by root and made the next HPO step fail.
+args=(run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$ROOT:/workspace" -w /workspace)
 # Forward declared experiment settings and nonsensitive Actions context.
 while IFS='=' read -r key _; do
   case "$key" in
