@@ -20,12 +20,13 @@ ga_config <- list(
 
 # Prospective v3 partition: immutable master seed roles, with disjoint random streams.
 t2_seed_plan_v3 <- list(discovery=0:9,heldout=10:19,stress=20:29,realworld=30:39,
+                        parametric_transfer=40:49,
                         discovery_n=c(200L,1000L,3000L),validation_n=c(200L,1000L,3000L),
                         realworld_n=c(200L,1000L,3000L),schema="t2_seed_plan_v3")
 t2_assert_seed_plan_v3 <- function(plan=t2_seed_plan_v3) {
- all_indices<-unlist(plan[c("discovery","heldout","stress","realworld")],use.names=FALSE)
- stopifnot(identical(sort(as.integer(all_indices)),0:39),
-           length(unique(all_indices))==40L,
+ all_indices<-unlist(plan[c("discovery","heldout","stress","realworld","parametric_transfer")],use.names=FALSE)
+ stopifnot(identical(sort(as.integer(all_indices)),0:49),
+           length(unique(all_indices))==50L,
            identical(as.integer(plan$discovery_n),c(200L,1000L,3000L)),
            identical(as.integer(plan$validation_n),c(200L,1000L,3000L)))
  invisible(TRUE)
@@ -45,7 +46,7 @@ t2_seed_for_v3 <- function(stage,family,index,n,scenario_id=0L,replicate=0L) {
 
 # Prospective stage accessors. Legacy single-heldout-seed references must not be used in V3.
 t2_v3_indices <- function(stage) {
- if(!stage %in% c("discovery","heldout","stress","realworld")) stop("Unknown V3 seed role")
+ if(!stage %in% c("discovery","heldout","stress","realworld","parametric_transfer")) stop("Unknown V3 seed role")
  as.integer(t2_seed_plan_v3[[stage]])
 }
 t2_v3_sample_sizes <- function(stage) {

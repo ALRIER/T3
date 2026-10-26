@@ -7,7 +7,7 @@ if(length(args)!=5L) stop('Usage: FAMILY PARAMETER_ROW TRANSFER_SEED REPS N')
 family<-args[[1L]]; parameter_row<-as.integer(args[[2L]])
 seed<-as.integer(args[[3L]]); reps<-as.integer(args[[4L]]); n<-as.integer(args[[5L]])
 if(!family%in%c('normal','lognormal','weibull','invgauss','exgaussian','exwald') ||
-   is.na(parameter_row)||parameter_row<2L||is.na(seed)||!seed%in%30:39 ||
+   is.na(parameter_row)||parameter_row<2L||is.na(seed)||!seed%in%40:49 ||
    reps!=500L||!n%in%c(200L,1000L,3000L)) stop('Invalid prospective transfer shard')
 source('R/00_shared/load_all.R');t2_load('.')
 grid<-read.csv('config/T2_V3_B3_prospective_321_grid.csv',stringsAsFactors=FALSE)
