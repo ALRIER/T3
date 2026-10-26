@@ -6,20 +6,42 @@ sources, score frozen models, and aggregate uncertainty at the independent
 source level. It does not copy the earlier dataset sample or treat its family
 labels, thresholds, or conclusions as T3 evidence.
 
-## New sample and hierarchy
+## T3 sample and parent/child hierarchy
 
-The candidate inventory must contain at least 642 distinct parent sources. The
-frozen audit sample is 642 parents, selected before scoring by a fixed seed.
-At least 200 parents must be in the finance stratum; the other 442 are sampled
-from non-financial sources. If the verified inventory cannot meet both counts,
-the freeze stops instead of counting multiple columns or transforms as extra
-independent datasets.
+The catalog workflow builds a fresh T3 candidate pool from two sources: the
+archived public candidate package at Zenodo record 23602795 and newly fetched
+UCI records. It excludes UCI entries already present in the archive before
+merging. The T3 profile and fixed seed create a new 642-parent sample; the
+predeclared composition is 200 financial and 442 other parents. The workflow
+stops if the merged, profiled inventory cannot meet these parent-level quotas.
+The UCI collector requires a numeric column with at least 150 finite values
+and an explicit CC BY 4.0 statement on that dataset's page. It saves the page
+snapshot and its SHA-256. The Zenodo package license is checked against record
+metadata; original upstream license terms for those archived files are kept
+separate and marked not independently reviewed.
 
 `parent_dataset_id` identifies the independent source object. A parent may
 contain several child series or numeric variables (`dataset_id`). Child rows
 may receive different empirical profiles, but every inferential and bootstrap
 resample groups by the parent ID. A child, transformed series, depth slice, or
 bootstrap draw never increases the independent parent count.
+
+To cap compute and stop high-dimensional tables from dominating within-parent
+averages, the UCI collector retains at most three numeric children per parent:
+the first, middle, and last numeric variable in repository order. This rule is
+applied before any model score is available and recorded in the manifests.
+
+The existing Zenodo package contributes 644 candidate parents after removing
+20 UCI duplicate copies (199 finance, 445 other). The UCI API lists 689 records;
+an initial technical screen found 201 with at least 150 rows and a numeric
+variable before per-record license and download checks. The current positional
+UCI parser verified 166 dataset pages and retained 84 downloadable parent
+records (5 finance, 79 other); failed or malformed downloads remain recorded as
+exclusions rather than being replaced silently. After limiting UCI parents to
+three child series each, the local merged pool contains 728 parents (204
+finance, 524 other) and 854 child series. These are candidate-pool counts; the
+freeze step independently recomputes profile and hash gates before selecting
+642 parents (200 finance, 442 other).
 
 ## Outcome-blind matching to T3
 
@@ -57,8 +79,10 @@ resampling and FDR references (Efron & Tibshirani, 1993; Benjamini & Hochberg,
 ## Current execution gates
 
 The selector is fail-closed unless the profile inventory contains 642
-independent parents, including 200 finance parents and 442 other parents. The
-separate publication/redistribution gate still requires a verified license
-record for every source; a candidate catalog or a public URL alone is not
-license verification. Discovery artifacts must also exist before the scoring
-workflow can run.
+independent parents, including 200 finance parents and 442 other parents. UCI
+license declarations are snapshotted per record. For the Zenodo-archived pool,
+the verified license applies to the archive package, while original upstream
+terms remain explicitly unreviewed; do not describe those upstream terms as
+individually cleared. Discovery artifacts must exist before frozen scoring
+can run. The catalog/profile/freeze workflow is
+`.github/workflows/t3-b3-realworld-catalog-freeze.yml`.

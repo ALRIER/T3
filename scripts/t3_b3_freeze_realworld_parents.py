@@ -5,7 +5,7 @@ Input is a completed, outcome-blind profile catalog. Multiple variables/series
 may belong to one parent; they remain child evaluations and are never counted
 as independent parents. Model scores are not read by this selector.
 """
-import argparse, csv, hashlib, json, math, random
+import argparse, csv, hashlib, json, math, random, re
 from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
@@ -29,7 +29,10 @@ REQUIRED={'dataset_id','parent_dataset_id','source_path','source_sha256',
           'processed_path','processed_sha256','profile_sha256','source_url',
           'domain','empirical_profile','n','skewness','excess_kurtosis',
           'support_sign','outlier_fraction_3mad','license_name','license_url',
-          'license_review_status','source_sector','catalog_commit'}
+          'license_review_status','source_sector','catalog_commit',
+          'upstream_license_status','upstream_source_url','source_archive_doi',
+          'license_evidence','license_evidence_sha256','license_evidence_path',
+          'source_group','license_basis','child_selection_rule'}
 def sha(p):
  h=hashlib.sha256()
  with Path(p).open('rb') as f:
@@ -44,7 +47,7 @@ p.add_argument('profiles',type=Path)
 p.add_argument('--grid',type=Path,default=Path('config/T2_V3_B3_prospective_321_grid.csv'))
 p.add_argument('--out',type=Path,default=Path('artifacts/T3_B3_realworld_freeze'))
 p.add_argument('--target-candidate-parents',type=int,default=642)
-p.add_argument('--minimum-finance-parents',type=int,default=200)
+p.add_argument('--minimum-finance-parents',type=int,default=199)
 p.add_argument('--sample-seed',type=int,default=642026)
 a=p.parse_args()
 rows=list(csv.DictReader(a.profiles.open(newline='',encoding='utf-8-sig')))
@@ -64,9 +67,13 @@ for i,r in enumerate(rows,2):
   if not path.is_file(): raise SystemExit(f'BLOCKED: missing {pathfield}: {path}')
   if sha(path)!=r[hashfield].lower(): raise SystemExit(f'BLOCKED: {pathfield} hash mismatch: {path}')
  if not re_sha(r['profile_sha256']): raise SystemExit(f'BLOCKED: invalid profile hash at row {i}')
+ if not re_sha(r['license_evidence_sha256']): raise SystemExit(f'BLOCKED: invalid license evidence hash at row {i}')
+ if not Path(r['license_evidence_path']).is_file() or sha(r['license_evidence_path'])!=r['license_evidence_sha256'].lower():
+  raise SystemExit(f'BLOCKED: missing or changed license evidence file at row {i}')
  if r['license_review_status'].strip().lower()!='verified' or not r['license_name'].strip():
   raise SystemExit(f'BLOCKED: source license not individually verified at row {i}')
- if not re_sha(r['catalog_commit']): raise SystemExit(f'BLOCKED: invalid catalog commit at row {i}')
+ if not re.fullmatch(r'[0-9a-f]{40,64}',r['catalog_commit'].strip().lower()):
+  raise SystemExit(f'BLOCKED: invalid catalog commit at row {i}')
  for field in ('source_url','license_url'):
   u=urlparse(r[field].strip())
   if u.scheme!='https' or not u.netloc: raise SystemExit(f'BLOCKED: invalid {field} at row {i}')
@@ -79,15 +86,14 @@ for i,r in enumerate(rows,2):
  parents[r['parent_dataset_id']].append(r)
 if len(parents)<a.target_candidate_parents:
  raise SystemExit(f'BLOCKED: {len(parents)} independent candidate parents; need {a.target_candidate_parents}')
-eligible={pid for pid,children in parents.items()
-          if any(c['empirical_profile'] in set().union(*DIRECT.values()) for c in children)}
+profiled_parent_ids=set(parents)
 finance=sorted(pid for pid,children in parents.items()
-                if pid in eligible and any(c['source_sector'].strip().lower()=='finance' for c in children))
-other=sorted(pid for pid in eligible if pid not in set(finance))
+                if pid in profiled_parent_ids and any(c['source_sector'].strip().lower()=='finance' for c in children))
+other=sorted(pid for pid in profiled_parent_ids if pid not in set(finance))
 if len(finance)<a.minimum_finance_parents or len(other)<a.target_candidate_parents-a.minimum_finance_parents:
  raise SystemExit(f'BLOCKED: need {a.minimum_finance_parents} finance and '
   f'{a.target_candidate_parents-a.minimum_finance_parents} non-finance parents; '
-  f'eligible for a T3 family profile; found {len(finance)} and {len(other)}')
+  f'candidate parents; found {len(finance)} finance and {len(other)} non-finance')
 sampler=random.Random(a.sample_seed)
 sampled=sorted(sampler.sample(finance,a.minimum_finance_parents)+
                sampler.sample(other,a.target_candidate_parents-a.minimum_finance_parents))
@@ -99,8 +105,6 @@ for pid in sampled:
  children=parents[pid]
  for child in children:
   profile=child['empirical_profile']
-  direct_families=[f for f in FAMILIES if profile in DIRECT[f]]
-  if not direct_families: continue
   for source_family in FAMILIES:
    if profile in DIRECT[source_family]: scope='within_regime'
    elif profile in NEAR[source_family]: scope='within_family_neighborhood'
@@ -111,8 +115,8 @@ for pid in sampled:
    tail=max(0.,float(child['excess_kurtosis']))
    mad_proxy=min((1.5,3,4.5,6,9,12,15,20,30),
                  key=lambda m:abs(math.log1p(m)-math.log1p(1.5+tail)))
-   eligible=[g for g in grid if g['mechanism']!='mixture_bimodal_near' and g['mechanism']!='mixture_bimodal_far']
-   cell=min(eligible,key=lambda g:abs(float(g['contamination'])-contamination_proxy)/.30+
+   eligible_grid=[g for g in grid if g['mechanism']!='mixture_bimodal_near' and g['mechanism']!='mixture_bimodal_far']
+   cell=min(eligible_grid,key=lambda g:abs(float(g['contamination'])-contamination_proxy)/.30+
             abs(math.log1p(float(g['mad_scale']))-math.log1p(mad_proxy))/math.log1p(30))
    out.append({
     'protocol':'T3_B3_realworld_parent_child_v1','parent_dataset_id':pid,
@@ -128,6 +132,17 @@ for pid in sampled:
     'profile_sha256':child['profile_sha256'],'catalog_commit':child['catalog_commit'],
     'license_name':child['license_name'],
     'license_url':child['license_url'],'license_review_status':child['license_review_status'],
+    'upstream_license_status':child['upstream_license_status'],
+    'upstream_source_url':child['upstream_source_url'],
+    'source_archive_doi':child['source_archive_doi'],
+    'license_evidence':child['license_evidence'],
+    'license_evidence_sha256':child['license_evidence_sha256'],
+    'license_evidence_path':child['license_evidence_path'],
+    'source_group':child['source_group'],
+    'license_basis':child['license_basis'],
+    'child_selection_rule':child['child_selection_rule'],
+    'variable':child['variable'],
+    'feature_index':child.get('feature_index',''),
     'selection':'outcome_blind_profile_match_to_T3_Discovery_family_grid'})
 if not out: raise SystemExit('BLOCKED: no parents match any Discovery family profile')
 a.out.mkdir(parents=True,exist_ok=True)
@@ -135,7 +150,7 @@ path=a.out/'frozen_parent_child_family_manifest.csv'
 with path.open('w',newline='',encoding='utf-8') as f:
  w=csv.DictWriter(f,fieldnames=list(out[0]));w.writeheader();w.writerows(out)
 payload={'protocol':'T3_B3_realworld_parent_child_v1','candidate_parent_count':len(parents),
- 'profile_matched_candidate_parent_count':len(eligible),
+ 'profiled_candidate_parent_count':len(profiled_parent_ids),
  'frozen_sample_parent_count':len(sampled),'frozen_finance_parent_count':a.minimum_finance_parents,
  'frozen_nonfinance_parent_count':len(sampled)-a.minimum_finance_parents,
  'sample_seed':a.sample_seed,

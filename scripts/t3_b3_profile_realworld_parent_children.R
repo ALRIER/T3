@@ -18,8 +18,18 @@ numeric_values<-function(row){
  if(!file.exists(p))stop('Missing raw source: ',p)
  obj<-if(ext=='rds')readRDS(p) else if(ext=='csv')read.csv(p,stringsAsFactors=FALSE,check.names=FALSE) else
    stop('Source must be pre-extracted CSV or RDS: ',p)
- v<-as.character(row$variable[1])
- if(is.data.frame(obj)){if(!v%in%names(obj))stop('Variable absent from source: ',v);x<-obj[[v]]}
+ v<-trimws(as.character(row$variable[1]))
+ if(is.data.frame(obj)){
+   if('feature_index'%in%names(row)&&!is.na(row$feature_index[1])&&nzchar(as.character(row$feature_index[1]))){
+     j<-as.integer(row$feature_index[1]);
+     if(is.na(j)||j<1L||j>ncol(obj)||trimws(names(obj)[j])!=v)stop('Variable position does not match source schema: ',v)
+   } else {
+     hits<-which(trimws(names(obj))==v);if(!length(hits))stop('Variable absent in source: ',v)
+     if(length(hits)>1L)stop('Duplicate source variable needs a frozen feature_index: ',v)
+     j<-hits[1L]
+   }
+   x<-obj[[j]]
+ }
  else if(is.atomic(obj)&&is.null(dim(obj)))x<-obj else stop('Unsupported source object: ',p)
  x<-suppressWarnings(as.numeric(x));x<-x[is.finite(x)]
  transform<-if('transform'%in%names(row)&&!is.na(row$transform[1])&&nzchar(row$transform[1]))
@@ -46,13 +56,18 @@ features<-function(x){
 dir.create(file.path(out,'vectors'),recursive=TRUE,showWarnings=FALSE)
 dir.create(file.path(out,'sources'),recursive=TRUE,showWarnings=FALSE)
 rows<-vector('list',nrow(catalog))
+optional_meta<-intersect(c('upstream_license_status','upstream_source_url','source_archive_doi',
+  'license_evidence','license_evidence_sha256','license_evidence_path',
+  'source_group','license_basis','child_selection_rule','feature_index'),names(catalog))
 for(i in seq_len(nrow(catalog))){
  r<-catalog[i,,drop=FALSE];source_path<-normalizePath(r$source_path,mustWork=TRUE)
  source_hash<-t2_sha256(source_path)
- target_source<-file.path(out,'sources',paste0(slug(r$dataset_id),'.',tools::file_ext(source_path)))
+ target_source<-file.path(out,'sources',paste0(source_hash,'.',tools::file_ext(source_path)))
  if(!file.exists(target_source)&&!file.copy(source_path,target_source))stop('Failed to retain raw source')
  if(!identical(t2_sha256(target_source),source_hash))stop('Raw source copy hash mismatch')
- x<-numeric_values(r);if(length(x)<150L)stop('Child vector has fewer than 150 observations: ',r$dataset_id)
+ x<-tryCatch(numeric_values(r),error=function(e)stop('Source parse failed for child ',r$dataset_id,
+   ' from parent ',r$parent_dataset_id,': ',conditionMessage(e)))
+ if(length(x)<150L)stop('Child vector has fewer than 150 observations: ',r$dataset_id)
  f<-features(x)
  vector_path<-file.path(out,'vectors',paste0(slug(r$dataset_id),'.rds'))
  saveRDS(x,vector_path,version=3,compress='xz')
@@ -71,6 +86,7 @@ for(i in seq_len(nrow(catalog))){
    empirical_profile=f$empirical_profile,license_name=r$license_name,
    license_url=r$license_url,license_review_status=r$license_review_status,
    catalog_commit=catalog_commit,stringsAsFactors=FALSE)
+ for(nm in optional_meta) rows[[i]][[nm]]<-as.character(r[[nm]][1])
 }
 profile<-do.call(rbind,rows)
 write.csv(profile,file.path(out,'outcome_blind_profiles.csv'),row.names=FALSE)

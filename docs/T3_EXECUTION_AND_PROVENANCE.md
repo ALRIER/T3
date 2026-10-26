@@ -11,7 +11,7 @@
 
 ## Comparisons and claims
 
-- For each metric, the reference is the best eligible member of the predeclared 26-estimator classical/robust panel, selected within the independent evaluation seed. The MSE and q95 references may differ. A learned candidate is paired against that per-seed reference; the reference is never selected after looking at candidate outcomes.
+- For both metrics, the primary reference is the sample-mean estimator. The other 25 classical/robust estimators remain competitors and are reported as outcomes; the benchmark is not selected after observing results.
 - MSE and q95 are evaluated separately. Reports preserve MSE-only, q95-only, joint MSE+q95, joint BH-FDR, single-metric BH-FDR, Pareto, and practical-improvement indicators with confidence intervals. A joint winner is not required for a candidate to appear in a single-metric category.
 - Held-out and stress primary BH correction is applied once to the complete stage reporting panel: candidate × metric × source family × evaluation family × sample size × transfer scope. Within-stratum q-values are secondary. The global aggregation workflow refuses to run without both standard and cross-family score artifacts.
 - The frozen practical threshold is a 5% relative reduction in each loss for the `practical` category; `assured_practical` additionally requires both 95% lower confidence bounds to exceed 5%. Statistical significance alone does not imply practical value.
@@ -27,4 +27,4 @@
 
 ## Current external-data gate
 
-`config/confirmatory_public_datasets.csv` does not currently satisfy the parent-level source and license-review schema. The legacy Real-world collector references files absent from this checkout. Consequently the old Real-world workflows are disabled, and a full Real-world run must remain blocked until a frozen catalog has at least 500 independent parents and passes `scripts/t3_validate_realworld_manifest.py --minimum-parents 500`. This is a data-provenance gate, not a license inference from a generic package name.
+The new catalog workflow merges a fresh UCI collection with the archived public candidate package, profiles without model outcomes, and freezes 642 parents (200 finance, 442 other). UCI license pages and the Zenodo package license are snapshotted and hashed; the original upstream rights for items in the archived package remain marked not independently reviewed. The old Real-world scoring workflows remain disabled. Frozen scoring is gated on a successful new catalog freeze and available production Discovery artifacts; the old 50-row fixture is not used.

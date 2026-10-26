@@ -13,6 +13,11 @@ tab<-read.csv(manifest_path,stringsAsFactors=FALSE,check.names=FALSE)
 required<-c('parent_dataset_id','dataset_id','training_family','transfer_scope',
  'matched_scenario_id','processed_path','processed_sha256','profile_sha256',
  'source_path','source_sha256','license_review_status','license_name','license_url','catalog_commit',
+ 'upstream_license_status','upstream_source_url','source_archive_doi',
+ 'license_evidence','license_evidence_sha256','license_evidence_path',
+ 'source_group',
+ 'license_basis',
+ 'child_selection_rule','variable',
  'empirical_profile','domain','source_url')
 if(!all(required%in%names(tab)))stop('Frozen parent-child schema incomplete')
 if(any(tolower(tab$license_review_status)!='verified'))stop('Real-world scoring requires individually verified source licenses')
@@ -69,6 +74,17 @@ for(j in seq_len(nrow(tab))) {
    z$dataset_id<-row$dataset_id;z$parent_dataset_id<-row$parent_dataset_id
    z$family<-family;z$training_family<-family;z$evaluation_profile<-row$empirical_profile
    z$domain<-row$domain;z$source_url<-row$source_url
+   z$license_name<-row$license_name;z$license_url<-row$license_url
+   z$upstream_license_status<-row$upstream_license_status
+   z$upstream_source_url<-row$upstream_source_url
+   z$source_archive_doi<-row$source_archive_doi
+   z$license_evidence<-row$license_evidence
+   z$license_evidence_sha256<-row$license_evidence_sha256
+   z$license_evidence_path<-row$license_evidence_path
+   z$source_group<-row$source_group
+   z$license_basis<-row$license_basis
+   z$child_selection_rule<-row$child_selection_rule
+   z$variable<-row$variable
    z$transfer_scope<-row$transfer_scope;z$matched_scenario_id<-row$matched_scenario_id
    z$depth<-depth;z$sample_n<-n;z$training_seed<-training_seed;z$realworld_seed<-eval_seed
    z$parent_cluster_unit<-'parent_dataset_id';z$target_type<-'parent_full_sample_mean_proxy'
