@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.make.outputs.matrix }}
@@ -25,6 +26,7 @@ jobs:
           print('matrix='+json.dumps({'include':z},separators=(',',':')))
           PY
   cv5:
+    if: ${{ false }}
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -66,6 +68,7 @@ jobs:
           retention-days: 90
 
   component-stability:
+    if: ${{ false }}
     needs: [plan,cv5]
     runs-on: ubuntu-latest
     timeout-minutes: 90

@@ -17,6 +17,35 @@ t2_realworld_validate_manifest <- function(tab, mode = 'smoke') {
   if (mode == 'full' && any(grepl('fixture|nonredistributable|review|pending|unknown',
                                    tab$license, ignore.case = TRUE)))
     stop('Final real-world full mode requires reviewed redistributable inputs')
+  if(mode=='full') {
+    required<-c('parent_dataset_id','source_url','source_path','source_sha256',
+      'processed_path','processed_sha256','license_name','license_url',
+      'license_review_status','profile_sha256','catalog_commit')
+    missing<-setdiff(required,names(tab))
+    if(length(missing))stop('Full real-world manifest lacks auditable source/license fields: ',
+      paste(missing,collapse=', '))
+    is_sha<-function(x)grepl('^[[:xdigit:]]{64}$',as.character(x))
+    if(anyNA(tab$parent_dataset_id)||any(!nzchar(trimws(tab$parent_dataset_id)))||
+       any(!is_sha(tab$source_sha256))||any(!is_sha(tab$profile_sha256)))
+      stop('Full real-world manifest has invalid parent or SHA-256 provenance')
+    if(any(!file.exists(tab$source_path))||
+       any(tolower(vapply(tab$source_path,t2_sha256,character(1)))!=tolower(tab$source_sha256)))
+      stop('Full real-world raw-source file/checksum mismatch')
+    if(any(tolower(tab$processed_sha256)!=tolower(tab$sha256))||
+       any(normalizePath(tab$processed_path,mustWork=FALSE)!=normalizePath(tab$path,mustWork=FALSE)))
+      stop('Processed file fields disagree with the frozen scoring input')
+    https<-function(x)grepl('^https://[^/]+',as.character(x))
+    if(any(!https(tab$source_url))||any(!https(tab$license_url))||
+       any(tolower(tab$license_review_status)!='verified')||
+       any(!nzchar(trimws(tab$license_name)))||
+       any(!grepl('^[[:xdigit:]]{40,64}$',tab$catalog_commit)))
+      stop('Full real-world source or license provenance is not individually verified')
+    parent_hashes<-split(tolower(tab$source_sha256),tab$parent_dataset_id)
+    if(any(vapply(parent_hashes,function(x)length(unique(x))!=1L,logical(1))))
+      stop('One parent_dataset_id maps to multiple source files')
+    if(length(unique(tab$parent_dataset_id))<500L)
+      stop('Full real-world audit requires at least 500 independent parent datasets')
+  }
   if (any(!file.exists(tab$path))) stop('Final real-world cache is incomplete')
   actual <- vapply(tab$path, t2_sha256, character(1))
   if (any(is.na(tab$sha256) | !nzchar(trimws(tab$sha256)) |

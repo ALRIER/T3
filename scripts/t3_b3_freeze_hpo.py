@@ -9,7 +9,8 @@ p.add_argument('--root',default='artifacts/T2_V3_B3_nested_optuna')
 p.add_argument('--out',required=True)
 a=p.parse_args()
 if a.seed not in range(10) or a.n not in (200,1000,3000): raise SystemExit('invalid registry key')
-continuous={'mutation_rate','crossover_probability','F','CR','alpha'}
+continuous={'mutation_rate','crossover_probability','F','CR','alpha','regularization_lambda'}
+BUDGET_DESIGNS={'p75_g67':(75,67),'p100_g50':(100,50),'p150_g33':(150,33)}
 engines={}
 for engine in ('ga','nsga2','de','dirichlet'):
     rows=[]
@@ -28,8 +29,13 @@ for engine in ('ga','nsga2','de','dirichlet'):
             chosen[key]=statistics.median(values)
         else:
             counts=Counter(values); chosen[key]=sorted(counts,key=lambda v:(-counts[v],str(v)))[0]
+    design=chosen.get('budget_design')
+    if design not in BUDGET_DESIGNS: raise SystemExit(f'Invalid equal-budget design for {engine}: {design}')
+    chosen['population'],chosen['generations']=BUDGET_DESIGNS[design]
+    if chosen['population']*(chosen['generations']+1)!=5100:
+        raise SystemExit(f'Unequal objective budget in frozen registry for {engine}')
     engines[engine]=chosen
-out={'protocol':'T3_B3_nested_5x3_hpo_freeze_v1','family':a.family,'seed':a.seed,
+out={'protocol':'T3_B3_nested_5x3_hpo_freeze_v2_equal_budget','family':a.family,'seed':a.seed,
      'sample_n':a.n,'outer_folds':5,'inner_folds':3,
      'selection':'median_continuous_mode_discrete_across_outer_fold_inner_CV',
      'engines':engines}

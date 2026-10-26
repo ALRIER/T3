@@ -52,11 +52,11 @@ jobs:
           path: incoming/mc
       - name: Materialize and verify held-out Monte Carlo source
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R heldout ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
       - name: Evaluate frozen discovery models on independent held-out seeds
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: bash scripts/run_r_in_container.sh Rscript scripts/v3_heldout_frozen_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}
@@ -101,11 +101,11 @@ jobs:
           path: incoming/mc
       - name: Materialize and verify stress Monte Carlo source
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R stress ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
       - name: Evaluate frozen discovery models under stress seeds
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: bash scripts/run_r_in_container.sh Rscript scripts/v3_stress_frozen_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}

@@ -1,0 +1,63 @@
+name: T3 B3 Optimizer RNG Sensitivity Audit
+"on":
+  workflow_dispatch:
+    inputs:
+      mc_run_id:
+        description: Successful T3 B3 FULL Monte Carlo run ID
+        required: true
+        type: string
+      discovery_run_id:
+        description: Successful T3 B3 Discovery run ID
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  repeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s0-n1000-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/mc
+      - name: Materialize immutable training data
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} 0 1000 incoming/mc ${{ inputs.mc_run_id }}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-${{ matrix.family }}-s0-n1000-run${{ inputs.discovery_run_id }}
+          run-id: ${{ inputs.discovery_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
+      - name: Repeat optimizers with frozen nested HPO
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_optimizer_variability.R ${{ matrix.family }} 0 1000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-optimizer-variability-${{ matrix.family }}-seed0-n1000-run${{ github.run_id }}
+          path: artifacts/v3_optimizer_variability
+          if-no-files-found: error
+          retention-days: 90

@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     outputs:
       batches: ${{ steps.make.outputs.result }}
@@ -36,6 +37,7 @@ jobs:
             if(!ids.length)return core.setFailed('No immutable audited parent datasets');
             return ids;
   freeze-parents:
+    if: ${{ false }}
     needs: plan
     runs-on: ubuntu-latest
     steps:
@@ -57,6 +59,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   score_a:
+    if: ${{ false }}
     needs: [plan, freeze-parents]
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -107,6 +110,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   score_b:
+    if: ${{ false }}
     needs: [plan, freeze-parents]
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -157,6 +161,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   parent-inference:
+    if: ${{ false }}
     needs: [score_a,score_b]
     runs-on: ubuntu-latest
     timeout-minutes: 120

@@ -1,10 +1,6 @@
 name: T3 B3 Monte Carlo Actual Generator Pilot
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/t3-b3-montecarlo-actual-pilot.yml'
 permissions:
   contents: read
   packages: read
@@ -23,10 +19,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull R runtime
-        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: docker pull ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
       - name: Execute actual distribution, contamination, 26-estimator pilot
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_pilot.R normal discovery 0 3
@@ -50,7 +46,7 @@ jobs:
           path: restored
       - name: Verify published SHA-256 and canonical R payload with Discovery reader
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
         run: |
           python3 - <<'PY'
           import csv,hashlib,pathlib

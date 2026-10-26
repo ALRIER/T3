@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.make.outputs.matrix }}
@@ -27,6 +28,7 @@ jobs:
           print('matrix='+json.dumps({'include':z},separators=(',',':')))
           PY
   inference:
+    if: ${{ false }}
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -69,7 +71,7 @@ jobs:
   false-positive-calibration:
     name: T2 V3 B3 Post-Heldout Null Calibration
     needs: inference
-    if: ${{ needs.inference.result == 'success' }}
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:

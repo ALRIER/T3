@@ -268,12 +268,17 @@ t2_run_discovery <- function(data,mode,shard,engine='all',hyperparameters=NULL){
  )
  selected <- if (engine == 'all') names(dispatch) else engine
  if (!all(selected %in% names(dispatch))) stop('Unknown discovery engine')
+ engine_configs<-setNames(lapply(selected,engine_cfg),selected)
+ max_budgets<-vapply(engine_configs,t3_common_budget,integer(1))
+ if(length(unique(max_budgets))!=1L)
+   stop('Frozen HPO registries imply unequal optimizer objective budgets')
+ common_cfg<-engine_configs[[selected[[1L]]]]
  engines <- setNames(lapply(selected, function(name) dispatch[[name]]()), selected)
 
  # Non-evolutionary controls are separate diagnostics: preserve 26+4 frozen production models.
  controls<-list(
-   convex_mse=t3_control_optimize(s,cfg,t2_seed(shard,205),method='convex_mse'),
-   local_deterministic=t3_control_optimize(s,cfg,t2_seed(shard,206),method='local_deterministic')
+   convex_mse=t3_control_optimize(s,common_cfg,t2_seed(shard,205),method='convex_mse'),
+   local_deterministic=t3_control_optimize(s,common_cfg,t2_seed(shard,206),method='local_deterministic')
  )
  selected_models<-t3_select_models(engines,s)
  # Identical training-only MSE/q95 evaluation for all 26 baselines + six optimizers.
@@ -289,15 +294,15 @@ t2_run_discovery <- function(data,mode,shard,engine='all',hyperparameters=NULL){
  budget_audit<-t3_assert_engine_budget_parity(all_optimizers)
  convergence_audit<-t3_compare_convergence(all_optimizers,s)
  computational_ledger<-t3_budget_ledger(all_optimizers,length(s),
-   outer_folds=cfg$discovery_cv_folds,
-   inner_folds=cfg$discovery_cv_inner_folds,
+   outer_folds=common_cfg$discovery_cv_folds,
+   inner_folds=common_cfg$discovery_cv_inner_folds,
    hyperparameter_trials=1L)
  list(engines=engines,non_evolutionary_controls=controls,training_control_comparison=discovery_comparison,
       models=selected_models$models,
       objective_budget_audit=budget_audit,convergence_audit=convergence_audit,
       computational_ledger=computational_ledger,
-      selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=cfg,
-      budget_registry=t2_discovery_budget_registry(cfg),seed=t2_seed(shard,200),
+      selection_policy=selected_models$selection,selection_scales=selected_models$scales,config=common_cfg,
+      budget_registry=t2_discovery_budget_registry(engine_configs),seed=t2_seed(shard,200),
       training_seed_index=if (length(data$seed_index)) as.integer(data$seed_index) else 0L,
       mc_canonical_id=if(is.null(data$canonical_id)) NA_character_ else data$canonical_id)
 }

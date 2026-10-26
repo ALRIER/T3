@@ -1,10 +1,6 @@
 name: T3 B3 Integration Smoke (manual only)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/t3-b3-integration-smoke.yml'
 permissions:
   contents: read
   packages: read
@@ -21,16 +17,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull already published pinned T3 R runtime
-        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: docker pull ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
       - name: Verify pinned R runtime is available
-        run: docker run --rm ghcr.io/alrier/t3-r:4.3.3-statmod-v2 Rscript -e "cat(R.version.string, '\\n'); stopifnot(requireNamespace('statmod',quietly=TRUE))"
+        run: docker run --rm ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16 Rscript -e "cat(R.version.string, '\\n'); stopifnot(requireNamespace('statmod',quietly=TRUE))"
       - name: Run small synthetic statistical and seed-contract checks
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_common_w_selection_smoke.R
       - name: Check Python Optuna driver parses
-        run: python3 -m py_compile scripts/t2_v3_b3_nested_optuna.py
+        run: |
+          python3 -m py_compile scripts/t2_v3_b3_nested_optuna.py scripts/t3_b3_freeze_hpo.py scripts/t3_validate_realworld_manifest.py
+          python3 scripts/t2_v3_b3_nested_contract.py
+      - name: Parse downstream R entrypoints
+        run: Rscript -e "invisible(parse(file='R/00_shared/pipeline.R')); invisible(parse(file='R/03_heldout/heldout_audit.R')); invisible(parse(file='R/00_shared/t3_b3_partitions.R')); invisible(parse(file='R/05_audits/stage_inference.R')); invisible(parse(file='scripts/v3_cross_family_frozen_production.R')); invisible(parse(file='scripts/v3_optimizer_variability.R')); invisible(parse(file='scripts/v3_stage_aggregate_panel.R')); invisible(parse(file='scripts/t3_b3_downstream_e2e_smoke.R')); cat('T3_DOWNSTREAM_R_PARSE_PASS\\n')"
       - name: Verify safe stage scripts exist without running production
         run: |
           test -s scripts/v3_discovery_production.R
@@ -38,5 +38,9 @@ jobs:
           test -s scripts/v3_stress_frozen_production.R
           test -s scripts/v3_realworld_frozen_production.R
           test -s scripts/v3_stage_aggregate.R
+          test -s scripts/v3_stage_aggregate_panel.R
+          test -s scripts/v3_cross_family_frozen_production.R
+          test -s scripts/v3_optimizer_variability.R
+          test -s scripts/t3_b3_downstream_e2e_smoke.R
 
 # Bounded smoke triggered after repairing convergence output name collision; full runs remain disabled.

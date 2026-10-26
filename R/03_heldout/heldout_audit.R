@@ -3,6 +3,11 @@
 t2_discovery_budget_registry <- function(config) {
   required <- c('ga', 'nsga2', 'de', 'dirichlet')
   fields <- c('population', 'generations', 'evaluation_replicates', 'objective_names')
+  if(all(required%in%names(config))&&all(vapply(config[required],is.list,logical(1)))) {
+    if(!all(vapply(config[required],function(z)all(fields%in%names(z)),logical(1))))
+      stop('Incomplete per-engine Discovery budget registry')
+    return(setNames(lapply(required,function(engine)config[[engine]][fields]),required))
+  }
   setNames(lapply(required, function(engine) config[fields]), required)
 }
 
@@ -18,10 +23,16 @@ t2_budget_parity_audit <- function(discovery) {
   if (!identical(names(registry), required))
     stop('Budget registry must declare ga, nsga2, de and dirichlet')
   reference <- registry[[1L]]
-  same <- vapply(registry, identical, logical(1), y=reference)
-  if (!all(same)) stop('Discovery budgets or objectives are not equal across engines')
-  data.frame(engine=names(registry), population=reference$population,
-             generations=reference$generations,
+  valid <- vapply(registry,function(z)
+    identical(as.integer(z$evaluation_replicates),as.integer(reference$evaluation_replicates))&&
+    identical(as.character(z$objective_names),as.character(reference$objective_names)),logical(1))
+  caps<-vapply(registry,function(z)as.integer(z$population)*(as.integer(z$generations)+1L),integer(1))
+  same <- valid & caps==caps[[1L]]
+  if (!all(same)) stop('Discovery maximum objective budgets or objectives are unequal across engines')
+  data.frame(engine=names(registry),
+             population=vapply(registry,function(z)as.integer(z$population),integer(1)),
+             generations=vapply(registry,function(z)as.integer(z$generations),integer(1)),
+             max_objective_evaluations=caps,
              evaluation_replicates=reference$evaluation_replicates,
              objective_mse=TRUE, objective_q95=TRUE,
              budget_equal=TRUE, stringsAsFactors=FALSE)

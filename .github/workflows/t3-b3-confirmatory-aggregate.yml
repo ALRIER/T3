@@ -1,29 +1,28 @@
-name: T3 B3 Confirmatory BH-FDR aggregation
-
+name: T3 B3 Stage-wide confirmatory inference
 "on":
   workflow_dispatch:
     inputs:
       confirmatory_run_id:
-        description: Successful T3 B3 Held-out and Stress from immutable Actions artifacts run ID
+        description: Successful held-out/stress scoring run ID
         required: true
         type: string
-
+      cross_family_run_id:
+        description: Successful frozen cross-family scoring run ID
+        required: true
+        type: string
+      stage:
+        description: Independent evaluation stage
+        required: true
+        type: choice
+        options: [heldout, stress]
 permissions:
   contents: read
   actions: read
   packages: read
-
 jobs:
   aggregate:
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      max-parallel: 6
-      matrix:
-        stage: [heldout, stress]
-        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
-        n: [200, 1000, 3000]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/login-action@v3
@@ -31,27 +30,39 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify complete upstream evaluation workflow
+      - name: Verify upstream runs completed successfully
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run view ${{ inputs.confirmatory_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Held-out and Stress from immutable Actions artifacts")'
+        run: |
+          gh run view ${{ inputs.confirmatory_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Held-out and Stress from immutable Actions artifacts")'
+          gh run view ${{ inputs.cross_family_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Frozen Cross-Family Transfer")'
       - uses: actions/download-artifact@v5
         with:
-          pattern: t3-b3-${{ matrix.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ inputs.confirmatory_run_id }}
+          pattern: t3-b3-${{ inputs.stage }}-*-run${{ inputs.confirmatory_run_id }}
           run-id: ${{ inputs.confirmatory_run_id }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: artifacts
           merge-multiple: true
-      - name: Aggregate independent-seed evidence and BH-FDR
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-crossfamily-${{ inputs.stage }}-*-run${{ inputs.cross_family_run_id }}
+          run-id: ${{ inputs.cross_family_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/v3_cross_family_scoring/${{ inputs.stage }}
+          merge-multiple: true
+      - name: Compute one prespecified stage-wide BH-FDR panel
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          T3_CONFIRMATORY_RUN_ID: ${{ inputs.confirmatory_run_id }}
+          T3_CROSS_FAMILY_RUN_ID: ${{ inputs.cross_family_run_id }}
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
-        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_stage_aggregate.R ${{ matrix.stage }} ${{ matrix.family }} ${{ matrix.n }}
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_stage_aggregate_panel.R ${{ inputs.stage }}
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-confirmatory-bh-${{ matrix.stage }}-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/v3_confirmatory_aggregate
+          name: t3-b3-global-inference-${{ inputs.stage }}-run${{ github.run_id }}
+          path: artifacts/v3_confirmatory_global/${{ inputs.stage }}
           if-no-files-found: error
           retention-days: 90

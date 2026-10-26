@@ -208,6 +208,10 @@ t3_winner_taxonomy <- function(inference,alpha=.05,
  wide$winner_joint_mse_q95<-mse&q95
  wide$winner_mse_only<-mse&!q95
  wide$winner_q95_only<-q95&!mse
+ wide$winner_mse_only_bh_fdr<-mse_fdr&!q95_fdr
+ wide$winner_q95_only_bh_fdr<-q95_fdr&!mse_fdr
+ wide$winner_pareto<-wide$winner_mse_only|wide$winner_q95_only
+ wide$winner_pareto_bh_fdr<-wide$winner_mse_only_bh_fdr|wide$winner_q95_only_bh_fdr
  wide$winner_joint_mse_q95_bh_fdr<-mse_fdr&q95_fdr
  wide$winner_joint_practical<-wide$winner_joint_mse_q95_bh_fdr &
    wide$gain_pct.mse>=practical_gain_pct & wide$gain_pct.q95>=practical_gain_pct &
@@ -215,9 +219,11 @@ t3_winner_taxonomy <- function(inference,alpha=.05,
  wide$winner_joint_assured_practical<-wide$winner_joint_mse_q95_bh_fdr &
    wide$gain_pct_lower.mse>=practical_gain_pct & wide$gain_pct_lower.q95>=practical_gain_pct
  wide$winner_taxonomy<-ifelse(wide$winner_joint_mse_q95_bh_fdr,'joint_MSE_q95_BH_FDR',
+   ifelse(wide$winner_mse_only_bh_fdr,'MSE_only_BH_FDR',
+   ifelse(wide$winner_q95_only_bh_fdr,'q95_only_BH_FDR',
    ifelse(wide$winner_joint_mse_q95,'joint_MSE_q95_descriptive',
    ifelse(wide$winner_mse_only,'MSE_only_descriptive',
-   ifelse(wide$winner_q95_only,'q95_only_descriptive','no_confirmed_gain'))))
+   ifelse(wide$winner_q95_only,'q95_only_descriptive','no_confirmed_gain'))))))
  wide$alpha<-alpha
  wide$practical_gain_pct<-practical_gain_pct
  wide

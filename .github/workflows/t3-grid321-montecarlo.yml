@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
@@ -32,6 +33,7 @@ jobs:
           print('matrix='+json.dumps({'include':z},separators=(',',':')))
           PY
   simulate:
+    if: ${{ false }}
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 360

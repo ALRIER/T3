@@ -9,6 +9,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   catalog:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     container:
@@ -37,6 +38,7 @@ jobs:
           path: artifacts/T2_V3_B3_fresh_profiles/catalog.*
           retention-days: 90
   profile:
+    if: ${{ false }}
     needs: catalog
     runs-on: ubuntu-latest
     timeout-minutes: 120

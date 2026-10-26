@@ -49,8 +49,11 @@ t3_b3_transfer_scope <- function(source_family,evaluation_family,stage,mechanism
       ifelse(mechanism=='mixture_bimodal_far','cross_family_structural_shift',
         'cross_family_transfer')))
   if(stage=='discovery') return(rep('within_family_training_descriptive',length(mechanism)))
-  if(stage=='heldout') return(rep('within_family_independent_replication',length(mechanism)))
+  if(stage=='heldout') return(ifelse(mechanism=='mixture_bimodal_near',
+    'within_family_neighborhood_shift',ifelse(mechanism=='mixture_bimodal_far',
+      'within_family_structural_shift','within_regime_independent_replication')))
   if(stage=='stress') return(ifelse(mechanism=='mixture_bimodal_near',
-    'within_family_neighborhood_shift','within_family_structural_shift'))
+    'within_family_neighborhood_shift',ifelse(mechanism=='mixture_bimodal_far',
+      'within_family_structural_shift','within_family_stress_transfer')))
   rep('realworld_profile_matched_transfer',length(mechanism))
 }

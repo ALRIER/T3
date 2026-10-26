@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 # Phase A of the regime-matched external audit.  This phase is outcome blind:
 # it only freezes public sources, raw hashes and structural diagnostics.
+stop('Retired catalog entrypoint: its legacy_sources modules are absent. Use the reviewed T3 manifest contract; do not run this V2 collector.')
 args <- commandArgs(trailingOnly = TRUE)
 stage <- if (length(args)) args[[1L]] else stop('Usage: catalog|profile [batch]')
 batch <- if (length(args) > 1L) as.integer(args[[2L]]) else NA_integer_
@@ -72,7 +73,7 @@ if (stage == 'catalog') {
       load_ok=ok, load_error=if(ok) '' else as.character(got$error %||% 'insufficient observations'), n=d$n,
       skewness=d$skew, excess_kurtosis=d$kurt, support_sign=d$support_sign,
       empirical_profile=if(ok) .eb_empirical_profile(sp$family_hint,sp$domain,d$skew,d$kurt,d$support_sign) else 'load_failed',
-      raw_sha256=if(ok) rw_md5(file.path(out,'raw',paste0(sp$id,'.rds'))) else '', stringsAsFactors=FALSE)
+      raw_sha256=if(ok) t2_sha256(file.path(out,'raw',paste0(sp$id,'.rds'))) else '', stringsAsFactors=FALSE)
   })
   write_csv(do.call(rbind, rows), file.path(out, 'profiles.csv'))
   writeLines('PROFILE_COMPLETE', file.path(out, 'profile.status'))

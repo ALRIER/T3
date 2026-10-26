@@ -16,7 +16,7 @@ for p in sorted(base.glob('profile_batch_*/profiles.csv')):
   raw=p.parent/'raw'/(r['dataset_id']+'.rds')
   if not raw.exists():raise RuntimeError(f'Missing parent scientific data: {raw}')
   if not r.get('raw_sha256'):raise RuntimeError(f'Missing source fingerprint: {raw}')
-  h=hashlib.md5()
+  h=hashlib.sha256()
   with raw.open('rb') as stream:
    for chunk in iter(lambda:stream.read(1048576),b''):h.update(chunk)
   if h.hexdigest()!=r['raw_sha256']:raise RuntimeError(f'Parent fingerprint mismatch: {raw}')

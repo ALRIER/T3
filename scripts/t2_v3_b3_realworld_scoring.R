@@ -78,7 +78,7 @@ for(j in seq_len(nrow(profile))) {
   id<-profile$dataset_id[j]
   raw<-file.path(batchdir,'raw',paste0(id,'.rds'))
   if(!file.exists(raw))stop('Missing audited raw: ',id)
-  if(!identical(unname(tools::md5sum(raw)),profile$raw_sha256[j]))stop('Raw audit fingerprint mismatch: ',id)
+  if(!identical(t2_sha256(raw),profile$raw_sha256[j]))stop('Raw audit fingerprint mismatch: ',id)
   x<-readRDS(raw);x<-as.numeric(x);x<-x[is.finite(x)]
   if(length(x)<150L)stop('Insufficient parent observations: ',id)
   bench<-if(profile$empirical_profile[j]=='normal_like')'mean' else
@@ -122,7 +122,7 @@ for(j in seq_len(nrow(profile))) {
        z$contamination_band_proxy<-fr$contamination_band_proxy[1L]
        z$synthetic_regime_match<-fr$synthetic_regime_match[1L]
       }
-      z$raw_md5<-profile$raw_sha256[j];z$weights_sha256<-t2_sha256(p)
+      z$raw_sha256<-profile$raw_sha256[j];z$weights_sha256<-t2_sha256(p)
       write.table(z,outfile,sep=',',append=rows>0L,col.names=rows==0L,row.names=FALSE)
       set.seed(t2_seed(paste('B3_infer',family,id,depth,n,k),19000L))
       inf<-t2_v3_infer_scenario(sc,models,k,j,n,B=if(smoke)50L else 500L,reference=bench)

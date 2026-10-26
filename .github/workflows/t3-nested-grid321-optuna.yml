@@ -50,6 +50,9 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -70,10 +73,10 @@ jobs:
           path: incoming/mc
       - name: Verify and materialize immutable Monte Carlo source
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
       - name: Install reproducible hyperparameter tuner
-        run: python3 -m pip install --user 'optuna>=4,<5'
+        run: python3 -m pip install --user 'optuna==4.9.0'
       - name: Tune four engines using three internal folds
         run: python3 scripts/t2_v3_b3_nested_optuna.py "${{ matrix.family }}" "${{ matrix.seed }}" "${{ inputs.outer_fold }}" "${{ matrix.n }}" --trials 8
       - name: Refit four engines and score withheld external fold

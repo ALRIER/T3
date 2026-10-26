@@ -19,7 +19,7 @@ hpo_path<-Sys.getenv('T3_B3_HPO_REGISTRY','')
 if(!nzchar(hpo_path)||!file.exists(hpo_path))stop('Production Discovery requires a frozen nested-CV HPO registry')
 if(!requireNamespace('jsonlite',quietly=TRUE))stop('jsonlite required for frozen HPO registry')
 hpo<-jsonlite::fromJSON(hpo_path,simplifyVector=FALSE)
-if(!identical(hpo$protocol,'T3_B3_nested_5x3_hpo_freeze_v1')||
+if(!identical(hpo$protocol,'T3_B3_nested_5x3_hpo_freeze_v2_equal_budget')||
    !identical(hpo$family,family)||as.integer(hpo$seed)!=seed||as.integer(hpo$sample_n)!=n||
    !identical(as.integer(hpo$outer_folds),5L)||!identical(as.integer(hpo$inner_folds),3L)||
    !setequal(names(hpo$engines),c('ga','nsga2','de','dirichlet')))

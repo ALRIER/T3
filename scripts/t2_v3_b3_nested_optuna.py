@@ -100,8 +100,11 @@ for engine in ('ga','nsga2','de','dirichlet'):
                                      (200,1000,3000).index(a.n)))
  rows=[]
  def objective(trial):
-  params=dict(population=trial.suggest_categorical('population',[75,100,150]),
-    generations=trial.suggest_categorical('generations',[50,80]),
+  budget_design=trial.suggest_categorical('budget_design',['p75_g67','p100_g50','p150_g33'])
+  population,generations={'p75_g67':(75,67),'p100_g50':(100,50),
+                          'p150_g33':(150,33)}[budget_design]
+  params=dict(budget_design=budget_design,population=population,
+    generations=generations,
     mutation_rate=trial.suggest_float('mutation_rate',.08,.28),
     crossover_probability=trial.suggest_float('crossover_probability',.65,.95),
     regularization_lambda=trial.suggest_categorical('regularization_lambda',[.0001,.001,.01]),

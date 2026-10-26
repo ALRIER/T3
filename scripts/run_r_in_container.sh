@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Shared pinned R execution for GitHub Actions and local Docker runners.
 set -euo pipefail
-IMAGE="${T2_R_IMAGE:-ghcr.io/alrier/t3-r:4.3.3-statmod-v2}"
+IMAGE="${T2_R_IMAGE:-ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16}"
 if ! command -v docker >/dev/null 2>&1; then echo "Docker is required for T2 pinned R runtime" >&2; exit 127; fi
 ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
 if [[ ! -d "$ROOT" ]]; then echo "Missing workspace: $ROOT" >&2; exit 2; fi

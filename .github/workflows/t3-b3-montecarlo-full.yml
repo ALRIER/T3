@@ -2,10 +2,6 @@ name: T3 B3 FULL Monte Carlo 321 x 500
 run-name: FULL MONTE CARLO PRODUCCION — 540 bloques — 321 escenarios — 500 replicas — ${{ github.sha }}
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/t3-b3-montecarlo-full.yml'
 permissions:
   contents: read
   packages: read
@@ -208,10 +204,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull pinned scientific R runtime
-        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: docker pull ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
       - name: Monte Carlo full 500 replications per scenario
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_full.R ${{ matrix.family }} discovery ${{ matrix.seed }} 500 ${{ matrix.n }}
@@ -421,10 +417,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull pinned scientific R runtime
-        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: docker pull ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
       - name: Monte Carlo full 500 replications per scenario
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_full.R ${{ matrix.family }} heldout ${{ matrix.seed }} 500 ${{ matrix.n }}
@@ -634,10 +630,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull pinned scientific R runtime
-        run: docker pull ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: docker pull ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
       - name: Monte Carlo full 500 replications per scenario
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_full.R ${{ matrix.family }} stress ${{ matrix.seed }} 500 ${{ matrix.n }}
