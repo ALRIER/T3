@@ -102,13 +102,15 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
                   realworld='realworld_seed')
  if(!eval_col%in%names(scores))stop('Missing independent evaluation seed')
  if(!reference%in%as.character(scores$model))stop('Missing benchmark')
- key_columns<-c(intersect(c('family','sample_n','dataset_id','parent_dataset_id'),names(scores)),
+ key_columns<-c(intersect(c('family','source_family','evaluation_family','transfer_scope',
+                            'sample_n','dataset_id','parent_dataset_id'),names(scores)),
                  eval_col,'training_seed','model',
                  intersect('scenario_id',names(scores)))
  if(anyDuplicated(scores[key_columns]))stop('Duplicate stage score keys')
  # Independent evaluation seed is the test unit; training seeds and scenarios
  # form repeated measures and are averaged before inference.
- groups<-intersect(c('family','sample_n','dataset_id','parent_dataset_id'),names(scores))
+ groups<-intersect(c('family','source_family','evaluation_family','transfer_scope',
+                     'sample_n','dataset_id','parent_dataset_id'),names(scores))
  keys<-c(groups,eval_col,'model')
  z<-aggregate(scores[,c('mse','q95'),drop=FALSE],
               scores[,keys,drop=FALSE],mean)
@@ -128,21 +130,31 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
     for(metric in c('mse','q95')) {
       delta<-join[[paste0(metric,'_candidate')]]-
              join[[paste0(metric,'_reference')]]
+      reference_loss<-join[[paste0(metric,'_reference')]]
+      candidate_loss<-join[[paste0(metric,'_candidate')]]
+      gain_pct<-100*(reference_loss-candidate_loss)/pmax(reference_loss,.Machine$double.eps)
       if(all(delta==delta[1L])) {
         pv<-if(delta[1L]<0) 0 else 1
         limits<-rep(delta[1L],2L)
+        gain_limits<-rep(gain_pct[1L],2L)
       } else {
         test<-stats::t.test(delta,alternative='less')
         pv<-test$p.value
         limits<-stats::t.test(delta,conf.level=.95)$conf.int
+        gain_limits<-if(!is.finite(stats::sd(gain_pct)) || stats::sd(gain_pct)<.Machine$double.eps^0.5) rep(mean(gain_pct),2L) else
+          stats::t.test(gain_pct,conf.level=.95)$conf.int
       }
-      ans[[length(ans)+1L]]<-data.frame(stage=stage,group=group,
+      row<-data.frame(stage=stage,group=group,
         model=model,metric=metric,benchmark=reference,
         independent_seeds=nrow(join),difference=mean(delta),
         lower=limits[1L],upper=limits[2L],p_value=pv,
+        reference_loss=mean(reference_loss),candidate_loss=mean(candidate_loss),
+        gain_pct=mean(gain_pct),gain_pct_lower=gain_limits[1L],gain_pct_upper=gain_limits[2L],
         negative_control=FALSE,
         inference_unit='evaluation_seed',
         stringsAsFactors=FALSE)
+      for(group_col in groups)row[[group_col]]<-zz[[group_col]][1L]
+      ans[[length(ans)+1L]]<-row
     }
   }
  }
@@ -155,6 +167,40 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
   # averaged before the test and are never pseudo-replicated.
   out$evidence_status<-'confirmatory_seed_level_BH_FDR_prespecified_panel'
  out
+}
+
+# One row per candidate and transfer stratum.  These categories are mutually
+# auditable rather than a winner-take-all replacement: a model may be a
+# descriptive MSE winner, q95 winner, joint winner, or a joint BH-FDR winner.
+t3_winner_taxonomy <- function(inference,alpha=.05) {
+ required<-c('stage','group','model','metric','difference','upper','q_value',
+             'gain_pct','gain_pct_lower','gain_pct_upper')
+ if(!is.data.frame(inference)||!all(required%in%names(inference)))
+   stop('Incomplete confirmatory inference for winner taxonomy')
+ ids<-c(intersect(c('stage','group','family','source_family','evaluation_family',
+                     'transfer_scope','sample_n','dataset_id','parent_dataset_id','model','benchmark'),names(inference)))
+ wide<-reshape(inference[,c(ids,'metric','difference','upper','q_value','gain_pct',
+                            'gain_pct_lower','gain_pct_upper'),drop=FALSE],
+   idvar=ids,timevar='metric',direction='wide')
+ needed<-c('difference.mse','difference.q95','upper.mse','upper.q95',
+           'q_value.mse','q_value.q95')
+ if(!all(needed%in%names(wide)))stop('Both MSE and q95 are required')
+ mse<-wide$difference.mse<0 & wide$upper.mse<0
+ q95<-wide$difference.q95<0 & wide$upper.q95<0
+ mse_fdr<-mse & wide$q_value.mse<=alpha
+ q95_fdr<-q95 & wide$q_value.q95<=alpha
+ wide$winner_mse<-mse
+ wide$winner_q95<-q95
+ wide$winner_joint_mse_q95<-mse&q95
+ wide$winner_mse_only<-mse&!q95
+ wide$winner_q95_only<-q95&!mse
+ wide$winner_joint_mse_q95_bh_fdr<-mse_fdr&q95_fdr
+ wide$winner_taxonomy<-ifelse(wide$winner_joint_mse_q95_bh_fdr,'joint_MSE_q95_BH_FDR',
+   ifelse(wide$winner_joint_mse_q95,'joint_MSE_q95_descriptive',
+   ifelse(wide$winner_mse_only,'MSE_only_descriptive',
+   ifelse(wide$winner_q95_only,'q95_only_descriptive','no_confirmed_gain'))))
+ wide$alpha<-alpha
+ wide
 }
 
 
@@ -187,6 +233,9 @@ t3_aggregate_confirmatory_shards <- function(stage,family,n,root='artifacts',
       length(unique(part$model))!=32L)stop('Incomplete 32-model evaluation shard: ',dir)
    part$family<-family
    part$sample_n<-n
+   if(!'source_family'%in%names(part))part$source_family<-family
+   if(!'evaluation_family'%in%names(part))part$evaluation_family<-family
+   if(!'transfer_scope'%in%names(part))part$transfer_scope<-'legacy_unclassified'
    rows[[length(rows)+1L]]<-part
  }
  combined<-do.call(rbind,rows)
@@ -195,9 +244,10 @@ t3_aggregate_confirmatory_shards <- function(stage,family,n,root='artifacts',
  # datasets and their parent clusters are prespecified and verified.
  inference<-t3_confirmatory_seed_summary(combined,stage,alpha=alpha,
                                          near_band=near_band)
+ taxonomy<-t3_winner_taxonomy(inference,alpha=alpha)
  if(stage=='realworld')
    inference$evidence_status<-'descriptive_proxy_not_population_confirmation'
- list(scores=combined,inference=inference,
+ list(scores=combined,inference=inference,taxonomy=taxonomy,
       manifest=data.frame(stage=stage,family=family,n=n,seeds=seeds,
        evidence_status='complete_independent_seed_partition_stage'))
 }

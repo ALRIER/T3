@@ -13,6 +13,7 @@ out<-file.path('artifacts','v3_confirmatory_aggregate',role,family,sprintf('n%d'
 if(dir.exists(out))stop('Refusing overwrite of existing aggregate: ',out)
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 write.csv(ans$inference,file.path(out,'seed_level_inference.csv'),row.names=FALSE)
+write.csv(ans$taxonomy,file.path(out,'winner_taxonomy.csv'),row.names=FALSE)
 write.csv(ans$manifest,file.path(out,'seed_coverage.csv'),row.names=FALSE)
 write.csv(ans$scores,file.path(out,'complete_scores.csv'),row.names=FALSE)
 cat('B3_STAGE_AGGREGATE_PASS',role,family,n,'\\n')

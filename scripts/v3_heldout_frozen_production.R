@@ -52,6 +52,9 @@ for(train_seed in 0:9) {
        c(baselines,learned,control_models),reps=500L,selected=scenario_ids)
   cz$training_seed<-train_seed
   cz$heldout_seed<-seed
+  cz$source_family<-family
+  cz$evaluation_family<-family
+  cz$transfer_scope<-t3_b3_transfer_scope(family,family,'heldout',cz$mechanism)
   cz$discovery_sha256<-t2_sha256(frozen_file)
   if(nrow(cz)!=length(scenario_ids)*32L||any(!is.finite(cz$mse))||any(!is.finite(cz$q95)))
     stop('Invalid 32-model heldout comparison')
