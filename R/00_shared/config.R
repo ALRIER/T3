@@ -13,6 +13,7 @@ ga_config <- list(
  training_seed_indices=0:9, heldout_seed_indices=10:19, bootstrap_B=500L,
  patience=10L, early_stop_enabled=TRUE, improvement=.001, training_fraction=.8, batch_size=32L,
  objective_names=c('mse','q95'), fdr_primary=.05, fdr_sensitivity=.10,
+ practical_gain_pct=5,
  mutation_rate=.15, crossover_probability=.9, evaluation_replicates=500L,
  training_bands=list(clean=0,low=c(.01,.05),intermediate=.10,high=c(.20,.30)),
  external_realworld_target='full_data_mean_proxy'

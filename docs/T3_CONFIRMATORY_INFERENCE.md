@@ -17,6 +17,11 @@ parent dataset (with repeated draws/seeds averaged within parent), not a raw
 row or bootstrap draw.  A real-world output without these fields is rejected
 from final BH-FDR aggregation.
 
+The prospectively fixed practical threshold is a 5% relative loss reduction
+in both MSE and q95.  It creates additional `practical` and `assured_practical`
+taxonomy labels; it never deletes descriptive or BH-FDR results.  The latter
+requires the lower 95% confidence bound to be at least 5% for both metrics.
+
 For each family, sample size, stage, candidate, and metric, the independent
 unit is the evaluation seed.  Scenario and training-seed scores are repeated
 measurements and are averaged before the paired seed-level comparison.  BH is

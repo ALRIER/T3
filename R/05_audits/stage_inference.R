@@ -172,7 +172,8 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
 # One row per candidate and transfer stratum.  These categories are mutually
 # auditable rather than a winner-take-all replacement: a model may be a
 # descriptive MSE winner, q95 winner, joint winner, or a joint BH-FDR winner.
-t3_winner_taxonomy <- function(inference,alpha=.05) {
+t3_winner_taxonomy <- function(inference,alpha=.05,
+                               practical_gain_pct=ga_config$practical_gain_pct) {
  required<-c('stage','group','model','metric','difference','upper','q_value',
              'gain_pct','gain_pct_lower','gain_pct_upper')
  if(!is.data.frame(inference)||!all(required%in%names(inference)))
@@ -195,11 +196,17 @@ t3_winner_taxonomy <- function(inference,alpha=.05) {
  wide$winner_mse_only<-mse&!q95
  wide$winner_q95_only<-q95&!mse
  wide$winner_joint_mse_q95_bh_fdr<-mse_fdr&q95_fdr
+ wide$winner_joint_practical<-wide$winner_joint_mse_q95_bh_fdr &
+   wide$gain_pct.mse>=practical_gain_pct & wide$gain_pct.q95>=practical_gain_pct &
+   wide$gain_pct_lower.mse>0 & wide$gain_pct_lower.q95>0
+ wide$winner_joint_assured_practical<-wide$winner_joint_mse_q95_bh_fdr &
+   wide$gain_pct_lower.mse>=practical_gain_pct & wide$gain_pct_lower.q95>=practical_gain_pct
  wide$winner_taxonomy<-ifelse(wide$winner_joint_mse_q95_bh_fdr,'joint_MSE_q95_BH_FDR',
    ifelse(wide$winner_joint_mse_q95,'joint_MSE_q95_descriptive',
    ifelse(wide$winner_mse_only,'MSE_only_descriptive',
    ifelse(wide$winner_q95_only,'q95_only_descriptive','no_confirmed_gain'))))
  wide$alpha<-alpha
+ wide$practical_gain_pct<-practical_gain_pct
  wide
 }
 
