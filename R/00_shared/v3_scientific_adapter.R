@@ -15,6 +15,13 @@ t2_v3_prepare_scenario <- function(s) {
   s$benchmark <- precompute_benchmarks(s$T,s$target,s$eligible)
   s
 }
+t3_b3_scenario_metadata <- function(id,grid_path='config/T2_V3_B3_prospective_321_grid.csv') {
+  g<-read.csv(grid_path,stringsAsFactors=FALSE)
+  if(nrow(g)!=321L||!setequal(g$scenario_id,0:320L))stop('Invalid prospective scenario metadata')
+  z<-g[g$scenario_id==as.integer(id),,drop=FALSE]
+  if(nrow(z)!=1L)stop('Scenario metadata absent')
+  z
+}
 t2_v3_validate_scenario <- function(s, id, reps=500L) {
   if (!is.list(s) || !identical(as.integer(s$scenario_id),as.integer(id)) ||
       !is.matrix(s$T) || !is.numeric(s$T) ||
@@ -54,6 +61,8 @@ t2_v3_read_scenario <- function(role,family,seed,n,id,reps=500L) {
   if (!file.exists(p)) stop('Missing V3 scientific scenario: ',p)
   s <- t2_read_rds(p)
   t2_v3_validate_scenario(s,id,reps)
+  meta<-t3_b3_scenario_metadata(id)
+  for(key in c('contamination','mad_scale','mechanism','band'))s[[key]]<-meta[[key]][1L]
   t2_v3_prepare_scenario(s)
 }
 

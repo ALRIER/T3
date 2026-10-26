@@ -48,6 +48,9 @@ for(training_seed in 0:9) {
   z<-t2_v3_stream_scores('stress',family,seed,n,models,reps=500L,selected=scenario_ids)
   z$training_seed<-training_seed
   z$stress_seed<-seed
+  z$source_family<-family
+  z$evaluation_family<-family
+  z$transfer_scope<-t3_b3_transfer_scope(family,family,'stress',z$mechanism)
   z$source_discovery_sha256<-t2_sha256(source_file)
   outpath<-file.path(out,'scores.csv')
   write.table(z,outpath,append=!first,row.names=FALSE,col.names=first,

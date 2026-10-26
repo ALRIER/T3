@@ -33,3 +33,24 @@ t3_b3_write_partition_manifest <- function(path) {
   write.csv(x,path,row.names=FALSE)
   invisible(x)
 }
+
+# A common label vocabulary.  It describes the relation between a frozen W's
+# source family and the independent evaluation environment; it never changes
+# a score or decides which model is retained.
+t3_b3_transfer_scope <- function(source_family,evaluation_family,stage,mechanism) {
+  families<-c('normal','lognormal','weibull','invgauss','exgaussian','exwald')
+  if(length(source_family)!=1L||length(evaluation_family)!=1L||
+     !source_family%in%families||!evaluation_family%in%families||
+     !stage%in%c('discovery','heldout','stress','realworld'))
+    stop('Invalid transfer-scope identity')
+  mechanism<-as.character(mechanism)
+  if(source_family!=evaluation_family)
+    return(ifelse(mechanism=='mixture_bimodal_near','cross_family_neighborhood_shift',
+      ifelse(mechanism=='mixture_bimodal_far','cross_family_structural_shift',
+        'cross_family_transfer')))
+  if(stage=='discovery') return(rep('within_family_training_descriptive',length(mechanism)))
+  if(stage=='heldout') return(rep('within_family_independent_replication',length(mechanism)))
+  if(stage=='stress') return(ifelse(mechanism=='mixture_bimodal_near',
+    'within_family_neighborhood_shift','within_family_structural_shift'))
+  rep('realworld_profile_matched_transfer',length(mechanism))
+}

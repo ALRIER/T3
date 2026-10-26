@@ -23,6 +23,10 @@ t2_v3_stream_scores <- function(role,family,seed,n,models,reps=500L,
     sc <- t2_v3_read_scenario(role,family,seed,n,selected[[i]],reps)
     z <- score_model_set(sc$T,models,sc$target)
     z$scenario_id <- sc$scenario_id
+    z$contamination <- sc$contamination
+    z$mad_scale <- sc$mad_scale
+    z$mechanism <- sc$mechanism
+    z$band <- sc$band
     z$role <- role
     z$family <- family
     z$seed_index <- seed

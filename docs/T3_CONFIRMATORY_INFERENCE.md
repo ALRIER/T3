@@ -11,6 +11,12 @@ weights are evaluated on disjoint seed roles:
 * Stress: seeds 20--29, on the 80-cell `stress_exclusive` partition, made of
   the two bimodal mechanisms excluded from all Discovery fitting and tuning.
 
+The same FDR calculation is required for Real-world after its parent-dataset
+manifest and profiling map are frozen.  Its independent unit is the declared
+parent dataset (with repeated draws/seeds averaged within parent), not a raw
+row or bootstrap draw.  A real-world output without these fields is rejected
+from final BH-FDR aggregation.
+
 For each family, sample size, stage, candidate, and metric, the independent
 unit is the evaluation seed.  Scenario and training-seed scores are repeated
 measurements and are averaged before the paired seed-level comparison.  BH is

@@ -61,6 +61,9 @@ for(train_seed in 0:9) {
   rm(cz,control_models,controls)
   z$training_seed<-train_seed
   z$heldout_seed<-seed
+  z$source_family<-family
+  z$evaluation_family<-family
+  z$transfer_scope<-t3_b3_transfer_scope(family,family,'heldout',z$mechanism)
   z$discovery_sha256<-t2_sha256(frozen_file)
   if(any(!is.finite(z$mse)) || any(!is.finite(z$q95))) stop('Invalid heldout scores')
   write.table(z,outcsv,append=!first,col.names=first,
