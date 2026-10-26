@@ -63,7 +63,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN: ${{ inputs.mc_run_id }}
         run: |
-          gh api "repos/${{ github.repository }}/actions/runs/$RUN" --jq '.conclusion + " " + .name' | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
+          gh run view "$RUN" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
       - uses: actions/download-artifact@v5
         with:
           name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
