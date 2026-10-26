@@ -1,0 +1,57 @@
+name: T3 B3 Confirmatory BH-FDR aggregation
+
+"on":
+  workflow_dispatch:
+    inputs:
+      confirmatory_run_id:
+        description: Successful T3 B3 Held-out and Stress from immutable Actions artifacts run ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  packages: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        stage: [heldout, stress]
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify complete upstream evaluation workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run view ${{ inputs.confirmatory_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Held-out and Stress from immutable Actions artifacts")'
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-${{ matrix.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ inputs.confirmatory_run_id }}
+          run-id: ${{ inputs.confirmatory_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts
+          merge-multiple: true
+      - name: Aggregate independent-seed evidence and BH-FDR
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_stage_aggregate.R ${{ matrix.stage }} ${{ matrix.family }} ${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-confirmatory-bh-${{ matrix.stage }}-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/v3_confirmatory_aggregate
+          if-no-files-found: error
+          retention-days: 90

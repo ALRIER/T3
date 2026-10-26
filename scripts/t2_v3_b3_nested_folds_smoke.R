@@ -11,20 +11,20 @@ for(i in 0:120){
     file.path(tmp,sprintf('scenario_%04d.rds',i)))
 }
 for(outer in 1:5){
- p<-t2_b3_nested_partitions('normal',0L,outer)
+ p<-t2_b3_nested_partitions('normal',0L,outer,ids=0:120)
  stopifnot(length(intersect(p$training,p$validation))==0,
    length(union(p$training,p$validation))==121L,
    length(p$validation)%in%c(24L,25L))
  for(inner in 1:3){
-  q<-t2_b3_nested_partitions('normal',0L,outer,inner)
+  q<-t2_b3_nested_partitions('normal',0L,outer,inner,ids=0:120)
   stopifnot(!length(intersect(q$training,q$validation)),
    setequal(union(q$training,q$validation),p$training),
    !length(intersect(q$training,p$validation)),
    !length(intersect(q$validation,p$validation)))
  }
 }
-a<-t2_b3_nested_partitions('normal',0L,1L)
-b<-t2_b3_nested_partitions('normal',0L,1L)
+a<-t2_b3_nested_partitions('normal',0L,1L,ids=0:120)
+b<-t2_b3_nested_partitions('normal',0L,1L,ids=0:120)
 stopifnot(identical(a$outer,b$outer))
 unlink(tmp,recursive=TRUE)
 cat('T2_B3_STRICT_STRATIFIED_NESTED_5X3_PASS\n')

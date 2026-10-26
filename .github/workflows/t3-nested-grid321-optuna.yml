@@ -60,14 +60,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN: ${{ inputs.mc_run_id }}
         run: |
-          gh api "repos/${{ github.repository }}/actions/runs/$RUN" --jq '.conclusion + " " + .name' | grep -Fx 'success T3 321-Scenario Monte Carlo Production'
+          gh api "repos/${{ github.repository }}/actions/runs/$RUN" --jq '.conclusion + " " + .name' | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
       - uses: actions/download-artifact@v5
         with:
-          name: t3-grid321-discovery-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
           run-id: ${{ inputs.mc_run_id }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
-          path: artifacts/mc_t3_grid321
+          path: incoming/mc
+      - name: Verify and materialize immutable Monte Carlo source
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
       - name: Install reproducible hyperparameter tuner
         run: python3 -m pip install --user 'optuna>=4,<5'
       - name: Tune four engines using three internal folds

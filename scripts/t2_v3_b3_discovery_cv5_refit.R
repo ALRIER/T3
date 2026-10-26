@@ -18,7 +18,7 @@ ids<-parts$outer$scenario_id
 foldid<-parts$outer$fold
 training<-parts$training
 validation<-parts$validation
-stopifnot(length(training)+length(validation)==321L,!any(training%in%validation))
+stopifnot(length(training)+length(validation)==length(ids),!any(training%in%validation))
 out<-file.path('artifacts','T2_V3_B3_discovery_cv5_refit',fam,sprintf('seed%02d',seed),sprintf('fold%02d',fold),sprintf('n%d',n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 source_root<-t2_v3_block_dir('discovery',fam,seed,n)

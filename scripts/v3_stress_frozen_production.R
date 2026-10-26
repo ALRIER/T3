@@ -7,15 +7,17 @@ source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 source('R/00_shared/t2_v3_b3_resources.R')
+source('R/00_shared/t3_b3_partitions.R')
 if(!seed%in%t2_v3_indices('stress') || !n%in%t2_v3_sample_sizes('stress'))stop('Reserved stress role contract violated')
 t3_stage_preflight('stress',family,seed,n,require_scenarios=TRUE)
 out<-file.path('artifacts','v3_stress_scoring',family,sprintf('seed%02d_n%d',seed,n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 input<-file.path('artifacts','discovery_v3')
+scenario_ids<-t3_b3_partition_ids('stress_exclusive')
 if(!dir.exists(input))stop('Frozen Discovery results absent')
 t2_b3_inputs_manifest(c(
   file.path(input,family,sprintf('seed%02d',0:9),sprintf('n%d',n),'discovery.rds'),
-  file.path(t2_v3_block_dir('stress',family,seed,n),sprintf('scenario_%04d.rds',0:320))
+  file.path(t2_v3_block_dir('stress',family,seed,n),sprintf('scenario_%04d.rds',scenario_ids))
 ),out,'stress')
 t2_b3_ram_guard('stress',out,'start')
 first<-TRUE
@@ -43,7 +45,7 @@ for(training_seed in 0:9) {
   if(length(models)!=32L)stop('Stress comparison must contain 32 models')
   if(length(models)<8L || anyDuplicated(vapply(models,function(m)m$id,character(1))))
     stop('Invalid frozen candidate registry')
-  z<-t2_v3_stream_scores('stress',family,seed,n,models,reps=500L,selected=0:320)
+  z<-t2_v3_stream_scores('stress',family,seed,n,models,reps=500L,selected=scenario_ids)
   z$training_seed<-training_seed
   z$stress_seed<-seed
   z$source_discovery_sha256<-t2_sha256(source_file)
@@ -62,7 +64,7 @@ write.csv(aggregate(cbind(mse,q95)~model+training_seed,data=summary,FUN=mean),
   file.path(out,'training_comparison.csv'),row.names=FALSE)
 t3_stage_publish('stress',sprintf('b3_%s_n%d',family,n),
  list(scores_path=file.path(out,'scores.csv'),
-      score_sha256=t2_sha256(file.path(out,'scores.csv')),scenario_ids=0:320),
+      score_sha256=t2_sha256(file.path(out,'scores.csv')),scenario_ids=scenario_ids),
  family,seed,n,500L,file.path(out,'stage_contract.rds'))
 t3_stage_postflight(file.path(out,'stage_contract.rds'),'stress',family,seed,n,expected_files=file.path(out,'scores.csv'))
 cat('V3_STRESS_SHARD_PASS',family,seed,n,'\\n')

@@ -240,7 +240,7 @@ t2_run_mc_validation <- function(mode,shard) {
    integrated_historical_audits=audits$status,
    legacy_four_layer_certified=isTRUE(mode == 'full' && audits$status == 'PASS' && anchor$status == 'PASS'))
 }
-t2_run_discovery <- function(data,mode,shard,engine='all'){
+t2_run_discovery <- function(data,mode,shard,engine='all',hyperparameters=NULL){
  if(is.null(data$scenarios)) {
    if(is.null(data$family)||is.null(data$seed_index)||is.null(data$n)||is.null(data$replications))
      stop('Monte Carlo reference is incomplete')
@@ -250,11 +250,21 @@ t2_run_discovery <- function(data,mode,shard,engine='all'){
  if(mode=='smoke'){cfg$population<-8L;cfg$generations<-2L;cfg$patience<-2L;cfg$bootstrap_B<-100L}
  s<-data$scenarios
  source('R/02_discovery/t3_predeclared_w_selection.R')
+ if(is.null(hyperparameters)) hyperparameters<-list()
+ if(!is.list(hyperparameters))stop('Invalid frozen hyperparameter registry')
+ engine_cfg<-function(name) {
+   z<-cfg; h<-hyperparameters[[name]]
+   if(is.null(h))return(z)
+   for(key in intersect(names(h),c('population','generations','mutation_rate',
+       'crossover_probability','regularization_lambda')))
+     z[[if(key=='regularization_lambda') 'discovery_weight_regularization_lambda' else key]]<-h[[key]]
+   z
+ }
  dispatch <- list(
-   ga=function() ga_discover(s,cfg,t2_seed(shard,201),shard=shard),
-   nsga2=function() nsga_discover(s,cfg,t2_seed(shard,202),shard=shard),
-   de=function() de_discover(s,cfg,t2_seed(shard,203),shard=shard),
-   dirichlet=function() dirichlet_discover(s,cfg,t2_seed(shard,204),n_draws=t3_common_budget(cfg),shard=shard)
+   ga=function() ga_discover(s,engine_cfg('ga'),t2_seed(shard,201),shard=shard),
+   nsga2=function() nsga_discover(s,engine_cfg('nsga2'),t2_seed(shard,202),shard=shard),
+   de=function() {h<-hyperparameters[['de']]; de_discover(s,engine_cfg('de'),t2_seed(shard,203),F=if(is.null(h$F)) .65 else h$F,CR=if(is.null(h$CR)) .8 else h$CR,shard=shard)},
+   dirichlet=function() {h<-hyperparameters[['dirichlet']]; z<-engine_cfg('dirichlet'); dirichlet_discover(s,z,t2_seed(shard,204),alpha=if(is.null(h$alpha)) 1 else h$alpha,n_draws=t3_common_budget(z),shard=shard)}
  )
  selected <- if (engine == 'all') names(dispatch) else engine
  if (!all(selected %in% names(dispatch))) stop('Unknown discovery engine')

@@ -7,16 +7,18 @@ source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 source('R/00_shared/t2_v3_b3_resources.R')
+source('R/00_shared/t3_b3_partitions.R')
 if(!seed %in% t2_v3_indices('heldout') || !n %in% t2_v3_sample_sizes('heldout'))
   stop('Held-out reserved seed/sample-size contract violated')
 t3_stage_preflight('heldout',family,seed,n,require_scenarios=TRUE)
 root<-file.path('artifacts','discovery_v3')
+scenario_ids<-t3_b3_partition_ids('discovery_support')
 out<-file.path('artifacts','heldout_v3',family,sprintf('seed%02d_n%d',seed,n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 outcsv<-file.path(out,'scores.csv')
 t2_b3_inputs_manifest(c(
   file.path(root,family,sprintf('seed%02d',0:9),sprintf('n%d',n),'discovery.rds'),
-  file.path(t2_v3_block_dir('heldout',family,seed,n),sprintf('scenario_%04d.rds',0:320))
+  file.path(t2_v3_block_dir('heldout',family,seed,n),sprintf('scenario_%04d.rds',scenario_ids))
 ),out,'heldout')
 t2_b3_ram_guard('heldout',out,'start')
 first<-TRUE
@@ -34,7 +36,7 @@ for(train_seed in 0:9) {
   models<-c(baselines,learned)
   if(length(models)!=30L)stop('B3 requires all 26 benchmarks and four frozen learners')
   z<-t2_v3_stream_scores('heldout',family,seed,n,models,
-                        reps=500L,selected=0:320)
+                        reps=500L,selected=scenario_ids)
   # Controls are fitted in Discovery only. Held-out never tunes their weights.
   controls<-fit$non_evolutionary_controls
   if(!is.list(controls)||!setequal(names(controls),c('convex_mse','local_deterministic')))
@@ -47,11 +49,11 @@ for(train_seed in 0:9) {
     new_frozen_model(name,weights=as.numeric(W[,1L]),family=name)
   })
   cz<-t2_v3_stream_scores('heldout',family,seed,n,
-       c(baselines,learned,control_models),reps=500L,selected=0:320)
+       c(baselines,learned,control_models),reps=500L,selected=scenario_ids)
   cz$training_seed<-train_seed
   cz$heldout_seed<-seed
   cz$discovery_sha256<-t2_sha256(frozen_file)
-  if(nrow(cz)!=321L*32L||any(!is.finite(cz$mse))||any(!is.finite(cz$q95)))
+  if(nrow(cz)!=length(scenario_ids)*32L||any(!is.finite(cz$mse))||any(!is.finite(cz$q95)))
     stop('Invalid 32-model heldout comparison')
   write.table(cz,controlcsv,append=!control_first,col.names=control_first,
               row.names=FALSE,sep=',',quote=TRUE)
@@ -74,7 +76,7 @@ out_data<-read.csv(outcsv)
 write.csv(aggregate(cbind(mse,q95)~model+training_seed,data=out_data,mean),
           file.path(out,'summary.csv'),row.names=FALSE)
 t3_stage_publish('heldout',sprintf('b3_%s_n%d',family,n),
- list(scores_path=outcsv,score_sha256=t2_sha256(outcsv),scenario_ids=0:320),
+ list(scores_path=outcsv,score_sha256=t2_sha256(outcsv),scenario_ids=scenario_ids),
  family,seed,n,500L,file.path(out,'stage_contract.rds'),
  parents=sprintf('discovery__%s__%02d',family,t2_v3_indices('discovery')))
 t3_stage_postflight(file.path(out,'stage_contract.rds'),'heldout',family,seed,n,expected_files=outcsv)

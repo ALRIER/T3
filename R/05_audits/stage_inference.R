@@ -149,7 +149,11 @@ t3_confirmatory_seed_summary <- function(scores,stage,reference='mean',
  if(!length(ans))stop('No confirmatory comparisons')
  out<-do.call(rbind,ans)
  out<-t3_gate_diagnostics(out,alpha,near_band,group_cols=c('stage','group','metric'))
- out$evidence_status<-'provisional_seed_level_subject_to_design_review'
+  # Discovery is disjoint from these evaluation seeds.  BH is applied only
+  # here, to the complete prespecified candidate x metric panel in each
+  # family/sample-size/stage group; scenario rows and training seeds were
+  # averaged before the test and are never pseudo-replicated.
+  out$evidence_status<-'confirmatory_seed_level_BH_FDR_prespecified_panel'
  out
 }
 
@@ -195,5 +199,5 @@ t3_aggregate_confirmatory_shards <- function(stage,family,n,root='artifacts',
    inference$evidence_status<-'descriptive_proxy_not_population_confirmation'
  list(scores=combined,inference=inference,
       manifest=data.frame(stage=stage,family=family,n=n,seeds=seeds,
-       evidence_status='complete_40_seed_partition_stage'))
+       evidence_status='complete_independent_seed_partition_stage'))
 }

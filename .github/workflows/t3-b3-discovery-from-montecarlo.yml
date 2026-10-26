@@ -7,6 +7,10 @@ name: T3 B3 Discovery from immutable Monte Carlo
         description: Successful T3 B3 full Monte Carlo Actions run ID
         required: true
         type: string
+      nested_hpo_run_id:
+        description: Successful T3 Full Nested Optuna 5x3 Grid321 run ID
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -42,6 +46,16 @@ jobs:
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: incoming/mc
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
+          run-id: ${{ inputs.nested_hpo_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts
+          merge-multiple: true
+      - name: Freeze pre-Discovery hyperparameters from nested 5x3 CV
+        run: python3 scripts/t3_b3_freeze_hpo.py ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} --out artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
       - name: Verify, hash and materialize the 321 source scenarios
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
@@ -51,6 +65,7 @@ jobs:
           T2_R_IMAGE: ghcr.io/alrier/t3-r:4.3.3-statmod-v2
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
+          T3_B3_HPO_REGISTRY: artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
         run: bash scripts/run_r_in_container.sh Rscript scripts/v3_discovery_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}
       - uses: actions/upload-artifact@v4
         with:

@@ -6,16 +6,25 @@ source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
+source('R/00_shared/t3_b3_partitions.R')
 if(!seed %in% 0:9)stop('Discovery cannot use reserved seeds')
 if(!n%in%t2_v3_sample_sizes('discovery'))stop('Invalid discovery n')
-d<-t2_v3_discovery_input(family,seed,n,500L,0:320)
-stopifnot(length(d$scenarios)==321L,all(vapply(d$scenarios,function(s)
+scenario_ids<-t3_b3_partition_ids('discovery_support')
+d<-t2_v3_discovery_input(family,seed,n,500L,scenario_ids)
+stopifnot(length(d$scenarios)==length(scenario_ids),all(vapply(d$scenarios,function(s)
  length(s$eligible)==26L && all(s$eligible) && all(is.finite(s$benchmark$mse)),logical(1))))
 shard<-sprintf('v3-discovery-%s-seed%02d-n%d',family,seed,n)
 start_ram <- gc(reset=TRUE)
-fit<-t2_run_discovery(d,'full',shard,'all')
-source('R/02_discovery/t2_v3_b3_cv5.R')
-cv5<-t2_b3_discovery_cv(d$scenarios,fit$models,k=ga_config$discovery_cv_folds)
+hpo_path<-Sys.getenv('T3_B3_HPO_REGISTRY','')
+if(!nzchar(hpo_path)||!file.exists(hpo_path))stop('Production Discovery requires a frozen nested-CV HPO registry')
+if(!requireNamespace('jsonlite',quietly=TRUE))stop('jsonlite required for frozen HPO registry')
+hpo<-jsonlite::fromJSON(hpo_path,simplifyVector=FALSE)
+if(!identical(hpo$protocol,'T3_B3_nested_5x3_hpo_freeze_v1')||
+   !identical(hpo$family,family)||as.integer(hpo$seed)!=seed||as.integer(hpo$sample_n)!=n||
+   !identical(as.integer(hpo$outer_folds),5L)||!identical(as.integer(hpo$inner_folds),3L)||
+   !setequal(names(hpo$engines),c('ga','nsga2','de','dirichlet')))
+  stop('Frozen nested HPO registry provenance mismatch')
+fit<-t2_run_discovery(d,'full',shard,'all',hyperparameters=hpo$engines)
 # Optional, capped 2x2 scientific ablation. It uses Discovery inputs only.
 # Run on prospectively chosen representative seeds; never select production W from it.
 if(identical(Sys.getenv('T3_RUN_ABLATION','0'),'1')) {
@@ -60,11 +69,13 @@ w_registry<-do.call(rbind,lapply(Filter(function(m)!is.null(m$weights),fit$model
                         sample_n=n,component=seq_len(26L),
                         weight=as.numeric(m$weights),stringsAsFactors=FALSE)))
 write.csv(w_registry,file.path(out,'frozen_w_registry.csv'),row.names=FALSE)
-write.csv(cv5$folds,file.path(out,'cv5_fold_performance.csv'),row.names=FALSE)
-write.csv(cv5$assignments,file.path(out,'cv5_scenario_assignments.csv'),row.names=FALSE)
-writeLines(cv5$scope,file.path(out,'cv5_scope.txt'))
-rm(cv5);invisible(gc(verbose=FALSE))
-write.csv(data.frame(family=family,seed=seed,n=n,reps=500L,scenarios=321L,
+t3_b3_write_partition_manifest(file.path(out,'scenario_partition.csv'))
+file.copy(hpo_path,file.path(out,'frozen_hyperparameters.json'),overwrite=FALSE)
+writeLines(c('Production Discovery was fit only on the predeclared discovery_support partition.',
+ 'Nested 5x3 tuning is a separate training-only protocol; this production fit is not an in-sample CV claim.',
+ 'No Discovery p-value, BH-FDR result, or false-positive rate is a confirmatory result.'),
+ file.path(out,'discovery_scope.txt'))
+write.csv(data.frame(family=family,seed=seed,n=n,reps=500L,scenarios=length(scenario_ids),
   engines=paste(names(fit$engines),collapse=';'),
   sha256=t2_sha256(file.path(out,'discovery.rds'))),
  file.path(out,'manifest.csv'),row.names=FALSE)
@@ -75,7 +86,7 @@ write.csv(data.frame(stage='Discovery',version='T2_V3_B3',family=family,seed=see
 t3_stage_publish('discovery',sprintf('b3_%s_n%d',family,n),
   list(model_path=file.path(out,'discovery.rds'),
        model_sha256=t2_sha256(file.path(out,'discovery.rds')),
-       scenario_ids=0:320),
+       scenario_ids=scenario_ids),
   family,seed,n,500L,file.path(out,'stage_contract.rds'))
 cat('V3_DISCOVERY_PASS',family,seed,'\n')
 
