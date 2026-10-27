@@ -11,6 +11,9 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R')
 source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t2_v3_b3_naming.R')
+# The optimizer calls the common baseline scales while fitting; load the
+# shared selection policy before any engine is invoked.
+source('R/02_discovery/t3_predeclared_w_selection.R')
 stopifnot(ga_config$discovery_cv_folds==5L,n%in%t2_v3_sample_sizes('discovery'))
 source('R/02_discovery/t2_v3_b3_nested_folds.R')
 parts<-t2_b3_nested_partitions(fam,seed,fold,n=n)
@@ -50,7 +53,6 @@ for(engine in c('ga','nsga2','de','dirichlet')){
    dirichlet=dirichlet_discover(d$scenarios,cfg,seed=engine_seed,
        alpha=chosen$alpha,n_draws=t3_common_budget(cfg),shard=NULL))
 }
-source('R/02_discovery/t3_predeclared_w_selection.R')
 budget_audit<-t3_assert_engine_budget_parity(engines)
 convergence_audit<-t3_compare_convergence(engines,d$scenarios)
 chosen<-t3_select_models(engines,d$scenarios)
