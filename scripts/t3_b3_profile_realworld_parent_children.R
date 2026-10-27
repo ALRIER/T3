@@ -13,9 +13,18 @@ required<-c('dataset_id','parent_dataset_id','source_path','source_url','domain'
 if(!all(required%in%names(catalog))||!nrow(catalog))stop('Candidate parent/child catalog schema incomplete')
 if(anyDuplicated(catalog[c('parent_dataset_id','dataset_id')]))stop('Duplicate parent-child identity')
 slug<-function(x)gsub('[^A-Za-z0-9_.-]+','_',x)
+resolve_catalog_input<-function(p){
+ p<-gsub('\\\\','/',as.character(p))
+ if(file.exists(p))return(normalizePath(p,mustWork=TRUE))
+ marker<-regexpr('/artifacts/',p,fixed=TRUE)[1L]
+ if(marker>0L){
+   candidate<-file.path(getwd(),substring(p,marker+1L))
+   if(file.exists(candidate))return(normalizePath(candidate,mustWork=TRUE))
+ }
+ stop('Catalog input is not available in this execution workspace: ',p)
+}
 numeric_values<-function(row){
- p<-as.character(row$source_path[1]); ext<-tolower(tools::file_ext(p))
- if(!file.exists(p))stop('Missing raw source: ',p)
+ p<-resolve_catalog_input(row$source_path[1]); ext<-tolower(tools::file_ext(p))
  obj<-if(ext=='rds')readRDS(p) else if(ext=='csv')read.csv(p,stringsAsFactors=FALSE,check.names=FALSE) else
    stop('Source must be pre-extracted CSV or RDS: ',p)
  v<-trimws(as.character(row$variable[1]))
@@ -61,7 +70,7 @@ optional_meta<-intersect(c('upstream_license_status','upstream_source_url','sour
   'license_evidence','license_evidence_sha256','license_evidence_path',
   'source_group','license_basis','child_selection_rule','feature_index'),names(catalog))
 for(i in seq_len(nrow(catalog))){
- r<-catalog[i,,drop=FALSE];source_path<-normalizePath(r$source_path,mustWork=TRUE)
+ r<-catalog[i,,drop=FALSE];source_path<-resolve_catalog_input(r$source_path)
  source_hash<-t2_sha256(source_path)
  target_source<-file.path(out,'sources',paste0(source_hash,'.',tools::file_ext(source_path)))
  if(!file.exists(target_source)&&!file.copy(source_path,target_source))stop('Failed to retain raw source')
@@ -90,7 +99,7 @@ for(i in seq_len(nrow(catalog))){
  for(nm in optional_meta){
    value<-as.character(r[[nm]][1])
    if(nm=='license_evidence_path'){
-     if(!file.exists(value))stop('Missing license evidence snapshot for ',r$dataset_id)
+     value<-resolve_catalog_input(value)
      evidence_hash<-t2_sha256(value)
      expected<-as.character(r$license_evidence_sha256[1])
      if(!identical(tolower(evidence_hash),tolower(expected)))stop('License evidence hash mismatch for ',r$dataset_id)
