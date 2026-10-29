@@ -95,7 +95,7 @@ for(j in seq_len(nrow(tab))) {
    z$variable<-row$variable
    z$transfer_scope<-row$transfer_scope;z$matched_scenario_id<-row$matched_scenario_id
    z$depth<-depth;z$sample_n<-n;z$training_seed<-training_seed;z$realworld_seed<-eval_seed
-   z$parent_cluster_unit<-'parent_dataset_id';z$target_type<-'parent_full_sample_mean_proxy'
+   z$parent_cluster_unit<-'parent_dataset_id';z$target_type<-'evaluated_child_depth_mean_proxy'
    z$source_sha256<-row$source_sha256;z$processed_sha256<-row$processed_sha256
    z$profile_sha256<-row$profile_sha256;z$discovery_sha256<-t2_sha256(frozen)
    write.table(z,score_path,sep=',',append=!first,col.names=first,row.names=FALSE,quote=TRUE)
