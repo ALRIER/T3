@@ -67,7 +67,6 @@ inf <- do.call(rbind,res)
 inf$q_value_global <- p.adjust(inf$p_value,'BH')
 inf$winner_supported <- inf$gain>0 & inf$ci_lower>0 & inf$q_value_global<=.05
 inf$practical_gain_threshold_pct <- ga_config$practical_gain_pct
-inf$relative_gain_pct <- NA_real_
 parent$practical_mse <- parent$mse_gain_pct>=ga_config$practical_gain_pct
 parent$practical_q95 <- parent$q95_gain_pct>=ga_config$practical_gain_pct
 scenario_parent_keys <- intersect(c('parent_dataset_id','family','transfer_scope','sample_n',
@@ -118,7 +117,7 @@ writeLines(c('benchmark=sample_mean','independent_unit=parent_dataset_id',
  'parent inference averages child variables, depth slices, evaluation seeds, and training seeds within each parent',
  'matched scenario cell is descriptive only; sparse scenario cells receive no p-value or BH claim',
  'scope=within_regime; within_family_neighborhood; cross_family_transfer',
- 'realworld_target=full_parent_sample_mean_proxy_not_unknown_population_truth'),
+ 'realworld_target=evaluated_child_depth_mean_proxy_not_unknown_population_truth'),
  file.path(dest,'scientific_scope.txt'))
 cat('T3_B3_REALWORLD_PARENT_INFERENCE_PASS',nrow(inf),'hypotheses; parent effects',nrow(parent),
  'scenario diagnostics',nrow(scenario_diag),'\n')
