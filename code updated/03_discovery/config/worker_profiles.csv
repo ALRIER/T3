@@ -1,0 +1,2 @@
+worker_id,kind,max_parallel,reserve_cores,min_available_gb,temp_warn_c,temp_stop_c,temp_resume_c,requires_temperature_sensor
+github_actions,ci,32,0,4,999,999,999,FALSE

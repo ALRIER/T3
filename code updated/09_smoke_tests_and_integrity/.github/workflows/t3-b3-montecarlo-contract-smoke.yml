@@ -1,0 +1,61 @@
+name: T3 B3 Monte Carlo Design & Artifact Smoke
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate bounded 321-scenario manifest and separated seeds
+        run: python3 scripts/t3_b3_montecarlo_contract_smoke.py
+      - name: Authenticate to pinned R image registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull pinned R image
+        run: docker pull ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+      - name: Generate prospective design and check real R canonical reader
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: |
+          python3 scripts/t2_v3_b3_generate_grid321.py
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_montecarlo_canonical_smoke.R
+      - name: Persist scientific-design fixture for 30 days
+        uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-mc-contract-fixture-${{ github.run_id }}
+          path: artifacts/b3_mc_contract_smoke/
+          retention-days: 30
+          if-no-files-found: error
+  consume:
+    needs: produce
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: t3-b3-mc-contract-fixture-${{ github.run_id }}
+          path: injected
+      - name: Verify independent-runner artifact injection and SHA256
+        run: |
+          python3 - <<'PY'
+          import csv,hashlib,json,pathlib
+          p=pathlib.Path('injected')
+          m=json.loads((p/'manifest.json').read_text())
+          rows=list(csv.DictReader((p/'grid321.csv').open()))
+          assert m['schema']=='B3_MC_DESIGN_SMOKE_V1'
+          assert m['fixture_only'] is True
+          assert len(rows)==m['grid_rows']==321
+          assert hashlib.sha256((p/'grid321.csv').read_bytes()).hexdigest()==m['grid_sha256']
+          assert len(set(sum(m['roles'].values(),[])))==40
+          print('T3_MC_ARTIFACT_30DAY_INDEPENDENT_RUNNER_SHA256_PASS')
+          PY
+
+# Trigger requested bounded Monte Carlo contract test; no production Monte Carlo.

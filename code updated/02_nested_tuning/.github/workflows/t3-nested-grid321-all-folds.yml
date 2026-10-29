@@ -1,0 +1,104 @@
+name: T3 Full Nested Optuna 5x3 Grid321
+on:
+  workflow_dispatch:
+    inputs:
+      mc_run_id:
+        description: 'Completed T3 321-grid discovery Monte Carlo run ID'
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  fold_1:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '1'
+    secrets: inherit
+  fold_2:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '2'
+    secrets: inherit
+  fold_3:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '3'
+    secrets: inherit
+  fold_4:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '4'
+    secrets: inherit
+  fold_5:
+    uses: ./.github/workflows/t3-nested-grid321-optuna.yml
+    with:
+      mc_run_id: ${{ inputs.mc_run_id }}
+      outer_fold: '5'
+    secrets: inherit
+  discovery:
+    name: Discovery after nested HPO is frozen
+    needs: [fold_1, fold_2, fold_3, fold_4, fold_5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        seed: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify successful immutable Monte Carlo source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.mc_run_id }}
+        run: |
+          gh run view "$RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
+      - uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/mc
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
+          run-id: ${{ github.run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts
+          merge-multiple: true
+      - name: Freeze hyperparameters selected by nested 5x3 CV
+        run: python3 scripts/t3_b3_freeze_hpo.py ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} --out artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
+      - name: Verify and materialize Monte Carlo inputs
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
+      - name: Fit four engines with nested-selected frozen hyperparameters
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+          T3_B3_HPO_REGISTRY: artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_discovery_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/discovery_v3
+          if-no-files-found: error
+          retention-days: 90

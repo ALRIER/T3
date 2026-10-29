@@ -1,0 +1,26 @@
+name: T2 V3 B3 Real World Fresh Workflow Contract
+on:
+  push:
+    branches: [t2-v3-contract-adapter-20261024]
+    paths: ['.github/workflows/t2-v3-b3-realworld-contract-check.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/t2_v3_b3_realworld_freeze_smoke.py
+      - run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          a=Path('scripts/t2_v3_b3_realworld_parent_inference.R').read_text()
+          assert 'parent_flips' in a
+          assert "p.adjust(null_p,'BH')" in a
+          assert "parent_null_calibration_T2_V3_B3.csv" in a
+          b=Path('.github/workflows/t2-v3-b3-realworld-recollect.yml').read_text()
+          assert 'T2_RW_CATALOG_ROOT=artifacts/T2_V3_B3_fresh_profiles' in b
+          assert 'max-parallel: 4' in b
+          print('T2_V3_B3_REALWORLD_INTEGRATION_CONTRACT_PASS')
+          PY

@@ -1,0 +1,15 @@
+name: T2 V3 B3 Fresh Parent Recollection Gate
+on:
+  push:
+    branches: [t2-v3-contract-adapter-20261024]
+    paths: ['.github/workflows/t2-v3-b3-realworld-freeze-gate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check B3 newly selected parents and workflow contracts
+        run: python3 scripts/t2_v3_b3_realworld_freeze_smoke.py

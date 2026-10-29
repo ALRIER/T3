@@ -1,0 +1,51 @@
+#!/usr/bin/env Rscript
+a<-commandArgs(TRUE);if(length(a)!=1L||!a[1]%in%c('discovery','heldout','stress','realworld'))stop('stage')
+stage<-a[1];source('R/00_shared/load_all.R');t2_load('.')
+source('R/00_shared/pipeline.R');source('R/00_shared/v3_inference.R')
+source('R/00_shared/t2_v3_b3_resources.R')
+root<-'artifacts/T2_V3_B3_integrated_smoke'
+dir.create(root,recursive=TRUE,showWarnings=FALSE)
+set.seed(16031L)
+if(stage=='discovery'){
+ mk<-function(id,band){
+  T<-matrix(rnorm(100L*26L,mean=id/15,sd=1),100L,26L)
+  colnames(T)<-ESTIMATOR_NAMES
+  list(T=T,target=id/15,scenario_id=as.integer(id),band=band,
+       eligible=rep(TRUE,26L),benchmark=precompute_benchmarks(T,id/15))}
+ sc<-list(mk(0,'clean'),mk(1,'low'),mk(2,'intermediate'),mk(3,'high'))
+ cfg<-ga_config;cfg$population<-8L;cfg$generations<-2L;cfg$patience<-2L
+ out<-list()
+ out$ga<-ga_discover(sc,cfg,seed=501L,shard=NULL)
+ out$nsga2<-nsga_discover(sc,cfg,seed=502L,shard=NULL)
+ out$de<-de_discover(sc,cfg,seed=503L,shard=NULL)
+ out$dirichlet<-dirichlet_discover(sc,cfg,seed=504L,n_draws=16L,shard=NULL)
+ models<-Filter(function(m)!is.null(m$weights),t2_models(out))
+ stopifnot(length(models)==4L,all(vapply(models,function(m)abs(sum(m$weights)-1)<1e-6,logical(1))))
+ saveRDS(models,file.path(root,'frozen_models.rds'))
+ write.csv(data.frame(engine=vapply(models,function(m)m$id,character(1)),
+  mse=seq_along(models),q95=seq_along(models)),
+  file.path(root,'discovery_taxonomy.csv'),row.names=FALSE)
+}else{
+ models<-readRDS(file.path(root,'frozen_models.rds'))
+ all_models<-c(lapply(ESTIMATOR_NAMES,function(nm)new_frozen_model(nm,component=nm)),models)
+ if(stage%in%c('heldout','stress')){
+  T<-matrix(rnorm(100L*26L,sd=if(stage=='stress')2 else 1),100L,26L)
+  colnames(T)<-ESTIMATOR_NAMES
+  sc<-list(T=T,target=0,scenario_id=0L)
+  set.seed(if(stage=='heldout')177 else 189)
+  z<-t2_v3_infer_scenario(sc,all_models,0L,if(stage=='heldout')10L else 15L,200L,B=40L,reference='mean')
+  z<-t2_v3_adjust_inference(z)
+  stopifnot(nrow(z)==60L,all(is.finite(z$ci_lower)))
+  nul<-t2_v3_null_fpr(sc,all_models,0L,10L,Bnull=30L,reference='mean')
+  stopifnot(nrow(nul)>0L)
+  write.csv(z,file.path(root,paste0(stage,'_inference.csv')),row.names=FALSE)
+  write.csv(nul,file.path(root,paste0(stage,'_null.csv')),row.names=FALSE)
+ }else{
+  x<-rnorm(220L);T<-t(replicate(100L,component_vector(sample(x,200L,TRUE))))
+  colnames(T)<-ESTIMATOR_NAMES
+  z<-score_model_set(T,all_models,mean(x))
+  stopifnot(nrow(z)==30L)
+  write.csv(z,file.path(root,'realworld_scores.csv'),row.names=FALSE)
+ }
+}
+cat('T2_V3_B3_INTEGRATED_SMOKE_PASS',stage,'\\n')

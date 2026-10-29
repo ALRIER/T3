@@ -1,0 +1,34 @@
+name: T3 321 Grid and Nested CV Integration Gate (v2)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/t3-grid321-nested-gate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen manifest generator
+        run: |
+          python3 scripts/t2_v3_b3_generate_grid321.py
+          git show HEAD:config/T2_V3_B3_prospective_321_grid.csv > /tmp/t3_committed_grid.csv
+          python3 - <<'PY'
+          import csv
+          a=list(csv.DictReader(open('/tmp/t3_committed_grid.csv',newline='')))
+          b=list(csv.DictReader(open('config/T2_V3_B3_prospective_321_grid.csv',newline='')))
+          assert a==b, 'Generated grid differs from frozen scientific design'
+          print('T3_FROZEN_321_GRID_EQUIVALENCE_PASS')
+          PY
+          python3 -m py_compile scripts/t2_v3_b3_nested_optuna.py
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check 321-grid and 5x3 independence for each n
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_grid321_nested_contract_smoke.R

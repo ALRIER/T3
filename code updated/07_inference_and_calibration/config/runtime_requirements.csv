@@ -1,0 +1,10 @@
+component,name,version,source,required
+R,R,4.3.3,R-project,TRUE
+package,statmod,1.5.2,CRAN,TRUE
+package,MASS,7.3.60.0.1,R-recommended,TRUE
+package,stats,4.3.3,R-base,TRUE
+package,utils,4.3.3,R-base,TRUE
+package,methods,4.3.3,R-base,TRUE
+package,graphics,4.3.3,R-base,TRUE
+package,grDevices,4.3.3,R-base,TRUE
+package,datasets,4.3.3,R-base,TRUE

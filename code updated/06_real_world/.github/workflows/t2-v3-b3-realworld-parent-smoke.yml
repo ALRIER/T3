@@ -1,0 +1,19 @@
+name: T2 V3 B3 Real World Parent Final Gate 5
+on:
+  push:
+    branches: [t2-v3-contract-adapter-20261024]
+    paths: ['.github/workflows/t2-v3-b3-realworld-parent-smoke.yml']
+  workflow_dispatch:
+permissions: {contents: read, packages: read}
+jobs:
+  aggregate-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_realworld_parent_smoke.R

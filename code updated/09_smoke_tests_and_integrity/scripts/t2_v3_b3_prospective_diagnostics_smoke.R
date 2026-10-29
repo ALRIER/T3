@@ -1,0 +1,24 @@
+#!/usr/bin/env Rscript
+source('R/00_shared/load_all.R');t2_load('.')
+source('R/00_shared/pipeline.R')
+source('R/02_discovery/t2_v3_b3_prospective_diagnostics.R')
+set.seed(23L)
+T<-matrix(stats::rnorm(500L*26L),500,26)
+colnames(T)<-ESTIMATOR_NAMES
+W<-matrix(stats::rexp(26L*4L),26L,4L)
+W<-sweep(W,2,colSums(W),'/')
+bench<-lapply(ESTIMATOR_NAMES,function(nm)new_frozen_model(nm,component=nm))
+engines<-lapply(seq_len(4L),function(i)new_frozen_model(
+ c('ga','nsga2','de','dirichlet')[i],weights=W[,i]))
+m<-c(bench,engines)
+sc<-list(list(T=T,target=0,scenario_id=0L,band='clean',
+ mechanism='clean',mad_scale=NA_real_,contamination=0))
+d<-t2_b3_regime_diagnostics(sc,m)
+stopifnot(nrow(d)==30L,all(is.finite(d$gain_mse_against_best_of_26)),
+ all(is.finite(d$gain_q95_against_best_of_26)),
+ any(d$pareto_all_30))
+a<-t2_b3_single_component_ablation(T,engines[[1]],0)
+stopifnot(nrow(a)==26L,all(is.finite(a$delta_mse)))
+s<-t2_b3_weight_stability(replicate(5L,engines,simplify=FALSE))
+stopifnot(nrow(s)==104L,all(s$selection_rate>=0&s$selection_rate<=1))
+cat('T2_B3_26_BENCHMARK_PARETO_ABLATION_STABILITY_PASS\n')
