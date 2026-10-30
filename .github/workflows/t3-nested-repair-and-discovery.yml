@@ -1,0 +1,170 @@
+name: T3 Repair failed nested jobs and continue Discovery
+on:
+  workflow_dispatch:
+    inputs:
+      mc_run_id:
+        description: Successful T3 production Monte Carlo run ID
+        required: true
+        type: string
+      original_nested_run_id:
+        description: Original nested run containing already successful fold artifacts
+        required: true
+        type: string
+      failed_jobs_json:
+        description: JSON array of failed keys; each item has family, seed, n, outer_fold
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  repair-plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - id: plan
+        env:
+          JOBS_JSON: ${{ inputs.failed_jobs_json }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          jobs=json.loads(os.environ['JOBS_JSON'])
+          allowed={'normal','lognormal','weibull','invgauss','exgaussian','exwald'}
+          keys=set()
+          assert isinstance(jobs,list) and jobs, 'failed_jobs_json must be a nonempty array'
+          for x in jobs:
+              assert set(x)=={'family','seed','n','outer_fold'}, f'invalid fields: {x}'
+              assert x['family'] in allowed and int(x['seed']) in range(10)
+              assert int(x['n']) in (200,1000,3000) and int(x['outer_fold']) in range(1,6)
+              key=(x['family'],int(x['seed']),int(x['n']),int(x['outer_fold']))
+              assert key not in keys, f'duplicate repair key: {key}'
+              keys.add(key)
+          print('matrix='+json.dumps({'include':jobs},separators=(',',':')))
+          PY
+  repair:
+    needs: repair-plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.repair-plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify immutable Monte Carlo source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ inputs.mc_run_id }}
+        run: |
+          gh run view "$RUN" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
+      - uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/mc
+      - name: Verify and materialize immutable Monte Carlo source
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
+      - name: Install pinned hyperparameter tuner
+        run: python3 -m pip install --user 'optuna==4.9.0'
+      - name: Run nested tuning for this failed outer-fold key
+        run: python3 scripts/t2_v3_b3_nested_optuna.py "${{ matrix.family }}" "${{ matrix.seed }}" "${{ matrix.outer_fold }}" "${{ matrix.n }}" --trials 8
+      - name: Refit four engines and score the withheld outer fold
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t2_v3_b3_discovery_cv5_refit.R "${{ matrix.family }}" "${{ matrix.seed }}" "${{ matrix.outer_fold }}" "${{ matrix.n }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold${{ matrix.outer_fold }}
+          path: |
+            artifacts/T2_V3_B3_nested_optuna/
+            artifacts/T2_V3_B3_discovery_cv5_refit/
+          if-no-files-found: error
+          retention-days: 90
+  discovery:
+    needs: [repair-plan, repair]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        seed: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify immutable Monte Carlo source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ inputs.mc_run_id }}
+        run: |
+          gh run view "$RUN" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
+      - uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/mc
+      - name: Download nested HPO artifacts from original run
+        uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
+          run-id: ${{ inputs.original_nested_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts
+          merge-multiple: true
+      - name: Download repaired nested HPO artifacts
+        uses: actions/download-artifact@v5
+        continue-on-error: true
+        with:
+          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
+          run-id: ${{ github.run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts
+          merge-multiple: true
+      - name: Freeze hyperparameters from all five outer-fold ledgers
+        run: python3 scripts/t3_b3_freeze_hpo.py ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} --out artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
+      - name: Verify and materialize immutable Monte Carlo inputs
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
+      - name: Fit four engines with frozen nested-CV hyperparameters
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+          T3_B3_HPO_REGISTRY: artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_discovery_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/discovery_v3
+          if-no-files-found: error
+          retention-days: 90
