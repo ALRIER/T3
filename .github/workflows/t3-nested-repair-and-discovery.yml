@@ -53,7 +53,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 16
+      max-parallel: 32
       matrix: ${{ fromJSON(needs.repair-plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -106,7 +106,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 16
+      max-parallel: 32
       matrix:
         family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
         seed: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
