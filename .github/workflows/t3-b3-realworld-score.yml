@@ -10,6 +10,10 @@ name: T3 B3 Frozen Real-world Parent Audit
         description: Successful T3 nested Optuna plus Discovery run ID
         required: true
         type: string
+      discovery_retry_run_id:
+        description: Successful selective Discovery repair run ID
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
@@ -28,7 +32,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 32
       matrix:
         family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
         seed: ${{ fromJSON(needs.plan.outputs.seeds) }}
@@ -45,13 +49,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           CATALOG_RUN_ID: ${{ inputs.catalog_run_id }}
           DISCOVERY_RUN_ID: ${{ inputs.discovery_run_id }}
+          DISCOVERY_RETRY_RUN_ID: ${{ inputs.discovery_retry_run_id }}
         run: |
           gh run view "$CATALOG_RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
             --jq '"\(.conclusion) \(.workflowName)"' \
             | grep -Fx 'success T3 B3 Fresh Real-world Parent Catalog Freeze'
-          gh run view "$DISCOVERY_RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
+          gh run view "$DISCOVERY_RUN_ID" --repo "${{ github.repository }}" --json status,workflowName \
+            --jq '"\(.status) \(.workflowName)"' \
+            | grep -Fx 'completed T3 Repair failed nested jobs and continue Discovery'
+          gh run view "$DISCOVERY_RETRY_RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
             --jq '"\(.conclusion) \(.workflowName)"' \
-            | grep -Fx 'success T3 Full Nested Optuna 5x3 Grid321'
+            | grep -Fx 'success T3 Resume selected Discovery jobs'
       - uses: actions/download-artifact@v5
         with:
           name: t3-b3-realworld-parent-freeze-run${{ inputs.catalog_run_id }}
@@ -63,6 +71,14 @@ jobs:
         with:
           pattern: t3-b3-discovery-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ inputs.discovery_run_id }}
           run-id: ${{ inputs.discovery_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ inputs.discovery_retry_run_id }}
+          run-id: ${{ inputs.discovery_retry_run_id }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: artifacts/discovery_v3
