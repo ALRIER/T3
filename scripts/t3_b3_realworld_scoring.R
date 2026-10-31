@@ -51,8 +51,12 @@ for(j in seq_len(nrow(tab))) {
  x<-as.numeric(readRDS(vector_path));x<-x[is.finite(x)]
  if(length(x)<150L)stop('Frozen child has insufficient observations: ',row$dataset_id)
  profile_key<-paste(row$parent_dataset_id,row$dataset_id,as.integer(row$n),
-   format(as.numeric(row$skewness),digits=17),format(as.numeric(row$excess_kurtosis),digits=17),
-   row$support_sign,format(as.numeric(row$outlier_fraction_3mad),digits=17),sep='|')
+   format({s<-stats::sd(x);if(s>0)mean((x-mean(x))^3)/s^3 else 0},digits=17),
+   format({s<-stats::sd(x);if(s>0)mean((x-mean(x))^4)/s^4-3 else 0},digits=17),
+   if(all(x>0))'strictly_positive' else 'contains_nonpositive',
+   format({s<-stats::sd(x);med<-stats::median(x);m<-stats::mad(x,constant=1);
+     scale<-if(is.finite(m)&&m>0)m else stats::IQR(x,type=8)/1.349;
+     if(is.finite(scale)&&scale>0)mean(abs(x-med)>3*scale) else 0},digits=17),sep='|')
  profile_tmp<-tempfile();writeBin(charToRaw(profile_key),profile_tmp)
  profile_actual<-t2_sha256(profile_tmp);unlink(profile_tmp)
  if(!identical(profile_actual,as.character(row$profile_sha256)))stop('Frozen profile fingerprint mismatch: ',row$dataset_id)

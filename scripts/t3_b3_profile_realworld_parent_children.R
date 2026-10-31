@@ -112,6 +112,8 @@ for(i in seq_len(nrow(catalog))){
  }
 }
 profile<-do.call(rbind,rows)
+old_digits<-options(digits=17)
 write.csv(profile,file.path(out,'outcome_blind_profiles.csv'),row.names=FALSE)
+options(old_digits)
 cat('T3_B3_REALWORLD_PROFILE_PASS children=',nrow(profile),'parents=',
   length(unique(profile$parent_dataset_id)),'\n',sep='')
