@@ -133,37 +133,14 @@ jobs:
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: incoming/mc
-      - name: Download nested HPO artifacts from original run
-        uses: actions/download-artifact@v5
-        continue-on-error: true
-        with:
-          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
-          run-id: ${{ inputs.original_nested_run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: artifacts
-          merge-multiple: true
-      - name: Download nested HPO artifacts from prior repair run
-        if: ${{ inputs.prior_repair_run_id != '' }}
-        uses: actions/download-artifact@v5
-        continue-on-error: true
-        with:
-          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
-          run-id: ${{ inputs.prior_repair_run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: artifacts
-          merge-multiple: true
-      - name: Download repaired nested HPO artifacts
-        uses: actions/download-artifact@v5
-        continue-on-error: true
-        with:
-          pattern: t3-nested-${{ matrix.family }}-seed${{ matrix.seed }}-n${{ matrix.n }}-fold*
-          run-id: ${{ github.run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: artifacts
-          merge-multiple: true
+      - name: Download all nested HPO folds with paginated artifact listing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          T3_NESTED_RUN_IDS: ${{ inputs.original_nested_run_id }},${{ inputs.prior_repair_run_id }},${{ github.run_id }}
+          T3_FAMILY: ${{ matrix.family }}
+          T3_SEED: ${{ matrix.seed }}
+          T3_SAMPLE_N: ${{ matrix.n }}
+        run: bash scripts/t3_download_nested_hpo_artifacts.sh
       - name: Freeze hyperparameters from all five outer-fold ledgers
         run: python3 scripts/t3_b3_freeze_hpo.py ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} --out artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
       - name: Verify and materialize immutable Monte Carlo inputs

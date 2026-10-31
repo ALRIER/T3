@@ -1,0 +1,106 @@
+name: T3 Resume selected Discovery jobs
+on:
+  workflow_dispatch:
+    inputs:
+      mc_run_id:
+        description: Successful T3 production Monte Carlo run id
+        required: true
+        type: string
+      original_nested_run_id:
+        description: Original nested HPO run id
+        required: true
+        type: string
+      repair_run_ids:
+        description: Comma-separated completed nested repair run ids
+        required: true
+        type: string
+      discovery_jobs_json:
+        description: JSON array of failed Discovery keys with family, seed, n
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - id: plan
+        env:
+          JOBS_JSON: ${{ inputs.discovery_jobs_json }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          jobs=json.loads(os.environ['JOBS_JSON'])
+          allowed={'normal','lognormal','weibull','invgauss','exgaussian','exwald'}
+          keys=set()
+          assert isinstance(jobs,list) and jobs, 'discovery_jobs_json must be a nonempty array'
+          for x in jobs:
+              assert set(x)=={'family','seed','n'}, f'invalid fields: {x}'
+              assert x['family'] in allowed and int(x['seed']) in range(10)
+              assert int(x['n']) in (200,1000,3000)
+              key=(x['family'],int(x['seed']),int(x['n']))
+              assert key not in keys, f'duplicate discovery key: {key}'
+              keys.add(key)
+          print('matrix='+json.dumps({'include':jobs},separators=(',',':')))
+          PY
+  discovery:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 32
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify immutable Monte Carlo source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ inputs.mc_run_id }}
+        run: |
+          gh run view "$RUN" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 FULL Monte Carlo 321 x 500'
+      - uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/mc
+      - name: Download nested HPO folds with paginated artifact listing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          T3_NESTED_RUN_IDS: ${{ inputs.original_nested_run_id }},${{ inputs.repair_run_ids }}
+          T3_FAMILY: ${{ matrix.family }}
+          T3_SEED: ${{ matrix.seed }}
+          T3_SAMPLE_N: ${{ matrix.n }}
+        run: bash scripts/t3_download_nested_hpo_artifacts.sh
+      - name: Freeze hyperparameters from all five outer-fold ledgers
+        run: python3 scripts/t3_b3_freeze_hpo.py ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} --out artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
+      - name: Verify and materialize immutable Monte Carlo inputs
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_ingest_mc_artifact.R discovery ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }} incoming/mc ${{ inputs.mc_run_id }}
+      - name: Fit four engines with frozen nested-CV hyperparameters
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+          T3_B3_HPO_REGISTRY: artifacts/t3_b3_hpo/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/frozen_hyperparameters.json
+        run: bash scripts/run_r_in_container.sh Rscript scripts/v3_discovery_production.R ${{ matrix.family }} ${{ matrix.seed }} ${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-discovery-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/discovery_v3
+          if-no-files-found: error
+          retention-days: 90
