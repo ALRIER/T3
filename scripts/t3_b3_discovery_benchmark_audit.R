@@ -35,7 +35,8 @@ for(path in files){
  scale_parts[[length(scale_parts)+1L]]<-sc
  rm(fit,z,allb,sc);invisible(gc(FALSE))
 }
-expected<-expand.grid(family=t2_families(),training_seed=0:9,
+frozen_families<-c('normal','lognormal','weibull','invgauss','exgaussian','exwald')
+expected<-expand.grid(family=frozen_families,training_seed=0:9,
  sample_n=t2_v3_sample_sizes('discovery'),stringsAsFactors=FALSE)
 expected_ids<-with(expected,paste(family,training_seed,sample_n,sep='|'))
 if(anyDuplicated(identities)||!setequal(identities,expected_ids))stop('Discovery artifacts do not cover the complete frozen family x seed x n grid')
