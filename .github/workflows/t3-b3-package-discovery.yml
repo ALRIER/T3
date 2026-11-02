@@ -56,6 +56,9 @@ jobs:
                 done
               done
             done
+            printf 'discovery_run_id=%s\ndiscovery_retry_run_id=%s\nbundle_run_id=%s\nsample_n=%s\nshards=60\n' \
+              '${{ inputs.discovery_run_id }}' '${{ inputs.discovery_retry_run_id }}' '${{ github.run_id }}' "$n" \
+              > "artifacts/bundle_stage/n$n/source_provenance.txt"
             find "artifacts/bundle_stage/n$n" -type f -print | sort > "artifacts/bundle_stage/files-n$n.txt"
             tar -czf "$GITHUB_WORKSPACE/artifacts/discovery_bundles/discovery-n$n.tar.gz" \
               -C "$GITHUB_WORKSPACE/artifacts/bundle_stage/n$n" .
