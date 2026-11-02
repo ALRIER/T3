@@ -25,6 +25,10 @@ candidate and attaches four layers to each candidate/benchmark/stratum row:
    interval-supported flags.
 4. The full retained candidate row, regardless of whether it wins.
 
+Each stratum also reports `absolute_tier1_all26` and
+`absolute_tier2_all26`: these are true only when the candidate passes the
+corresponding joint criterion against every benchmark in the 26-model panel.
+
 Real-world scopes are empirical profile matches, not known generative-family
 labels. The synthetic cross-family workflow supplies the explicit
 source-family × evaluation-family transfer matrix.

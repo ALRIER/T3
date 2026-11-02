@@ -106,6 +106,13 @@ t3_pairwise_tournament <- function(unit_scores, stage, unit_col,
   # Tier 4 means every frozen evolutionary candidate remains in the reporting
   # universe; it is never a retrospective winner filter.
   wide$tier4_retained_candidate <- TRUE
+  all26_key <- interaction(wide[c('stage','candidate_model',group_cols)],
+                           drop=TRUE,lex.order=TRUE)
+  wide$benchmarks_evaluated <- ave(rep(1L,nrow(wide)),all26_key,FUN=sum)
+  wide$absolute_tier1_all26 <- ave(as.integer(wide$tier1_joint_mse_q95_bh_fdr),
+                                    all26_key,FUN=function(v)as.logical(all(v==1L)))
+  wide$absolute_tier2_all26 <- ave(as.integer(wide$tier2_joint_mse_q95_ci),
+                                    all26_key,FUN=function(v)as.logical(all(v==1L)))
   wide$practical_mse <- wide$gain_pct.mse >= ga_config$practical_gain_pct
   wide$practical_q95 <- wide$gain_pct.q95 >= ga_config$practical_gain_pct
   list(metrics=metric_rows, taxonomy=wide,
