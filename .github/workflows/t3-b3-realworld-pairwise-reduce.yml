@@ -1,0 +1,153 @@
+name: T3 B3 Reduce complete Real-world tournament inputs
+on:
+  workflow_dispatch:
+    inputs:
+      score_run_ids:
+        description: Comma-separated original run plus every parent-block scoring or repair run
+        required: true
+        type: string
+      prepared_blocks_run_id:
+        description: Run containing the frozen outcome-blind empirical family proximity map
+        required: true
+        type: string
+      batch_index:
+        description: Reducer batch index (dispatch 0 through 4)
+        required: true
+        type: choice
+        options: ['0','1','2','3','4']
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      expected_count: ${{ steps.plan.outputs.expected_count }}
+    steps:
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          SCORE_RUN_IDS: ${{ inputs.score_run_ids }}
+          BATCH_INDEX: ${{ inputs.batch_index }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,os,re,subprocess
+          repo=os.environ['GH_REPOSITORY'];runs=[x.strip() for x in os.environ['SCORE_RUN_IDS'].split(',') if x.strip()]
+          if len(runs)<2 or len(set(runs))!=len(runs):raise SystemExit('Pass the original score run and all unique repair runs')
+          pat=re.compile(r'^t3-b3-realworld-(repair-)?(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(200|1000|3000)(?:-(b\d+))?-run(\d+)$')
+          artifacts=[]
+          for run in runs:
+              page=1
+              while True:
+                  d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))
+                  chunk=d.get('artifacts',[])
+                  for a in chunk:
+                      m=pat.fullmatch(a['name'])
+                      if m and not a.get('expired',False):
+                          if m.group(6)!=run:raise SystemExit('Score artifact name/run ID mismatch')
+                          artifacts.append({'run_id':run,'artifact_id':a['id'],'artifact_name':a['name'],
+                            'repair':bool(m.group(1)),'family':m.group(2),'seed':int(m.group(3)),
+                            'n':int(m.group(4)),'block_id':m.group(5) or ''})
+                  if len(chunk)<100:break
+                  page+=1
+          if len(artifacts)!=856:raise SystemExit(f'Expected 856 score artifacts (128+728), found {len(artifacts)}')
+          base=[x for x in artifacts if not x['repair']];repair=[x for x in artifacts if x['repair']]
+          if len(base)!=128 or len(repair)!=728:raise SystemExit(f'Unexpected partition: base={len(base)} repair={len(repair)}')
+          base_keys={(x['family'],x['seed'],x['n']) for x in base}
+          if len(base_keys)!=128:raise SystemExit('Duplicate original score key')
+          expected={(f,s,3000) for f in ('normal','lognormal','weibull','invgauss','exgaussian','exwald') for s in range(30,40)}
+          done={(x['family'],x['seed'],x['n']) for x in base}
+          missing=expected-done
+          repaired=[x for x in repair if x['n']==3000 and x['seed'] in range(30,40)]
+          coverage={(x['family'],x['seed'],x['block_id']) for x in repaired}
+          expected_coverage={(f,s,f'b{b:02d}') for f,s,n in missing for b in range(1,15)}
+          if len(repaired)!=728 or coverage!=expected_coverage:
+              raise SystemExit(f'Repair coverage mismatch: observed {len(coverage)}, expected {len(expected_coverage)}')
+          artifacts.sort(key=lambda x:(x['family'],x['seed'],x['n'],x['block_id'],x['run_id']))
+          batch=int(os.environ['BATCH_INDEX']);selected=[x for i,x in enumerate(artifacts) if i%5==batch]
+          print('matrix='+json.dumps({'include':selected},separators=(',',':')))
+          print('expected_count='+str(len(selected)))
+          print('all_sources='+json.dumps(runs,separators=(',',':')))
+          PY
+
+  reduce:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 32
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-block-plan-run${{ inputs.prepared_blocks_run_id }}
+          run-id: ${{ inputs.prepared_blocks_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/family_map
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: ${{ matrix.artifact_name }}
+          run-id: ${{ matrix.run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/score
+      - name: Verify source score manifest and reduce to parent units
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: |
+          family_map="$(find artifacts/family_map -type f -name empirical_family_proximity.csv -print -quit)"
+          test -n "$family_map"
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_reduce_tournament_shard.R \
+            realworld incoming/score artifacts/reduced/parents-${{ matrix.artifact_id }}.csv.gz "$family_map"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-pairwise-reduced-${{ matrix.artifact_id }}-run${{ github.run_id }}
+          path: artifacts/reduced/parents-${{ matrix.artifact_id }}.csv.gz
+          if-no-files-found: error
+          retention-days: 90
+
+  bundle:
+    if: needs.reduce.result == 'success'
+    needs: [plan,reduce]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-realworld-pairwise-reduced-*-run${{ github.run_id }}
+          path: incoming/reduced
+          merge-multiple: true
+      - name: Verify, bundle, and hash this bounded reducer batch
+        env:
+          EXPECTED: ${{ needs.plan.outputs.expected_count }}
+          BATCH: ${{ inputs.batch_index }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,os,tarfile
+          from pathlib import Path
+          root=Path('incoming/reduced');files=sorted(root.rglob('*.csv.gz'))
+          expected=int(os.environ['EXPECTED'])
+          if len(files)!=expected:raise SystemExit(f'Expected {expected} reducer files, found {len(files)}')
+          out=Path(f'artifacts/realworld-reduced-batch{os.environ["BATCH"]}.tar.gz');out.parent.mkdir(parents=True,exist_ok=True)
+          with tarfile.open(out,'w:gz') as tf:
+              for f in files:tf.add(f,arcname=f.name)
+          digest=hashlib.sha256(out.read_bytes()).hexdigest()
+          out.with_name(out.name+'.sha256').write_text(f'{digest}  {out.name}\n')
+          print(f'REALWORLD_REDUCED_BATCH_BUNDLE_PASS {len(files)} {digest}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-reduced-batch${{ inputs.batch_index }}-run${{ github.run_id }}
+          path: artifacts/realworld-reduced-batch${{ inputs.batch_index }}.tar.gz*
+          if-no-files-found: error
+          retention-days: 90

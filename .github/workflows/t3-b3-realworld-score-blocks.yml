@@ -1,0 +1,216 @@
+name: T3 B3 Resume Real-world n3000 in parent checkpoints
+on:
+  workflow_dispatch:
+    inputs:
+      original_run_id:
+        description: Original Real-world scoring run with 128 successful artifacts
+        required: true
+        default: '41208956012'
+        type: string
+      catalog_run_id:
+        description: Frozen Real-world parent catalog
+        required: true
+        default: '40508641708'
+        type: string
+      discovery_bundle_run_id:
+        description: Immutable Discovery bundles
+        required: true
+        default: '41487091262'
+        type: string
+      prepared_blocks_run_id:
+        description: Successful immutable parent-block preparation run
+        required: true
+        type: string
+      prior_repair_run_ids:
+        description: Optional comma-separated prior parent-block score runs to resume around
+        required: false
+        default: ''
+        type: string
+      batch_index:
+        description: Deterministic scoring batch (dispatch 0, 1, 2, and 3)
+        required: true
+        type: choice
+        options: ['0','1','2','3']
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      expected_count: ${{ steps.plan.outputs.expected_count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-block-plan-run${{ inputs.prepared_blocks_run_id }}
+          run-id: ${{ inputs.prepared_blocks_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/block_plan
+      - name: Build this batch from exact missing keys and frozen blocks
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          ORIGINAL_RUN_ID: ${{ inputs.original_run_id }}
+          CATALOG_RUN_ID: ${{ inputs.catalog_run_id }}
+          DISCOVERY_BUNDLE_RUN_ID: ${{ inputs.discovery_bundle_run_id }}
+          PREPARED_RUN_ID: ${{ inputs.prepared_blocks_run_id }}
+          BATCH_INDEX: ${{ inputs.batch_index }}
+          PRIOR_REPAIR_RUN_IDS: ${{ inputs.prior_repair_run_ids }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import csv,json,os,re,subprocess
+          repo=os.environ['GH_REPOSITORY'];run=os.environ['ORIGINAL_RUN_ID']
+          artifacts=[];page=1
+          while True:
+              d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))
+              chunk=d.get('artifacts',[]);artifacts.extend(chunk)
+              if len(chunk)<100:break
+              page+=1
+          pat=re.compile(r'^t3-b3-realworld-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(200|1000|3000)-run'+re.escape(run)+r'$')
+          done=set()
+          for a in artifacts:
+              m=pat.fullmatch(a['name'])
+              if m and not a.get('expired',False):done.add((m.group(1),int(m.group(2)),int(m.group(3))))
+          if len(done)!=128:raise SystemExit(f'Original run must have exactly 128 valid score artifacts; found {len(done)}')
+          expected={(f,s,3000) for f in ('normal','lognormal','weibull','invgauss','exgaussian','exwald') for s in range(30,40)}
+          missing=sorted(expected-done)
+          if len(missing)!=52:raise SystemExit(f'Expected 52 missing n3000 keys, found {len(missing)}')
+          index_path=next(__import__('pathlib').Path('artifacts/block_plan').rglob('realworld_parent_block_index.csv'))
+          blocks=list(csv.DictReader(index_path.open()))
+          if len(blocks)!=84:raise SystemExit(f'Expected 84 frozen family blocks, found {len(blocks)}')
+          matrix=[]
+          for family,seed,n in missing:
+              family_blocks=sorted([b for b in blocks if b['training_family']==family],key=lambda b:b['parent_block_id'])
+              if not family_blocks:raise SystemExit(f'No input blocks for {family}')
+              for b in family_blocks:
+                  matrix.append({'family':family,'seed':seed,'n':n,'block_id':b['parent_block_id'],
+                    'parent_count':int(b['parent_count']),'child_count':int(b['child_count']),
+                    'block_artifact':f"t3-b3-realworld-parentblock-{family}-{b['parent_block_id']}-run{os.environ['PREPARED_RUN_ID']}"})
+          all_keys={(x['family'],x['seed'],x['block_id']) for x in matrix}
+          repaired=set()
+          repair_pat=re.compile(r'^t3-b3-realworld-repair-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n3000-(b\d+)-run(\d+)$')
+          for prior in [x.strip() for x in os.environ['PRIOR_REPAIR_RUN_IDS'].split(',') if x.strip()]:
+              page=1
+              while True:
+                  d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{prior}/artifacts?per_page=100&page={page}'],text=True))
+                  chunk=d.get('artifacts',[])
+                  for art in chunk:
+                      m=repair_pat.fullmatch(art['name'])
+                      if m and not art.get('expired',False):
+                          key=(m.group(1),int(m.group(2)),m.group(3))
+                          if key not in all_keys:raise SystemExit(f'Unexpected prior repair checkpoint {art["name"]}')
+                          if key in repaired:raise SystemExit(f'Duplicate prior repair checkpoint {key}')
+                          repaired.add(key)
+                  if len(chunk)<100:break
+                  page+=1
+          # Keep each batch assignment stable across restarts; completed checkpoint keys are omitted.
+          total=len(matrix);batch=int(os.environ['BATCH_INDEX'])
+          selected=[x for i,x in enumerate(matrix) if i%4==batch and (x['family'],x['seed'],x['block_id']) not in repaired]
+          if len(repaired)>total:raise SystemExit('Prior repair checkpoint count exceeds the full plan')
+          print('matrix='+json.dumps({'include':selected},separators=(',',':')))
+          print('expected_count='+str(len(selected)))
+          print('planned_total='+str(total))
+          print('already_checkpointed='+str(len(repaired)))
+          print(f"source_ids={os.environ['CATALOG_RUN_ID']},{os.environ['DISCOVERY_BUNDLE_RUN_ID']}")
+          PY
+      - name: Verify immutable source runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run view '${{ inputs.catalog_run_id }}' --repo '${{ github.repository }}' \
+            --json conclusion,workflowName --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 Fresh Real-world Parent Catalog Freeze'
+          gh run view '${{ inputs.prepared_blocks_run_id }}' --repo '${{ github.repository }}' \
+            --json conclusion,workflowName --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 Prepare immutable Real-world parent blocks'
+          gh run view '${{ inputs.discovery_bundle_run_id }}' --repo '${{ github.repository }}' \
+            --json conclusion,workflowName --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 Package immutable Discovery shards'
+          gh run view '${{ inputs.original_run_id }}' --repo '${{ github.repository }}' \
+            --json workflowName --jq 'select(.workflowName=="T3 B3 Frozen Real-world Parent Audit")'
+
+  score:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 32
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: ${{ matrix.block_artifact }}
+          run-id: ${{ inputs.prepared_blocks_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/block
+      - name: Verify and unpack parent checkpoint plus frozen Discovery weights
+        run: |
+          archive="$(find incoming/block -name 'realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz' -print -quit)"
+          test -n "$archive"
+          (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256")
+          mkdir -p input
+          tar -xzf "$archive" -C input
+          block_root="$GITHUB_WORKSPACE/input/parent_block"
+          test -s "$block_root/parent_block_manifest.csv"
+          cd "$block_root/discovery_bundle"
+          sha256sum -c discovery-n3000.tar.gz.sha256
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          tar -xzf discovery-n3000.tar.gz -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          cd "$GITHUB_WORKSPACE"
+          test "$(find artifacts/discovery_v3 -name discovery.rds -type f | wc -l)" -eq 60
+      - name: Score this immutable family-seed-parent block
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+          T3_REALWORLD_BLOCK_ID: ${{ matrix.block_id }}
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_scoring.R \
+            '${{ matrix.family }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
+            input/parent_block/parent_block_manifest.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-repair-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-${{ matrix.block_id }}-run${{ github.run_id }}
+          path: artifacts/realworld_T3_B3/${{ matrix.family }}/seed${{ matrix.seed }}_n${{ matrix.n }}_${{ matrix.block_id }}
+          if-no-files-found: error
+          retention-days: 90
+
+  coverage:
+    if: always() && needs.plan.result == 'success'
+    needs: [plan,score]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify this batch produced one immutable artifact per planned checkpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          EXPECTED: ${{ needs.plan.outputs.expected_count }}
+        run: |
+          python3 - <<'PY'
+          import json,os,re,subprocess
+          repo=os.environ['GH_REPOSITORY'];run=os.environ['GITHUB_RUN_ID'];arts=[];page=1
+          while True:
+              d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))
+              z=d.get('artifacts',[]);arts+=z
+              if len(z)<100:break
+              page+=1
+          rows=[x for x in arts if x['name'].startswith('t3-b3-realworld-repair-')]
+          expected=int(os.environ['EXPECTED'])
+          if len(rows)!=expected:raise SystemExit(f'Batch expected {expected} score artifacts, found {len(rows)}')
+          if len({x['name'] for x in rows})!=expected:raise SystemExit('Duplicate checkpoint artifact names')
+          print(f'REALWORLD_BLOCK_BATCH_COVERAGE_PASS {len(rows)}/{expected}')
+          PY

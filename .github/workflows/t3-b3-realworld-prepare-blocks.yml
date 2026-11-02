@@ -1,0 +1,162 @@
+name: T3 B3 Prepare immutable Real-world parent blocks
+on:
+  workflow_dispatch:
+    inputs:
+      catalog_run_id:
+        description: Frozen parent catalog artifact run
+        required: true
+        default: '40508641708'
+        type: string
+      discovery_bundle_run_id:
+        description: Immutable Discovery bundles run
+        required: true
+        default: '41487091262'
+        type: string
+      target_child_rows:
+        description: Target child profiles in each parent-intact checkpoint
+        required: true
+        default: '55'
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.freeze.outputs.matrix }}
+      total_blocks: ${{ steps.freeze.outputs.total_blocks }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen catalog source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run view '${{ inputs.catalog_run_id }}' --repo '${{ github.repository }}' \
+            --json conclusion,workflowName --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 Fresh Real-world Parent Catalog Freeze'
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-parent-freeze-run${{ inputs.catalog_run_id }}
+          run-id: ${{ inputs.catalog_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/realworld_catalog
+      - name: Locate frozen manifest and preflight source paths
+        id: inputs
+        run: |
+          manifest="$(find artifacts/realworld_catalog -type f -name frozen_parent_child_family_manifest.csv -print -quit)"
+          test -n "$manifest"
+          root="$(dirname "$(dirname "$manifest")")"
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+          echo "root=$root" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Classify empirical family proximity without model outcomes
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          T3_REALWORLD_SOURCE_ROOT: ${{ steps.inputs.outputs.root }}
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_family_proximity.R \
+            '${{ steps.inputs.outputs.root }}' '${{ steps.inputs.outputs.manifest }}' \
+            artifacts/realworld_family/empirical_family_proximity.csv
+      - name: Freeze deterministic parent-intact blocks
+        id: freeze
+        run: |
+          python3 scripts/t3_b3_plan_realworld_parent_blocks.py \
+            '${{ steps.inputs.outputs.manifest }}' \
+            --target-child-rows '${{ inputs.target_child_rows }}' \
+            --out artifacts/realworld_blocks/realworld_parent_block_plan.csv
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import csv,json
+          from pathlib import Path
+          root=Path('artifacts/realworld_blocks')
+          index=list(csv.DictReader((root/'realworld_parent_block_index.csv').open()))
+          matrix=[{'family':x['training_family'],'block_id':x['parent_block_id'],
+                   'parent_count':int(x['parent_count']),'child_count':int(x['child_count'])}
+                  for x in index]
+          print('matrix='+json.dumps({'include':matrix},separators=(',',':')))
+          print('total_blocks='+str(len(matrix)))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-block-plan-run${{ github.run_id }}
+          path: |
+            artifacts/realworld_blocks/
+            artifacts/realworld_family/empirical_family_proximity.csv
+          if-no-files-found: error
+          retention-days: 90
+
+  package:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-parent-freeze-run${{ inputs.catalog_run_id }}
+          run-id: ${{ inputs.catalog_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/realworld_catalog
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-block-plan-run${{ github.run_id }}
+          path: artifacts/plan
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-bundle-n3000-run${{ inputs.discovery_bundle_run_id }}
+          run-id: ${{ inputs.discovery_bundle_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/discovery
+      - name: Resolve immutable plan, classifier, and source root
+        id: paths
+        run: |
+          manifest="$(find artifacts/realworld_catalog -type f -name frozen_parent_child_family_manifest.csv -print -quit)"
+          root="$(dirname "$(dirname "$manifest")")"
+          plan="$(find artifacts/plan -type f -name realworld_parent_block_plan.csv -print -quit)"
+          classifier="$(find artifacts/plan -type f -name empirical_family_proximity.csv -print -quit)"
+          test -n "$manifest" -a -n "$plan" -a -n "$classifier"
+          echo "root=$root" >> "$GITHUB_OUTPUT"
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+          echo "plan=$plan" >> "$GITHUB_OUTPUT"
+          echo "classifier=$classifier" >> "$GITHUB_OUTPUT"
+      - name: Verify frozen Discovery bundle
+        run: |
+          cd incoming/discovery
+          sha256sum -c discovery-n3000.tar.gz.sha256
+          cd "$GITHUB_WORKSPACE"
+      - name: Build verified block bundle
+        run: |
+          python3 scripts/t3_b3_package_realworld_parent_block.py \
+            '${{ steps.paths.outputs.root }}' '${{ steps.paths.outputs.plan }}' \
+            '${{ steps.paths.outputs.classifier }}' \
+            --family '${{ matrix.family }}' --block-id '${{ matrix.block_id }}' \
+            --out-dir artifacts/parent_block
+          mkdir -p artifacts/parent_block/discovery_bundle
+          cp incoming/discovery/discovery-n3000.tar.gz artifacts/parent_block/discovery_bundle/
+          cp incoming/discovery/discovery-n3000.tar.gz.sha256 artifacts/parent_block/discovery_bundle/
+          tar -czf "artifacts/realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz" \
+            -C artifacts parent_block
+          sha256sum "artifacts/realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz" \
+            > "artifacts/realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-parentblock-${{ matrix.family }}-${{ matrix.block_id }}-run${{ github.run_id }}
+          path: |
+            artifacts/realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz
+            artifacts/realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 90

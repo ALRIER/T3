@@ -39,7 +39,16 @@ tab<-tab[tab$training_family==family,,drop=FALSE]
 if(!nrow(tab))stop('No frozen parent-child profile for source family ',family)
 if(anyDuplicated(tab[c('parent_dataset_id','dataset_id')]))stop('Duplicate parent-child frozen identity')
 if(length(unique(tab$parent_dataset_id))<5L)stop('Too few independent parents for this family')
-shard_suffix<-if(length(a)==5L)paste0('_trainseeds_',paste(training_seeds,collapse='_')) else ''
+block_id<-Sys.getenv('T3_REALWORLD_BLOCK_ID','')
+if(nzchar(block_id)) {
+ if(!'parent_block_id'%in%names(tab)||any(tab$parent_block_id!=block_id))
+  stop('Parent block ID does not match the frozen input bundle')
+ if(!all(c('empirical_family_assignment','family_assignment_confidence',
+           'family_assignment_status','empirical_family_relation')%in%names(tab)))
+  stop('Outcome-blind empirical family proximity labels are missing')
+}
+shard_suffix<-if(nzchar(block_id))paste0('_',block_id) else
+ if(length(a)==5L)paste0('_trainseeds_',paste(training_seeds,collapse='_')) else ''
 out<-file.path('artifacts','realworld_T3_B3',family,paste0(sprintf('seed%02d_n%d',eval_seed,n),shard_suffix))
 dir.create(file.path(out,'raw'),recursive=TRUE,showWarnings=FALSE)
 score_path<-file.path(out,'scores.csv')
@@ -89,7 +98,10 @@ for(j in seq_len(nrow(tab))) {
    models<-c(baselines,learned)
    z<-score_model_set(T,models,mean(xx))
    z$dataset_id<-row$dataset_id;z$parent_dataset_id<-row$parent_dataset_id
-   z$family<-family;z$training_family<-family;z$evaluation_profile<-row$empirical_profile
+  z$family<-family;z$training_family<-family;z$source_family<-family
+  z$evaluation_family<-if('empirical_family_assignment'%in%names(row))
+    as.character(row$empirical_family_assignment) else family
+  z$evaluation_profile<-row$empirical_profile
    z$domain<-row$domain;z$source_url<-row$source_url
    z$license_name<-row$license_name;z$license_url<-row$license_url
    z$upstream_license_status<-row$upstream_license_status
@@ -103,6 +115,12 @@ for(j in seq_len(nrow(tab))) {
    z$child_selection_rule<-row$child_selection_rule
    z$variable<-row$variable
    z$transfer_scope<-row$transfer_scope;z$matched_scenario_id<-row$matched_scenario_id
+  for(nm in c('empirical_family_assignment','family_assignment_runner_up',
+      'family_assignment_confidence','family_assignment_margin',
+      'family_assignment_compatible_set','family_assignment_status',
+      'family_assignment_method','family_assignment_bootstrap_B',
+      'family_assignment_seed','empirical_family_relation','family_assignment_scope'))
+   if(nm%in%names(row))z[[nm]]<-row[[nm]]
    z$depth<-depth;z$sample_n<-n;z$training_seed<-training_seed;z$realworld_seed<-eval_seed
    z$parent_cluster_unit<-'parent_dataset_id';z$target_type<-'evaluated_child_depth_mean_proxy'
    z$source_sha256<-row$source_sha256;z$processed_sha256<-row$processed_sha256
@@ -116,9 +134,13 @@ for(j in seq_len(nrow(tab))) {
 }
 if(first)stop('No scores were created')
 manifest<-data.frame(family,realworld_seed=eval_seed,sample_n=n,
+ parent_block_id=if(nzchar(block_id))block_id else 'full',
  parent_count=length(unique(tab$parent_dataset_id)),child_count=nrow(tab),
+ parent_ids=paste(sort(unique(tab$parent_dataset_id)),collapse=';'),
  scoring_training_seeds=paste(training_seeds,collapse=';'),
  score_sha256=t2_sha256(score_path),parent_manifest_sha256=t2_sha256(manifest_path),
+ family_classifier_method=if('family_assignment_method'%in%names(tab))
+  paste(unique(tab$family_assignment_method),collapse=';') else 'legacy_profile_only',
  benchmark='mean',weight_selection='frozen_discovery_no_retuning',
  code_revision=Sys.getenv('GITHUB_SHA','local'),stringsAsFactors=FALSE)
 write.csv(manifest,file.path(out,'score_manifest.csv'),row.names=FALSE)
