@@ -20,6 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
+      - name: Report the Actions artifact API quota before source downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api rate_limit --jq '.resources.core | "remaining=\(.remaining) reset_epoch=\(.reset)"'
       - uses: actions/download-artifact@v5
         with:
           pattern: t3-b3-discovery-*-s*-n*-run${{ inputs.discovery_run_id }}
