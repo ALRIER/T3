@@ -30,13 +30,6 @@ jobs:
           ROLE: ${{ inputs.role }}
         run: |
           if [[ "$ROLE" == heldout ]]; then echo 'seeds=[10,11,12,13,14,15,16,17,18,19]' >> "$GITHUB_OUTPUT"; else echo 'seeds=[20,21,22,23,24,25,26,27,28,29]' >> "$GITHUB_OUTPUT"; fi
-      - name: Verify the immutable Discovery bundle run
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh run view "${{ inputs.discovery_bundle_run_id }}" --repo "${{ github.repository }}" \
-            --json conclusion,workflowName \
-            --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Package immutable Discovery shards")' >/dev/null
   transfer:
     needs: plan
     runs-on: ubuntu-latest

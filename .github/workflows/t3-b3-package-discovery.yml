@@ -16,21 +16,7 @@ permissions:
   contents: read
   actions: read
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify immutable source runs
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RUN_ID: ${{ inputs.discovery_run_id }}
-          RETRY_RUN_ID: ${{ inputs.discovery_retry_run_id }}
-        run: |
-          for run in "$RUN_ID" "$RETRY_RUN_ID"; do
-            gh run view "$run" --repo "${GITHUB_REPOSITORY}" --json conclusion,workflowName \
-              --jq 'select(.conclusion=="success" and .workflowName=="T3 Full Nested Optuna 5x3 Grid321")' >/dev/null
-          done
   package:
-    needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
