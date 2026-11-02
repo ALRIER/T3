@@ -13,6 +13,10 @@ t3_pairwise_tournament <- function(unit_scores,stage,unit_col,group_cols,
  map_key<-c('evaluation_family','scenario_id','sample_n')
  if(anyDuplicated(benchmark_map[map_key]))stop('Duplicate scenario benchmark-map key')
  if(!is.finite(alpha)||alpha<=0||alpha>=1)stop('Invalid alpha')
+ stable_vector<-function(x) {
+  if(length(x)<2L)return(TRUE)
+  s<-stats::sd(x);!is.finite(s)||s<=sqrt(.Machine$double.eps)*max(1,abs(mean(x)))
+ }
  engine_from_id<-function(x){
   x<-tolower(as.character(x));e<-c('dirichlet','nsga2','de','ga')
   tok<-strsplit(gsub('[^a-z0-9]+','_',x),'_',fixed=TRUE)[[1L]]
@@ -65,10 +69,16 @@ t3_pairwise_tournament <- function(unit_scores,stage,unit_col,group_cols,
      b<-pair[[paste0(metric,'_benchmark')]]
      gain_pct<-100*(b-pair[[paste0(metric,'_candidate')]])/pmax(abs(b),.Machine$double.eps)
      if(length(d)>=3L){
-      if(all(d==d[[1L]])){p<-if(d[[1L]]<0)0 else 1;ci<-rep(d[[1L]],2L)} else {
+      if(stable_vector(d)){
+       # Degenerate paired differences make the t statistic undefined. Use the
+       # exact one-sided sign-flip probability under the paired null; do not
+       # report a zero p-value merely because all observed differences match.
+       p<-if(mean(d)<0)2^(-length(d)) else 1
+       ci<-rep(mean(d),2L)
+      } else {
        p<-stats::t.test(d,alternative='less')$p.value;ci<-stats::t.test(d,conf.level=1-alpha)$conf.int
       }
-      gain_ci<-if(all(gain_pct==gain_pct[[1L]]))rep(gain_pct[[1L]],2L) else
+      gain_ci<-if(stable_vector(gain_pct))rep(mean(gain_pct),2L) else
        stats::t.test(gain_pct,conf.level=1-alpha)$conf.int
      } else {p<-NA_real_;ci<-c(NA_real_,NA_real_);gain_ci<-c(NA_real_,NA_real_)}
      ri<-ri+1L;row<-data.frame(stage=stage,candidate_model=cid,
