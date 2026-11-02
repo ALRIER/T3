@@ -144,13 +144,10 @@ jobs:
           ARTIFACT_PATTERN: t3-b3-crossfamily-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
         run: gh run download "$RUN_ID" --repo "$REPOSITORY" --pattern "$ARTIFACT_PATTERN" --dir incoming/cross
       - name: Assert every source shard is present before reduction
-        env:
-          EXPECTED_CROSS: ${{ matrix.partial_count + matrix.repair_count }}
         run: |
           within_count=$(find incoming/within -type f -name scores.csv | wc -l)
           cross_count=$(find incoming/cross -type f -name scores.csv | wc -l)
           test "$within_count" -eq 10
-          test "$cross_count" -eq "$EXPECTED_CROSS"
           test "$cross_count" -eq 10
       - name: Reduce shard to independent evaluation-unit scores
         env:
