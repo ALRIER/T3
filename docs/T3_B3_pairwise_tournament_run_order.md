@@ -54,21 +54,27 @@ source-family × evaluation-family transfer matrix.
 
 ## Run order using frozen Actions artifacts
 
-1. Run **T3 B3 Discovery own-benchmark freeze** with the original and repair
-   Discovery run IDs. It freezes one non-mean classical benchmark per family,
-   scenario, and sample size using Discovery data only; training comparisons remain
-   descriptive and do not compute confirmatory p-values or select new W*.
-2. Run **T3 B3 Frozen Cross-Family Transfer** for `heldout`, then for `stress`.
-   Supply the Monte Carlo run ID and both Discovery artifact run IDs. Each run
-   evaluates every source-family W on the other evaluation families.
-3. Run **T3 B3 Pairwise own-benchmark confirmation** once for `heldout` and
-   once for `stress`, pairing the completed within-family score run with the
-   corresponding cross-family score run, and supply the own-benchmark freeze
-   run ID.
-4. Let the currently active Real-world repair finish. Then run **T3 B3
-   Real-world own-benchmark parent tournament** with the original Real-world
-   run, the repair run, and the own-benchmark freeze run. It reduces each score artifact separately, so one
-   Actions runner never downloads the full raw score archive.
+1. **T3 B3 Discovery own-benchmark freeze** is complete. Its artifact freezes
+   one non-mean classical benchmark per family, scenario, and sample size from
+   Discovery data only; training comparisons remain descriptive.
+2. Run **T3 B3 Package immutable Discovery shards**. It verifies all 180
+   Discovery artifacts and packages three immutable bundles, one per sample
+   size. Transfer jobs then download one bundle instead of repeatedly fetching
+   the same 60 Discovery shards.
+3. Run **T3 B3 Frozen Cross-Family Transfer** for `heldout`, then `stress`.
+   Supply the Monte Carlo run ID, bundle run ID, and earlier partial transfer
+   run. The planner preserves successful earlier shards and schedules only
+   missing family × seed × sample-size cells.
+4. Run **T3 B3 Pairwise own-benchmark confirmation** for `heldout` and `stress`,
+   with the original within-family score run, partial cross-family run, repair
+   run, and Discovery benchmark-map run. Reduction uses 18 bounded
+   family × sample-size blocks, each combining its within-family and
+   cross-family seed shards before global inference.
+5. Run the **T3 B3 Optimizer RNG Sensitivity Audit** from the completed
+   Discovery source runs. It is an audit-only repeat and never replaces the
+   frozen production weights.
+6. Resume Real-world scoring and its parent-level tournament only after these
+   non-Real-world audits and local backups are complete.
 
 The new tournament outputs are additive and versioned. Existing raw scores,
 checkpoints, manifests, legacy summaries, and backups remain available for
