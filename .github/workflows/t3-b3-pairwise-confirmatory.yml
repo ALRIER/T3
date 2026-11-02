@@ -67,6 +67,24 @@ jobs:
                   blocks.append({'family':family,'n':n,'partial_count':partial_count,'repair_count':repair_count})
           print('matrix='+json.dumps({'include':blocks},separators=(',',':')))
           PY
+      - name: Preflight a held-out score artifact before opening reducer blocks
+        if: inputs.stage == 'heldout'
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-heldout-normal-s10-n200-run${{ inputs.confirmatory_run_id }}
+          run-id: ${{ inputs.confirmatory_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: preflight/score
+      - name: Preflight a Stress score artifact before opening reducer blocks
+        if: inputs.stage == 'stress'
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-stress-normal-s20-n200-run${{ inputs.confirmatory_run_id }}
+          run-id: ${{ inputs.confirmatory_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: preflight/score
   reduce:
     needs: plan
     runs-on: ubuntu-latest

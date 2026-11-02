@@ -60,6 +60,24 @@ jobs:
           print('matrix='+json.dumps({'include':[{'evaluation_family':f,'seed':s,'n':n} for f,s,n in missing]},separators=(',',':')))
           print(f'planned_missing={len(missing)}')
           PY
+      - name: Preflight the Monte Carlo artifact download before opening the shard matrix
+        if: inputs.role == 'heldout'
+        uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-heldout-normal-s10-n200-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: preflight/mc
+      - name: Preflight the Stress Monte Carlo artifact download before opening the shard matrix
+        if: inputs.role == 'stress'
+        uses: actions/download-artifact@v5
+        with:
+          name: b3-mc-stress-normal-s20-n200-run${{ inputs.mc_run_id }}
+          run-id: ${{ inputs.mc_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: preflight/mc
   transfer:
     needs: plan
     runs-on: ubuntu-latest
