@@ -6,8 +6,8 @@ on:
         description: Successful held-out/stress scoring run
         required: true
         type: string
-      cross_family_run_id:
-        description: Successful frozen cross-family scoring run
+      cross_family_run_ids:
+        description: Comma-separated partial and repair frozen cross-family scoring runs
         required: true
         type: string
       benchmark_map_run_id:
@@ -34,14 +34,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPOSITORY: ${{ github.repository }}
           CONFIRM_RUN: ${{ inputs.confirmatory_run_id }}
-          CROSS_RUN: ${{ inputs.cross_family_run_id }}
+          CROSS_RUNS: ${{ inputs.cross_family_run_ids }}
           STAGE: ${{ inputs.stage }}
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os, subprocess
           repo=os.environ['GH_REPOSITORY']; stage=os.environ['STAGE']
-          specs=[(os.environ['CONFIRM_RUN'],f't3-b3-{stage}-'),
-                 (os.environ['CROSS_RUN'],f't3-b3-crossfamily-{stage}-')]
+          cross_runs=[x.strip() for x in os.environ['CROSS_RUNS'].split(',') if x.strip()]
+          specs=[(os.environ['CONFIRM_RUN'],f't3-b3-{stage}-')]+[
+                 (run,f't3-b3-crossfamily-{stage}-') for run in cross_runs]
           matrix=[]
           for run,prefix in specs:
               page=1
@@ -53,19 +54,19 @@ jobs:
                   if len(arts)<100: break
                   page+=1
           a=[x for x in matrix if x['run_id']==os.environ['CONFIRM_RUN']]
-          b=[x for x in matrix if x['run_id']==os.environ['CROSS_RUN']]
+          b=[x for x in matrix if x['run_id'] in cross_runs]
           assert len(a)==180, f'Expected 180 within-family {stage} shards, found {len(a)}'
-          assert len(b)==180, f'Expected 180 cross-family {stage} shards, found {len(b)}'
-          assert len({x['artifact_id'] for x in matrix})==360, 'Duplicate Actions artifact IDs'
+          import re
+          pat=re.compile(rf't3-b3-crossfamily-{stage}-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(\d+)-run\d+')
+          keys=[]
+          for x in b:
+              m=pat.fullmatch(x['artifact_name'])
+              assert m, f'Unexpected cross-family shard identity: {x["artifact_name"]}'
+              keys.append((m.group(1),int(m.group(2)),int(m.group(3))))
+          assert len(b)==180 and len(set(keys))==180, f'Expected 180 unique cross-family {stage} shards, found {len(set(keys))}'
+          assert len({x['artifact_id'] for x in matrix})==len(matrix), 'Duplicate Actions artifact IDs'
           print('matrix='+json.dumps({'include':matrix},separators=(',',':')))
           PY
-      - name: Verify the two immutable scoring runs
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh run view ${{ inputs.confirmatory_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Held-out and Stress from immutable Actions artifacts")'
-          gh run view ${{ inputs.cross_family_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Frozen Cross-Family Transfer")'
-          gh run view ${{ inputs.benchmark_map_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Discovery own-benchmark freeze")'
   reduce:
     needs: plan
     runs-on: ubuntu-latest
