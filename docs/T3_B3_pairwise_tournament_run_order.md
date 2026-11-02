@@ -63,14 +63,16 @@ source-family × evaluation-family transfer matrix.
    the matching bundle instead of repeatedly fetching the same 60 Discovery
    artifacts through the Actions API.
 3. Run **T3 B3 Frozen Cross-Family Transfer** for `heldout`, then `stress`.
-   Supply the Monte Carlo run ID, bundle branch, and earlier partial transfer
-   run. The planner preserves the 32 successful earlier shards per stage and
+   Supply Monte Carlo run `40239277660`, the successful Discovery-bundle run ID,
+   and the corresponding earlier partial transfer run (`41476736420` for
+   Held-out; `41476743557` for Stress). The planner preserves the 32 successful
+   earlier shards per stage and
    schedules only the 148 missing family × seed × sample-size cells.
 4. Run **T3 B3 Pairwise own-benchmark confirmation** for `heldout` and `stress`,
-   with the original within-family score run, partial cross-family run, repair
-   run, and Discovery benchmark-map run. Reduction uses 18 bounded
-   family × sample-size blocks, each combining its within-family and
-   cross-family seed shards before global inference.
+   with within-family score run `41208513291`, the partial cross-family run,
+   repair run, and Discovery benchmark-map run `41478038812`. Reduction uses
+   18 bounded family × sample-size blocks, each combining its within-family
+   and cross-family seed shards before global inference.
 5. Run the **T3 B3 Optimizer RNG Sensitivity Audit** from the completed
    Discovery source runs. It is an audit-only repeat and never replaces the
    frozen production weights.
