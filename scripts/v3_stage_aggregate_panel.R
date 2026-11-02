@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
-# Stage-wide primary inference: one BH panel across all candidate/metric,
-# family, sample-size, and transfer strata after reducing repeated scenarios.
+# Legacy best-eligible-classical analysis retained for reproducibility.
+# The primary all-26 paired panel is produced by the pairwise tournament workflow.
 a<-commandArgs(TRUE)
 if(length(a)!=1L||!a[1L]%in%c('heldout','stress'))
   stop('Usage: STAGE (heldout|stress)')
@@ -44,7 +44,8 @@ write.csv(data.frame(stage=stage,score_files=length(paths),
   strata=length(unique(interaction(reduced[c('source_family','evaluation_family',
     'transfer_scope','sample_n')],drop=TRUE))),
   evaluation_seed_count=length(unique(reduced[[eval_col]])),
-  hypotheses=nrow(inference),global_bh_family='all reported candidate x metric x transfer strata',
+  hypotheses=nrow(inference),analysis_status='legacy_best_eligible_comparator_not_all_26_tournament',
+  global_bh_family='all reported candidate x metric x transfer strata',
   score_file_manifest=paste(paths,collapse=';'),stringsAsFactors=FALSE),
   file.path(out,'panel_manifest.csv'),row.names=FALSE)
 write.csv(data.frame(path=paths,sha256=vapply(paths,t2_sha256,character(1)),

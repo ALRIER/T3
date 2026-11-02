@@ -1,0 +1,120 @@
+name: T3 B3 Real-world all-benchmark parent tournament
+on:
+  workflow_dispatch:
+    inputs:
+      original_run_id:
+        description: Original Real-world scoring run with completed shards
+        required: true
+        default: '41208956012'
+        type: string
+      retry_run_id:
+        description: Successful n=3000 missing-shard repair run
+        required: true
+        default: '41441526072'
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          ORIGINAL_RUN: ${{ inputs.original_run_id }}
+          RETRY_RUN: ${{ inputs.retry_run_id }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, subprocess
+          repo=os.environ['GH_REPOSITORY']; runs=[os.environ['ORIGINAL_RUN'],os.environ['RETRY_RUN']]
+          matrix=[]
+          for run in runs:
+              page=1
+              while True:
+                  p=subprocess.run(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],capture_output=True,text=True,check=True)
+                  data=json.loads(p.stdout); arts=data.get('artifacts',[])
+                  for x in arts:
+                      name=x['name']
+                      if x.get('expired') or not name.startswith('t3-b3-realworld-'): continue
+                      if name.startswith('t3-b3-realworld-global-') or name.startswith('t3-b3-realworld-pairwise-'): continue
+                      matrix.append({'run_id':run,'artifact_id':x['id'],'artifact_name':name})
+                  if len(arts)<100: break
+                  page+=1
+          base=[x for x in matrix if x['run_id']==runs[0]]
+          retry=[x for x in matrix if x['run_id']==runs[1]]
+          assert len(base)==128, f'Expected 128 completed original shards, found {len(base)}'
+          assert len(retry)==104, f'Expected 104 repaired split-seed shards, found {len(retry)}'
+          assert len({x['artifact_id'] for x in matrix})==232, 'Duplicate Real-world artifact IDs'
+          print('matrix='+json.dumps({'include':matrix},separators=(',',':')))
+          PY
+      - name: Verify original and repair runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run view ${{ inputs.original_run_id }} --repo ${{ github.repository }} --json workflowName --jq 'select(.workflowName=="T3 B3 Frozen Real-world Parent Audit")'
+          gh run view ${{ inputs.retry_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Retry cancelled Real-world n3000 shards")'
+  reduce:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 32
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: ${{ matrix.artifact_name }}
+          run-id: ${{ matrix.run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming
+      - name: Reduce this raw score shard to parent-cluster model means
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_reduce_tournament_shard.R realworld incoming artifacts/reduced/parents-${{ matrix.artifact_id }}.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-pairwise-reduced-${{ matrix.artifact_id }}
+          path: artifacts/reduced/parents-${{ matrix.artifact_id }}.csv.gz
+          if-no-files-found: error
+          retention-days: 90
+  infer:
+    needs: [plan,reduce]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-realworld-pairwise-reduced-*
+          path: artifacts/reduced
+          merge-multiple: true
+      - name: Parent-weighted inference against all 26 estimators
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_tournament_from_reduced.R realworld artifacts/reduced
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-pairwise-global-run${{ github.run_id }}
+          path: artifacts/v3_confirmatory_pairwise/realworld_v2
+          if-no-files-found: error
+          retention-days: 90

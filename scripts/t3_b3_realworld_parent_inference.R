@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
-# Parent-cluster bootstrap and one global BH panel for every reported layer.
+# Legacy mean-only parent analysis retained for exact reproducibility.
+# Primary all-26 results are produced by t3_b3_tournament_from_reduced.R.
 a <- commandArgs(TRUE)
 root <- if(length(a)) a[[1L]] else 'artifacts/realworld_T3_B3'
 source('R/00_shared/load_all.R'); t2_load('.')
@@ -112,6 +113,7 @@ write.csv(scenario_diag,file.path(dest,'scenario_diagnostics_descriptive.csv'),r
 write.csv(data.frame(path=files,sha256=vapply(files,t2_sha256,character(1))),
  file.path(dest,'input_manifest.csv'),row.names=FALSE)
 writeLines(c('benchmark=sample_mean','independent_unit=parent_dataset_id',
+ 'analysis_status=legacy_mean_only_not_the_all_26_benchmark_tournament',
  'bootstrap=resample independent parents; 5000 replicates; percentile 95% CI',
  'BH=one global panel over family x transfer_scope x sample_n x model x metric hypotheses',
  'parent inference averages child variables, depth slices, evaluation seeds, and training seeds within each parent',
