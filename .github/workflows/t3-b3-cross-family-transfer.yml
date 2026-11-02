@@ -7,8 +7,13 @@ name: T3 B3 Frozen Cross-Family Transfer
         required: true
         type: string
       discovery_run_id:
-        description: Successful T3 B3 Discovery run ID
+        description: T3 B3 Discovery run containing original frozen artifacts
         required: true
+        type: string
+      discovery_retry_run_id:
+        description: T3 B3 Discovery repair run containing remaining frozen artifacts
+        required: true
+        default: '41207646731'
         type: string
       role:
         description: Independent evaluation role
@@ -36,7 +41,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 32
       matrix:
         evaluation_family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
         seed: ${{ fromJSON(needs.plan.outputs.seeds) }}
@@ -52,6 +57,14 @@ jobs:
         with:
           pattern: t3-b3-discovery-*-s*-n${{ matrix.n }}-run${{ inputs.discovery_run_id }}
           run-id: ${{ inputs.discovery_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-*-s*-n${{ matrix.n }}-run${{ inputs.discovery_retry_run_id }}
+          run-id: ${{ inputs.discovery_retry_run_id }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: artifacts/discovery_v3

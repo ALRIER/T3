@@ -166,6 +166,10 @@ jobs:
 
   infer:
     needs: [plan, score]
+    # This historical job downloads the full raw archive to one runner and
+    # performs mean-only inference. The all-26 primary tournament now reduces
+    # each immutable score artifact independently in t3-b3-pairwise-realworld.yml.
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:

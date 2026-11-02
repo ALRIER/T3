@@ -14,7 +14,7 @@ get_engine <- function(x) {
   hit <- order[order %in% tokens]
   if(length(hit)) hit[[1L]] else NA_character_
 }
-pair_rows <- list(); candidate_rows <- list(); pi <- 0L; ci <- 0L
+pair_rows <- list(); candidate_rows <- list(); identities <- character(); pi <- 0L; ci <- 0L
 for(path in files) {
   fit <- readRDS(path)
   if(!is.data.frame(fit$training_control_comparison)) stop('Discovery artifact lacks training score panel: ',path)
@@ -32,6 +32,8 @@ for(path in files) {
   family <- if(!is.na(ix)&&length(p)>=ix+3L)p[ix+1L] else NA_character_
   seed <- if(!is.na(ix)&&length(p)>=ix+3L)sub('^seed','',p[ix+2L]) else NA_character_
   sample_n <- if(!is.na(ix)&&length(p)>=ix+3L)sub('^n','',p[ix+3L]) else NA_character_
+  if(is.na(family)||is.na(seed)||is.na(sample_n))stop('Cannot recover Discovery shard identity from path: ',path)
+  identities <- c(identities,paste(family,as.integer(seed),as.integer(sample_n),sep='|'))
   for(candidate_id in candidates) {
     engine <- get_engine(candidate_id)
     cdat <- z[z$model==candidate_id,c('scenario_id','mse','q95')]
@@ -68,6 +70,11 @@ for(path in files) {
   }
   rm(fit,z); invisible(gc(FALSE))
 }
+expected <- expand.grid(family=t2_families(),training_seed=0:9,
+  sample_n=t2_v3_sample_sizes('discovery'),stringsAsFactors=FALSE)
+expected_ids <- with(expected,paste(family,training_seed,sample_n,sep='|'))
+if(anyDuplicated(identities)||!setequal(identities,expected_ids))
+  stop('Discovery audit requires exactly one frozen artifact for every family x seed x sample-size shard')
 out <- file.path(root,'benchmark_audit_v2')
 if(dir.exists(out)) stop('Refusing to overwrite immutable Discovery benchmark audit')
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
