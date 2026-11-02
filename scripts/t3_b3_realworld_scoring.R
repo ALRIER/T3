@@ -3,12 +3,13 @@
 a<-commandArgs(TRUE)
 if(!(length(a)%in%c(4L,5L)))stop('Usage: TRAINING_FAMILY REALWORLD_SEED N FROZEN_PARENT_CHILD_MANIFEST [TRAINING_SEEDS_COMMA_SEPARATED]')
 family<-a[1L];eval_seed<-as.integer(a[2L]);n<-as.integer(a[3L]);manifest_path<-a[4L]
-training_seeds<-if(length(a)==5L)as.integer(strsplit(a[5L],',',fixed=TRUE)[[1L]]) else t2_v3_indices('discovery')
-if(!length(training_seeds)||anyNA(training_seeds)||anyDuplicated(training_seeds)||
-   any(!training_seeds%in%t2_v3_indices('discovery')))stop('Invalid frozen Discovery training-seed shard')
+training_seed_arg<-if(length(a)==5L)strsplit(a[5L],',',fixed=TRUE)[[1L]] else NULL
 source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R');source('R/00_shared/v3_inference.R')
 source('R/00_shared/v3_scientific_adapter.R');source('R/00_shared/v3_downstream.R')
+training_seeds<-if(is.null(training_seed_arg))t2_v3_indices('discovery') else as.integer(training_seed_arg)
+if(!length(training_seeds)||anyNA(training_seeds)||anyDuplicated(training_seeds)||
+   any(!training_seeds%in%t2_v3_indices('discovery')))stop('Invalid frozen Discovery training-seed shard')
 if(!family%in%t2_families()||!eval_seed%in%t2_v3_indices('realworld')||
    !n%in%t2_v3_sample_sizes('realworld'))stop('Invalid Real-world family/seed/n')
 if(!file.exists(manifest_path))stop('Frozen parent-child manifest missing')
