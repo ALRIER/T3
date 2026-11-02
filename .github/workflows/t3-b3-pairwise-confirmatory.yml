@@ -58,6 +58,9 @@ jobs:
           done=[(r['evaluation_family'],int(r['seed']),int(r['sample_n'])) for r in stage_rows]
           if len(stage_rows)!=32 or any(r['source_run_id']!=partial_run for r in stage_rows) or len(set(done))!=32:
               raise SystemExit('Partial successful-shard manifest is incomplete or has the wrong source run')
+          seeds=range(10,20) if stage=='heldout' else range(20,30)
+          expected={(f,s,n) for f in ['normal','lognormal','weibull','invgauss','exgaussian','exwald'] for s in seeds for n in (200,1000,3000)}
+          if not set(done)<=expected: raise SystemExit('Partial successful-shard manifest contains an unexpected scope')
           blocks=[]
           for family in ['normal','lognormal','weibull','invgauss','exgaussian','exwald']:
               for n in (200,1000,3000):
