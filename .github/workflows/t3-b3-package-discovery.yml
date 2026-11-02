@@ -1,0 +1,78 @@
+name: T3 B3 Package immutable Discovery shards
+on:
+  workflow_dispatch:
+    inputs:
+      discovery_run_id:
+        description: Primary successful Discovery run
+        required: true
+        default: '41113724413'
+        type: string
+      discovery_retry_run_id:
+        description: Successful repair run with remaining Discovery shards
+        required: true
+        default: '41207646731'
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify immutable source runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.discovery_run_id }}
+          RETRY_RUN_ID: ${{ inputs.discovery_retry_run_id }}
+        run: |
+          for run in "$RUN_ID" "$RETRY_RUN_ID"; do
+            gh run view "$run" --repo "${GITHUB_REPOSITORY}" --json conclusion,workflowName \
+              --jq 'select(.conclusion=="success" and .workflowName=="T3 Full Nested Optuna 5x3 Grid321")' >/dev/null
+          done
+  package:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-*-s*-n${{ matrix.n }}-run${{ inputs.discovery_run_id }}
+          run-id: ${{ inputs.discovery_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-*-s*-n${{ matrix.n }}-run${{ inputs.discovery_retry_run_id }}
+          run-id: ${{ inputs.discovery_retry_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
+      - name: Verify and compress the complete immutable shard panel
+        run: |
+          test "$(find artifacts/discovery_v3 -name discovery.rds -type f | wc -l)" -eq 60
+          test "$(find artifacts/discovery_v3 -name stage_contract.rds -type f | wc -l)" -eq 60
+          for f in normal lognormal weibull invgauss exgaussian exwald; do
+            for i in $(seq 0 9); do
+              printf -v s '%02d' "$i"
+              test -s "artifacts/discovery_v3/$f/seed$s/n${{ matrix.n }}/discovery.rds"
+              test -s "artifacts/discovery_v3/$f/seed$s/n${{ matrix.n }}/stage_contract.rds"
+            done
+          done
+          mkdir -p artifacts/discovery_bundles
+          tar -czf "artifacts/discovery_bundles/discovery-n${{ matrix.n }}.tar.gz" -C artifacts/discovery_v3 .
+          sha256sum "artifacts/discovery_bundles/discovery-n${{ matrix.n }}.tar.gz" \
+            > "artifacts/discovery_bundles/discovery-n${{ matrix.n }}.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/discovery_bundles/*
+          if-no-files-found: error
+          retention-days: 90
