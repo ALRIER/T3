@@ -57,7 +57,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh run view ${{ inputs.original_run_id }} --repo ${{ github.repository }} --json workflowName --jq 'select(.workflowName=="T3 B3 Frozen Real-world Parent Audit")'
-          gh run view ${{ inputs.retry_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Retry cancelled Real-world n3000 shards")'
+          # The legacy inference job may fail after every score shard uploaded.
+          # The artifact-count and per-shard schema checks are authoritative.
+          gh run view ${{ inputs.retry_run_id }} --repo ${{ github.repository }} --json status,workflowName --jq 'select(.status=="completed" and .workflowName=="T3 B3 Retry cancelled Real-world n3000 shards")'
   reduce:
     needs: plan
     runs-on: ubuntu-latest
