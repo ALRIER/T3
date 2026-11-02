@@ -2,10 +2,15 @@ name: T3 B3 Discovery own-benchmark freeze
 on:
   workflow_dispatch:
     inputs:
-      discovery_run_ids:
-        description: Comma-separated Discovery runs whose immutable shards complete the frozen W registry
+      discovery_run_id:
+        description: Primary successful Discovery run
         required: true
-        default: '41113724413,41207646731'
+        default: '41113724413'
+        type: string
+      discovery_retry_run_id:
+        description: Successful Discovery repair run containing remaining immutable shards
+        required: true
+        default: '41207646731'
         type: string
 permissions:
   contents: read
@@ -22,18 +27,32 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download only immutable Discovery artifacts
+      - name: Verify immutable Discovery source runs
         env:
           GH_TOKEN: ${{ github.token }}
-          RUN_IDS: ${{ inputs.discovery_run_ids }}
+          RUN_ID: ${{ inputs.discovery_run_id }}
+          RETRY_RUN_ID: ${{ inputs.discovery_retry_run_id }}
         run: |
-          mkdir -p artifacts/discovery_v3
-          IFS=',' read -ra runs <<< "$RUN_IDS"
-          for run in "${runs[@]}"; do
-            run="$(echo "$run" | xargs)"
-            test -n "$run"
-            gh run download "$run" --pattern 't3-b3-discovery-*' --dir artifacts/discovery_v3
+          for run in "$RUN_ID" "$RETRY_RUN_ID"; do
+            gh run view "$run" --repo "${GITHUB_REPOSITORY}" --json conclusion,workflowName \
+              --jq 'select(.conclusion=="success" and .workflowName=="T3 Full Nested Optuna 5x3 Grid321")' >/dev/null
           done
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-*-run${{ inputs.discovery_run_id }}
+          run-id: ${{ inputs.discovery_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-*-run${{ inputs.discovery_retry_run_id }}
+          run-id: ${{ inputs.discovery_retry_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/discovery_v3
+          merge-multiple: true
       - name: Freeze own-regime classical benchmark and compare W* with it and mean
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
