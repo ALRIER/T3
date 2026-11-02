@@ -18,11 +18,6 @@ on:
         description: Successful Discovery own-benchmark freeze run ID
         required: true
         type: string
-      transport_ref:
-        description: Private branch containing the verified partial-shard manifest
-        required: true
-        default: t3-discovery-data-20261102
-        type: string
       stage:
         description: Independent evaluation stage
         required: true
@@ -38,35 +33,57 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.transport_ref }}
-          path: plan-data
-          sparse-checkout: bundles/partial_crossfamily_success.csv
-          sparse-checkout-cone-mode: false
       - id: plan
         env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+          CONFIRM_RUN: ${{ inputs.confirmatory_run_id }}
           PARTIAL_RUN: ${{ inputs.partial_cross_family_run_id }}
+          REPAIR_RUN: ${{ inputs.repair_cross_family_run_id }}
           STAGE: ${{ inputs.stage }}
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import csv,json,os
-          stage=os.environ['STAGE'];partial_run=os.environ['PARTIAL_RUN']
-          with open('plan-data/bundles/partial_crossfamily_success.csv',newline='') as f:
-              rows=list(csv.DictReader(f))
-          stage_rows=[r for r in rows if r['role']==stage]
-          done=[(r['evaluation_family'],int(r['seed']),int(r['sample_n'])) for r in stage_rows]
-          if len(stage_rows)!=32 or any(r['source_run_id']!=partial_run for r in stage_rows) or len(set(done))!=32:
-              raise SystemExit('Partial successful-shard manifest is incomplete or has the wrong source run')
+          import json,os,re,subprocess
+          stage=os.environ['STAGE'];repo=os.environ['GH_REPOSITORY']
+          partial_run=os.environ['PARTIAL_RUN'];repair_run=os.environ['REPAIR_RUN']
+          cross_runs=[partial_run,repair_run]
+          specs=[(os.environ['CONFIRM_RUN'],f't3-b3-{stage}-'),
+                 (partial_run,f't3-b3-crossfamily-{stage}-'),
+                 (repair_run,f't3-b3-crossfamily-{stage}-')]
+          arts=[]
+          for run,prefix in specs:
+              page=1
+              while True:
+                  d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))
+                  items=d.get('artifacts',[])
+                  arts.extend({'run_id':run,'name':x['name'],'id':x['id']} for x in items if not x.get('expired',False) and x['name'].startswith(prefix))
+                  if len(items)<100:break
+                  page+=1
+          within=[x for x in arts if x['run_id']==os.environ['CONFIRM_RUN']]
+          cross=[x for x in arts if x['run_id'] in cross_runs]
+          within_pat=re.compile(rf't3-b3-{stage}-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(\d+)-run\d+')
+          cross_pat=re.compile(rf't3-b3-crossfamily-{stage}-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(\d+)-run\d+')
+          def keys(items,pat):
+              out=[]
+              for x in items:
+                  m=pat.fullmatch(x['name'])
+                  if not m:raise SystemExit('Unexpected score artifact name: '+x['name'])
+                  out.append((x['run_id'],m.group(1),int(m.group(2)),int(m.group(3))))
+              return out
+          wkeys=keys(within,within_pat);ckeys=keys(cross,cross_pat)
+          if len(within)!=180 or len({x[1:] for x in wkeys})!=180:raise SystemExit('Within-family score panel is incomplete or duplicated')
+          if len(cross)!=180 or len({x[1:] for x in ckeys})!=180:raise SystemExit('Cross-family score panel is incomplete or duplicated')
+          partial=[x for x in ckeys if x[0]==partial_run]
+          if len(partial)!=32:raise SystemExit(f'Expected 32 reusable partial artifacts, found {len(partial)}')
           seeds=range(10,20) if stage=='heldout' else range(20,30)
           expected={(f,s,n) for f in ['normal','lognormal','weibull','invgauss','exgaussian','exwald'] for s in seeds for n in (200,1000,3000)}
-          if not set(done)<=expected: raise SystemExit('Partial successful-shard manifest contains an unexpected scope')
+          if not {(f,s,n) for _,f,s,n in ckeys}==expected:raise SystemExit('Cross-family score panel has an unexpected scope')
           blocks=[]
           for family in ['normal','lognormal','weibull','invgauss','exgaussian','exwald']:
               for n in (200,1000,3000):
-                  partial_count=sum(r['role']==stage and r['source_run_id']==partial_run and
-                    r['evaluation_family']==family and int(r['sample_n'])==n for r in rows)
-                  repair_count=10-partial_count
+                  partial_count=sum(x[0]==partial_run and x[1]==family and x[3]==n for x in ckeys)
+                  repair_count=sum(x[0]==repair_run and x[1]==family and x[3]==n for x in ckeys)
+                  if partial_count+repair_count!=10:raise SystemExit(f'Incomplete block {family}/n{n}')
                   blocks.append({'family':family,'n':n,'partial_count':partial_count,'repair_count':repair_count})
           print('matrix='+json.dumps({'include':blocks},separators=(',',':')))
           PY
