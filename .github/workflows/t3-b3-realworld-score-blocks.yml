@@ -160,7 +160,11 @@ jobs:
         run: |
           archive="$(find incoming/block -name 'realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz' -print -quit)"
           test -n "$archive"
-          (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256")
+          checksum="$(find incoming/block -name 'realworld-${{ matrix.family }}-${{ matrix.block_id }}.tar.gz.sha256' -print -quit)"
+          test -n "$checksum"
+          expected_sha="$(awk 'NR == 1 {print $1}' "$checksum")"
+          actual_sha="$(sha256sum "$archive" | awk '{print $1}')"
+          test "$expected_sha" = "$actual_sha"
           mkdir -p input
           tar -xzf "$archive" -C input
           block_root="$GITHUB_WORKSPACE/input/parent_block"
