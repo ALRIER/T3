@@ -1,8 +1,11 @@
 #!/usr/bin/env Rscript
 # Score a frozen parent/child sample with discovery W only; no refitting/tuning.
 a<-commandArgs(TRUE)
-if(length(a)!=4L)stop('Usage: TRAINING_FAMILY REALWORLD_SEED N FROZEN_PARENT_CHILD_MANIFEST')
+if(!(length(a)%in%c(4L,5L)))stop('Usage: TRAINING_FAMILY REALWORLD_SEED N FROZEN_PARENT_CHILD_MANIFEST [TRAINING_SEEDS_COMMA_SEPARATED]')
 family<-a[1L];eval_seed<-as.integer(a[2L]);n<-as.integer(a[3L]);manifest_path<-a[4L]
+training_seeds<-if(length(a)==5L)as.integer(strsplit(a[5L],',',fixed=TRUE)[[1L]]) else t2_v3_indices('discovery')
+if(!length(training_seeds)||anyNA(training_seeds)||anyDuplicated(training_seeds)||
+   any(!training_seeds%in%t2_v3_indices('discovery')))stop('Invalid frozen Discovery training-seed shard')
 source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R');source('R/00_shared/v3_inference.R')
 source('R/00_shared/v3_scientific_adapter.R');source('R/00_shared/v3_downstream.R')
@@ -35,7 +38,8 @@ tab<-tab[tab$training_family==family,,drop=FALSE]
 if(!nrow(tab))stop('No frozen parent-child profile for source family ',family)
 if(anyDuplicated(tab[c('parent_dataset_id','dataset_id')]))stop('Duplicate parent-child frozen identity')
 if(length(unique(tab$parent_dataset_id))<5L)stop('Too few independent parents for this family')
-out<-file.path('artifacts','realworld_T3_B3',family,sprintf('seed%02d_n%d',eval_seed,n))
+shard_suffix<-if(length(a)==5L)paste0('_trainseeds_',paste(training_seeds,collapse='_')) else ''
+out<-file.path('artifacts','realworld_T3_B3',family,paste0(sprintf('seed%02d_n%d',eval_seed,n),shard_suffix))
 dir.create(file.path(out,'raw'),recursive=TRUE,showWarnings=FALSE)
 score_path<-file.path(out,'scores.csv')
 if(file.exists(score_path))stop('Refusing to overwrite immutable real-world shard')
@@ -71,7 +75,7 @@ for(j in seq_len(nrow(tab))) {
   set.seed(seed);T<-matrix(NA_real_,R,26L,dimnames=list(NULL,ESTIMATOR_NAMES))
   for(b in seq_len(R))T[b,]<-component_vector(sample(xx,n,replace=TRUE))
   if(any(!is.finite(T)))stop('Nonfinite estimator component in child ',row$dataset_id)
-  for(training_seed in t2_v3_indices('discovery')) {
+  for(training_seed in training_seeds) {
    d<-file.path('artifacts','discovery_v3',family,sprintf('seed%02d',training_seed),sprintf('n%d',n))
    frozen<-file.path(d,'discovery.rds')
    if(!file.exists(frozen))stop('Missing frozen Discovery W: ',frozen)
@@ -112,6 +116,7 @@ for(j in seq_len(nrow(tab))) {
 if(first)stop('No scores were created')
 manifest<-data.frame(family,realworld_seed=eval_seed,sample_n=n,
  parent_count=length(unique(tab$parent_dataset_id)),child_count=nrow(tab),
+ scoring_training_seeds=paste(training_seeds,collapse=';'),
  score_sha256=t2_sha256(score_path),parent_manifest_sha256=t2_sha256(manifest_path),
  benchmark='mean',weight_selection='frozen_discovery_no_retuning',
  code_revision=Sys.getenv('GITHUB_SHA','local'),stringsAsFactors=FALSE)
