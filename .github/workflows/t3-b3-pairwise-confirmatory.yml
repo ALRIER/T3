@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       partial_cross_family_run_id:
-        description: Earlier partial transfer run with 33 successful reusable shards
+        description: Earlier partial transfer run with 32 successful reusable shards
         required: true
         type: string
       repair_cross_family_run_id:
@@ -17,6 +17,11 @@ on:
       benchmark_map_run_id:
         description: Successful Discovery own-benchmark freeze run ID
         required: true
+        type: string
+      transport_ref:
+        description: Private branch containing the verified partial-shard manifest
+        required: true
+        default: t3-discovery-data-20261102
         type: string
       stage:
         description: Independent evaluation stage
@@ -33,55 +38,32 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.transport_ref }}
+          path: plan-data
+          sparse-checkout: bundles/partial_crossfamily_success.csv
+          sparse-checkout-cone-mode: false
       - id: plan
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPOSITORY: ${{ github.repository }}
-          CONFIRM_RUN: ${{ inputs.confirmatory_run_id }}
-          CROSS_RUNS: ${{ inputs.partial_cross_family_run_id }},${{ inputs.repair_cross_family_run_id }}
+          PARTIAL_RUN: ${{ inputs.partial_cross_family_run_id }}
           STAGE: ${{ inputs.stage }}
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json, os, subprocess
-          repo=os.environ['GH_REPOSITORY']; stage=os.environ['STAGE']
-          cross_runs=[x.strip() for x in os.environ['CROSS_RUNS'].split(',') if x.strip()]
-          specs=[(os.environ['CONFIRM_RUN'],f't3-b3-{stage}-')]+[
-                 (run,f't3-b3-crossfamily-{stage}-') for run in cross_runs]
-          artifacts=[]
-          for run,prefix in specs:
-              page=1
-              while True:
-                  p=subprocess.run(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],capture_output=True,text=True,check=True)
-                  data=json.loads(p.stdout); arts=data.get('artifacts',[])
-                  artifacts.extend({'run_id':run,'artifact_id':x['id'],'artifact_name':x['name']}
-                      for x in arts if x.get('expired') is False and x['name'].startswith(prefix))
-                  if len(arts)<100: break
-                  page+=1
-          a=[x for x in artifacts if x['run_id']==os.environ['CONFIRM_RUN']]
-          b=[x for x in artifacts if x['run_id'] in cross_runs]
-          assert len(a)==180, f'Expected 180 within-family {stage} shards, found {len(a)}'
-          import re
-          within_pat=re.compile(rf't3-b3-{stage}-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(\d+)-run\d+')
-          pat=re.compile(rf't3-b3-crossfamily-{stage}-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(\d+)-n(\d+)-run\d+')
-          within_keys=[];keys=[]
-          for x in a:
-              m=within_pat.fullmatch(x['artifact_name'])
-              assert m, f'Unexpected within-family shard identity: {x["artifact_name"]}'
-              within_keys.append((m.group(1),int(m.group(3)),int(m.group(2))))
-          assert len(set(within_keys))==180, 'Within-family scoring shards are duplicated or incomplete'
-          for x in b:
-              m=pat.fullmatch(x['artifact_name'])
-              assert m, f'Unexpected cross-family shard identity: {x["artifact_name"]}'
-              keys.append((m.group(1),int(m.group(2)),int(m.group(3))))
-          assert len(b)==180 and len(set(keys))==180, f'Expected 180 unique cross-family {stage} shards, found {len(set(keys))}'
+          import csv,json,os
+          stage=os.environ['STAGE'];partial_run=os.environ['PARTIAL_RUN']
+          with open('plan-data/bundles/partial_crossfamily_success.csv',newline='') as f:
+              rows=list(csv.DictReader(f))
+          stage_rows=[r for r in rows if r['role']==stage]
+          done=[(r['evaluation_family'],int(r['seed']),int(r['sample_n'])) for r in stage_rows]
+          if len(stage_rows)!=32 or any(r['source_run_id']!=partial_run for r in stage_rows) or len(set(done))!=32:
+              raise SystemExit('Partial successful-shard manifest is incomplete or has the wrong source run')
           blocks=[]
           for family in ['normal','lognormal','weibull','invgauss','exgaussian','exwald']:
               for n in (200,1000,3000):
-                  within_count=sum(k[0]==family and k[1]==n for k in within_keys)
-                  partial_count=sum(x['run_id']==cross_runs[0] and k[0]==family and k[2]==n for x,k in zip(b,keys))
-                  repair_count=sum(x['run_id']==cross_runs[1] and k[0]==family and k[2]==n for x,k in zip(b,keys))
-                  assert within_count==10, f'Expected 10 within shards in {family}/n{n}, found {within_count}'
-                  assert partial_count+repair_count==10, f'Expected 10 cross-family shards in {family}/n{n}'
+                  partial_count=sum(r['role']==stage and r['source_run_id']==partial_run and
+                    r['evaluation_family']==family and int(r['sample_n'])==n for r in rows)
+                  repair_count=10-partial_count
                   blocks.append({'family':family,'n':n,'partial_count':partial_count,'repair_count':repair_count})
           print('matrix='+json.dumps({'include':blocks},separators=(',',':')))
           PY

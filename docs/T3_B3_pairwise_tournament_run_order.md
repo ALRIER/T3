@@ -57,14 +57,15 @@ source-family × evaluation-family transfer matrix.
 1. **T3 B3 Discovery own-benchmark freeze** is complete. Its artifact freezes
    one non-mean classical benchmark per family, scenario, and sample size from
    Discovery data only; training comparisons remain descriptive.
-2. Run **T3 B3 Package immutable Discovery shards**. It verifies all 180
-   Discovery artifacts and packages three immutable bundles, one per sample
-   size. Transfer jobs then download one bundle instead of repeatedly fetching
-   the same 60 Discovery shards.
+2. Use the private `t3-discovery-data-20261102` transport branch. Its three
+   sample-size bundles were reconstructed from the 180 verified artifacts in
+   the original and repair Discovery runs; each file has a SHA-256 entry.
+   Transfer jobs fetch only the matching bundle instead of repeatedly fetching
+   the same 60 Discovery artifacts through the Actions API.
 3. Run **T3 B3 Frozen Cross-Family Transfer** for `heldout`, then `stress`.
-   Supply the Monte Carlo run ID, bundle run ID, and earlier partial transfer
-   run. The planner preserves successful earlier shards and schedules only
-   missing family × seed × sample-size cells.
+   Supply the Monte Carlo run ID, bundle branch, and earlier partial transfer
+   run. The planner preserves the 32 successful earlier shards per stage and
+   schedules only the 148 missing family × seed × sample-size cells.
 4. Run **T3 B3 Pairwise own-benchmark confirmation** for `heldout` and `stress`,
    with the original within-family score run, partial cross-family run, repair
    run, and Discovery benchmark-map run. Reduction uses 18 bounded
