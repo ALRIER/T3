@@ -1,4 +1,4 @@
-name: T3 B3 Real-world all-benchmark parent tournament
+name: T3 B3 Real-world own-benchmark parent tournament
 on:
   workflow_dispatch:
     inputs:
@@ -11,6 +11,10 @@ on:
         description: Successful n=3000 missing-shard repair run
         required: true
         default: '41441526072'
+        type: string
+      benchmark_map_run_id:
+        description: Successful Discovery own-benchmark freeze run ID
+        required: true
         type: string
 permissions:
   contents: read
@@ -60,6 +64,7 @@ jobs:
           # The legacy inference job may fail after every score shard uploaded.
           # The artifact-count and per-shard schema checks are authoritative.
           gh run view ${{ inputs.retry_run_id }} --repo ${{ github.repository }} --json status,workflowName --jq 'select(.status=="completed" and .workflowName=="T3 B3 Retry cancelled Real-world n3000 shards")'
+          gh run view ${{ inputs.benchmark_map_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Discovery own-benchmark freeze")'
   reduce:
     needs: plan
     runs-on: ubuntu-latest
@@ -108,12 +113,19 @@ jobs:
           pattern: t3-b3-realworld-pairwise-reduced-*
           path: artifacts/reduced
           merge-multiple: true
-      - name: Parent-weighted inference against all 26 estimators
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id }}
+          run-id: ${{ inputs.benchmark_map_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/benchmark_map
+      - name: Parent-weighted inference against own benchmark and mean
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
-        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_tournament_from_reduced.R realworld artifacts/reduced
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_tournament_from_reduced.R realworld artifacts/reduced artifacts/benchmark_map/own_benchmark_map.csv
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-realworld-pairwise-global-run${{ github.run_id }}

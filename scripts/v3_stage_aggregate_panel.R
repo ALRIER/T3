@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Legacy best-eligible-classical analysis retained for reproducibility.
-# The primary all-26 paired panel is produced by the pairwise tournament workflow.
+# The primary own-benchmark-plus-mean panel uses the frozen-map tournament workflow.
 a<-commandArgs(TRUE)
 if(length(a)!=1L||!a[1L]%in%c('heldout','stress'))
   stop('Usage: STAGE (heldout|stress)')

@@ -167,7 +167,7 @@ jobs:
   infer:
     needs: [plan, score]
     # This historical job downloads the full raw archive to one runner and
-    # performs mean-only inference. The all-26 primary tournament now reduces
+    # performs mean-only inference. The primary own-benchmark-plus-mean tournament reduces
     # each immutable score artifact independently in t3-b3-pairwise-realworld.yml.
     if: false
     runs-on: ubuntu-latest

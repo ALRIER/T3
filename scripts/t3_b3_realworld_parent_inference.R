@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Legacy mean-only parent analysis retained for exact reproducibility.
-# Primary all-26 results are produced by t3_b3_tournament_from_reduced.R.
+# Primary own-benchmark-plus-mean results use t3_b3_tournament_from_reduced.R.
 a <- commandArgs(TRUE)
 root <- if(length(a)) a[[1L]] else 'artifacts/realworld_T3_B3'
 source('R/00_shared/load_all.R'); t2_load('.')

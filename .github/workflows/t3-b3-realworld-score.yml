@@ -112,7 +112,7 @@ jobs:
   infer:
     needs: score
     # The old single-run mean-only aggregation is retained in source history;
-    # the primary all-26 parent tournament is the sharded workflow
+    # the primary own-benchmark-plus-mean parent tournament is the sharded workflow
     # t3-b3-pairwise-realworld.yml, which avoids downloading the raw archive
     # into one runner.
     if: false

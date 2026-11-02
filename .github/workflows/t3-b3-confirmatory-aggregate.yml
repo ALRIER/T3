@@ -21,6 +21,10 @@ permissions:
   packages: read
 jobs:
   aggregate:
+    # Legacy best-eligible comparator can select the reference from evaluation
+    # outcomes. Use t3-b3-pairwise-confirmatory.yml with the frozen Discovery
+    # benchmark map for the primary own-benchmark-plus-mean analysis.
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:

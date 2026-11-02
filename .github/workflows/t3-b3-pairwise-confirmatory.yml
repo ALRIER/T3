@@ -1,4 +1,4 @@
-name: T3 B3 Pairwise all-benchmark confirmation
+name: T3 B3 Pairwise own-benchmark confirmation
 on:
   workflow_dispatch:
     inputs:
@@ -8,6 +8,10 @@ on:
         type: string
       cross_family_run_id:
         description: Successful frozen cross-family scoring run
+        required: true
+        type: string
+      benchmark_map_run_id:
+        description: Successful Discovery own-benchmark freeze run ID
         required: true
         type: string
       stage:
@@ -61,6 +65,7 @@ jobs:
         run: |
           gh run view ${{ inputs.confirmatory_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Held-out and Stress from immutable Actions artifacts")'
           gh run view ${{ inputs.cross_family_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Frozen Cross-Family Transfer")'
+          gh run view ${{ inputs.benchmark_map_run_id }} --repo ${{ github.repository }} --json conclusion,workflowName --jq 'select(.conclusion=="success" and .workflowName=="T3 B3 Discovery own-benchmark freeze")'
   reduce:
     needs: plan
     runs-on: ubuntu-latest
@@ -109,12 +114,19 @@ jobs:
           pattern: t3-b3-tournament-reduced-${{ inputs.stage }}-*
           path: artifacts/reduced
           merge-multiple: true
-      - name: Run the complete candidate x 26-benchmark x 2-metric global panel
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id }}
+          run-id: ${{ inputs.benchmark_map_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: artifacts/benchmark_map
+      - name: Run the candidate x own-benchmark/mean x two-metric global panel
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
-        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_tournament_from_reduced.R ${{ inputs.stage }} artifacts/reduced
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_tournament_from_reduced.R ${{ inputs.stage }} artifacts/reduced artifacts/benchmark_map/own_benchmark_map.csv
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-pairwise-global-${{ inputs.stage }}-run${{ github.run_id }}
