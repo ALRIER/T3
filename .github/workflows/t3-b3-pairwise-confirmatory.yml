@@ -120,32 +120,38 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/download-artifact@v5
-        with:
-          pattern: t3-b3-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
-          run-id: ${{ inputs.confirmatory_run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: incoming/within
-          merge-multiple: true
-      - uses: actions/download-artifact@v5
+      - name: Download all within-family score shards with paginated artifact listing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ inputs.confirmatory_run_id }}
+          ARTIFACT_PATTERN: t3-b3-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
+        run: gh run download "$RUN_ID" --repo "$REPOSITORY" --pattern "$ARTIFACT_PATTERN" --dir incoming/within
+      - name: Download partial cross-family score shards with paginated artifact listing
         if: matrix.partial_count > 0
-        with:
-          pattern: t3-b3-crossfamily-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
-          run-id: ${{ inputs.partial_cross_family_run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: incoming/cross
-          merge-multiple: true
-      - uses: actions/download-artifact@v5
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ inputs.partial_cross_family_run_id }}
+          ARTIFACT_PATTERN: t3-b3-crossfamily-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
+        run: gh run download "$RUN_ID" --repo "$REPOSITORY" --pattern "$ARTIFACT_PATTERN" --dir incoming/cross
+      - name: Download repaired cross-family score shards with paginated artifact listing
         if: matrix.repair_count > 0
-        with:
-          pattern: t3-b3-crossfamily-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
-          run-id: ${{ inputs.repair_cross_family_run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: incoming/cross
-          merge-multiple: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ inputs.repair_cross_family_run_id }}
+          ARTIFACT_PATTERN: t3-b3-crossfamily-${{ inputs.stage }}-${{ matrix.family }}-s*-n${{ matrix.n }}-run*
+        run: gh run download "$RUN_ID" --repo "$REPOSITORY" --pattern "$ARTIFACT_PATTERN" --dir incoming/cross
+      - name: Assert every source shard is present before reduction
+        env:
+          EXPECTED_CROSS: ${{ matrix.partial_count + matrix.repair_count }}
+        run: |
+          within_count=$(find incoming/within -type f -name scores.csv | wc -l)
+          cross_count=$(find incoming/cross -type f -name scores.csv | wc -l)
+          test "$within_count" -eq 10
+          test "$cross_count" -eq "$EXPECTED_CROSS"
+          test "$cross_count" -eq 10
       - name: Reduce shard to independent evaluation-unit scores
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
