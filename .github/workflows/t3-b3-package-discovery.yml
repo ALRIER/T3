@@ -72,8 +72,10 @@ jobs:
             find "artifacts/bundle_stage/n$n" -type f -print | sort > "artifacts/bundle_stage/files-n$n.txt"
             tar -czf "$GITHUB_WORKSPACE/artifacts/discovery_bundles/discovery-n$n.tar.gz" \
               -C "$GITHUB_WORKSPACE/artifacts/bundle_stage/n$n" .
-            sha256sum "artifacts/discovery_bundles/discovery-n$n.tar.gz" \
-              > "artifacts/discovery_bundles/discovery-n$n.tar.gz.sha256"
+            (
+              cd artifacts/discovery_bundles
+              sha256sum "discovery-n$n.tar.gz" > "discovery-n$n.tar.gz.sha256"
+            )
             tar -tzf "artifacts/discovery_bundles/discovery-n$n.tar.gz" | grep -c '/discovery.rds$' | grep -qx 60
           done
       - uses: actions/upload-artifact@v4
