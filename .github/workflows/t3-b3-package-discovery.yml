@@ -23,7 +23,13 @@ jobs:
       - name: Report the Actions artifact API quota before source downloads
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh api rate_limit --jq '.resources.core | "remaining=\(.remaining) reset_epoch=\(.reset)"'
+        run: |
+          read -r remaining reset < <(gh api rate_limit --jq '[.resources.core.remaining, .resources.core.reset] | @tsv')
+          printf 'artifact_api_remaining=%s reset_epoch=%s\n' "$remaining" "$reset"
+          if [ "$remaining" -lt 100 ]; then
+            echo 'Not starting artifact downloads while the Actions API quota is nearly exhausted.'
+            exit 1
+          fi
       - uses: actions/download-artifact@v5
         with:
           pattern: t3-b3-discovery-*-s*-n*-run${{ inputs.discovery_run_id }}
