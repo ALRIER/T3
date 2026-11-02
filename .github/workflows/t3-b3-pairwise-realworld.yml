@@ -129,6 +129,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-realworld-pairwise-global-run${{ github.run_id }}
-          path: artifacts/v3_confirmatory_pairwise/realworld_v2
+          path: artifacts/v3_confirmatory_pairwise/realworld_v3
           if-no-files-found: error
           retention-days: 90

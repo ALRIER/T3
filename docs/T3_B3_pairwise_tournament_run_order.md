@@ -9,14 +9,30 @@ of the 26 benchmark contestants, so it is compared once as part of that panel.
 ## What is compared
 
 For each of the four frozen evolutionary weight vectors, the tournament compares
-its paired MSE and q95 losses only against two references: the own-regime
-classical benchmark frozen from Discovery and `mean`. The own benchmark is the
-best non-mean classical estimator for that source family and sample size under
-Discovery's equal-weight normalized MSE/q95 criterion. It is selected before
-Held-out, Stress, or Real-world evaluation. It uses evaluation seeds as independent units in
-Held-out and Stress, and `parent_dataset_id` as the independent unit in
-Real-world. Repeated training seeds, scenario cells, child series, and depth
-slices are collapsed within those units before inference.
+its paired MSE and q95 losses only against two references: the best non-mean
+classical benchmark frozen for the target family × scenario × sample-size cell,
+and `mean`. Discovery selects that classical estimator using its equal-weight
+normalized MSE/q95 criterion; the map is fixed before Held-out and Real-world
+scoring. Stress selects its scenario-specific comparator from Stress seeds
+20–24 and confirms only on disjoint seeds 25–29.
+
+Held-out and Stress use independent evaluation seeds as units. Real-world keeps
+`depth` (`full`, `body_10_90`, and, when eligible, `upper_tail`) as an explicit
+stratum. It produces two views: (1) a conditional within-parent/child × depth
+analysis across independently seeded bootstrap draws, and (2) a between-parent
+analysis that averages repeated seeds and child series within each
+`parent_dataset_id` before inference. The second view uses independent parent
+datasets as units. Neither view counts the 500 inner bootstrap draws, child
+series, depths, nor repeated Discovery training seeds as independent datasets.
+The within-dataset conditional panel uses the ten independent Real-world seed
+summaries for uncertainty conditional on that parent/child; its `bh_panel_id` is
+separate from the primary between-parent panel because it answers a different
+question. The parent-cluster panel is the inferential basis for claims across
+datasets. A parent/scenario/depth cell with fewer than three independent parents
+retains descriptive gains but has no p-value, confidence interval, or BH claim.
+Real-world family names identify the outcome-blind Discovery family used for
+profile matching; the empirical profile and matched scenario are reported as
+destinations/proxies, not as known data-generating families.
 
 The primary BH-FDR family is the complete candidate × (own benchmark or mean) × metric ×
 transfer-stratum panel for each stage. The output retains every evolutionary
@@ -39,8 +55,8 @@ source-family × evaluation-family transfer matrix.
 ## Run order using frozen Actions artifacts
 
 1. Run **T3 B3 Discovery own-benchmark freeze** with the original and repair
-   Discovery run IDs. It freezes one non-mean classical benchmark per family
-   and sample size using Discovery data only; training comparisons remain
+   Discovery run IDs. It freezes one non-mean classical benchmark per family,
+   scenario, and sample size using Discovery data only; training comparisons remain
    descriptive and do not compute confirmatory p-values or select new W*.
 2. Run **T3 B3 Frozen Cross-Family Transfer** for `heldout`, then for `stress`.
    Supply the Monte Carlo run ID and both Discovery artifact run IDs. Each run
@@ -56,4 +72,11 @@ source-family × evaluation-family transfer matrix.
 
 The new tournament outputs are additive and versioned. Existing raw scores,
 checkpoints, manifests, legacy summaries, and backups remain available for
-reproducibility. The new output paths are `v3_confirmatory_pairwise/*_v2`.
+reproducibility. The new output paths are `v3_confirmatory_pairwise/*_v3`. The
+Real-world output includes `within_dataset_depth_inference.csv` and
+`within_dataset_depth_taxonomy.csv` for conditional parent/child analyses,
+plus `four_tier_winner_matrix.csv` for parent-cluster inference. The latter is
+the table to use for generalization claims across independent datasets. Both
+retain source family, matched destination/profile, transfer scope, scenario,
+sample size, depth, benchmark identity, effect/gain, confidence interval, and
+BH-FDR q-value for cells with enough independent units.

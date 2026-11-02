@@ -20,19 +20,24 @@ engine_from_id <- function(x) {
 e<-vapply(d$model,function(m)if(m%in%ESTIMATOR_NAMES)NA_character_ else engine_from_id(m),character(1))
 d$model[!is.na(e)]<-e[!is.na(e)]
 if(stage=='realworld') {
-  need<-c('parent_dataset_id','family','transfer_scope','model','mse','q95')
+  need<-c('parent_dataset_id','dataset_id','family','transfer_scope','matched_scenario_id',
+          'depth','sample_n','model','mse','q95')
   if(!all(need%in%names(d))||anyNA(d$parent_dataset_id)||any(!nzchar(d$parent_dataset_id)))
-    stop('Real-world shard lacks parent-cluster identity')
-  keys<-c('parent_dataset_id','family','transfer_scope',
-    intersect(c('sample_n'),names(d)),'model')
-  sums<-aggregate(d[c('mse','q95')],d[keys],sum)
-  cnt<-aggregate(rep(1,nrow(d)),d[keys],sum);names(cnt)[ncol(cnt)]<-'n_observations'
+    stop('Real-world shard lacks parent/child/depth identity')
+  # Keep child and depth rows distinct. Repeated real-world seeds and frozen
+  # Discovery training seeds are repeated measures, not independent datasets.
+  optional<-intersect(c('evaluation_profile','domain','source_sector','realworld_seed'),names(d))
+  keys<-c('parent_dataset_id','dataset_id','family','transfer_scope','sample_n',
+          'matched_scenario_id','depth',optional,'model')
+  names(d)[names(d)=='matched_scenario_id']<-'scenario_id'
+  keys[keys=='matched_scenario_id']<-'scenario_id'
+  sums<-aggregate(d[c('mse','q95')],d[keys],mean)
+  cnt<-aggregate(rep(1,nrow(d)),d[keys],sum);names(cnt)[ncol(cnt)]<-'n_score_rows'
   z<-merge(sums,cnt,by=keys,sort=FALSE)
-  z$mse<-z$mse/z$n_observations;z$q95<-z$q95/z$n_observations
   z$independent_unit<-z$parent_dataset_id
 } else {
   eval_col<-paste0(stage,'_seed')
-  strata<-c('family','source_family','evaluation_family','transfer_scope','sample_n')
+  strata<-c('family','source_family','evaluation_family','transfer_scope','sample_n','scenario_id')
   need<-c('model','mse','q95','training_seed','scenario_id',eval_col,strata)
   if(!all(need%in%names(d)))stop('Confirmatory score shard lacks transfer/taxonomy fields')
   # Equal weighting by prepared scenario and frozen training seed; then one
