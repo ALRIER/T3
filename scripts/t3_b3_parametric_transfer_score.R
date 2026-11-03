@@ -68,7 +68,9 @@ for (ti in seq_along(t2_v3_indices('discovery'))) {
   rows <- lapply(mc$scenarios,function(sc) {
     z <- score_model_set(sc$T,c(classical,engines),sc$target)
     z$scenario_id <- as.integer(sc$scenario_id)
-    ref <- map$own_benchmark[match(z$scenario_id,map$scenario_id)]
+    ref <- map$own_benchmark[match(as.integer(sc$scenario_id),as.integer(map$scenario_id))]
+    if (length(ref)!=1L || is.na(ref) || !nzchar(ref))
+      stop('Missing Discovery-frozen own benchmark for scenario ',sc$scenario_id)
     keep <- z$model=='mean' | z$model==ref | z$model%in%vapply(engines,`[[`,character(1),'id')
     z <- z[keep,,drop=FALSE]
     z$family <- family; z$source_family <- family; z$evaluation_family <- family
@@ -78,7 +80,7 @@ for (ti in seq_along(t2_v3_indices('discovery'))) {
     z$contamination <- as.numeric(mc$grid$contamination[match(sc$scenario_id,mc$grid$scenario_id)])
     z$mad_scale <- as.numeric(mc$grid$mad_scale[match(sc$scenario_id,mc$grid$scenario_id)])
     z$mechanism <- as.character(mc$grid$mechanism[match(sc$scenario_id,mc$grid$scenario_id)])
-    z$own_benchmark <- ref
+    z$own_benchmark <- rep(ref,nrow(z))
     z$discovery_sha256 <- t2_sha256(model_file)
     z
   })
