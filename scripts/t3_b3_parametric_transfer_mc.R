@@ -29,7 +29,7 @@ for(j in seq_len(nrow(grid))) {
   row<-grid[j,,drop=FALSE]; id<-as.integer(row$scenario_id)
   T<-matrix(NA_real_,reps,26L,dimnames=list(NULL,ESTIMATOR_NAMES))
   for(b in seq_len(reps)) {
-    set.seed(t2_seed(paste('T3_parametric_transfer',family,parameter_row,seed,n,id,b),761L))
+    set.seed(t2_seed_for_v3('parametric_transfer',family,seed,n,id,b))
     sample<-generate_population(family,n,params)
     if(id!=0L) sample<-inject_outliers_realistic(sample,as.numeric(row$contamination),
       as.numeric(row$mad_scale),as.character(row$mechanism))

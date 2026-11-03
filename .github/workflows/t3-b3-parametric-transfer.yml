@@ -22,6 +22,11 @@ on:
         required: true
         default: '10'
         type: string
+      prepared_inputs_run_id:
+        description: Existing run with successful benchmark-map and Discovery-input preparation; blank prepares them in this run
+        required: false
+        default: ''
+        type: string
 permissions:
   contents: read
   actions: read
@@ -46,6 +51,7 @@ jobs:
           echo "expected_shards=$expected" >> "$GITHUB_OUTPUT"
 
   prepare_benchmark_map:
+    if: ${{ inputs.prepared_inputs_run_id == '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -79,6 +85,7 @@ jobs:
 
   prepare_discovery_inputs:
     needs: [prepare_benchmark_map]
+    if: ${{ always() && inputs.prepared_inputs_run_id == '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -165,8 +172,45 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+  prep_gate:
+    needs: [prepare_benchmark_map,prepare_discovery_inputs]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify shared Discovery inputs or this run's preparation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PREPARED_RUN_ID: ${{ inputs.prepared_inputs_run_id }}
+          MAP_RESULT: ${{ needs.prepare_benchmark_map.result }}
+          INPUT_RESULT: ${{ needs.prepare_discovery_inputs.result }}
+        run: |
+          if [[ -z "$PREPARED_RUN_ID" ]]; then
+            test "$MAP_RESULT" = success
+            test "$INPUT_RESULT" = success
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json,os,subprocess
+          run=os.environ['PREPARED_RUN_ID'];repo=os.environ['REPOSITORY']
+          jobs=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/jobs?per_page=100'],text=True))['jobs']
+          bm=[j for j in jobs if j['name']=='prepare_benchmark_map']
+          di=[j for j in jobs if j['name'].startswith('prepare_discovery_inputs (')]
+          if len(bm)!=1 or bm[0]['conclusion']!='success' or len(di)!=18 or any(j['conclusion']!='success' for j in di):
+              raise SystemExit('Prepared source run lacks all 18 successful input bundles')
+          arts=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100'],text=True))['artifacts']
+          names=[a['name'] for a in arts if not a.get('expired')]
+          if f't3-b3-parametric-benchmark-map-run{run}' not in names:
+              raise SystemExit('Prepared source run lacks frozen benchmark-map artifact')
+          expected={f't3-b3-parametric-input-{f}-n{n}-run{run}' for f in
+              ('normal','lognormal','weibull','invgauss','exgaussian','exwald') for n in (200,1000,3000)}
+          if not expected.issubset(set(names)):
+              raise SystemExit('Prepared source run lacks one or more family/n bundles')
+          print('SHARED_DISCOVERY_INPUTS_READY',run)
+          PY
+
   transfer:
-    needs: [plan,prepare_benchmark_map,prepare_discovery_inputs]
+    needs: [plan,prep_gate]
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -182,7 +226,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v5
         with:
-          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ inputs.prepared_inputs_run_id != '' && inputs.prepared_inputs_run_id || github.run_id }}
+          run-id: ${{ inputs.prepared_inputs_run_id != '' && inputs.prepared_inputs_run_id || github.run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
           path: incoming/parametric_input
       - name: Verify the family-specific frozen Discovery bundle
         run: |
@@ -231,13 +278,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/
+          path: artifacts/t3_b3_parametric_transfer_mc/
           if-no-files-found: error
           retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/
+          path: artifacts/t3_b3_parametric_transfer/
           if-no-files-found: error
           retention-days: 90
 

@@ -34,7 +34,7 @@ t2_assert_seed_plan_v3 <- function(plan=t2_seed_plan_v3) {
 }
 t2_seed_for_v3 <- function(stage,family,index,n,scenario_id=0L,replicate=0L) {
  t2_assert_seed_plan_v3()
- if(!stage%in%c("discovery","heldout","stress","realworld")||
+ if(!stage%in%c("discovery","heldout","stress","realworld","parametric_transfer")||
     !family%in%c("normal","lognormal","weibull","invgauss","exgaussian","exwald")||
     !index%in%t2_seed_plan_v3[[stage]]) stop("Seed role mismatch")
  if(length(n)!=1L||!is.finite(n)||n<2L)stop("Invalid n")
