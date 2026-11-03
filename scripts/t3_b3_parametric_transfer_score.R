@@ -7,10 +7,11 @@ family <- a[[1L]]; parameter_row <- as.integer(a[[2L]]); seed <- as.integer(a[[3
 n <- as.integer(a[[4L]]); mc_path <- a[[5L]]; discovery_root <- a[[6L]]
 benchmark_map_path <- a[[7L]]
 source('R/00_shared/load_all.R'); t2_load('.')
+source('R/00_shared/pipeline.R')
 if (!family %in% t2_families() || !seed %in% t2_v3_indices('parametric_transfer') ||
     !n %in% c(200L,1000L,3000L) || !file.exists(mc_path) ||
     !file.exists(benchmark_map_path)) stop('Invalid transfer identity/input')
-source('R/00_shared/pipeline.R'); source('R/00_shared/t3_b3_partitions.R')
+source('R/00_shared/t3_b3_partitions.R')
 source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R'); source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t3_b3_partitions.R')
