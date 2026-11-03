@@ -23,11 +23,12 @@ regime-specific objective or select a universal estimator.
    family × parameter-row × sample-size × scenario × model × metric panel.
 
 The workflow covers 2,490 identities across six families, non-base parameter
-rows, ten seeds, and three sample sizes. `n=3000` is divided into two disjoint
-scenario checkpoints; `n=200` and `n=1000` each retain the full scenario panel
-in one checkpoint. This yields 3,320 score shards. The stage runs after
+rows, ten seeds, and three sample sizes. Each identity processes all 241
+scenarios in one shard. One workflow run per sample size contains all 830
+identities. To stay below GitHub's 256-job workflow cap, each of 208 matrix
+jobs processes up to four intact shards sequentially. The stage runs after
 Discovery has uploaded all frozen W artifacts, using the pinned T3 R container
-and `max-parallel: 32` per workflow matrix.
+and `max-parallel: 32`.
 
 This is a transfer audit, not another optimizer comparison and not evidence
 that one weight vector should work for all family parameterizations. Simulation

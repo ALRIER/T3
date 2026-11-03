@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check one bounded parametric-transfer Actions batch without trusting filenames."""
+"""Check one full-sample-size transfer workflow without trusting filenames."""
 import csv
 import hashlib
 import sys
@@ -9,19 +9,14 @@ ROWS = {'normal': 8, 'lognormal': 6, 'weibull': 12, 'invgauss': 9,
         'exgaussian': 27, 'exwald': 27}
 
 root = Path(sys.argv[1])
-batch_index, batch_count, expected_count = map(int, sys.argv[2:5])
-scenario_block = int(sys.argv[5]) if len(sys.argv) > 5 else 0
-sample_n = int(sys.argv[6]) if len(sys.argv) > 6 else 3000
+sample_n = int(sys.argv[2]) if len(sys.argv) > 2 else 3000
 grid_path = Path(__file__).resolve().parents[1] / 'config/T2_V3_B3_prospective_321_grid.csv'
 with grid_path.open(newline='', encoding='utf-8-sig') as stream:
     support_ids = [int(row['scenario_id']) for row in csv.DictReader(stream)
                    if row['mechanism'] not in {'mixture_bimodal_near', 'mixture_bimodal_far'}]
-expected_block_count = 2 if sample_n == 3000 else 1
-if (len(support_ids) != 241 or sample_n not in (200, 1000, 3000) or
-        not 0 <= scenario_block < expected_block_count):
-    raise SystemExit('Invalid frozen transfer scenario-block plan')
-block_size = (len(support_ids) + expected_block_count - 1) // expected_block_count
-expected_scenarios = set(support_ids[scenario_block * block_size:(scenario_block + 1) * block_size])
+if len(support_ids) != 241 or sample_n not in (200, 1000, 3000):
+    raise SystemExit('Invalid frozen complete-panel transfer plan')
+expected_scenarios = set(support_ids)
 all_shards = [
     (fam, row, seed, n)
     for fam, maxrow in ROWS.items()
@@ -30,11 +25,10 @@ all_shards = [
     for n in (200, 1000, 3000)
 ]
 all_shards = [x for x in all_shards if x[3] == sample_n]
-batch_size = (len(all_shards) + batch_count - 1) // batch_count
-expected = { (x[0],x[1],x[2],x[3],scenario_block)
-             for x in all_shards[batch_index * batch_size:(batch_index + 1) * batch_size] }
-if len(expected) != expected_count:
-    raise SystemExit(f"Plan/output mismatch: {len(expected)} != {expected_count}")
+expected = {(x[0], x[1], x[2], x[3], 0) for x in all_shards}
+expected_count = len(expected)
+if expected_count != 830:
+    raise SystemExit(f"Expected 830 complete shards for n={sample_n}, found {expected_count}")
 
 def sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -58,7 +52,7 @@ for manifest_path in root.rglob("score_manifest.csv"):
     if not score_path.is_file() or sha256(score_path) != row["scores_sha256"]:
         raise SystemExit(f"Score file missing or SHA mismatch: {score_path}")
     if (int(row["scenario_count"]) != len(expected_scenarios) or
-            int(row["scenario_block_count"]) != expected_block_count or
+            int(row["scenario_block"]) != 0 or int(row["scenario_block_count"]) != 1 or
             int(row["training_seed_count"]) != 10):
         raise SystemExit(f"Unexpected score contract: {manifest_path}")
     try:
@@ -81,4 +75,4 @@ with out.open("w", newline="", encoding="utf-8") as stream:
     for key in sorted(seen):
         manifest_path, score_path = seen[key]
         writer.writerow([*key, manifest_path.relative_to(root), sha256(score_path)])
-print(f"PARAMETRIC_TRANSFER_BLOCK_COVERAGE_PASS batch={batch_index}/{batch_count} block={scenario_block}: {len(seen)}/{expected_count}")
+print(f"PARAMETRIC_TRANSFER_COMPLETE_PANEL_COVERAGE_PASS n={sample_n}: {len(seen)}/{expected_count}")

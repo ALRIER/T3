@@ -1,0 +1,145 @@
+name: T3 B3 complete parametric transfer shard
+description: Generate, preserve, score, and verify one complete 241-scenario transfer identity
+inputs:
+  family:
+    required: true
+    description: Distribution family
+  parameter_row:
+    required: true
+    description: Held parameter-grid row
+  seed:
+    required: true
+    description: Reserved transfer seed
+  sample_n:
+    required: true
+    description: Sample size
+  scenario_ids:
+    required: true
+    description: All 241 predeclared scenario IDs
+  prepared_inputs_run_id:
+    required: false
+    default: ''
+    description: Actions run containing validated Discovery bundles
+runs:
+  using: composite
+  steps:
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+    - uses: actions/download-artifact@v5
+      if: ${{ hashFiles(format('incoming/parametric_input/{0}_n{1}/discovery-{0}-n{1}.tar.gz', inputs.family, inputs.sample_n)) == '' }}
+      with:
+        name: t3-b3-parametric-input-${{ inputs.family }}-n${{ inputs.sample_n }}-run${{ inputs.prepared_inputs_run_id != '' && inputs.prepared_inputs_run_id || github.run_id }}
+        run-id: ${{ inputs.prepared_inputs_run_id != '' && inputs.prepared_inputs_run_id || github.run_id }}
+        repository: ${{ github.repository }}
+        github-token: ${{ github.token }}
+        path: incoming/parametric_input/${{ inputs.family }}_n${{ inputs.sample_n }}
+    - name: Verify the family-specific frozen Discovery bundle
+      shell: bash
+      run: |
+        cd "incoming/parametric_input/${{ inputs.family }}_n${{ inputs.sample_n }}"
+        archive="discovery-${{ inputs.family }}-n${{ inputs.sample_n }}.tar.gz"
+        sha256sum -c "$archive.sha256"
+        mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+        if [[ "$(find "$GITHUB_WORKSPACE/artifacts/discovery_v3/${{ inputs.family }}" -name discovery.rds -type f 2>/dev/null | wc -l)" -ne 10 ]]; then
+          tar -xzf "$archive" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+        fi
+        cd "$GITHUB_WORKSPACE"
+        test "$(find "artifacts/discovery_v3/${{ inputs.family }}" -name discovery.rds -type f | wc -l)" -eq 10
+        test -s artifacts/discovery_v3/own_benchmark_map.csv
+    - name: Generate the complete 241-scenario Monte Carlo shard
+      shell: bash
+      env:
+        T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        T3_TRANSFER_SCENARIO_BLOCK: '0'
+        T3_TRANSFER_SCENARIO_BLOCK_COUNT: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        OMP_NUM_THREADS: '1'
+      run: |
+        bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_mc.R \
+          '${{ inputs.family }}' '${{ inputs.parameter_row }}' '${{ inputs.seed }}' 500 '${{ inputs.sample_n }}' '${{ inputs.scenario_ids }}'
+    - name: Verify and persist the Monte Carlo checkpoint before scoring
+      id: verify_mc
+      shell: bash
+      env:
+        FAMILY: ${{ inputs.family }}
+        PARAMETER_ROW: ${{ inputs.parameter_row }}
+        TRANSFER_SEED: ${{ inputs.seed }}
+        SAMPLE_N: ${{ inputs.sample_n }}
+        SCENARIO_IDS: ${{ inputs.scenario_ids }}
+      run: |
+        python3 - <<'PY'
+        import csv,hashlib,os
+        from pathlib import Path
+        root=Path('artifacts/t3_b3_parametric_transfer_mc')/os.environ['FAMILY']
+        root/=f"parameter_row{int(os.environ['PARAMETER_ROW']):02d}"
+        root/=f"seed{int(os.environ['TRANSFER_SEED']):02d}"
+        mc=root/f"n{os.environ['SAMPLE_N']}_r500/b0/canonical.rds"
+        with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+            out.write(f'mc_dir={mc.parent.as_posix()}\n')
+        manifest=mc.with_name('manifest.csv')
+        sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+        rows=list(csv.DictReader(manifest.open()))
+        expected=';'.join(os.environ['SCENARIO_IDS'].split(','))
+        if not mc.is_file() or len(rows)!=1 or rows[0]['sha256']!=sha(mc):
+            raise SystemExit(f'Monte Carlo checkpoint checksum/manifest failure: {mc}')
+        if (int(rows[0]['scenario_block'])!=0 or int(rows[0]['scenario_block_count'])!=1 or
+            rows[0]['scenario_ids']!=expected or int(rows[0]['scenario_count'])!=241):
+            raise SystemExit('Monte Carlo checkpoint does not match the complete frozen scenario panel')
+        print('PARAMETRIC_MC_CHECKPOINT_PASS',sha(mc))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: t3-b3-parametric-mc-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+        path: ${{ steps.verify_mc.outputs.mc_dir }}
+        if-no-files-found: warn
+        retention-days: 90
+    - name: Score against the Discovery-frozen own benchmark and mean
+      shell: bash
+      env:
+        T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        OPENBLAS_NUM_THREADS: '1'
+        OMP_NUM_THREADS: '1'
+      run: |
+        mc="artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')/n${{ inputs.sample_n }}_r500/b0/canonical.rds"
+        test -s "$mc"
+        bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_score.R \
+          '${{ inputs.family }}' '${{ inputs.parameter_row }}' '${{ inputs.seed }}' '${{ inputs.sample_n }}' \
+          "$mc" artifacts/discovery_v3 artifacts/discovery_v3/own_benchmark_map.csv
+    - name: Verify this shard's Monte Carlo and score hashes
+      id: verify_score
+      shell: bash
+      env:
+        FAMILY: ${{ inputs.family }}
+        PARAMETER_ROW: ${{ inputs.parameter_row }}
+        TRANSFER_SEED: ${{ inputs.seed }}
+        SAMPLE_N: ${{ inputs.sample_n }}
+      run: |
+        python3 - <<'PY'
+        import csv,hashlib,os
+        from pathlib import Path
+        fam=os.environ['FAMILY'];row=int(os.environ['PARAMETER_ROW']);seed=int(os.environ['TRANSFER_SEED']);n=os.environ['SAMPLE_N']
+        base=Path('artifacts/t3_b3_parametric_transfer_mc')/fam/f'parameter_row{row:02d}'/f'seed{seed:02d}'/f'n{n}_r500/b0'
+        mc=base/'canonical.rds';mm=base/'manifest.csv'
+        score=Path('artifacts/t3_b3_parametric_transfer')/fam/f'parameter_row{row:02d}'/f'seed{seed:02d}_n{n}/b0/scores.csv'
+        with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+            out.write(f'score_dir={score.parent.as_posix()}\n')
+        sm=score.with_name('score_manifest.csv')
+        sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+        m=list(csv.DictReader(mm.open()));s=list(csv.DictReader(sm.open()))
+        if (len(m)!=1 or len(s)!=1 or sha(mc)!=m[0]['sha256'] or
+            sha(score)!=s[0]['scores_sha256'] or s[0]['mc_sha256']!=m[0]['sha256'] or
+            int(s[0]['scenario_count'])!=241 or int(s[0]['scenario_block_count'])!=1):
+            raise SystemExit('Parametric shard checksum/coverage contract failed')
+        print('PARAMETRIC_SHARD_CHECKSUM_PASS',sha(mc),sha(score))
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: t3-b3-parametric-score-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+        path: ${{ steps.verify_score.outputs.score_dir }}
+        if-no-files-found: warn
+        retention-days: 90

@@ -25,10 +25,12 @@ params<-as.list(params_grid[parameter_row,,drop=FALSE])
 target<-analytic_mean_from_params(family,params)
 if(!is.finite(target))stop('Nonfinite transfer target')
 block_id<-sprintf('b%d',as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK','0')))
-block_count<-as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK_COUNT','2'))
-expected_block_count<-if(n==3000L)2L else 1L
+block_count<-as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK_COUNT','1'))
+expected_block_count<-1L
 if(is.na(block_count)||block_count!=expected_block_count)
-  stop('Scenario block count must be 2 only for n=3000 and 1 for smaller n')
+  stop('The complete 241-scenario panel must be processed in one shard')
+if(length(scenario_ids)!=241L||!setequal(scenario_ids,as.integer(grid$scenario_id)))
+  stop('Every transfer shard must contain all 241 predeclared scenarios')
 root<-file.path('artifacts','t3_b3_parametric_transfer_mc',family,
   sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d',seed),sprintf('n%d_r%d',n,reps),block_id)
 if(dir.exists(root))stop('Refusing overwrite of immutable transfer shard')
@@ -46,6 +48,9 @@ for(j in seq_len(nrow(grid))) {
   }
   if(any(!is.finite(T)))stop('Nonfinite transfer scenario ',id)
   scenarios[[j]]<-list(scenario_id=id,T=T,target=target,component_names=ESTIMATOR_NAMES)
+  if(j%%10L==0L||j==nrow(grid))
+    message('T3_B3_PARAMETRIC_TRANSFER_MC_PROGRESS ',family,' row=',parameter_row,
+      ' seed=',seed,' n=',n,' scenarios=',j,'/',nrow(grid))
 }
 z<-list(protocol='t3_b3_parametric_transfer_v3',role='parametric_transfer',
  family=family,parameter_row=parameter_row,seed_index=seed,n=n,replications=reps,

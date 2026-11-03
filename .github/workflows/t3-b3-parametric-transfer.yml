@@ -12,27 +12,12 @@ on:
         required: true
         default: '41478038812'
         type: string
-      batch_index:
-        description: Zero-based balanced batch within the selected sample size (six batches)
-        required: true
-        default: '0'
-        type: string
-      batch_count:
-        description: Number of deterministic shard batches
-        required: true
-        default: '6'
-        type: string
       sample_n:
-        description: Sample size for this transfer pass
+        description: Run all 830 complete shards for this sample size in one workflow
         required: true
         default: '3000'
         type: choice
         options: ['3000','1000','200']
-      scenario_block_index:
-        description: One of two immutable scenario halves (dispatch 0 and 1 for each batch)
-        required: true
-        type: choice
-        options: ['0','1']
       prepared_inputs_run_id:
         description: Existing run with successful benchmark-map and Discovery-input preparation; blank prepares them in this run
         required: false
@@ -47,22 +32,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
+      scenario_ids: ${{ steps.plan.outputs.scenario_ids }}
       expected_shards: ${{ steps.plan.outputs.expected_shards }}
+      expected_runner_jobs: ${{ steps.plan.outputs.expected_runner_jobs }}
     steps:
       - uses: actions/checkout@v4
       - id: plan
         env:
-          BATCH_INDEX: ${{ inputs.batch_index }}
-          BATCH_COUNT: ${{ inputs.batch_count }}
-          SCENARIO_BLOCK_INDEX: ${{ inputs.scenario_block_index }}
           SAMPLE_N: ${{ inputs.sample_n }}
-          SCENARIO_BLOCK_COUNT: ${{ inputs.sample_n == '3000' && '2' || '1' }}
         run: |
-          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT" "$SCENARIO_BLOCK_INDEX" "$SCENARIO_BLOCK_COUNT" "$SAMPLE_N")"
+          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$SAMPLE_N")"
           matrix="$(python3 -c 'import json,sys; print(json.dumps({"include":json.load(sys.stdin)["include"]},separators=(",",":")))' <<< "$plan_json")"
+          scenario_ids="$(python3 -c 'import json,sys; print(",".join(map(str,json.load(sys.stdin)["scenario_ids"])))' <<< "$plan_json")"
           expected="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["expected_shards"])' <<< "$plan_json")"
+          runner_jobs="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["expected_runner_jobs"])' <<< "$plan_json")"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "scenario_ids=$scenario_ids" >> "$GITHUB_OUTPUT"
           echo "expected_shards=$expected" >> "$GITHUB_OUTPUT"
+          echo "expected_runner_jobs=$runner_jobs" >> "$GITHUB_OUTPUT"
 
   prepare_benchmark_map:
     if: ${{ inputs.prepared_inputs_run_id == '' }}
@@ -240,97 +227,69 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - id: shard_0
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        continue-on-error: true
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/download-artifact@v5
+          family: ${{ matrix.shard0_family }}
+          parameter_row: ${{ matrix.shard0_parameter_row }}
+          seed: ${{ matrix.shard0_seed }}
+          sample_n: ${{ matrix.shard0_n }}
+          scenario_ids: ${{ needs.plan.outputs.scenario_ids }}
+          prepared_inputs_run_id: ${{ inputs.prepared_inputs_run_id }}
+      - id: shard_1
+        if: ${{ matrix.shard1_family != '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        continue-on-error: true
         with:
-          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ inputs.prepared_inputs_run_id != '' && inputs.prepared_inputs_run_id || github.run_id }}
-          run-id: ${{ inputs.prepared_inputs_run_id != '' && inputs.prepared_inputs_run_id || github.run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: incoming/parametric_input
-      - name: Verify the family-specific frozen Discovery bundle
-        run: |
-          cd incoming/parametric_input
-          archive="discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz"
-          sha256sum -c "$archive.sha256"
-          mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
-          tar -xzf "$archive" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
-          cd "$GITHUB_WORKSPACE"
-          test "$(find "artifacts/discovery_v3/${{ matrix.family }}" -name discovery.rds -type f | wc -l)" -eq 10
-          test -s artifacts/discovery_v3/own_benchmark_map.csv
-      - name: Generate the independent parameter-row Monte Carlo shard
+          family: ${{ matrix.shard1_family }}
+          parameter_row: ${{ matrix.shard1_parameter_row }}
+          seed: ${{ matrix.shard1_seed }}
+          sample_n: ${{ matrix.shard1_n }}
+          scenario_ids: ${{ needs.plan.outputs.scenario_ids }}
+          prepared_inputs_run_id: ${{ inputs.prepared_inputs_run_id }}
+      - id: shard_2
+        if: ${{ matrix.shard2_family != '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        continue-on-error: true
+        with:
+          family: ${{ matrix.shard2_family }}
+          parameter_row: ${{ matrix.shard2_parameter_row }}
+          seed: ${{ matrix.shard2_seed }}
+          sample_n: ${{ matrix.shard2_n }}
+          scenario_ids: ${{ needs.plan.outputs.scenario_ids }}
+          prepared_inputs_run_id: ${{ inputs.prepared_inputs_run_id }}
+      - id: shard_3
+        if: ${{ matrix.shard3_family != '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        continue-on-error: true
+        with:
+          family: ${{ matrix.shard3_family }}
+          parameter_row: ${{ matrix.shard3_parameter_row }}
+          seed: ${{ matrix.shard3_seed }}
+          sample_n: ${{ matrix.shard3_n }}
+          scenario_ids: ${{ needs.plan.outputs.scenario_ids }}
+          prepared_inputs_run_id: ${{ inputs.prepared_inputs_run_id }}
+      - name: Report shard failures after preserving completed artifacts
+        if: always()
         env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
-          T3_TRANSFER_SCENARIO_BLOCK: ${{ matrix.scenario_block }}
-          T3_TRANSFER_SCENARIO_BLOCK_COUNT: ${{ matrix.scenario_block_count }}
-          OPENBLAS_NUM_THREADS: '1'
-          OMP_NUM_THREADS: '1'
+          S0: ${{ steps.shard_0.outcome }}
+          S1: ${{ steps.shard_1.outcome }}
+          S2: ${{ steps.shard_2.outcome }}
+          S3: ${{ steps.shard_3.outcome }}
         run: |
-          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_mc.R \
-            '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' 500 '${{ matrix.n }}' '${{ matrix.scenario_ids }}'
-      - name: Verify and persist the Monte Carlo checkpoint before scoring
-        run: |
-          python3 - <<'PY'
-          import csv,hashlib
-          from pathlib import Path
-          mc=Path('artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/b${{ matrix.scenario_block }}/canonical.rds')
-          manifest=mc.with_name('manifest.csv')
-          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
-          rows=list(csv.DictReader(manifest.open()))
-          expected=';'.join('${{ matrix.scenario_ids }}'.split(','))
-          if not mc.is_file() or len(rows)!=1 or rows[0]['sha256']!=sha(mc):
-              raise SystemExit('Monte Carlo checkpoint checksum/manifest failure')
-          if (int(rows[0]['scenario_block'])!=${{ matrix.scenario_block }} or
-              int(rows[0]['scenario_block_count'])!=${{ matrix.scenario_block_count }} or
-              rows[0]['scenario_ids']!=expected):
-              raise SystemExit('Monte Carlo checkpoint does not match its frozen scenario half')
-          print('PARAMETRIC_MC_CHECKPOINT_PASS',sha(mc))
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
-          path: artifacts/t3_b3_parametric_transfer_mc/
-          if-no-files-found: error
-          retention-days: 90
-      - name: Score against the Discovery-frozen own benchmark and mean
-        env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
-          OPENBLAS_NUM_THREADS: '1'
-          OMP_NUM_THREADS: '1'
-        run: |
-          mc="artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row$(printf '%02d' ${{ matrix.parameter_row }})/seed$(printf '%02d' ${{ matrix.seed }})/n${{ matrix.n }}_r500/canonical.rds"
-          mc="${mc%/canonical.rds}/b${{ matrix.scenario_block }}/canonical.rds"
-          test -s "$mc"
-          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_score.R \
-            '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
-            "$mc" artifacts/discovery_v3 artifacts/discovery_v3/own_benchmark_map.csv
-      - name: Verify this shard's Monte Carlo and score hashes
-        run: |
-          python3 - <<'PY'
-          import csv,hashlib
-          from pathlib import Path
-          mc=Path('artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/b${{ matrix.scenario_block }}/canonical.rds')
-          mm=mc.with_name('manifest.csv')
-          score=Path('artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/b${{ matrix.scenario_block }}/scores.csv')
-          sm=score.with_name('score_manifest.csv')
-          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
-          m=list(csv.DictReader(mm.open()));s=list(csv.DictReader(sm.open()))
-          if len(m)!=1 or len(s)!=1 or sha(mc)!=m[0]['sha256'] or sha(score)!=s[0]['scores_sha256'] or s[0]['mc_sha256']!=m[0]['sha256']:
-              raise SystemExit('Parametric shard checksum contract failed')
-          print('PARAMETRIC_SHARD_CHECKSUM_PASS')
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
-          path: artifacts/t3_b3_parametric_transfer/
-          if-no-files-found: error
-          retention-days: 90
+          failed=()
+          [[ "$S0" == failure ]] && failed+=(0)
+          [[ "$S1" == failure ]] && failed+=(1)
+          [[ "$S2" == failure ]] && failed+=(2)
+          [[ "$S3" == failure ]] && failed+=(3)
+          if ((${#failed[@]})); then
+            printf 'Failed shard slots: %s\n' "${failed[*]}"
+            exit 1
+          fi
+          echo 'ALL_COMPLETE_SHARDS_PASS'
 
-  verify_batch_coverage:
+  verify_run_coverage:
     needs: [plan,transfer]
     if: ${{ always() && needs.plan.result == 'success' && needs.transfer.result == 'success' }}
     runs-on: ubuntu-latest
@@ -338,17 +297,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v5
         with:
-          pattern: t3-b3-parametric-score-*-run${{ github.run_id }}-a*
+          pattern: t3-b3-parametric-score-*-n${{ inputs.sample_n }}-run${{ github.run_id }}-a*
           path: incoming/score_shards
           merge-multiple: true
-      - name: Verify exact expected shard and manifest coverage
-        run: |
-          python3 scripts/t3_b3_parametric_transfer_coverage.py \
-            incoming/score_shards '${{ inputs.batch_index }}' '${{ inputs.batch_count }}' \
-            '${{ needs.plan.outputs.expected_shards }}' '${{ inputs.scenario_block_index }}' '${{ inputs.sample_n }}'
+      - name: Verify exact complete-panel shard coverage
+        run: python3 scripts/t3_b3_parametric_transfer_coverage.py incoming/score_shards '${{ inputs.sample_n }}'
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-parametric-batch-coverage-${{ inputs.batch_index }}-b${{ inputs.scenario_block_index }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+          name: t3-b3-parametric-coverage-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
           path: incoming/score_shards/parametric_batch_coverage.csv
           if-no-files-found: error
           retention-days: 90
