@@ -204,14 +204,23 @@ jobs:
             exit 0
           fi
           python3 - <<'PY'
-          import json,os,subprocess
+          import json,os,subprocess,time
           run=os.environ['PREPARED_RUN_ID'];repo=os.environ['REPOSITORY']
-          jobs=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/jobs?per_page=100'],text=True))['jobs']
+          def gh_json(endpoint):
+              last=''
+              for attempt in range(6):
+                  p=subprocess.run(['gh','api',endpoint],text=True,capture_output=True)
+                  if p.returncode==0:
+                      return json.loads(p.stdout)
+                  last=p.stderr.strip()
+                  if attempt<5:time.sleep(min(2**attempt,20))
+              raise SystemExit(f'GitHub API unavailable after 6 attempts: {endpoint}: {last}')
+          jobs=gh_json(f'repos/{repo}/actions/runs/{run}/jobs?per_page=100')['jobs']
           bm=[j for j in jobs if j['name']=='prepare_benchmark_map']
           di=[j for j in jobs if j['name'].startswith('prepare_discovery_inputs (')]
           if len(bm)!=1 or bm[0]['conclusion']!='success' or len(di)!=18 or any(j['conclusion']!='success' for j in di):
               raise SystemExit('Prepared source run lacks all 18 successful input bundles')
-          arts=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100'],text=True))['artifacts']
+          arts=gh_json(f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100')['artifacts']
           names=[a['name'] for a in arts if not a.get('expired')]
           if f't3-b3-parametric-benchmark-map-run{run}' not in names:
               raise SystemExit('Prepared source run lacks frozen benchmark-map artifact')
