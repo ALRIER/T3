@@ -42,7 +42,7 @@ for manifest_path in root.rglob("score_manifest.csv"):
     score_path = manifest_path.with_name("scores.csv")
     if not score_path.is_file() or sha256(score_path) != row["scores_sha256"]:
         raise SystemExit(f"Score file missing or SHA mismatch: {score_path}")
-    if int(row["scenario_count"]) != 321 or int(row["training_seed_count"]) != 10:
+    if int(row["scenario_count"]) != 241 or int(row["training_seed_count"]) != 10:
         raise SystemExit(f"Unexpected score contract: {manifest_path}")
     seen[key] = (manifest_path, score_path, row["mc_sha256"])
 

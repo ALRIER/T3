@@ -139,8 +139,12 @@ jobs:
           rows=list(csv.DictReader(open(sys.argv[1],newline='')))
           fam,n=sys.argv[2],int(sys.argv[3])
           rows=[r for r in rows if r['evaluation_family']==fam and int(r['sample_n'])==n]
-          if len(rows)!=321 or len({r['scenario_id'] for r in rows})!=321:
-              raise SystemExit(f'Expected 321 frozen own-benchmark cells for {fam}/n={n}, found {len(rows)}')
+          grid=list(csv.DictReader(open('config/T2_V3_B3_prospective_321_grid.csv',newline='')))
+          expected={r['scenario_id'] for r in grid if r['mechanism'] not in
+                    {'mixture_bimodal_near','mixture_bimodal_far'}}
+          actual={r['scenario_id'] for r in rows}
+          if len(expected)!=241 or actual!=expected or len(rows)!=241:
+              raise SystemExit(f'Expected the 241 Discovery-support benchmark cells for {fam}/n={n}, found {len(rows)}')
           out='artifacts/discovery_v3/own_benchmark_map.csv'
           with open(out,'w',newline='') as f:
               w=csv.DictWriter(f,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)

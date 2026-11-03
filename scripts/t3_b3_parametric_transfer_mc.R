@@ -11,6 +11,10 @@ if(!family%in%c('normal','lognormal','weibull','invgauss','exgaussian','exwald')
    reps!=500L||!n%in%c(200L,1000L,3000L)) stop('Invalid prospective transfer shard')
 source('R/00_shared/load_all.R');t2_load('.')
 grid<-read.csv('config/T2_V3_B3_prospective_321_grid.csv',stringsAsFactors=FALSE)
+source('R/00_shared/t3_b3_partitions.R')
+grid<-grid[grid$scenario_id%in%t3_b3_partition_ids('discovery_support'),,drop=FALSE]
+if(nrow(grid)!=241L||anyDuplicated(grid$scenario_id))
+  stop('Parametric transfer must use exactly the 241 predeclared Discovery-support scenarios')
 params_grid<-build_param_grids(families=family)[[family]]
 if(parameter_row>nrow(params_grid))stop('Parameter row outside family grid')
 params<-as.list(params_grid[parameter_row,,drop=FALSE])
@@ -34,7 +38,7 @@ for(j in seq_len(nrow(grid))) {
   if(any(!is.finite(T)))stop('Nonfinite transfer scenario ',id)
   scenarios[[j]]<-list(scenario_id=id,T=T,target=target,component_names=ESTIMATOR_NAMES)
 }
-z<-list(protocol='t3_b3_parametric_transfer_v1',role='parametric_transfer',
+z<-list(protocol='t3_b3_parametric_transfer_v2',role='parametric_transfer',
  family=family,parameter_row=parameter_row,seed_index=seed,n=n,replications=reps,
  component_names=ESTIMATOR_NAMES,grid=grid,scenarios=scenarios,parameters=params,target=target,
  scientific_scope='secondary_intra_family_transfer_no_W_retuning')

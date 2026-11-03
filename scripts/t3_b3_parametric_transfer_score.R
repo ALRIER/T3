@@ -10,19 +10,21 @@ source('R/00_shared/load_all.R'); t2_load('.')
 if (!family %in% t2_families() || !seed %in% t2_v3_indices('parametric_transfer') ||
     !n %in% c(200L,1000L,3000L) || !file.exists(mc_path) ||
     !file.exists(benchmark_map_path)) stop('Invalid transfer identity/input')
-source('R/00_shared/pipeline.R'); source('R/00_shared/v3_scientific_adapter.R')
+source('R/00_shared/pipeline.R'); source('R/00_shared/t3_b3_partitions.R')
+source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R'); source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t3_b3_partitions.R')
 mc <- readRDS(mc_path)
-if (!identical(mc$protocol,'t3_b3_parametric_transfer_v1') ||
+if (!identical(mc$protocol,'t3_b3_parametric_transfer_v2') ||
     !identical(mc$family,family) || as.integer(mc$parameter_row)!=parameter_row ||
     as.integer(mc$seed_index)!=seed || as.integer(mc$n)!=n ||
-    !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)!=321L)
+    !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)!=241L ||
+    !setequal(as.integer(mc$grid$scenario_id),t3_b3_partition_ids('discovery_support')))
   stop('Parametric transfer Monte Carlo contract mismatch')
 benchmark_map <- read.csv(benchmark_map_path,stringsAsFactors=FALSE,check.names=FALSE)
 map <- benchmark_map[benchmark_map$evaluation_family==family &
   as.integer(benchmark_map$sample_n)==n,,drop=FALSE]
-if (nrow(map)!=321L || anyDuplicated(map$scenario_id) ||
+if (nrow(map)!=241L || anyDuplicated(map$scenario_id) ||
     !setequal(as.integer(map$scenario_id),as.integer(mc$grid$scenario_id)) ||
     any(!map$own_benchmark %in% setdiff(ESTIMATOR_NAMES,'mean')))
   stop('Discovery-frozen own-benchmark map does not cover this transfer panel')
@@ -85,7 +87,7 @@ summary$training_seed_count <- length(train_seeds)
 summary$training_seed_set <- paste(train_seeds,collapse=';')
 write.csv(summary,target,row.names=FALSE)
 manifest <- data.frame(protocol='t3_b3_parametric_transfer_score_v2',family,
-  parameter_row,seed,n,replications=500L,scenario_count=321L,
+  parameter_row,seed,n,replications=500L,scenario_count=241L,
   training_seed_count=length(train_seeds),score_rows=nrow(summary),
   scores_sha256=t2_sha256(target),mc_sha256=t2_sha256(mc_path),
   benchmark_map_sha256=t2_sha256(benchmark_map_path),
