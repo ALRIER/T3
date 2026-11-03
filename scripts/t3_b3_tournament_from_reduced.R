@@ -6,6 +6,7 @@ if(!(length(a)%in%c(3L,4L)))stop('Usage: STAGE REDUCED_ARTIFACT_ROOT OWN_BENCHMA
 stage<-a[[1L]];root<-a[[2L]];map_path<-a[[3L]]
 if(!stage%in%c('heldout','stress','realworld'))stop('Invalid stage')
 source('R/00_shared/load_all.R');t2_load('.')
+source('R/00_shared/pipeline.R')
 if(!file.exists(map_path))stop('Frozen own-benchmark map artifact is required')
 benchmark_map<-read.csv(map_path,stringsAsFactors=FALSE,check.names=FALSE)
 family_map_path<-if(length(a)==4L)a[[4L]] else ''
