@@ -2,7 +2,7 @@
 # with the best frozen classical benchmark for its target scenario and mean.
 t3_pairwise_tournament <- function(unit_scores,stage,unit_col,group_cols,
                                    benchmark_map,alpha=0.05) {
- if(!stage%in%c('heldout','stress','realworld'))stop('Invalid tournament stage')
+ if(!stage%in%c('heldout','stress','realworld','parametric_transfer'))stop('Invalid tournament stage')
  req<-unique(c(unit_col,group_cols,'model','mse','q95'))
  if(!is.data.frame(unit_scores)||!all(req%in%names(unit_scores)))stop('Incomplete unit-score schema')
  map_req<-c('evaluation_family','scenario_id','sample_n','own_benchmark')

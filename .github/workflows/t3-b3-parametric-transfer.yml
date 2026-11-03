@@ -2,9 +2,25 @@ name: T3 B3 Frozen Parametric Transfer
 on:
   workflow_dispatch:
     inputs:
-      discovery_run_id:
-        description: Successful T3 B3 Discovery Actions run ID
+      discovery_bundle_run_id:
+        description: Successful Actions run packaging all immutable Discovery shards
         required: true
+        default: '41487091262'
+        type: string
+      benchmark_map_run_id:
+        description: Successful Discovery-only own-benchmark map run
+        required: true
+        default: '41478038812'
+        type: string
+      batch_index:
+        description: Zero-based shard batch (10 bounded batches total)
+        required: true
+        default: '0'
+        type: string
+      batch_count:
+        description: Number of deterministic shard batches
+        required: true
+        default: '10'
         type: string
 permissions:
   contents: read
@@ -15,17 +31,143 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
+      expected_shards: ${{ steps.plan.outputs.expected_shards }}
     steps:
       - uses: actions/checkout@v4
       - id: plan
-        run: echo "matrix=$(python3 scripts/t3_b3_parametric_transfer_plan.py)" >> "$GITHUB_OUTPUT"
+        env:
+          BATCH_INDEX: ${{ inputs.batch_index }}
+          BATCH_COUNT: ${{ inputs.batch_count }}
+        run: |
+          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT")"
+          matrix="$(python3 -c 'import json,sys; print(json.dumps({"include":json.load(sys.stdin)["include"]},separators=(",",":")))' <<< "$plan_json")"
+          expected="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["expected_shards"])' <<< "$plan_json")"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "expected_shards=$expected" >> "$GITHUB_OUTPUT"
+
+  prepare_benchmark_map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen Discovery benchmark-map source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.benchmark_map_run_id }}
+        run: |
+          gh run view "$RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 Discovery own-benchmark freeze'
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id }}
+          run-id: ${{ inputs.benchmark_map_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/benchmark
+      - name: Verify and retain the immutable benchmark map for this run
+        run: |
+          map="$(find incoming/benchmark -name own_benchmark_map.csv -print -quit)"
+          test -s "$map"
+          mkdir -p artifacts/benchmark_map
+          cp "$map" artifacts/benchmark_map/own_benchmark_map.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-parametric-benchmark-map-run${{ github.run_id }}
+          path: artifacts/benchmark_map/own_benchmark_map.csv
+          if-no-files-found: error
+          retention-days: 90
+
+  prepare_discovery_inputs:
+    needs: [prepare_benchmark_map]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - {family: normal, n: 200}
+          - {family: normal, n: 1000}
+          - {family: normal, n: 3000}
+          - {family: lognormal, n: 200}
+          - {family: lognormal, n: 1000}
+          - {family: lognormal, n: 3000}
+          - {family: weibull, n: 200}
+          - {family: weibull, n: 1000}
+          - {family: weibull, n: 3000}
+          - {family: invgauss, n: 200}
+          - {family: invgauss, n: 1000}
+          - {family: invgauss, n: 3000}
+          - {family: exgaussian, n: 200}
+          - {family: exgaussian, n: 1000}
+          - {family: exgaussian, n: 3000}
+          - {family: exwald, n: 200}
+          - {family: exwald, n: 1000}
+          - {family: exwald, n: 3000}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the packaged immutable Discovery source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.discovery_bundle_run_id }}
+        run: |
+          gh run view "$RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
+            --jq '"\(.conclusion) \(.workflowName)"' \
+            | grep -Fx 'success T3 B3 Package immutable Discovery shards'
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run${{ inputs.discovery_bundle_run_id }}
+          run-id: ${{ inputs.discovery_bundle_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/discovery
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-parametric-benchmark-map-run${{ github.run_id }}
+          path: incoming/benchmark
+      - name: Verify and create the family-specific Discovery input bundle
+        run: |
+          cd incoming/discovery
+          sha256sum -c discovery-n${{ matrix.n }}.tar.gz.sha256
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          tar -xzf discovery-n${{ matrix.n }}.tar.gz -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          cd "$GITHUB_WORKSPACE"
+          test "$(find artifacts/discovery_v3 -name discovery.rds -type f | wc -l)" -eq 60
+          map="$(find incoming/benchmark -name own_benchmark_map.csv -print -quit)"
+          test -s "$map"
+          python3 - "$map" '${{ matrix.family }}' '${{ matrix.n }}' <<'PY'
+          import csv,sys
+          rows=list(csv.DictReader(open(sys.argv[1],newline='')))
+          fam,n=sys.argv[2],int(sys.argv[3])
+          rows=[r for r in rows if r['evaluation_family']==fam and int(r['sample_n'])==n]
+          if len(rows)!=321 or len({r['scenario_id'] for r in rows})!=321:
+              raise SystemExit(f'Expected 321 frozen own-benchmark cells for {fam}/n={n}, found {len(rows)}')
+          out='artifacts/discovery_v3/own_benchmark_map.csv'
+          with open(out,'w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)
+          PY
+          mkdir -p artifacts/parametric_input
+          cp -a "artifacts/discovery_v3/${{ matrix.family }}" artifacts/parametric_input/
+          cp artifacts/discovery_v3/own_benchmark_map.csv artifacts/parametric_input/
+          test "$(find artifacts/parametric_input/${{ matrix.family }} -name discovery.rds -type f | wc -l)" -eq 10
+          tar -czf "artifacts/parametric_input/discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz" \
+            -C artifacts/parametric_input "${{ matrix.family }}" own_benchmark_map.csv
+          cd artifacts/parametric_input
+          sha256sum "discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz" \
+            > "discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/parametric_input/discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz*
+          if-no-files-found: error
+          retention-days: 90
+
   transfer:
-    needs: plan
+    needs: [plan,prepare_benchmark_map,prepare_discovery_inputs]
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 32
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -34,32 +176,29 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify completed Discovery source run
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RUN_ID: ${{ inputs.discovery_run_id }}
-        run: |
-          gh run view "$RUN_ID" --repo "${{ github.repository }}" --json conclusion,workflowName \
-            --jq '"\(.conclusion) \(.workflowName)"' \
-            | grep -Fx 'success T3 Full Nested Optuna 5x3 Grid321'
       - uses: actions/download-artifact@v5
         with:
-          pattern: t3-b3-discovery-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ inputs.discovery_run_id }}
-          run-id: ${{ inputs.discovery_run_id }}
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: artifacts/discovery_v3
-          merge-multiple: true
-      - name: Generate independent parameter-row Monte Carlo shard
+          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: incoming/parametric_input
+      - name: Verify the family-specific frozen Discovery bundle
+        run: |
+          cd incoming/parametric_input
+          archive="discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz"
+          sha256sum -c "$archive.sha256"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          tar -xzf "$archive" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          cd "$GITHUB_WORKSPACE"
+          test "$(find "artifacts/discovery_v3/${{ matrix.family }}" -name discovery.rds -type f | wc -l)" -eq 10
+          test -s artifacts/discovery_v3/own_benchmark_map.csv
+      - name: Generate the independent parameter-row Monte Carlo shard
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: |
-          mkdir -p incoming/parametric
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_mc.R \
-            ${{ matrix.family }} ${{ matrix.parameter_row }} ${{ matrix.seed }} 500 ${{ matrix.n }}
-      - name: Score against frozen Discovery weights without retuning
+            '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' 500 '${{ matrix.n }}'
+      - name: Score against the Discovery-frozen own benchmark and mean
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           OPENBLAS_NUM_THREADS: '1'
@@ -68,35 +207,35 @@ jobs:
           mc="artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row$(printf '%02d' ${{ matrix.parameter_row }})/seed$(printf '%02d' ${{ matrix.seed }})/n${{ matrix.n }}_r500/canonical.rds"
           test -s "$mc"
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_score.R \
-            ${{ matrix.family }} ${{ matrix.parameter_row }} ${{ matrix.seed }} ${{ matrix.n }} "$mc" artifacts/discovery_v3
+            '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
+            "$mc" artifacts/discovery_v3 artifacts/discovery_v3/own_benchmark_map.csv
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-parametric-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row*/seed*_n*
+          name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: |
+            artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/
+            artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/
           if-no-files-found: error
           retention-days: 90
-  aggregate:
-    needs: transfer
+
+  verify_batch_coverage:
+    needs: [plan,transfer]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v5
         with:
-          pattern: t3-b3-parametric-*-run${{ github.run_id }}
-          path: artifacts/t3_b3_parametric_transfer
+          pattern: t3-b3-parametric-score-*-run${{ github.run_id }}
+          path: incoming/score_shards
           merge-multiple: true
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Global seed-level inference, taxonomy, and artifact
-        env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
-        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_inference.R
+      - name: Verify exact expected shard and manifest coverage
+        run: |
+          python3 scripts/t3_b3_parametric_transfer_coverage.py \
+            incoming/score_shards '${{ inputs.batch_index }}' '${{ inputs.batch_count }}' \
+            '${{ needs.plan.outputs.expected_shards }}'
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-parametric-transfer-global-run${{ github.run_id }}
-          path: artifacts/t3_b3_parametric_transfer/aggregate
+          name: t3-b3-parametric-batch-coverage-${{ inputs.batch_index }}-run${{ github.run_id }}
+          path: incoming/score_shards/parametric_batch_coverage.csv
           if-no-files-found: error
           retention-days: 90

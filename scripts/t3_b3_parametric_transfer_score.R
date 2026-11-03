@@ -1,13 +1,15 @@
 #!/usr/bin/env Rscript
-# Evaluate discovery-frozen W on independently generated within-family parameter rows.
-# No fitting, HPO, threshold selection, or candidate selection is permitted here.
+# Score the frozen Discovery W* on independent, within-family parameter rows.
+# Retain only mean, the Discovery-frozen own benchmark, and the four W* engines.
 a <- commandArgs(TRUE)
-if (length(a) != 6L) stop('Usage: FAMILY PARAMETER_ROW SEED N MC_PATH DISCOVERY_DIR')
+if (length(a) != 7L) stop('Usage: FAMILY PARAMETER_ROW SEED N MC_PATH DISCOVERY_DIR OWN_BENCHMARK_MAP.csv')
 family <- a[[1L]]; parameter_row <- as.integer(a[[2L]]); seed <- as.integer(a[[3L]])
 n <- as.integer(a[[4L]]); mc_path <- a[[5L]]; discovery_root <- a[[6L]]
+benchmark_map_path <- a[[7L]]
 source('R/00_shared/load_all.R'); t2_load('.')
 if (!family %in% t2_families() || !seed %in% t2_v3_indices('parametric_transfer') ||
-    !n %in% c(200L,1000L,3000L) || !file.exists(mc_path)) stop('Invalid transfer identity/input')
+    !n %in% c(200L,1000L,3000L) || !file.exists(mc_path) ||
+    !file.exists(benchmark_map_path)) stop('Invalid transfer identity/input')
 source('R/00_shared/pipeline.R'); source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R'); source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t3_b3_partitions.R')
@@ -17,13 +19,28 @@ if (!identical(mc$protocol,'t3_b3_parametric_transfer_v1') ||
     as.integer(mc$seed_index)!=seed || as.integer(mc$n)!=n ||
     !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)!=321L)
   stop('Parametric transfer Monte Carlo contract mismatch')
+benchmark_map <- read.csv(benchmark_map_path,stringsAsFactors=FALSE,check.names=FALSE)
+map <- benchmark_map[benchmark_map$evaluation_family==family &
+  as.integer(benchmark_map$sample_n)==n,,drop=FALSE]
+if (nrow(map)!=321L || anyDuplicated(map$scenario_id) ||
+    !setequal(as.integer(map$scenario_id),as.integer(mc$grid$scenario_id)) ||
+    any(!map$own_benchmark %in% setdiff(ESTIMATOR_NAMES,'mean')))
+  stop('Discovery-frozen own-benchmark map does not cover this transfer panel')
+
 out <- file.path('artifacts','t3_b3_parametric_transfer',family,
   sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d_n%d',seed,n))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 target <- file.path(out,'scores.csv')
 if (file.exists(target)) stop('Refusing to overwrite immutable scoring shard')
-first <- TRUE
-for (training_seed in t2_v3_indices('discovery')) {
+engine_from_id <- function(x) {
+  x <- tolower(as.character(x)); engines <- c('dirichlet','nsga2','de','ga')
+  tokens <- strsplit(gsub('[^a-z0-9]+','_',x),'_',fixed=TRUE)[[1L]]
+  found <- engines[engines %in% tokens]
+  if (length(found)) found[[1L]] else NA_character_
+}
+parts <- vector('list',length(t2_v3_indices('discovery')))
+for (ti in seq_along(t2_v3_indices('discovery'))) {
+  training_seed <- t2_v3_indices('discovery')[[ti]]
   d <- file.path(discovery_root,family,sprintf('seed%02d',training_seed),sprintf('n%d',n))
   model_file <- file.path(d,'discovery.rds')
   if (!file.exists(model_file)) stop('Missing frozen Discovery W: ',model_file)
@@ -33,31 +50,46 @@ for (training_seed in t2_v3_indices('discovery')) {
     stop('Frozen W checksum mismatch: ',model_file)
   fit <- readRDS(model_file)
   engines <- Filter(function(m) !is.null(m$weights),fit$models)
-  if (length(engines)!=4L || anyDuplicated(vapply(engines,`[[`,character(1),'id')))
-    stop('Expected four frozen discovery engines')
+  if (length(engines)!=4L || anyDuplicated(vapply(engines,function(m)engine_from_id(m$id),character(1))))
+    stop('Expected four uniquely identified frozen Discovery engines')
+  engine_labels <- vapply(engines,function(m)engine_from_id(m$id),character(1))
+  if (anyNA(engine_labels)) stop('Could not identify a frozen engine')
+  for (k in seq_along(engines)) engines[[k]]$id <- paste0(family,'_',engine_labels[[k]],'_parametric_frozen_W')
+  classical <- lapply(ESTIMATOR_NAMES,function(nm)new_frozen_model(nm,component=nm))
   rows <- lapply(mc$scenarios,function(sc) {
-    z <- score_model_set(sc$T,c(list(new_frozen_model('mean',component='mean')),engines),sc$target)
+    z <- score_model_set(sc$T,c(classical,engines),sc$target)
     z$scenario_id <- as.integer(sc$scenario_id)
+    ref <- map$own_benchmark[match(z$scenario_id,map$scenario_id)]
+    keep <- z$model=='mean' | z$model==ref | z$model%in%vapply(engines,`[[`,character(1),'id')
+    z <- z[keep,,drop=FALSE]
     z$family <- family; z$source_family <- family; z$evaluation_family <- family
     z$transfer_scope <- 'within_family_parameter_transfer'
-    z$parameter_row <- parameter_row; z$training_seed <- training_seed
-    z$parametric_seed <- seed; z$sample_n <- n
+    z$parameter_row <- parameter_row; z$parametric_seed <- seed; z$sample_n <- n
+    z$training_seed <- training_seed
     z$contamination <- as.numeric(mc$grid$contamination[match(sc$scenario_id,mc$grid$scenario_id)])
     z$mad_scale <- as.numeric(mc$grid$mad_scale[match(sc$scenario_id,mc$grid$scenario_id)])
     z$mechanism <- as.character(mc$grid$mechanism[match(sc$scenario_id,mc$grid$scenario_id)])
+    z$own_benchmark <- ref
     z$discovery_sha256 <- t2_sha256(model_file)
     z
   })
-  block <- do.call(rbind,rows)
-  write.table(block,target,sep=',',append=!first,col.names=first,row.names=FALSE,quote=TRUE)
-  first <- FALSE
-  rm(fit,engines,rows,block); invisible(gc(FALSE))
+  parts[[ti]] <- do.call(rbind,rows)
+  rm(fit,engines,classical,rows); invisible(gc(FALSE))
 }
-if (first) stop('No frozen Discovery weights were scored')
-manifest <- data.frame(protocol='t3_b3_parametric_transfer_score_v1',family,
+raw <- do.call(rbind,parts)
+train_seeds <- t2_v3_indices('discovery')
+keys <- c('family','source_family','evaluation_family','transfer_scope','parameter_row',
+  'sample_n','scenario_id','parametric_seed','own_benchmark','model','contamination','mad_scale','mechanism')
+summary <- aggregate(raw[c('mse','q95')],raw[keys],mean)
+summary$training_seed_count <- length(train_seeds)
+summary$training_seed_set <- paste(train_seeds,collapse=';')
+write.csv(summary,target,row.names=FALSE)
+manifest <- data.frame(protocol='t3_b3_parametric_transfer_score_v2',family,
   parameter_row,seed,n,replications=500L,scenario_count=321L,
-  scores_sha256=t2_sha256(target),selection='frozen_discovery_W_no_retuning',
-  benchmark='sample_mean_component',code_revision=Sys.getenv('GITHUB_SHA','local'),
-  stringsAsFactors=FALSE)
+  training_seed_count=length(train_seeds),score_rows=nrow(summary),
+  scores_sha256=t2_sha256(target),mc_sha256=t2_sha256(mc_path),
+  benchmark_map_sha256=t2_sha256(benchmark_map_path),
+  selection='frozen_discovery_W_no_retuning',benchmark='discovery_frozen_best_classical_per_scenario_plus_mean',
+  code_revision=Sys.getenv('GITHUB_SHA','local'),stringsAsFactors=FALSE)
 write.csv(manifest,file.path(out,'score_manifest.csv'),row.names=FALSE)
-cat('T3_B3_PARAMETRIC_TRANSFER_SCORE_PASS',family,parameter_row,seed,n,'\n')
+cat('T3_B3_PARAMETRIC_TRANSFER_SCORE_PASS',family,parameter_row,seed,n,'rows',nrow(summary),'\n')
