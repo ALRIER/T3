@@ -213,12 +213,31 @@ jobs:
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_score.R \
             '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
             "$mc" artifacts/discovery_v3 artifacts/discovery_v3/own_benchmark_map.csv
+      - name: Verify this shard's Monte Carlo and score hashes
+        run: |
+          python3 - <<'PY'
+          import csv,hashlib
+          from pathlib import Path
+          mc=Path('artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/canonical.rds')
+          mm=mc.with_name('manifest.csv')
+          score=Path('artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/scores.csv')
+          sm=score.with_name('score_manifest.csv')
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          m=list(csv.DictReader(mm.open()));s=list(csv.DictReader(sm.open()))
+          if len(m)!=1 or len(s)!=1 or sha(mc)!=m[0]['sha256'] or sha(score)!=s[0]['scores_sha256'] or s[0]['mc_sha256']!=m[0]['sha256']:
+              raise SystemExit('Parametric shard checksum contract failed')
+          print('PARAMETRIC_SHARD_CHECKSUM_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/
+          if-no-files-found: error
+          retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
-          path: |
-            artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/
-            artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/
+          path: artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/
           if-no-files-found: error
           retention-days: 90
 
