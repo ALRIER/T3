@@ -3,25 +3,30 @@
 # W is trained only once on the base parameterization, then evaluated without
 # retuning on an excluded parameter-grid row from the same distribution family.
 args <- commandArgs(trailingOnly=TRUE)
-if(length(args)!=5L) stop('Usage: FAMILY PARAMETER_ROW TRANSFER_SEED REPS N')
+if(length(args)!=6L) stop('Usage: FAMILY PARAMETER_ROW TRANSFER_SEED REPS N SCENARIO_IDS_CSV')
 family<-args[[1L]]; parameter_row<-as.integer(args[[2L]])
 seed<-as.integer(args[[3L]]); reps<-as.integer(args[[4L]]); n<-as.integer(args[[5L]])
+scenario_ids<-as.integer(strsplit(args[[6L]],',',fixed=TRUE)[[1L]])
 if(!family%in%c('normal','lognormal','weibull','invgauss','exgaussian','exwald') ||
    is.na(parameter_row)||parameter_row<2L||is.na(seed)||!seed%in%40:49 ||
-   reps!=500L||!n%in%c(200L,1000L,3000L)) stop('Invalid prospective transfer shard')
+   reps!=500L||!n%in%c(200L,1000L,3000L)||!length(scenario_ids)||
+   anyNA(scenario_ids)||anyDuplicated(scenario_ids)) stop('Invalid prospective transfer checkpoint')
 source('R/00_shared/load_all.R');t2_load('.')
 grid<-read.csv('config/T2_V3_B3_prospective_321_grid.csv',stringsAsFactors=FALSE)
 source('R/00_shared/t3_b3_partitions.R')
 grid<-grid[grid$scenario_id%in%t3_b3_partition_ids('discovery_support'),,drop=FALSE]
 if(nrow(grid)!=241L||anyDuplicated(grid$scenario_id))
   stop('Parametric transfer must use exactly the 241 predeclared Discovery-support scenarios')
+if(!all(scenario_ids%in%grid$scenario_id))stop('Scenario checkpoint contains an ID outside Discovery support')
+grid<-grid[match(scenario_ids,grid$scenario_id),,drop=FALSE]
 params_grid<-build_param_grids(families=family)[[family]]
 if(parameter_row>nrow(params_grid))stop('Parameter row outside family grid')
 params<-as.list(params_grid[parameter_row,,drop=FALSE])
 target<-analytic_mean_from_params(family,params)
 if(!is.finite(target))stop('Nonfinite transfer target')
+block_id<-sprintf('b%d',as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK','0')))
 root<-file.path('artifacts','t3_b3_parametric_transfer_mc',family,
-  sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d',seed),sprintf('n%d_r%d',n,reps))
+  sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d',seed),sprintf('n%d_r%d',n,reps),block_id)
 if(dir.exists(root))stop('Refusing overwrite of immutable transfer shard')
 dir.create(root,recursive=TRUE)
 scenarios<-vector('list',nrow(grid))
@@ -38,12 +43,16 @@ for(j in seq_len(nrow(grid))) {
   if(any(!is.finite(T)))stop('Nonfinite transfer scenario ',id)
   scenarios[[j]]<-list(scenario_id=id,T=T,target=target,component_names=ESTIMATOR_NAMES)
 }
-z<-list(protocol='t3_b3_parametric_transfer_v2',role='parametric_transfer',
+z<-list(protocol='t3_b3_parametric_transfer_v3',role='parametric_transfer',
  family=family,parameter_row=parameter_row,seed_index=seed,n=n,replications=reps,
+ scenario_block=as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK','0')),
+ scenario_block_count=8L,scenario_ids=as.integer(grid$scenario_id),
  component_names=ESTIMATOR_NAMES,grid=grid,scenarios=scenarios,parameters=params,target=target,
  scientific_scope='secondary_intra_family_transfer_no_W_retuning')
 saveRDS(z,file.path(root,'canonical.rds'),compress='xz')
 sha<-t2_sha256(file.path(root,'canonical.rds'))
-write.csv(data.frame(family,parameter_row,seed,n,reps,target,sha256=sha,
+write.csv(data.frame(family,parameter_row,seed,n,reps,scenario_block=z$scenario_block,
+  scenario_block_count=z$scenario_block_count,scenario_count=nrow(grid),
+  scenario_ids=paste(grid$scenario_id,collapse=';'),target,sha256=sha,
  scope='secondary_intra_family_transfer_no_W_retuning'),file.path(root,'manifest.csv'),row.names=FALSE)
 cat('T3_B3_PARAMETRIC_TRANSFER_MC_PASS',family,parameter_row,seed,n,sha,'\n')

@@ -15,11 +15,13 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R'); source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t3_b3_partitions.R')
 mc <- readRDS(mc_path)
-if (!identical(mc$protocol,'t3_b3_parametric_transfer_v2') ||
+if (!identical(mc$protocol,'t3_b3_parametric_transfer_v3') ||
     !identical(mc$family,family) || as.integer(mc$parameter_row)!=parameter_row ||
     as.integer(mc$seed_index)!=seed || as.integer(mc$n)!=n ||
-    !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)!=241L ||
-    !setequal(as.integer(mc$grid$scenario_id),t3_b3_partition_ids('discovery_support')))
+    !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)<1L ||
+    length(mc$scenarios)>31L || as.integer(mc$scenario_block_count)!=8L ||
+    anyDuplicated(as.integer(mc$grid$scenario_id)) ||
+    !all(as.integer(mc$grid$scenario_id)%in%t3_b3_partition_ids('discovery_support')))
   stop('Parametric transfer Monte Carlo contract mismatch')
 benchmark_map <- read.csv(benchmark_map_path,stringsAsFactors=FALSE,check.names=FALSE)
 map <- benchmark_map[benchmark_map$evaluation_family==family &
@@ -30,7 +32,8 @@ if (nrow(map)!=241L || anyDuplicated(map$scenario_id) ||
   stop('Discovery-frozen own-benchmark map does not cover this transfer panel')
 
 out <- file.path('artifacts','t3_b3_parametric_transfer',family,
-  sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d_n%d',seed,n))
+  sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d_n%d',seed,n),
+  sprintf('b%d',as.integer(mc$scenario_block)))
 dir.create(out,recursive=TRUE,showWarnings=FALSE)
 target <- file.path(out,'scores.csv')
 if (file.exists(target)) stop('Refusing to overwrite immutable scoring shard')
@@ -86,8 +89,10 @@ summary <- aggregate(raw[c('mse','q95')],raw[keys],mean)
 summary$training_seed_count <- length(train_seeds)
 summary$training_seed_set <- paste(train_seeds,collapse=';')
 write.csv(summary,target,row.names=FALSE)
-manifest <- data.frame(protocol='t3_b3_parametric_transfer_score_v2',family,
-  parameter_row,seed,n,replications=500L,scenario_count=241L,
+manifest <- data.frame(protocol='t3_b3_parametric_transfer_score_v3',family,
+  parameter_row,seed,n,replications=500L,scenario_count=length(mc$scenarios),
+  scenario_block=as.integer(mc$scenario_block),scenario_block_count=as.integer(mc$scenario_block_count),
+  scenario_ids=paste(as.integer(mc$grid$scenario_id),collapse=';'),
   training_seed_count=length(train_seeds),score_rows=nrow(summary),
   scores_sha256=t2_sha256(target),mc_sha256=t2_sha256(mc_path),
   benchmark_map_sha256=t2_sha256(benchmark_map_path),

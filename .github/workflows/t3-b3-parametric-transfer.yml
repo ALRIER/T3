@@ -22,6 +22,11 @@ on:
         required: true
         default: '10'
         type: string
+      scenario_block_index:
+        description: Immutable scenario checkpoint (dispatch 0 through 7 for every shard batch)
+        required: true
+        type: choice
+        options: ['0','1','2','3','4','5','6','7']
       prepared_inputs_run_id:
         description: Existing run with successful benchmark-map and Discovery-input preparation; blank prepares them in this run
         required: false
@@ -43,8 +48,9 @@ jobs:
         env:
           BATCH_INDEX: ${{ inputs.batch_index }}
           BATCH_COUNT: ${{ inputs.batch_count }}
+          SCENARIO_BLOCK_INDEX: ${{ inputs.scenario_block_index }}
         run: |
-          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT")"
+          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT" "$SCENARIO_BLOCK_INDEX" 8)"
           matrix="$(python3 -c 'import json,sys; print(json.dumps({"include":json.load(sys.stdin)["include"]},separators=(",",":")))' <<< "$plan_json")"
           expected="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["expected_shards"])' <<< "$plan_json")"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
@@ -213,7 +219,7 @@ jobs:
     needs: [plan,prep_gate]
     if: ${{ always() && needs.plan.result == 'success' && needs.prep_gate.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       max-parallel: 32
@@ -245,11 +251,12 @@ jobs:
       - name: Generate the independent parameter-row Monte Carlo shard
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          T3_TRANSFER_SCENARIO_BLOCK: ${{ matrix.scenario_block }}
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_mc.R \
-            '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' 500 '${{ matrix.n }}'
+            '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' 500 '${{ matrix.n }}' '${{ matrix.scenario_ids }}'
       - name: Score against the Discovery-frozen own benchmark and mean
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
@@ -257,6 +264,7 @@ jobs:
           OMP_NUM_THREADS: '1'
         run: |
           mc="artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row$(printf '%02d' ${{ matrix.parameter_row }})/seed$(printf '%02d' ${{ matrix.seed }})/n${{ matrix.n }}_r500/canonical.rds"
+          mc="${mc%/canonical.rds}/b${{ matrix.scenario_block }}/canonical.rds"
           test -s "$mc"
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_score.R \
             '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
@@ -266,9 +274,9 @@ jobs:
           python3 - <<'PY'
           import csv,hashlib
           from pathlib import Path
-          mc=Path('artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/canonical.rds')
+          mc=Path('artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/b${{ matrix.scenario_block }}/canonical.rds')
           mm=mc.with_name('manifest.csv')
-          score=Path('artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/scores.csv')
+          score=Path('artifacts/t3_b3_parametric_transfer/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}_n${{ matrix.n }}/b${{ matrix.scenario_block }}/scores.csv')
           sm=score.with_name('score_manifest.csv')
           sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
           m=list(csv.DictReader(mm.open()));s=list(csv.DictReader(sm.open()))
@@ -278,13 +286,13 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
           path: artifacts/t3_b3_parametric_transfer_mc/
           if-no-files-found: error
           retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
           path: artifacts/t3_b3_parametric_transfer/
           if-no-files-found: error
           retention-days: 90
@@ -297,17 +305,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v5
         with:
-          pattern: t3-b3-parametric-score-*-run${{ github.run_id }}
+          pattern: t3-b3-parametric-score-*-run${{ github.run_id }}-a*
           path: incoming/score_shards
           merge-multiple: true
       - name: Verify exact expected shard and manifest coverage
         run: |
           python3 scripts/t3_b3_parametric_transfer_coverage.py \
             incoming/score_shards '${{ inputs.batch_index }}' '${{ inputs.batch_count }}' \
-            '${{ needs.plan.outputs.expected_shards }}'
+            '${{ needs.plan.outputs.expected_shards }}' '${{ inputs.scenario_block_index }}'
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-b3-parametric-batch-coverage-${{ inputs.batch_index }}-run${{ github.run_id }}
+          name: t3-b3-parametric-batch-coverage-${{ inputs.batch_index }}-b${{ inputs.scenario_block_index }}-run${{ github.run_id }}-a${{ github.run_attempt }}
           path: incoming/score_shards/parametric_batch_coverage.csv
           if-no-files-found: error
           retention-days: 90
