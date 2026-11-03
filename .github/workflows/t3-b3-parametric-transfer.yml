@@ -272,6 +272,28 @@ jobs:
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_mc.R \
             '${{ matrix.family }}' '${{ matrix.parameter_row }}' '${{ matrix.seed }}' 500 '${{ matrix.n }}' '${{ matrix.scenario_ids }}'
+      - name: Verify and persist the Monte Carlo checkpoint before scoring
+        run: |
+          python3 - <<'PY'
+          import csv,hashlib
+          from pathlib import Path
+          mc=Path('artifacts/t3_b3_parametric_transfer_mc/${{ matrix.family }}/parameter_row${{ matrix.parameter_row }}/seed${{ matrix.seed }}/n${{ matrix.n }}_r500/b${{ matrix.scenario_block }}/canonical.rds')
+          manifest=mc.with_name('manifest.csv')
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          rows=list(csv.DictReader(manifest.open()))
+          expected=';'.join('${{ matrix.scenario_ids }}'.split(','))
+          if not mc.is_file() or len(rows)!=1 or rows[0]['sha256']!=sha(mc):
+              raise SystemExit('Monte Carlo checkpoint checksum/manifest failure')
+          if int(rows[0]['scenario_block'])!=${{ matrix.scenario_block }} or rows[0]['scenario_ids']!=expected:
+              raise SystemExit('Monte Carlo checkpoint does not match its frozen scenario half')
+          print('PARAMETRIC_MC_CHECKPOINT_PASS',sha(mc))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+          path: artifacts/t3_b3_parametric_transfer_mc/
+          if-no-files-found: error
+          retention-days: 90
       - name: Score against the Discovery-frozen own benchmark and mean
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
@@ -299,12 +321,6 @@ jobs:
               raise SystemExit('Parametric shard checksum contract failed')
           print('PARAMETRIC_SHARD_CHECKSUM_PASS')
           PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: t3-b3-parametric-mc-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
-          path: artifacts/t3_b3_parametric_transfer_mc/
-          if-no-files-found: error
-          retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-parametric-score-${{ matrix.family }}-p${{ matrix.parameter_row }}-s${{ matrix.seed }}-n${{ matrix.n }}-b${{ matrix.scenario_block }}-run${{ github.run_id }}-a${{ github.run_attempt }}
