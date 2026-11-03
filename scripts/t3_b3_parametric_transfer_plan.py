@@ -13,13 +13,19 @@ all_shards = [dict(family=f, parameter_row=r, seed=s, n=n)
            for s in range(40, 50) for n in (200, 1000, 3000)]
 assert len(all_shards) == 2490
 batch_index = int(sys.argv[1]) if len(sys.argv) > 1 else 0
-batch_count = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+batch_count = int(sys.argv[2]) if len(sys.argv) > 2 else 6
 block_index = int(sys.argv[3]) if len(sys.argv) > 3 else 0
-block_count = int(sys.argv[4]) if len(sys.argv) > 4 else 8
+block_count = int(sys.argv[4]) if len(sys.argv) > 4 else 2
+sample_n = int(sys.argv[5]) if len(sys.argv) > 5 else 3000
 if batch_count < 1 or batch_index < 0 or batch_index >= batch_count:
     raise SystemExit('batch_index must be in [0, batch_count)')
-if block_count != 8 or block_index < 0 or block_index >= block_count:
-    raise SystemExit('scenario_block_index must be in [0, 8)')
+if block_count != 2 or block_index < 0 or block_index >= block_count:
+    raise SystemExit('scenario_block_index must be in [0, 2)')
+if sample_n not in (200, 1000, 3000):
+    raise SystemExit('sample_n must be one of 200, 1000, 3000')
+all_shards = [x for x in all_shards if x['n'] == sample_n]
+if len(all_shards) != 830:
+    raise SystemExit(f'Expected 830 shards for n={sample_n}, found {len(all_shards)}')
 batch_size = math.ceil(len(all_shards) / batch_count)
 start = batch_index * batch_size
 base = all_shards[start:start + batch_size]
@@ -39,6 +45,7 @@ if not include:
 print(json.dumps({'include': include, 'batch_index': batch_index,
                   'batch_count': batch_count, 'scenario_block_index': block_index,
                   'scenario_block_count': block_count,
+                  'sample_n': sample_n,
                   'scenario_ids': scenario_ids,
                   'expected_shards': len(include)},
                  separators=(',', ':')))

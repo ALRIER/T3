@@ -11,13 +11,14 @@ ROWS = {'normal': 8, 'lognormal': 6, 'weibull': 12, 'invgauss': 9,
 root = Path(sys.argv[1])
 batch_index, batch_count, expected_count = map(int, sys.argv[2:5])
 scenario_block = int(sys.argv[5]) if len(sys.argv) > 5 else 0
+sample_n = int(sys.argv[6]) if len(sys.argv) > 6 else 3000
 grid_path = Path(__file__).resolve().parents[1] / 'config/T2_V3_B3_prospective_321_grid.csv'
 with grid_path.open(newline='', encoding='utf-8-sig') as stream:
     support_ids = [int(row['scenario_id']) for row in csv.DictReader(stream)
                    if row['mechanism'] not in {'mixture_bimodal_near', 'mixture_bimodal_far'}]
-if len(support_ids) != 241 or not 0 <= scenario_block < 8:
+if len(support_ids) != 241 or not 0 <= scenario_block < 2 or sample_n not in (200, 1000, 3000):
     raise SystemExit('Invalid frozen transfer scenario-block plan')
-block_size = (len(support_ids) + 7) // 8
+block_size = (len(support_ids) + 1) // 2
 expected_scenarios = set(support_ids[scenario_block * block_size:(scenario_block + 1) * block_size])
 all_shards = [
     (fam, row, seed, n)
@@ -26,8 +27,9 @@ all_shards = [
     for seed in range(40, 50)
     for n in (200, 1000, 3000)
 ]
+all_shards = [x for x in all_shards if x[3] == sample_n]
 batch_size = (len(all_shards) + batch_count - 1) // batch_count
-expected = { (x['family'],x['parameter_row'],x['seed'],x['n'],scenario_block)
+expected = { (x[0],x[1],x[2],x[3],scenario_block)
              for x in all_shards[batch_index * batch_size:(batch_index + 1) * batch_size] }
 if len(expected) != expected_count:
     raise SystemExit(f"Plan/output mismatch: {len(expected)} != {expected_count}")
@@ -53,7 +55,8 @@ for manifest_path in root.rglob("score_manifest.csv"):
     score_path = manifest_path.with_name("scores.csv")
     if not score_path.is_file() or sha256(score_path) != row["scores_sha256"]:
         raise SystemExit(f"Score file missing or SHA mismatch: {score_path}")
-    if not 1 <= int(row["scenario_count"]) <= 31 or int(row["training_seed_count"]) != 10:
+    if (not 1 <= int(row["scenario_count"]) <= 121 or
+            int(row["scenario_block_count"]) != 2 or int(row["training_seed_count"]) != 10):
         raise SystemExit(f"Unexpected score contract: {manifest_path}")
     try:
         manifest_scenarios = {int(x) for x in row['scenario_ids'].split(';') if x}

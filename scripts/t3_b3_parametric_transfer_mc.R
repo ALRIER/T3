@@ -46,7 +46,7 @@ for(j in seq_len(nrow(grid))) {
 z<-list(protocol='t3_b3_parametric_transfer_v3',role='parametric_transfer',
  family=family,parameter_row=parameter_row,seed_index=seed,n=n,replications=reps,
  scenario_block=as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK','0')),
- scenario_block_count=8L,scenario_ids=as.integer(grid$scenario_id),
+ scenario_block_count=2L,scenario_ids=as.integer(grid$scenario_id),
  component_names=ESTIMATOR_NAMES,grid=grid,scenarios=scenarios,parameters=params,target=target,
  scientific_scope='secondary_intra_family_transfer_no_W_retuning')
 saveRDS(z,file.path(root,'canonical.rds'),compress='xz')

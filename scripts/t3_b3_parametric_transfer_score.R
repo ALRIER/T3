@@ -19,7 +19,7 @@ if (!identical(mc$protocol,'t3_b3_parametric_transfer_v3') ||
     !identical(mc$family,family) || as.integer(mc$parameter_row)!=parameter_row ||
     as.integer(mc$seed_index)!=seed || as.integer(mc$n)!=n ||
     !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)<1L ||
-    length(mc$scenarios)>31L || as.integer(mc$scenario_block_count)!=8L ||
+    length(mc$scenarios)>121L || as.integer(mc$scenario_block_count)!=2L ||
     anyDuplicated(as.integer(mc$grid$scenario_id)) ||
     !all(as.integer(mc$grid$scenario_id)%in%t3_b3_partition_ids('discovery_support')))
   stop('Parametric transfer Monte Carlo contract mismatch')
@@ -27,9 +27,12 @@ benchmark_map <- read.csv(benchmark_map_path,stringsAsFactors=FALSE,check.names=
 map <- benchmark_map[benchmark_map$evaluation_family==family &
   as.integer(benchmark_map$sample_n)==n,,drop=FALSE]
 if (nrow(map)!=241L || anyDuplicated(map$scenario_id) ||
-    !setequal(as.integer(map$scenario_id),as.integer(mc$grid$scenario_id)) ||
+    !setequal(as.integer(map$scenario_id),t3_b3_partition_ids('discovery_support')) ||
     any(!map$own_benchmark %in% setdiff(ESTIMATOR_NAMES,'mean')))
   stop('Discovery-frozen own-benchmark map does not cover this transfer panel')
+map <- map[match(as.integer(mc$grid$scenario_id),as.integer(map$scenario_id)),,drop=FALSE]
+if (nrow(map)!=length(mc$scenarios) || anyNA(map$own_benchmark))
+  stop('Discovery-frozen own-benchmark map could not be aligned to this scenario half')
 
 out <- file.path('artifacts','t3_b3_parametric_transfer',family,
   sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d_n%d',seed,n),

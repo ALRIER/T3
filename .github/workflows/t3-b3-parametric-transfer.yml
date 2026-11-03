@@ -13,20 +13,26 @@ on:
         default: '41478038812'
         type: string
       batch_index:
-        description: Zero-based shard batch (10 bounded batches total)
+        description: Zero-based balanced batch within the selected sample size (six batches)
         required: true
         default: '0'
         type: string
       batch_count:
         description: Number of deterministic shard batches
         required: true
-        default: '10'
+        default: '6'
         type: string
+      sample_n:
+        description: Sample size for this transfer pass
+        required: true
+        default: '3000'
+        type: choice
+        options: ['3000','1000','200']
       scenario_block_index:
-        description: Immutable scenario checkpoint (dispatch 0 through 7 for every shard batch)
+        description: One of two immutable scenario halves (dispatch 0 and 1 for each batch)
         required: true
         type: choice
-        options: ['0','1','2','3','4','5','6','7']
+        options: ['0','1']
       prepared_inputs_run_id:
         description: Existing run with successful benchmark-map and Discovery-input preparation; blank prepares them in this run
         required: false
@@ -49,8 +55,9 @@ jobs:
           BATCH_INDEX: ${{ inputs.batch_index }}
           BATCH_COUNT: ${{ inputs.batch_count }}
           SCENARIO_BLOCK_INDEX: ${{ inputs.scenario_block_index }}
+          SAMPLE_N: ${{ inputs.sample_n }}
         run: |
-          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT" "$SCENARIO_BLOCK_INDEX" 8)"
+          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT" "$SCENARIO_BLOCK_INDEX" 2 "$SAMPLE_N")"
           matrix="$(python3 -c 'import json,sys; print(json.dumps({"include":json.load(sys.stdin)["include"]},separators=(",",":")))' <<< "$plan_json")"
           expected="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["expected_shards"])' <<< "$plan_json")"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
@@ -311,7 +318,7 @@ jobs:
         run: |
           python3 scripts/t3_b3_parametric_transfer_coverage.py \
             incoming/score_shards '${{ inputs.batch_index }}' '${{ inputs.batch_count }}' \
-            '${{ needs.plan.outputs.expected_shards }}' '${{ inputs.scenario_block_index }}'
+            '${{ needs.plan.outputs.expected_shards }}' '${{ inputs.scenario_block_index }}' '${{ inputs.sample_n }}'
       - uses: actions/upload-artifact@v4
         with:
           name: t3-b3-parametric-batch-coverage-${{ inputs.batch_index }}-b${{ inputs.scenario_block_index }}-run${{ github.run_id }}-a${{ github.run_attempt }}

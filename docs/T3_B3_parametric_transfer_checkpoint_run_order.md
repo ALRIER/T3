@@ -1,37 +1,44 @@
-# T3 B3 parametric transfer: checkpointed run order
+# T3 B3 parametric transfer: two-part checkpoint run order
 
-The transfer plan is split into immutable scenario checkpoints so a timeout only
-puts one eighth of a shard at risk. Each checkpoint contains a disjoint subset of
-the 241 Discovery-support scenarios, its Monte Carlo RDS, its score CSV, and SHA
-manifests. The 80 mixture stress-only scenarios remain excluded.
+The full panel has 2,490 transfer identities: 830 each at `n=200`, `n=1000`,
+and `n=3000`. Each identity covers 241 Discovery-support scenarios and 500
+replications. The 80 mixture stress-only scenarios remain excluded.
+
+## Work unit and exact merge
+
+Each identity is split into two disjoint, deterministic scenario halves:
+
+- checkpoint `0`: 121 scenarios;
+- checkpoint `1`: 120 scenarios.
+
+Both halves retain the original sample size and all 500 replications. In
+particular, the heavy pass remains `n=3000`; the method does not split a sample
+into two `n=1500` samples. The score rows from both halves are reunited by the
+global inference script, which verifies complete 241-scenario coverage before
+the single global BH adjustment.
 
 ## Dispatch plan
 
-The workflow matrix holds at most 249 base identities per dispatch, below the
-GitHub Actions matrix limit. Run all combinations of:
+For each `sample_n` value, dispatch six balanced batches (`batch_index` 0–5,
+`batch_count` 6) and both scenario halves (`scenario_block_index` 0 and 1).
+That is 12 workflow runs per sample size. Start with `sample_n=3000`: its 830
+identities become 1,660 checkpoint jobs, about 138–139 jobs in each workflow
+matrix. Run `sample_n=1000` and `sample_n=200` the same way to complete the full
+panel: 36 workflow runs and 4,980 checkpoint jobs overall. Every workflow keeps
+`max-parallel: 32` and uses the pinned R container and prepared Discovery inputs.
 
-- `batch_index`: `0` through `9`;
-- `scenario_block_index`: `0` through `7`;
-- `batch_count`: `10`;
-- `prepared_inputs_run_id`: the successful run containing the frozen benchmark
-  map and all 18 family/sample-size Discovery input bundles.
+## Recovery and inference
 
-This is 80 dispatches total. Each dispatch uses `max-parallel: 32`; no
-job-specific timeout override is set. The 241 scenarios are split into seven blocks of
-31 and one block of 24, in the frozen grid order. The largest block therefore
-does one eighth of the former per-shard Monte Carlo and scoring work.
+Each successful worker uploads an immutable Monte Carlo checkpoint and score
+checkpoint with hashes. Use GitHub's **Re-run failed jobs** for a partial run;
+the coverage step checks the expected shard identities, half assignment,
+scenario IDs, and hashes across run attempts. Avoid **Re-run all jobs**, which
+would duplicate immutable artifacts.
 
-The previous transfer attempts failed during setup and produced no valid timing
-observations. A failed block can be retried without repeating completed blocks.
+After all 36 runs pass coverage, collect the 4,980 score manifests and CSVs and
+run `scripts/t3_b3_parametric_transfer_inference.R`. It verifies exact identity
+coverage, reunites the two scenario halves, and then performs global BH.
 
-## Recovery
-
-Use GitHub's **Re-run failed jobs** on a partially failed dispatch. Successful
-checkpoint artifacts from earlier attempts are retained; the coverage job
-collects artifacts across attempts for that run and checks every expected shard
-identity, block number, scenario ID set, and SHA. Do not use **Re-run all jobs**:
-it would intentionally encounter duplicate immutable checkpoint artifacts.
-
-After all 80 dispatches pass coverage, collect all 19,920 score checkpoints
-before running `scripts/t3_b3_parametric_transfer_inference.R`. That script now
-requires the complete block identity set and performs the single global BH pass.
+The earlier transfer failures were setup/code failures (`t2_seed` was undefined)
+and a skipped dependency gate. Those have been corrected. The canceled 80-run
+attempt did not validate this revised two-half implementation.
