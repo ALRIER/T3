@@ -219,7 +219,6 @@ jobs:
     needs: [plan,prep_gate]
     if: ${{ always() && needs.plan.result == 'success' && needs.prep_gate.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 90
     strategy:
       fail-fast: false
       max-parallel: 32

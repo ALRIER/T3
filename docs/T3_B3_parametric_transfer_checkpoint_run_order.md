@@ -16,15 +16,13 @@ GitHub Actions matrix limit. Run all combinations of:
 - `prepared_inputs_run_id`: the successful run containing the frozen benchmark
   map and all 18 family/sample-size Discovery input bundles.
 
-This is 80 dispatches total. Each dispatch uses `max-parallel: 32`; each worker
-has a 90-minute hard timeout. The 241 scenarios are split into seven blocks of
+This is 80 dispatches total. Each dispatch uses `max-parallel: 32`; no
+job-specific timeout override is set. The 241 scenarios are split into seven blocks of
 31 and one block of 24, in the frozen grid order. The largest block therefore
 does one eighth of the former per-shard Monte Carlo and scoring work.
 
-The 90-minute timeout is a conservative execution cap, not a measured runtime:
-the previous transfer attempts failed during setup and produced no valid timing
-observations. A block that exceeds the cap can be retried without repeating
-completed blocks.
+The previous transfer attempts failed during setup and produced no valid timing
+observations. A failed block can be retried without repeating completed blocks.
 
 ## Recovery
 
