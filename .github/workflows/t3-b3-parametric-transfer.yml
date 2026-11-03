@@ -211,6 +211,7 @@ jobs:
 
   transfer:
     needs: [plan,prep_gate]
+    if: ${{ always() && needs.plan.result == 'success' && needs.prep_gate.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -290,6 +291,7 @@ jobs:
 
   verify_batch_coverage:
     needs: [plan,transfer]
+    if: ${{ always() && needs.plan.result == 'success' && needs.transfer.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
