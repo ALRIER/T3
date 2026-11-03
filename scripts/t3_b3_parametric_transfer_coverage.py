@@ -16,9 +16,11 @@ grid_path = Path(__file__).resolve().parents[1] / 'config/T2_V3_B3_prospective_3
 with grid_path.open(newline='', encoding='utf-8-sig') as stream:
     support_ids = [int(row['scenario_id']) for row in csv.DictReader(stream)
                    if row['mechanism'] not in {'mixture_bimodal_near', 'mixture_bimodal_far'}]
-if len(support_ids) != 241 or not 0 <= scenario_block < 2 or sample_n not in (200, 1000, 3000):
+expected_block_count = 2 if sample_n == 3000 else 1
+if (len(support_ids) != 241 or sample_n not in (200, 1000, 3000) or
+        not 0 <= scenario_block < expected_block_count):
     raise SystemExit('Invalid frozen transfer scenario-block plan')
-block_size = (len(support_ids) + 1) // 2
+block_size = (len(support_ids) + expected_block_count - 1) // expected_block_count
 expected_scenarios = set(support_ids[scenario_block * block_size:(scenario_block + 1) * block_size])
 all_shards = [
     (fam, row, seed, n)
@@ -55,8 +57,9 @@ for manifest_path in root.rglob("score_manifest.csv"):
     score_path = manifest_path.with_name("scores.csv")
     if not score_path.is_file() or sha256(score_path) != row["scores_sha256"]:
         raise SystemExit(f"Score file missing or SHA mismatch: {score_path}")
-    if (not 1 <= int(row["scenario_count"]) <= 121 or
-            int(row["scenario_block_count"]) != 2 or int(row["training_seed_count"]) != 10):
+    if (int(row["scenario_count"]) != len(expected_scenarios) or
+            int(row["scenario_block_count"]) != expected_block_count or
+            int(row["training_seed_count"]) != 10):
         raise SystemExit(f"Unexpected score contract: {manifest_path}")
     try:
         manifest_scenarios = {int(x) for x in row['scenario_ids'].split(';') if x}

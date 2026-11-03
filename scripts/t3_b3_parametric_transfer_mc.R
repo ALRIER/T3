@@ -25,6 +25,10 @@ params<-as.list(params_grid[parameter_row,,drop=FALSE])
 target<-analytic_mean_from_params(family,params)
 if(!is.finite(target))stop('Nonfinite transfer target')
 block_id<-sprintf('b%d',as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK','0')))
+block_count<-as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK_COUNT','2'))
+expected_block_count<-if(n==3000L)2L else 1L
+if(is.na(block_count)||block_count!=expected_block_count)
+  stop('Scenario block count must be 2 only for n=3000 and 1 for smaller n')
 root<-file.path('artifacts','t3_b3_parametric_transfer_mc',family,
   sprintf('parameter_row%02d',parameter_row),sprintf('seed%02d',seed),sprintf('n%d_r%d',n,reps),block_id)
 if(dir.exists(root))stop('Refusing overwrite of immutable transfer shard')
@@ -46,7 +50,7 @@ for(j in seq_len(nrow(grid))) {
 z<-list(protocol='t3_b3_parametric_transfer_v3',role='parametric_transfer',
  family=family,parameter_row=parameter_row,seed_index=seed,n=n,replications=reps,
  scenario_block=as.integer(Sys.getenv('T3_TRANSFER_SCENARIO_BLOCK','0')),
- scenario_block_count=2L,scenario_ids=as.integer(grid$scenario_id),
+ scenario_block_count=block_count,scenario_ids=as.integer(grid$scenario_id),
  component_names=ESTIMATOR_NAMES,grid=grid,scenarios=scenarios,parameters=params,target=target,
  scientific_scope='secondary_intra_family_transfer_no_W_retuning')
 saveRDS(z,file.path(root,'canonical.rds'),compress='xz')

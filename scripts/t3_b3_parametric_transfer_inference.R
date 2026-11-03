@@ -10,16 +10,17 @@ source('R/00_shared/pipeline.R');source('R/05_audits/benchmark_tournament.R')
 if(!file.exists(map_path))stop('Discovery-frozen own-benchmark map is missing')
 files<-list.files(root,'^scores[.]csv$',recursive=TRUE,full.names=TRUE)
 manifest_files<-list.files(root,'^score_manifest[.]csv$',recursive=TRUE,full.names=TRUE)
-if(length(files)!=4980L||length(manifest_files)!=4980L)
- stop('Expected all 4,980 immutable two-part score checkpoints and manifests')
+if(length(files)!=3320L||length(manifest_files)!=3320L)
+ stop('Expected all 3,320 immutable transfer score checkpoints and manifests')
 sha256<-function(path)t2_sha256(path)
 meta<-vector('list',length(manifest_files));names(meta)<-manifest_files
 for(i in seq_along(manifest_files)) {
  m<-read.csv(manifest_files[i],stringsAsFactors=FALSE,check.names=FALSE)
+ expected_block_count<-if(as.integer(m$n[1L])==3000L)2L else 1L
  score<-file.path(dirname(manifest_files[i]),'scores.csv')
  if(!file.exists(score)||nrow(m)!=1L||
     !identical(as.character(m$protocol[1L]),'t3_b3_parametric_transfer_score_v3')||
-    as.integer(m$scenario_block_count[1L])!=2L||
+    as.integer(m$scenario_block_count[1L])!=expected_block_count||
     !identical(tolower(m$scores_sha256[1L]),tolower(sha256(score))))
    stop('Score manifest hash mismatch: ',manifest_files[i])
  key<-c(as.character(m$family),as.integer(m$parameter_row),as.integer(m$seed),as.integer(m$n),
@@ -34,8 +35,11 @@ expected_rows<-list(normal=2:8,lognormal=2:6,weibull=2:12,invgauss=2:9,
 expected<-unlist(lapply(expected_families,function(f)
  lapply(expected_rows[[f]],function(r)lapply(40:49,function(s)
   lapply(c(200L,1000L,3000L),function(n)paste(f,r,s,n,sep='|'))))),recursive=TRUE,use.names=FALSE)
-expected_blocks<-unlist(lapply(expected,function(k)paste(k,0:1,sep='|')),use.names=FALSE)
-if(length(expected)!=2490L||length(expected_blocks)!=4980L||!setequal(keys,expected_blocks))
+expected_blocks<-unlist(lapply(expected,function(k) {
+ n<-as.integer(strsplit(k,'|',fixed=TRUE)[[1L]][4L])
+ paste(k,if(n==3000L)0:1 else 0L,sep='|')
+}),use.names=FALSE)
+if(length(expected)!=2490L||length(expected_blocks)!=3320L||!setequal(keys,expected_blocks))
  stop('Transfer scenario-block identity coverage differs from frozen plan')
 map<-read.csv(map_path,stringsAsFactors=FALSE,check.names=FALSE)
 map_req<-c('evaluation_family','scenario_id','sample_n','own_benchmark')
@@ -58,10 +62,11 @@ for(pi in seq_along(panels)) {
  id<-panels[[pi]];fam<-id[[1L]];pr<-as.integer(id[[2L]]);n<-as.integer(id[[3L]])
  selected<-Filter(function(x)x$key[[1L]]==fam&&as.integer(x$key[[2L]])==pr&&as.integer(x$key[[4L]])==n,meta)
  seed_block_pairs<-vapply(selected,function(x)paste(as.integer(x$key[[3L]]),as.integer(x$key[[5L]]),sep='|'),character(1))
- required_pairs<-as.vector(outer(40:49,0:1,function(s,b)paste(s,b,sep='|')))
- if(length(selected)!=20L||!setequal(vapply(selected,function(x)as.integer(x$key[[3L]]),integer(1)),rep(40:49,each=2L))||
+ block_count<-if(n==3000L)2L else 1L
+ required_pairs<-as.vector(outer(40:49,0:(block_count-1L),function(s,b)paste(s,b,sep='|')))
+ if(length(selected)!=10L*block_count||!setequal(vapply(selected,function(x)paste(as.integer(x$key[[3L]]),as.integer(x$key[[5L]]),sep='|'),character(1)),required_pairs)||
     !setequal(seed_block_pairs,required_pairs))
-   stop('Panel lacks two scenario halves for each independent seed 40:49: ',fam,'/',pr,'/n',n)
+   stop('Panel lacks the required full/partitioned scenario checkpoints for seeds 40:49: ',fam,'/',pr,'/n',n)
  x<-do.call(rbind,lapply(selected,function(s)
    read.csv(s$score,stringsAsFactors=FALSE,check.names=FALSE)))
  if(any(x$family!=fam)||any(x$parameter_row!=pr)||any(x$sample_n!=n)||
@@ -152,7 +157,7 @@ write.csv(all_input_manifest,file.path(out,'input_manifest.csv'),row.names=FALSE
 write.csv(do.call(rbind,panel_index),file.path(out,'panel_manifest.csv'),row.names=FALSE)
 writeLines(c('status=COMPLETE','stage=parametric_transfer',
  'independent_unit=parametric_transfer_seed_40_to_49',
- 'checkpointing=241 Discovery-support scenarios split into two immutable disjoint halves',
+ 'checkpointing=n3000 uses two immutable scenario halves; n200 and n1000 use one complete 241-scenario checkpoint',
  'training_seed_handling=average frozen Discovery seeds 0:9 within each transfer seed before inference',
  'scenario_scope=241 predeclared Discovery-support scenarios; 80 mixture stress-exclusive scenarios are excluded',
  'benchmark=Discovery-frozen best non-mean classical estimator for each family/scenario/n plus mean',

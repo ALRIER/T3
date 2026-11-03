@@ -56,8 +56,9 @@ jobs:
           BATCH_COUNT: ${{ inputs.batch_count }}
           SCENARIO_BLOCK_INDEX: ${{ inputs.scenario_block_index }}
           SAMPLE_N: ${{ inputs.sample_n }}
+          SCENARIO_BLOCK_COUNT: ${{ inputs.sample_n == '3000' && '2' || '1' }}
         run: |
-          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT" "$SCENARIO_BLOCK_INDEX" 2 "$SAMPLE_N")"
+          plan_json="$(python3 scripts/t3_b3_parametric_transfer_plan.py "$BATCH_INDEX" "$BATCH_COUNT" "$SCENARIO_BLOCK_INDEX" "$SCENARIO_BLOCK_COUNT" "$SAMPLE_N")"
           matrix="$(python3 -c 'import json,sys; print(json.dumps({"include":json.load(sys.stdin)["include"]},separators=(",",":")))' <<< "$plan_json")"
           expected="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["expected_shards"])' <<< "$plan_json")"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
@@ -215,11 +216,9 @@ jobs:
                   last=p.stderr.strip()
                   if attempt<5:time.sleep(min(2**attempt,20))
               raise SystemExit(f'GitHub API unavailable after 6 attempts: {endpoint}: {last}')
-          jobs=gh_json(f'repos/{repo}/actions/runs/{run}/jobs?per_page=100')['jobs']
-          bm=[j for j in jobs if j['name']=='prepare_benchmark_map']
-          di=[j for j in jobs if j['name'].startswith('prepare_discovery_inputs (')]
-          if len(bm)!=1 or bm[0]['conclusion']!='success' or len(di)!=18 or any(j['conclusion']!='success' for j in di):
-              raise SystemExit('Prepared source run lacks all 18 successful input bundles')
+          meta=gh_json(f'repos/{repo}/actions/runs/{run}')
+          if meta.get('name')!='T3 B3 Frozen Parametric Transfer':
+              raise SystemExit('Prepared input run ID belongs to a different workflow')
           arts=gh_json(f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100')['artifacts']
           names=[a['name'] for a in arts if not a.get('expired')]
           if f't3-b3-parametric-benchmark-map-run{run}' not in names:
@@ -228,7 +227,7 @@ jobs:
               ('normal','lognormal','weibull','invgauss','exgaussian','exwald') for n in (200,1000,3000)}
           if not expected.issubset(set(names)):
               raise SystemExit('Prepared source run lacks one or more family/n bundles')
-          print('SHARED_DISCOVERY_INPUTS_READY',run)
+          print('SHARED_DISCOVERY_INPUT_ARTIFACTS_READY',run,'artifacts',len(expected)+1)
           PY
 
   transfer:
@@ -267,6 +266,7 @@ jobs:
         env:
           T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
           T3_TRANSFER_SCENARIO_BLOCK: ${{ matrix.scenario_block }}
+          T3_TRANSFER_SCENARIO_BLOCK_COUNT: ${{ matrix.scenario_block_count }}
           OPENBLAS_NUM_THREADS: '1'
           OMP_NUM_THREADS: '1'
         run: |
@@ -284,7 +284,9 @@ jobs:
           expected=';'.join('${{ matrix.scenario_ids }}'.split(','))
           if not mc.is_file() or len(rows)!=1 or rows[0]['sha256']!=sha(mc):
               raise SystemExit('Monte Carlo checkpoint checksum/manifest failure')
-          if int(rows[0]['scenario_block'])!=${{ matrix.scenario_block }} or rows[0]['scenario_ids']!=expected:
+          if (int(rows[0]['scenario_block'])!=${{ matrix.scenario_block }} or
+              int(rows[0]['scenario_block_count'])!=${{ matrix.scenario_block_count }} or
+              rows[0]['scenario_ids']!=expected):
               raise SystemExit('Monte Carlo checkpoint does not match its frozen scenario half')
           print('PARAMETRIC_MC_CHECKPOINT_PASS',sha(mc))
           PY

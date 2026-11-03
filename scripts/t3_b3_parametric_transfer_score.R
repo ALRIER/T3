@@ -16,11 +16,14 @@ source('R/00_shared/v3_scientific_adapter.R')
 source('R/00_shared/v3_downstream.R'); source('R/00_shared/t2_v3_b3_resources.R')
 source('R/00_shared/t3_b3_partitions.R')
 mc <- readRDS(mc_path)
+expected_block_count <- if (n == 3000L) 2L else 1L
+expected_scenario_count <- if (expected_block_count == 2L) 121L else 241L
 if (!identical(mc$protocol,'t3_b3_parametric_transfer_v3') ||
     !identical(mc$family,family) || as.integer(mc$parameter_row)!=parameter_row ||
     as.integer(mc$seed_index)!=seed || as.integer(mc$n)!=n ||
     !identical(mc$component_names,ESTIMATOR_NAMES) || length(mc$scenarios)<1L ||
-    length(mc$scenarios)>121L || as.integer(mc$scenario_block_count)!=2L ||
+    length(mc$scenarios)>expected_scenario_count ||
+    as.integer(mc$scenario_block_count)!=expected_block_count ||
     anyDuplicated(as.integer(mc$grid$scenario_id)) ||
     !all(as.integer(mc$grid$scenario_id)%in%t3_b3_partition_ids('discovery_support')))
   stop('Parametric transfer Monte Carlo contract mismatch')

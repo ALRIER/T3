@@ -19,10 +19,11 @@ block_count = int(sys.argv[4]) if len(sys.argv) > 4 else 2
 sample_n = int(sys.argv[5]) if len(sys.argv) > 5 else 3000
 if batch_count < 1 or batch_index < 0 or batch_index >= batch_count:
     raise SystemExit('batch_index must be in [0, batch_count)')
-if block_count != 2 or block_index < 0 or block_index >= block_count:
-    raise SystemExit('scenario_block_index must be in [0, 2)')
 if sample_n not in (200, 1000, 3000):
     raise SystemExit('sample_n must be one of 200, 1000, 3000')
+expected_blocks = 2 if sample_n == 3000 else 1
+if block_count != expected_blocks or block_index < 0 or block_index >= block_count:
+    raise SystemExit(f'n={sample_n} requires {expected_blocks} scenario block(s)')
 all_shards = [x for x in all_shards if x['n'] == sample_n]
 if len(all_shards) != 830:
     raise SystemExit(f'Expected 830 shards for n={sample_n}, found {len(all_shards)}')
