@@ -103,6 +103,24 @@ jobs:
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R             smoke-adapt normal 60 200 artifacts/stress_v2/adapt_smoke artifacts/discovery_v3
           test -s artifacts/stress_v2/adapt_smoke/adapted.rds
           test -s artifacts/stress_v2/adapt_smoke/manifest.csv
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-original-global-run42062234485
+          run-id: '42062234485'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/original-global
+      - name: Verify original Stress 20-24 calibration and 25-29 inference were already completed
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          p=next(pathlib.Path('incoming/original-global').rglob('global_manifest.json'))
+          data=json.loads(p.read_text())
+          assert data['experiment']=='original'
+          assert data['alpha']==.05 and data['n_global_BH']==1382400
+          assert len(data['blocks'])==18
+          print('STRESS_V2_HISTORICAL_RECOVERY_REUSE_PASS',data['n_global_BH'])
+          PY
       - name: Resource ledger and adapted training HPO availability
         run: |
           echo "Discovery HPO files: $(find artifacts/discovery_v3 -type f -name frozen_hyperparameters.json | wc -l)"
@@ -138,7 +156,7 @@ jobs:
           retention-days: 30
 
   original-reduce:
-    if: ${{ inputs.phase == 'original' || inputs.phase == 'all' }}
+    if: ${{ inputs.phase == 'original' }}
     needs: pilot
     runs-on: ubuntu-24.04
     timeout-minutes: 360
@@ -258,7 +276,7 @@ jobs:
           retention-days: 90
 
   confirmation-reduce:
-    if: ${{ always() && (inputs.phase == 'confirm' || inputs.phase == 'all') && needs.pilot.result == 'success' && needs.confirmation-score.result == 'success' && (inputs.phase != 'all' || needs.original-reduce.result == 'success') }}
+    if: ${{ always() && (inputs.phase == 'confirm' || inputs.phase == 'all') && needs.pilot.result == 'success' && needs.confirmation-score.result == 'success' && (needs.original-reduce.result == 'success' || needs.original-reduce.result == 'skipped') }}
     needs: [pilot,original-reduce,confirmation-score]
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -286,7 +304,7 @@ jobs:
       - name: Recover benchmark frozen on original calibration data, never on 50-59
         env:
           GH_TOKEN: ${{ github.token }}
-          CAL_RUN: ${{ inputs.original_run_id || github.run_id }}
+          CAL_RUN: ${{ inputs.original_run_id || '42062234485' }}
         run: |
           gh run download "$CAL_RUN" --repo '${{ github.repository }}' \
             --pattern "stress-v2-original-${{ matrix.family }}-n${{ matrix.n }}-run$CAL_RUN" \
