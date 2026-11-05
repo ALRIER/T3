@@ -1,6 +1,20 @@
 name: T3 B3 Stress V2 Unified
 run-name: Stress V2 | ${{ github.event_name == 'push' && 'branch pilot' || inputs.phase }}
 "on":
+  workflow_call:
+    inputs:
+      phase:
+        description: 'Selected checkpointed Stress V2 phase'
+        type: string
+        required: true
+      original_run_id:
+        description: 'Frozen original Stress recovery run'
+        type: string
+        required: false
+      confirm_run_id:
+        description: 'Independent 50-59 confirmation run when reusing a prior run'
+        type: string
+        required: false
   push:
     branches: [main, stress-v2-resource-optimizations]
     paths:
