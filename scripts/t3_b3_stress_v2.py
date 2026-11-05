@@ -201,7 +201,7 @@ def read_new(a):
    if cid in by_id:fail('Duplicate adapted candidate')
    by_id[cid]=r
   if len(by_id)!=1440:fail('Expected 720 original + 720 adapted W')
- seen=set();baseline={};pairs={};expected_candidates=len(by_id)
+ seen=set();baseline={};pairs={};expected_candidates=480 if a.adapted_registry else 240
  for path in paths:
   with path.open(newline='') as f:
    rd=csv.DictReader(f)
