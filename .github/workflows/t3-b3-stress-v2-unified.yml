@@ -80,11 +80,29 @@ jobs:
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
             pack-original normal 50 200 artifacts/stress_v2/compact artifacts/discovery_v3
           test "$(find artifacts/stress_v2/compact -name 'original_W_n*.rds' | wc -l)" -eq 3
+      - name: Pack only 180 frozen HPO JSONs for cheap Rediscovery workers
+        run: |
+          python - <<'PY'
+          import pathlib,tarfile,hashlib
+          root=pathlib.Path('artifacts/discovery_v3')
+          files=sorted(root.rglob('frozen_hyperparameters.json'))
+          if len(files)!=180:raise RuntimeError('Frozen HPO input inventory is incomplete')
+          out=pathlib.Path('artifacts/stress_v2/hpo_only.tar.gz')
+          with tarfile.open(out,'w:gz') as t:
+           for p in files:t.add(p,arcname=p.relative_to(root))
+          (out.parent/'hpo_only.sha256').write_text(hashlib.sha256(out.read_bytes()).hexdigest()+'  hpo_only.tar.gz\n')
+          print('STRESS_V2_HPO_ONLY_PASS',len(files),'files',out.stat().st_size,'bytes')
+          PY
       - name: Score one near and one far scenario using compact W and 12 replications
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
             smoke normal 50 200 artifacts/stress_v2/smoke artifacts/stress_v2/compact
           test -s artifacts/stress_v2/smoke/scores.csv
+      - name: Run tiny 8-scenario four-engine Rediscovery pilot, training-only
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R             smoke-adapt normal 60 200 artifacts/stress_v2/adapt_smoke artifacts/discovery_v3
+          test -s artifacts/stress_v2/adapt_smoke/adapted.rds
+          test -s artifacts/stress_v2/adapt_smoke/manifest.csv
       - name: Resource ledger and adapted training HPO availability
         run: |
           echo "Discovery HPO files: $(find artifacts/discovery_v3 -type f -name frozen_hyperparameters.json | wc -l)"
@@ -102,6 +120,14 @@ jobs:
         with:
           name: stress-v2-frozen-compact-W-run${{ github.run_id }}
           path: artifacts/stress_v2/compact
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-frozen-hpo-only-run${{ github.run_id }}
+          path: |
+            artifacts/stress_v2/hpo_only.tar.gz
+            artifacts/stress_v2/hpo_only.sha256
           if-no-files-found: error
           retention-days: 90
       - uses: actions/upload-artifact@v4
@@ -325,24 +351,22 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/download-artifact@v5
         with:
-          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262
-          run-id: '41487091262'
-          repository: ${{ github.repository }}
-          github-token: ${{ github.token }}
-          path: incoming/discovery
-      - name: Restore frozen HPO, no candidate retuning on Stress outcomes
+          name: stress-v2-frozen-hpo-only-run${{ github.run_id }}
+          path: incoming/hpo
+      - name: Restore compact HPO only, hash-verify and prohibit candidate retuning
         run: |
           set -euo pipefail
-          mkdir -p artifacts/discovery_v3
-          (cd incoming/discovery && sha256sum -c discovery-n${{ matrix.n }}.tar.gz.sha256)
-          tar -xzf incoming/discovery/discovery-n${{ matrix.n }}.tar.gz -C artifacts/discovery_v3
-          test -s artifacts/discovery_v3/${{ matrix.family }}/seed$(printf '%02d' $(( ${{ matrix.seed }} - 60 )))/n${{ matrix.n }}/frozen_hyperparameters.json
+          mkdir -p artifacts/hpo_v2
+          (cd incoming/hpo && sha256sum -c hpo_only.sha256)
+          tar -xzf incoming/hpo/hpo_only.tar.gz -C artifacts/hpo_v2
+          test "$(find artifacts/hpo_v2 -name frozen_hyperparameters.json | wc -l)" -eq 180
+          test -s artifacts/hpo_v2/${{ matrix.family }}/seed$(printf '%02d' $(( ${{ matrix.seed }} - 60 )))/n${{ matrix.n }}/frozen_hyperparameters.json
       - name: Four-engine equal-budget Rediscovery with 241 support + 40 near, zero far
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
             train-adapt '${{ matrix.family }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
             artifacts/stress_v2/rediscovery/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }} \
-            artifacts/discovery_v3
+            artifacts/hpo_v2
       - uses: actions/upload-artifact@v4
         with:
           name: stress-v2-adapt-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
