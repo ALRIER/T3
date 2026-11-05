@@ -1,0 +1,21 @@
+name: T3 B3 Stress V2 — One-Time Full Launch
+run-name: "Stress V2 full: new seeds 50–59 + near-adapted 60–69"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'config/T3_B3_STRESS_V2_LAUNCH_ONCE.txt'
+permissions:
+  contents: read
+  actions: read
+  packages: read
+concurrency:
+  group: t3-b3-stress-v2-full-one-time
+  cancel-in-progress: false
+jobs:
+  full:
+    name: Unified pilot, 10 fresh seeds, 10 adapted-training seeds, scoring and BH-FDR
+    uses: ./.github/workflows/t3-b3-stress-v2-unified.yml
+    with:
+      phase: all
+      original_run_id: '42062234485'
