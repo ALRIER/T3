@@ -1,8 +1,8 @@
 name: T3 B3 Stress V2 Unified
-run-name: Stress V2 seedwise recovery
+run-name: Stress V2 | ${{ github.event_name == 'push' && 'branch pilot' || inputs.phase }}
 "on":
   push:
-    branches: [main]
+    branches: [stress-v2-resource-optimizations]
     paths:
       - '.github/workflows/t3-b3-stress-v2-unified.yml'
       - 'scripts/t3_b3_stress_v2_runner.R'
@@ -11,29 +11,43 @@ run-name: Stress V2 seedwise recovery
     inputs:
       phase:
         type: choice
-        options: [pilot, original, confirm, adapt]
-        required: true
+        options: [pilot, original, confirm, adapt, all]
         default: pilot
+        required: true
       original_run_id:
         type: string
+        description: Successful historical original V2 recovery run (confirm/adapt if separate)
         required: false
       confirm_run_id:
         type: string
+        description: Successful fresh 50-59 run (adapt if separate)
         required: false
-permissions: {contents: read, actions: read, packages: read}
+permissions:
+  contents: read
+  actions: read
+  packages: read
 concurrency:
-  group: t3-b3-stress-v2
+  group: t3-stress-v2-${{ github.ref }}-${{ github.event_name == 'push' && 'pilot' || inputs.phase }}
   cancel-in-progress: false
+env:
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  NUMEXPR_NUM_THREADS: '1'
+  T3_STRESS_MC_WORKERS: '2'
+  PYTHONUNBUFFERED: '1'
+
 jobs:
   pilot:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12.10'}
-      - run: |
-          python -m pip install numpy==2.3.5 scipy==1.17.0
+      - name: Python smoke, hashes and deterministic-unit contracts
+        run: |
+          python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
           python -m py_compile scripts/t3_b3_stress_v2.py
           python scripts/t3_b3_stress_v2.py selftest
       - uses: docker/login-action@v3
@@ -48,36 +62,63 @@ jobs:
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: incoming/discovery
-      - name: Restore 180 original Discovery RDS and check 720 unique W
+      - name: Restore and SHA-check 180 frozen Discovery models
         run: |
+          set -euo pipefail
           mkdir -p artifacts/discovery_v3
           for n in 200 1000 3000; do
-            p="$(find incoming/discovery -type f -name discovery-n$n.tar.gz -print -quit)"
+            p="$(find incoming/discovery -type f -name "discovery-n$n.tar.gz" -print -quit)"
             test -s "$p"
-            (cd "$(dirname "$p")" && sha256sum -c discovery-n$n.tar.gz.sha256)
+            (cd "$(dirname "$p")" && sha256sum -c "discovery-n$n.tar.gz.sha256")
             tar -xzf "$p" -C artifacts/discovery_v3
           done
-          test "$(find artifacts/discovery_v3 -name discovery.rds | wc -l)" -eq 180
+          test "$(find artifacts/discovery_v3 -type f -name discovery.rds | wc -l)" -eq 180
+      - name: Verify 720 W, publish compact 240-W bundles for each n
+        run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_heldout_build_registry.R \
             artifacts/discovery_v3 artifacts/stress_v2/registry/candidate_registry.csv
-      - name: Independent new-seed smoke using two Stress scenarios and 12 replications
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            pack-original normal 50 200 artifacts/stress_v2/compact artifacts/discovery_v3
+          test "$(find artifacts/stress_v2/compact -name 'original_W_n*.rds' | wc -l)" -eq 3
+      - name: Score one near and one far scenario using compact W and 12 replications
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
-            smoke normal 50 200 artifacts/stress_v2/smoke artifacts/discovery_v3
+            smoke normal 50 200 artifacts/stress_v2/smoke artifacts/stress_v2/compact
+          test -s artifacts/stress_v2/smoke/scores.csv
+      - name: Resource ledger and adapted training HPO availability
+        run: |
+          echo "Discovery HPO files: $(find artifacts/discovery_v3 -type f -name frozen_hyperparameters.json | wc -l)"
+          df -h .; free -m
+          du -sh artifacts/stress_v2/compact
+          sha256sum artifacts/stress_v2/compact/original_W_n*.rds \
+            > artifacts/stress_v2/compact/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: stress-v2-registry-run${{ github.run_id }}
+          name: stress-v2-frozen-registry-run${{ github.run_id }}
           path: artifacts/stress_v2/registry/candidate_registry.csv
           if-no-files-found: error
           retention-days: 90
-  original:
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-frozen-compact-W-run${{ github.run_id }}
+          path: artifacts/stress_v2/compact
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-pilot-smoke-run${{ github.run_id }}
+          path: artifacts/stress_v2/smoke
+          if-no-files-found: error
+          retention-days: 30
+
+  original-reduce:
+    if: ${{ inputs.phase == 'original' || inputs.phase == 'all' }}
     needs: pilot
-    if: ${{ github.event_name == 'push' || inputs.phase == 'original' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 10
       matrix:
         family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
         n: [200,1000,3000]
@@ -85,33 +126,33 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12.10'}
-      - run: python -m pip install numpy==2.3.5 scipy==1.17.0
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
       - uses: actions/download-artifact@v5
         with:
-          name: stress-v2-registry-run${{ github.run_id }}
+          name: stress-v2-frozen-registry-run${{ github.run_id }}
           path: incoming/registry
-      - name: Load immutable own-family Stress scoring
+      - name: Original own-family Stress scoring
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           gh run download 41208513291 --repo '${{ github.repository }}' \
             --pattern 't3-b3-stress-${{ matrix.family }}-s*-n${{ matrix.n }}-run41208513291' \
-            --dir incoming/within
-      - name: Load first cross-family Stress successes
+            --dir incoming/sources/within
+      - name: Original partial cross-family Stress scoring
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           gh run download 41476743557 --repo '${{ github.repository }}' \
             --pattern 't3-b3-crossfamily-stress-${{ matrix.family }}-s*-n${{ matrix.n }}-run41476743557' \
-            --dir incoming/partial || true
-      - name: Load 148 repaired cross-family Stress shards
+            --dir incoming/sources/partial || true
+      - name: Original repaired cross-family Stress scoring
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           gh run download 41487292889 --repo '${{ github.repository }}' \
             --pattern 't3-b3-crossfamily-stress-${{ matrix.family }}-s*-n${{ matrix.n }}-run41487292889' \
-            --dir incoming/repair || true
-      - name: Recover independent 720 W and freeze classic comparator on 20:24
+            --dir incoming/sources/repair || true
+      - name: Recover frozen 240 W in each family/n, calibrate on 20-24, infer on 25-29
         run: |
-          test "$(find incoming -name scores.csv | wc -l)" -eq 20
-          python scripts/t3_b3_stress_v2.py original --input incoming \
+          test "$(find incoming/sources -name scores.csv | wc -l)" -eq 20
+          python scripts/t3_b3_stress_v2.py original --input incoming/sources \
             --registry incoming/registry/candidate_registry.csv \
             --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
             --output artifacts/stress_v2/original/${{ matrix.family }}-n${{ matrix.n }}
@@ -121,16 +162,17 @@ jobs:
           path: artifacts/stress_v2/original/${{ matrix.family }}-n${{ matrix.n }}
           if-no-files-found: error
           retention-days: 90
+
   original-final:
-    needs: original
-    if: ${{ github.event_name == 'push' || inputs.phase == 'original' }}
+    if: ${{ inputs.phase == 'original' || inputs.phase == 'all' }}
+    needs: original-reduce
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12.10'}
-      - run: python -m pip install numpy==2.3.5 scipy==1.17.0
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
       - uses: actions/download-artifact@v5
         with:
           pattern: stress-v2-original-*-run${{ github.run_id }}
@@ -142,5 +184,354 @@ jobs:
         with:
           name: stress-v2-original-global-run${{ github.run_id }}
           path: artifacts/stress_v2/original-final
+          if-no-files-found: error
+          retention-days: 90
+
+  confirmation-score:
+    if: ${{ inputs.phase == 'confirm' || inputs.phase == 'all' }}
+    needs: pilot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        n: [200,1000,3000]
+        seed: [50,51,52,53,54,55,56,57,58,59]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-frozen-compact-W-run${{ github.run_id }}
+          path: incoming/compact
+      - name: Verify 240 W of the target sample size
+        run: |
+          (cd incoming/compact && sha256sum -c SHA256SUMS)
+          test -s incoming/compact/original_W_n${{ matrix.n }}.rds
+      - name: Generate new 50-59 Monte Carlo once and score all 240 original W
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            score-new '${{ matrix.family }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
+            artifacts/stress_v2/confirm/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }} \
+            incoming/compact
+      - name: Preserve exact scenario-level RDS and score hashes for adapted re-scoring
+        run: |
+          test "$(find artifacts/stress_v2/confirm -name 'scenario_*.rds' | wc -l)" -eq 80
+          test -s artifacts/stress_v2/confirm/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}/score_manifest.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-confirm-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/stress_v2/confirm/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+  confirmation-reduce:
+    if: ${{ always() && (inputs.phase == 'confirm' || inputs.phase == 'all') && needs.pilot.result == 'success' && needs.confirmation-score.result == 'success' && (inputs.phase != 'all' || needs.original-reduce.result == 'success') }}
+    needs: [pilot,original-reduce,confirmation-score]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        n: [200,1000,3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-frozen-registry-run${{ github.run_id }}
+          path: incoming/registry
+      - name: Retrieve ten new original-W score artifacts
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download '${{ github.run_id }}' --repo '${{ github.repository }}' \
+            --pattern 'stress-v2-confirm-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ github.run_id }}' \
+            --dir incoming/scored
+      - name: Recover benchmark frozen on original calibration data, never on 50-59
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAL_RUN: ${{ inputs.original_run_id || github.run_id }}
+        run: |
+          gh run download "$CAL_RUN" --repo '${{ github.repository }}' \
+            --pattern "stress-v2-original-${{ matrix.family }}-n${{ matrix.n }}-run$CAL_RUN" \
+            --dir incoming/calibration
+      - run: |
+          test "$(find incoming/scored -name scores.csv | wc -l)" -eq 10
+          BENCH="$(find incoming/calibration -name benchmark_map.csv -type f -print -quit)"
+          test -s "$BENCH"
+          python scripts/t3_b3_stress_v2.py new --input incoming/scored \
+            --registry incoming/registry/candidate_registry.csv --benchmark "$BENCH" \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output artifacts/stress_v2/confirm-inference/${{ matrix.family }}-n${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-confirm-reduced-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/stress_v2/confirm-inference/${{ matrix.family }}-n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+  confirmation-final:
+    if: ${{ always() && (inputs.phase == 'confirm' || inputs.phase == 'all') && needs.confirmation-reduce.result == 'success' }}
+    needs: confirmation-reduce
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: stress-v2-confirm-reduced-*-run${{ github.run_id }}
+          path: incoming/blocks
+      - run: |
+          python scripts/t3_b3_stress_v2.py finalize --input incoming/blocks \
+            --output artifacts/stress_v2/confirm-final
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-confirm-global-run${{ github.run_id }}
+          path: artifacts/stress_v2/confirm-final
+          if-no-files-found: error
+          retention-days: 90
+
+  rediscovery-train:
+    if: ${{ inputs.phase == 'adapt' || inputs.phase == 'all' }}
+    needs: pilot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        n: [200,1000,3000]
+        seed: [60,61,62,63,64,65,66,67,68,69]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262
+          run-id: '41487091262'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/discovery
+      - name: Restore frozen HPO, no candidate retuning on Stress outcomes
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/discovery_v3
+          (cd incoming/discovery && sha256sum -c discovery-n${{ matrix.n }}.tar.gz.sha256)
+          tar -xzf incoming/discovery/discovery-n${{ matrix.n }}.tar.gz -C artifacts/discovery_v3
+          test -s artifacts/discovery_v3/${{ matrix.family }}/seed$(printf '%02d' $(( ${{ matrix.seed }} - 60 )))/n${{ matrix.n }}/frozen_hyperparameters.json
+      - name: Four-engine equal-budget Rediscovery with 241 support + 40 near, zero far
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            train-adapt '${{ matrix.family }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
+            artifacts/stress_v2/rediscovery/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }} \
+            artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-adapt-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/stress_v2/rediscovery/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+  rediscovery-pack:
+    if: ${{ always() && (inputs.phase == 'adapt' || inputs.phase == 'all') && needs.rediscovery-train.result == 'success' }}
+    needs: rediscovery-train
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore 180 completed four-engine independent Rediscovery shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download '${{ github.run_id }}' --repo '${{ github.repository }}' \
+            --pattern 'stress-v2-adapt-*-run${{ github.run_id }}' \
+            --dir incoming/models
+      - name: Build compact immutable adapted model archive with exact family/seed/n
+        run: |
+          python - <<'PY'
+          import re,pathlib,shutil
+          src=pathlib.Path('incoming/models')
+          dst=pathlib.Path('artifacts/stress_v2/rediscovery')
+          rx=re.compile(r'stress-v2-adapt-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-s(6\d)-n(200|1000|3000)-run${{ github.run_id }}')
+          names=set()
+          for p in src.iterdir():
+           m=rx.fullmatch(p.name)
+           if not m:raise ValueError('Unexpected adapted training artifact '+p.name)
+           fam,seed,n=m.groups()
+           if (fam,seed,n) in names:raise ValueError('Duplicate adapted training')
+           names.add((fam,seed,n))
+           target=dst/fam/('seed'+seed)/('n'+n)
+           target.mkdir(parents=True,exist_ok=False)
+           for file in ('adapted.rds','manifest.csv'):
+            shutil.copy2(p/file,target/file)
+          if len(names)!=180:raise ValueError('Incomplete 180-adapted W registry')
+          print('180 independent adapted models restored')
+          PY
+      - name: Freeze 720 adapted W with SHA and pack 240 weights per n
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            index-adapt normal 60 200 artifacts/stress_v2/rediscovery
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            pack-adapted normal 60 200 artifacts/stress_v2/compact-unused \
+            unused artifacts/stress_v2/rediscovery
+          test "$(find artifacts/stress_v2/compact-unused -name 'adapted_W_n*.rds' | wc -l)" -eq 3
+          sha256sum artifacts/stress_v2/compact-unused/adapted_W_n*.rds \
+            > artifacts/stress_v2/compact-unused/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-adapted-compact-W-run${{ github.run_id }}
+          path: |
+            artifacts/stress_v2/compact-unused
+            artifacts/stress_v2/rediscovery/adapted_candidate_registry.csv
+          if-no-files-found: error
+          retention-days: 90
+
+  rediscovery-score:
+    if: ${{ always() && (inputs.phase == 'adapt' || inputs.phase == 'all') && needs.rediscovery-pack.result == 'success' && (inputs.phase != 'all' || needs.confirmation-score.result == 'success') }}
+    needs: [rediscovery-pack,confirmation-score]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        n: [200,1000,3000]
+        seed: [50,51,52,53,54,55,56,57,58,59]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-adapted-compact-W-run${{ github.run_id }}
+          path: incoming/adapted
+      - name: Confirmed 240 adapted W for given n
+        run: |
+          (cd incoming/adapted/compact-unused && sha256sum -c SHA256SUMS)
+          test -s incoming/adapted/compact-unused/adapted_W_n${{ matrix.n }}.rds
+      - name: Retrieve exact independent 50-59 Monte Carlo, never regenerate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FRESH_RUN: ${{ inputs.confirm_run_id || github.run_id }}
+        run: |
+          gh run download "$FRESH_RUN" --repo '${{ github.repository }}' \
+            --pattern "stress-v2-confirm-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run$FRESH_RUN" \
+            --dir incoming/fresh
+      - name: Vectorized adapted W inference scores, same 500x26 MC matrices
+        run: |
+          BASE="$(find incoming/fresh -name score_manifest.csv -type f -printf '%h\n' -quit)"
+          test -s "$BASE/score_manifest.csv"
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            score-adapt '${{ matrix.family }}' '${{ matrix.seed }}' '${{ matrix.n }}' \
+            artifacts/stress_v2/adapt-score/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }} \
+            unused incoming/adapted/compact-unused "$BASE"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-adapt-score-${{ matrix.family }}-s${{ matrix.seed }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/stress_v2/adapt-score/${{ matrix.family }}/seed${{ matrix.seed }}/n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+  rediscovery-reduce:
+    if: ${{ always() && (inputs.phase == 'adapt' || inputs.phase == 'all') && needs.rediscovery-score.result == 'success' && (inputs.phase != 'all' || needs.original-reduce.result == 'success') }}
+    needs: [pilot,rediscovery-pack,rediscovery-score,original-reduce]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        n: [200,1000,3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-frozen-registry-run${{ github.run_id }}
+          path: incoming/registry
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-adapted-compact-W-run${{ github.run_id }}
+          path: incoming/adapted
+      - name: Get all ten new-seed original+adapted paired score shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download '${{ github.run_id }}' --repo '${{ github.repository }}' \
+            --pattern 'stress-v2-adapt-score-${{ matrix.family }}-s*-n${{ matrix.n }}-run${{ github.run_id }}' \
+            --dir incoming/scored
+      - name: Fetch untouched 20-24 calibration reference
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CAL_RUN: ${{ inputs.original_run_id || github.run_id }}
+        run: |
+          gh run download "$CAL_RUN" --repo '${{ github.repository }}' \
+            --pattern "stress-v2-original-${{ matrix.family }}-n${{ matrix.n }}-run$CAL_RUN" \
+            --dir incoming/calibration
+      - run: |
+          test "$(find incoming/scored -name scores.csv | wc -l)" -eq 10
+          BENCH="$(find incoming/calibration -name benchmark_map.csv -type f -print -quit)"
+          test -s "$BENCH"
+          python scripts/t3_b3_stress_v2.py new --input incoming/scored \
+            --registry incoming/registry/candidate_registry.csv \
+            --adapted-registry incoming/adapted/rediscovery/adapted_candidate_registry.csv \
+            --benchmark "$BENCH" --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output artifacts/stress_v2/adapt-inference/${{ matrix.family }}-n${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-adapt-reduced-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/stress_v2/adapt-inference/${{ matrix.family }}-n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+  rediscovery-final:
+    if: ${{ always() && (inputs.phase == 'adapt' || inputs.phase == 'all') && needs.rediscovery-reduce.result == 'success' }}
+    needs: rediscovery-reduce
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: stress-v2-adapt-reduced-*-run${{ github.run_id }}
+          path: incoming/blocks
+      - run: |
+          python scripts/t3_b3_stress_v2.py finalize --input incoming/blocks \
+            --output artifacts/stress_v2/adapt-final
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-adapt-global-run${{ github.run_id }}
+          path: artifacts/stress_v2/adapt-final
           if-no-files-found: error
           retention-days: 90
