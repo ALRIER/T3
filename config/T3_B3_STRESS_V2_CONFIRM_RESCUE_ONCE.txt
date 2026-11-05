@@ -1,0 +1,6 @@
+Stress V2 confirmation-score repair only, 2026-11-05.
+Original run: 42068731220 (failing due to SHA256SUMS paths inside downloaded compact W artifact).
+Frozen original Stress calibration: 42062234485.
+Use the original successful frozen 720-W compact archive and its ORIGINAL SHA256SUMS checksums, normalizing paths only during verification.
+Run independent 50-59 scoring only plus 18 family/n reductions and one global BH-FDR. No new Discovery and no repeat of Rediscovery training from original run.
+Artifact names and hashes must remain immutable and run-specific.
