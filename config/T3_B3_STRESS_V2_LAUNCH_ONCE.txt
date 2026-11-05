@@ -1,0 +1,8 @@
+T3/B3 STRESS V2 — EXPLICIT ONE-TIME FULL LAUNCH
+Date: 2026-11-05
+Immutable original Stress recovery: Actions run 42062234485 (720 W*, 18 blocks; no recomputation)
+Independent fresh confirmation: seeds 50–59 (80 stress scenarios; 500 Monte Carlo replicates)
+Near-adapted Rediscovery training: seeds 60–69; 241 support + 40 near, zero far
+Evaluation: both original and adapted W on identical fresh MC arrays; global BH-FDR and winner taxonomy
+Original Monte Carlo, Discovery, Held-out, RealWorld, and 20–29 Stress source data remain unchanged.
+This file triggers a single checkpointed workflow; edits to scripts do not retrigger it.
