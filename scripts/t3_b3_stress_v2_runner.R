@@ -14,8 +14,8 @@ if(mode!='index-adapt'&&(!fam%in%families||!n%in%c(200L,1000L,3000L)||
 source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
-seedv2<-function(role,seed,n,id=-1L,rep=0L,fam=fam){
- bytes<-utf8ToInt(paste('T3_B3_STRESS_V2_20261105',role,fam,seed,n,id,rep,sep=':'))
+seedv2<-function(role,seed,n,id=-1L,replicate=0L,distribution=fam){
+ bytes<-utf8ToInt(paste('T3_B3_STRESS_V2_20261105',role,distribution,seed,n,id,replicate,sep=':'))
  h<-104729
  for(b in bytes)h<-(h*131+as.double(b))%%2147483646
  as.integer(h+1)
