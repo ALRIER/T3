@@ -105,7 +105,7 @@ make_scenario<-function(id,role,params,reps){
   band=as.character(row$band),component_names=ESTIMATOR_NAMES)
  # Original scoring needs only (T,target). Precomputed calibration benchmarks
  # are required solely by the four optimizer fitness functions.
- if(mode=='train-adapt')t2_v3_prepare_scenario(sc) else sc
+ if(mode%in%c('train-adapt','smoke-adapt'))t2_v3_prepare_scenario(sc) else sc
 }
 load_models<-function(root,n,adapted=FALSE){
  if(!nzchar(root)||!dir.exists(root))stop('Model root missing')
