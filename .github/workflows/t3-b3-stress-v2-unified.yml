@@ -270,7 +270,7 @@ jobs:
           path: incoming/compact
       - name: Verify 240 W of the target sample size
         run: |
-          (cd incoming/compact && sha256sum -c SHA256SUMS)
+          (cd incoming/compact && sed 's#artifacts/stress_v2/compact/##g' SHA256SUMS | sha256sum -c -)
           test -s incoming/compact/original_W_n${{ matrix.n }}.rds
       - name: Generate new 50-59 Monte Carlo once and score all 240 original W
         run: |
@@ -489,7 +489,7 @@ jobs:
           path: incoming/adapted
       - name: Confirmed 240 adapted W for given n
         run: |
-          (cd incoming/adapted/compact-unused && sha256sum -c SHA256SUMS)
+          (cd incoming/adapted/compact-unused && sed 's#artifacts/stress_v2/compact-unused/##g' SHA256SUMS | sha256sum -c -)
           test -s incoming/adapted/compact-unused/adapted_W_n${{ matrix.n }}.rds
       - name: Retrieve exact independent 50-59 Monte Carlo, never regenerate
         env:
