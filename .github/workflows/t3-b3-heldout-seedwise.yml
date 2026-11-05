@@ -1,0 +1,147 @@
+name: T3 B3 Held-out — 720 independent W recovery
+run-name: Held-out seedwise recovery from original scoring (no retraining)
+"on":
+  push:
+    branches: [main]
+    paths: ['.github/workflows/t3-b3-heldout-seedwise.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  packages: read
+concurrency:
+  group: t3-heldout-seedwise-v1
+  cancel-in-progress: false
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-bundle-n*-run41487091262
+          run-id: '41487091262'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/discovery
+      - name: Verify and restore all immutable Discovery W
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/discovery_v3
+          for size in 200 1000 3000; do
+            bundle="$(find incoming/discovery -name "discovery-n$size.tar.gz" -type f -print -quit)"
+            test -s "$bundle"
+            (cd "$(dirname "$bundle")" && sha256sum -c "discovery-n$size.tar.gz.sha256")
+            tar -xzf "$bundle" -C artifacts/discovery_v3
+          done
+          test "$(find artifacts/discovery_v3 -type f -name discovery.rds | wc -l)" -eq 180
+          test "$(find artifacts/discovery_v3 -type f -name frozen_w_registry.csv | wc -l)" -eq 180
+      - name: Verify 720 frozen individual vectors against actual Discovery RDS
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_heldout_build_registry.R artifacts/discovery_v3 artifacts/heldout_registry/candidate_registry.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-heldout-W-registry-run${{ github.run_id }}
+          path: artifacts/heldout_registry/candidate_registry.csv
+          if-no-files-found: error
+          retention-days: 90
+  reduce:
+    needs: registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - name: Install pinned numerical inference environment
+        run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-heldout-W-registry-run${{ github.run_id }}
+          path: incoming/registry
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run41478038812
+          run-id: '41478038812'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/benchmark
+      - name: Download 10 original within-family scores
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 41208513291 --repo '${{ github.repository }}' \
+            --pattern 't3-b3-heldout-${{ matrix.family }}-s*-n${{ matrix.n }}-run41208513291' \
+            --dir incoming/scores/within
+      - name: Download 32-shard original partial cross-family artifacts where present
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 41476736420 --repo '${{ github.repository }}' \
+            --pattern 't3-b3-crossfamily-heldout-${{ matrix.family }}-s*-n${{ matrix.n }}-run41476736420' \
+            --dir incoming/scores/partial || true
+      - name: Download 148-shard repaired cross-family artifacts where present
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 41487179284 --repo '${{ github.repository }}' \
+            --pattern 't3-b3-crossfamily-heldout-${{ matrix.family }}-s*-n${{ matrix.n }}-run41487179284' \
+            --dir incoming/scores/repair || true
+      - name: Assert 20 original score files and frozen references per block
+        run: |
+          test "$(find incoming/scores -type f -name scores.csv | wc -l)" -eq 20
+          test -s incoming/registry/candidate_registry.csv
+          test -s incoming/benchmark/own_benchmark_map.csv
+      - name: Reconstruct individually frozen candidate effects from 10 paired seeds
+        run: |
+          python scripts/t3_b3_heldout_seedwise.py reduce \
+            --input incoming/scores \
+            --registry incoming/registry/candidate_registry.csv \
+            --benchmark incoming/benchmark/own_benchmark_map.csv \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output artifacts/heldout_individual/${{ matrix.family }}-n${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-heldout-individual-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/heldout_individual/${{ matrix.family }}-n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+  finalize:
+    needs: [registry,reduce]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-heldout-individual-*-run${{ github.run_id }}
+          path: incoming/blocks
+      - name: Recompute single global BH-FDR family and full individual W taxonomy
+        run: |
+          python scripts/t3_b3_heldout_seedwise.py finalize \
+            --input incoming/blocks \
+            --output artifacts/heldout_individual_v1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-heldout-720W-individual-final-run${{ github.run_id }}
+          path: artifacts/heldout_individual_v1
+          if-no-files-found: error
+          retention-days: 90
