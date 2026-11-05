@@ -1,0 +1,143 @@
+name: T3 B3 Stress V2 Unified
+run-name: Stress V2 seedwise recovery
+"on":
+  push:
+    branches: [main]
+    paths: ['.github/workflows/t3-b3-stress-v2-unified.yml']
+  workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        options: [pilot, original, confirm, adapt]
+        required: true
+        default: pilot
+      original_run_id:
+        type: string
+        required: false
+      confirm_run_id:
+        type: string
+        required: false
+permissions: {contents: read, actions: read, packages: read}
+concurrency:
+  group: t3-b3-stress-v2
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: |
+          python -m pip install numpy==2.3.5 scipy==1.17.0
+          python -m py_compile scripts/t3_b3_stress_v2.py
+          python scripts/t3_b3_stress_v2.py selftest
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-discovery-bundle-n*-run41487091262
+          run-id: '41487091262'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/discovery
+      - name: Restore 180 original Discovery RDS and check 720 unique W
+        run: |
+          mkdir -p artifacts/discovery_v3
+          for n in 200 1000 3000; do
+            p="$(find incoming/discovery -type f -name discovery-n$n.tar.gz -print -quit)"
+            test -s "$p"
+            (cd "$(dirname "$p")" && sha256sum -c discovery-n$n.tar.gz.sha256)
+            tar -xzf "$p" -C artifacts/discovery_v3
+          done
+          test "$(find artifacts/discovery_v3 -name discovery.rds | wc -l)" -eq 180
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_heldout_build_registry.R \
+            artifacts/discovery_v3 artifacts/stress_v2/registry/candidate_registry.csv
+      - name: Independent new-seed smoke using two Stress scenarios and 12 replications
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_stress_v2_runner.R \
+            smoke normal 50 200 artifacts/stress_v2/smoke artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-registry-run${{ github.run_id }}
+          path: artifacts/stress_v2/registry/candidate_registry.csv
+          if-no-files-found: error
+          retention-days: 90
+  original:
+    needs: pilot
+    if: ${{ github.event_name == 'push' || inputs.phase == 'original' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+        n: [200,1000,3000]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-registry-run${{ github.run_id }}
+          path: incoming/registry
+      - name: Load immutable own-family Stress scoring
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 41208513291 --repo '${{ github.repository }}' \
+            --pattern 't3-b3-stress-${{ matrix.family }}-s*-n${{ matrix.n }}-run41208513291' \
+            --dir incoming/within
+      - name: Load first cross-family Stress successes
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 41476743557 --repo '${{ github.repository }}' \
+            --pattern 't3-b3-crossfamily-stress-${{ matrix.family }}-s*-n${{ matrix.n }}-run41476743557' \
+            --dir incoming/partial || true
+      - name: Load 148 repaired cross-family Stress shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 41487292889 --repo '${{ github.repository }}' \
+            --pattern 't3-b3-crossfamily-stress-${{ matrix.family }}-s*-n${{ matrix.n }}-run41487292889' \
+            --dir incoming/repair || true
+      - name: Recover independent 720 W and freeze classic comparator on 20:24
+        run: |
+          test "$(find incoming -name scores.csv | wc -l)" -eq 20
+          python scripts/t3_b3_stress_v2.py original --input incoming \
+            --registry incoming/registry/candidate_registry.csv \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output artifacts/stress_v2/original/${{ matrix.family }}-n${{ matrix.n }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-original-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/stress_v2/original/${{ matrix.family }}-n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+  original-final:
+    needs: original
+    if: ${{ github.event_name == 'push' || inputs.phase == 'original' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: stress-v2-original-*-run${{ github.run_id }}
+          path: incoming/blocks
+      - run: |
+          python scripts/t3_b3_stress_v2.py finalize --input incoming/blocks \
+            --output artifacts/stress_v2/original-final
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stress-v2-original-global-run${{ github.run_id }}
+          path: artifacts/stress_v2/original-final
+          if-no-files-found: error
+          retention-days: 90
