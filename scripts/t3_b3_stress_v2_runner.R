@@ -8,9 +8,9 @@ droot<-if(length(a)>=6L)a[6L] else ''
 aroot<-if(length(a)>=7L)a[7L] else ''
 mcroot<-if(length(a)>=8L)a[8L] else ''
 families<-c('normal','lognormal','weibull','invgauss','exgaussian','exwald')
-if(!mode%in%c('smoke','score-new','score-adapt','train-adapt','index-adapt','pack-original','pack-adapted'))stop('Invalid mode')
+if(!mode%in%c('smoke','smoke-adapt','score-new','score-adapt','train-adapt','index-adapt','pack-original','pack-adapted'))stop('Invalid mode')
 if(!mode%in%c('index-adapt','pack-original','pack-adapted')&&(!fam%in%families||!n%in%c(200L,1000L,3000L)||
- !seed%in%if(mode=='train-adapt')60:69 else 50:59))stop('Seed role/family/n mismatch')
+ !seed%in%if(mode%in%c('train-adapt','smoke-adapt'))60:69 else 50:59))stop('Seed role/family/n mismatch')
 source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R')
 source('R/00_shared/v3_scientific_adapter.R')
@@ -185,11 +185,18 @@ if(mode=='index-adapt'){
 }
 if(dir.exists(out))stop('Refusing to overwrite immutable output')
 dir.create(out,recursive=TRUE)
-role<-if(mode=='train-adapt')'training_60_69' else 'eval_50_59'
-reps<-if(mode=='smoke')12L else 500L
-ids<-if(mode=='smoke')test_ids[c(1L,41L)] else if(mode=='train-adapt')train_ids else test_ids
+role<-if(mode%in%c('train-adapt','smoke-adapt'))'training_60_69' else 'eval_50_59'
+reps<-if(mode%in%c('smoke','smoke-adapt'))12L else 500L
+ids<-if(mode=='smoke')test_ids[c(1L,41L)] else if(mode=='smoke-adapt'){
+   unique(c(0L,
+    head(as.integer(grid$scenario_id[grid$band=='low' & grid$mechanism!='mixture_bimodal_far']),2L),
+    head(as.integer(grid$scenario_id[grid$band=='intermediate' & grid$mechanism!='mixture_bimodal_far']),2L),
+    head(as.integer(grid$scenario_id[grid$band=='high' & !grid$mechanism%in%c('mixture_bimodal_near','mixture_bimodal_far')]),2L),
+    head(as.integer(grid$scenario_id[grid$mechanism=='mixture_bimodal_near']),1L)))
+ } else if(mode=='train-adapt')train_ids else test_ids
+if(mode=='smoke-adapt' && (length(ids)!=8L||!all(c('clean','low','intermediate','high')%in%grid$band[match(ids,grid$scenario_id)])))stop('Smoke training must include every severity band')
 params<-params_v2(role)
-if(mode=='train-adapt'){
+if(mode%in%c('train-adapt','smoke-adapt')){
  hpopath<-file.path(droot,fam,sprintf('seed%02d',seed-60L),
    sprintf('n%d',n),'frozen_hyperparameters.json')
  if(!file.exists(hpopath)||!requireNamespace('jsonlite',quietly=TRUE))
@@ -199,22 +206,23 @@ if(mode=='train-adapt'){
     !setequal(names(hpo$engines),c('ga','nsga2','de','dirichlet')))
    stop('Cannot modify original four-engine HPO policy')
  sc<-lapply(ids,function(id)make_scenario(id,role,params,reps))
- if(length(sc)!=281L||any(vapply(sc,function(z)z$mechanism=='mixture_bimodal_far',logical(1))))
+ if(length(sc)!=(if(mode=='smoke-adapt')8L else 281L)||
+   any(vapply(sc,function(z)z$mechanism=='mixture_bimodal_far',logical(1))))
   stop('Adapted training leaked far mechanism')
  result<-t2_run_discovery(list(scenarios=sc,seed_index=seed,family=fam,n=n),
-   'full',sprintf('stressv2_adapt_%s_%02d_n%d',fam,seed,n),'all',
-   hyperparameters=hpo$engines)
+   if(mode=='smoke-adapt')'smoke' else 'full',sprintf('stressv2_adapt_%s_%02d_n%d',fam,seed,n),'all',
+   hyperparameters=if(mode=='smoke-adapt')list() else hpo$engines)
  if(length(Filter(function(x)!is.null(x$weights),result$models))!=4L)
   stop('Adapted training did not recover four W')
- result$training_design<-'241_support_plus_40_near_0_far_V1'
+ result$training_design<-if(mode=='smoke-adapt')'smoke_8_scenarios_no_far' else '241_support_plus_40_near_0_far_V1'
  result$independent_training_seed<-seed
  result$frozen_hpo_sha256<-t2_sha256(hpopath)
  saveRDS(result,file.path(out,'adapted.rds'))
  write.csv(data.frame(family=fam,training_seed=seed,sample_n=n,
-   train_support=241L,train_near=40L,train_far=0L,
+   train_support=sum(!grid$mechanism[match(ids,grid$scenario_id)]%in%c('mixture_bimodal_near','mixture_bimodal_far')),train_near=sum(grid$mechanism[match(ids,grid$scenario_id)]=='mixture_bimodal_near'),train_far=0L,
    replications=reps,fit_sha256=t2_sha256(file.path(out,'adapted.rds')),
    hpo_sha256=t2_sha256(hpopath)),file.path(out,'manifest.csv'),row.names=FALSE)
- cat('STRESS_V2_NEAR_ADAPTED_DISCOVERY_PASS',fam,seed,n,'\n')
+ cat(if(mode=='smoke-adapt')'STRESS_V2_ADAPT_TRAIN_SMOKE_PASS' else 'STRESS_V2_NEAR_ADAPTED_DISCOVERY_PASS',fam,seed,n,'\n')
  quit(save='no',status=0L)
 }
 models<-if(mode=='score-adapt')load_models(aroot,n,TRUE) else load_models(droot,n,FALSE)
