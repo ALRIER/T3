@@ -1,0 +1,56 @@
+name: T3 B3 Stress V2 — Repair Only Failed Confirmation Scoring
+run-name: Stress V2 confirmation rescue 50–59 (original Rediscovery preserved)
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'config/T3_B3_STRESS_V2_CONFIRM_RESCUE_ONCE.txt'
+permissions:
+  contents: read
+  actions: read
+  packages: read
+concurrency:
+  group: t3-b3-stress-v2-confirmation-rescue-once
+  cancel-in-progress: false
+jobs:
+  source-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download ORIGINAL successful frozen W compact archive
+        uses: actions/download-artifact@v5
+        with:
+          name: stress-v2-frozen-compact-W-run42068731220
+          run-id: '42068731220'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/compact
+      - name: Rebase SHA256SUMS paths without changing expected digests
+        run: |
+          set -euo pipefail
+          test -s incoming/compact/SHA256SUMS
+          for n in 200 1000 3000; do
+            test -s "incoming/compact/original_W_n$n.rds"
+          done
+          (
+            cd incoming/compact
+            sed 's#artifacts/stress_v2/compact/##g' SHA256SUMS | sha256sum --check --status -
+          )
+          echo 'STRESS_V2_CONFIRM_SHA_PATH_REPAIR_PASS 3 compact W archives'
+      - name: Verify original Stress 20–24 benchmark map is reusable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 42062234485 --repo '${{ github.repository }}' \
+            --pattern 'stress-v2-original-normal-n200-run42062234485' \
+            --dir incoming/original
+          test "$(find incoming/original -name benchmark_map.csv -type f | wc -l)" -eq 1
+          echo 'STRESS_V2_CONFIRM_ORIGINAL_BENCHMARK_PASS'
+  corrected-confirmation:
+    needs: source-preflight
+    uses: ./.github/workflows/t3-b3-stress-v2-unified.yml
+    with:
+      phase: confirm
+      original_run_id: '42062234485'
