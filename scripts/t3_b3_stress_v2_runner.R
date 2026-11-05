@@ -8,8 +8,8 @@ droot<-if(length(a)>=6L)a[6L] else ''
 aroot<-if(length(a)>=7L)a[7L] else ''
 mcroot<-if(length(a)>=8L)a[8L] else ''
 families<-c('normal','lognormal','weibull','invgauss','exgaussian','exwald')
-if(!mode%in%c('smoke','score-new','score-adapt','train-adapt','index-adapt'))stop('Invalid mode')
-if(mode!='index-adapt'&&(!fam%in%families||!n%in%c(200L,1000L,3000L)||
+if(!mode%in%c('smoke','score-new','score-adapt','train-adapt','index-adapt','pack-original','pack-adapted'))stop('Invalid mode')
+if(!mode%in%c('index-adapt','pack-original','pack-adapted')&&(!fam%in%families||!n%in%c(200L,1000L,3000L)||
  !seed%in%if(mode=='train-adapt')60:69 else 50:59))stop('Seed role/family/n mismatch')
 source('R/00_shared/load_all.R');t2_load('.')
 source('R/00_shared/pipeline.R')
@@ -60,6 +60,16 @@ make_scenario<-function(id,role,params,reps){
 }
 load_models<-function(root,n,adapted=FALSE){
  if(!nzchar(root)||!dir.exists(root))stop('Model root missing')
+ packed<-file.path(root,sprintf('%s_W_n%d.rds',if(adapted)'adapted' else 'original',n))
+ if(file.exists(packed)){
+  z<-readRDS(packed)
+  if(!is.list(z)||length(z)!=240L||anyDuplicated(vapply(z,function(x)x$candidate_id,character(1))))stop('Bad compact model bundle')
+  for(m in z){
+   if(length(m$weights)!=26L||any(!is.finite(m$weights))||any(m$weights<0)||abs(sum(m$weights)-1)>1e-8||
+    !identical(sha_weights(m$weights),m$weights_sha256)||!nzchar(m$discovery_sha256))stop('Compact model weight/hash corruption')
+  }
+  return(z)
+ }
  items<-list();j<-0L
  for(f in families)for(ss in if(adapted)60:69 else 0:9){
   p<-file.path(root,f,sprintf('seed%02d',ss),sprintf('n%d',n),
@@ -85,6 +95,24 @@ load_models<-function(root,n,adapted=FALSE){
  if(length(items)!=240L||anyDuplicated(vapply(items,function(x)x$candidate_id,character(1))))
   stop('Expected exactly 240 independent candidate W for one n')
  items
+}
+if(mode%in%c('pack-original','pack-adapted')){
+ adapted<-mode=='pack-adapted'
+ root<-if(adapted)aroot else droot
+ if(!nzchar(root)||!dir.exists(root))stop('Source model root unavailable for packing')
+ dir.create(out,recursive=TRUE,showWarnings=FALSE)
+ for(nn in c(200L,1000L,3000L)){
+  models<-load_models(root,nn,adapted)
+  p<-file.path(out,sprintf('%s_W_n%d.rds',if(adapted)'adapted' else 'original',nn))
+  if(file.exists(p))stop('Packed weights already exist: ',p)
+  saveRDS(models,p,compress='gzip')
+  check<-readRDS(p)
+  if(length(check)!=240L||!identical(vapply(check,function(x)x$weights_sha256,character(1)),
+   vapply(models,function(x)x$weights_sha256,character(1))))stop('Packed W round trip validation failed')
+  rm(models,check);invisible(gc(FALSE))
+ }
+ cat('STRESS_V2_COMPACT_W_PACK_PASS',mode,'720 candidates\n')
+ quit(save='no',status=0L)
 }
 if(mode=='index-adapt'){
  root<-normalizePath(out,mustWork=TRUE)
@@ -154,16 +182,18 @@ if(mode=='score-adapt'){
  if(!file.copy(original,file.path(out,'scores.csv'),overwrite=FALSE))stop('Cannot copy immutable original W score')
 }
 W<-do.call(cbind,lapply(models,function(x)x$weights))
+if(!identical(dim(W),c(26L,240L)))stop('Invalid vectorized W scoring matrix')
+Sys.setenv(OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
 target<-file.path(out,'scores.csv')
 for(i in seq_along(ids)){
  sc<-if(mode=='score-adapt')readRDS(file.path(mcroot,'mc',sprintf('scenario_%04d.rds',ids[[i]]))) else make_scenario(ids[[i]],role,params,reps)
  if(mode=='score-adapt' && (identical(sc$scenario_id,ids[[i]])==FALSE||!identical(dim(sc$T),c(500L,26L))))stop('Corrupt independent MC checkpoint')
  if(mode=='score-new'){
   dir.create(file.path(out,'mc'),showWarnings=FALSE)
-  saveRDS(sc,file.path(out,'mc',sprintf('scenario_%04d.rds',sc$scenario_id)),compress='xz')
+  saveRDS(sc,file.path(out,'mc',sprintf('scenario_%04d.rds',sc$scenario_id)),compress='gzip')
  }
  T<-sc$T;mu<-sc$target
- classical<-lapply(seq_along(ESTIMATOR_NAMES),function(k){
+ classical<-if(mode=='score-adapt')NULL else lapply(seq_along(ESTIMATOR_NAMES),function(k){
   loss<-(T[,k]-mu)^2
   data.frame(candidate_id='',model=ESTIMATOR_NAMES[k],source_family=fam,
    training_seed=-1L,weights_sha256='',discovery_sha256='',
@@ -186,7 +216,8 @@ for(i in seq_along(ids)){
  write.table(z,target,sep=',',row.names=FALSE,col.names=if(mode=='score-adapt')FALSE else i==1L,
    append=(mode=='score-adapt'||i>1L),qmethod='double')
  if(i%%10L==0L)message('STRESS_V2_SCORE_PROGRESS ',fam,' seed ',seed,' n ',n,' ',i,'/',length(ids))
- rm(sc,z,loss,learned);invisible(gc(FALSE))
+ rm(sc,z,loss,learned,classical)
+ if(i%%10L==0L)invisible(gc(FALSE))
 }
 expected<-length(ids)*(if(mode=='score-adapt')26L+240L+length(models) else 26L+length(models))
 write.csv(data.frame(protocol='T3_B3_STRESS_V2',
@@ -194,6 +225,8 @@ write.csv(data.frame(protocol='T3_B3_STRESS_V2',
  original_candidates=240L,adapted_candidates=if(mode=='score-adapt')240L else 0L,
  rows=expected,seed_role=role,score_sha256=t2_sha256(target),
  original_Discovery_retrained=FALSE,
+ input_weight_count=length(models),score_precision='float64',mc_compression='gzip',
+ peak_R_vcells_mb=max(gc()[,6]),peak_R_ncells_mb=max(gc()[,6]),
  source_mc_sha256=if(mode=='score-adapt')t2_sha256(file.path(mcroot,'score_manifest.csv')) else '',
  stringsAsFactors=FALSE),file.path(out,'score_manifest.csv'),row.names=FALSE)
 cat('STRESS_V2_NEW_SCORE_PASS',fam,seed,n,expected,'\n')
