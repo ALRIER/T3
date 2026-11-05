@@ -210,8 +210,7 @@ def audit_block(pair_path,tax_path,infer_path,grid,edges,cell_writer,neigh_write
    acc['tier1_with_any_neighbor_tier1']+=int(local_flags[(cid,sid,role)] and any(p))
    acc['tier1_with_all_neighbor_tier1']+=int(local_flags[(cid,sid,role)] and all(p))
   acc=counts[(cid,family,n,role,'within_family_independent_replication' if source==family else 'cross_family_transfer')]
-  if role=='own':
-   acc['tier1_own_and_mean']+=int(local_flags[(cid,sid,'own')] and local_flags[(cid,sid,'mean')])
+  acc['tier1_own_and_mean']+=int(local_flags[(cid,sid,'own')] and local_flags[(cid,sid,'mean')])
  return {'family':family,'n':n,'cells':len(seen),'source_sha256':sha256(pair_path),'tax_sha256':sha256(tax_path)}
 
 def write_summary(path,counts):
