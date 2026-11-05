@@ -1,0 +1,89 @@
+name: T3 B3 Held-out reviewer robustness and generalization complement
+run-name: Held-out supplementary reviewer safeguards from frozen 720-W inference
+"on":
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/t3-b3-heldout-reviewer-complement.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-heldout-reviewer-complement-v1
+  cancel-in-progress: false
+jobs:
+  reviewer-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - name: Verify script compiles and sensitivity-statistic unit checks pass
+        run: |
+          python -m py_compile scripts/t3_b3_heldout_reviewer_complement.py
+          python scripts/t3_b3_heldout_reviewer_complement.py --selftest
+      - name: Fetch immutable complete Held-out global BH/CI/taxonomy result
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-heldout-720W-individual-final-run42045005791
+          run-id: '42045005791'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/final
+      - name: Download all 18 original seed-paired Held-out recovery blocks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 42045005791 --repo '${{ github.repository }}' \
+            --pattern 't3-heldout-individual-*-run42045005791' \
+            --dir incoming/blocks
+      - name: Preflight frozen sources, full coverage and no rescore
+        run: |
+          set -euo pipefail
+          test "$(find incoming/blocks -type f -name paired_seed_differences.csv.gz | wc -l)" -eq 18
+          test "$(find incoming/blocks -type f -name manifest.json | wc -l)" -eq 18
+          test "$(find incoming/final -type f -name individual_winner_taxonomy.csv.gz | wc -l)" -eq 18
+          test "$(find incoming/final -type f -name individual_candidate_inference.csv.gz | wc -l)" -eq 18
+          test -s incoming/final/global_panel_manifest.json
+          test -s config/T2_V3_B3_prospective_321_grid.csv
+      - name: Audit 720 W and all 2,082,240 paired candidate-scenario-benchmark cells
+        run: |
+          python scripts/t3_b3_heldout_reviewer_complement.py \
+            --blocks incoming/blocks \
+            --final incoming/final \
+            --grid config/T2_V3_B3_prospective_321_grid.csv \
+            --output artifacts/T3_B3_heldout_reviewer_complement_v1
+      - name: Validate complete reviewer outputs and immutable-source provenance
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,json
+          from pathlib import Path
+          root=Path('artifacts/T3_B3_heldout_reviewer_complement_v1')
+          meta=json.loads((root/'scientific_limitations_and_provenance.json').read_text())
+          assert meta['distinct_W_candidates']==720
+          assert meta['source_scoring_reexecuted'] is False
+          assert meta['original_BH_hypotheses']==4164480
+          assert meta['new_p_values_calculated'] is False
+          assert len(meta['blocks'])==18
+          with (root/'reviewer_candidate_family_summary.csv').open(newline='') as f:
+              rows=list(csv.DictReader(f))
+          assert len(rows)==8640, f'Expected 8,640 candidate x evaluation family x benchmark summaries; got {len(rows)}'
+          with (root/'reviewer_candidate_cross_family_generalization.csv').open(newline='') as f:
+              rows=list(csv.DictReader(f))
+          assert len(rows)==1440, f'Expected 1,440 candidate/reference generalization summaries; got {len(rows)}'
+          for name in ('reviewer_full_cell_audit.csv.gz','observed_local_neighbor_consistency.csv.gz',
+                       'outcome_blind_scenario_adjacency.csv','README_REVIEWER_SCOPE.txt'):
+              assert (root/name).stat().st_size>100
+          print('HELDOUT_REVIEWER_FINAL_GATE_PASS 720 candidates, 18 blocks, 8640 family summaries, 1440 generalization summaries')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-heldout-reviewer-complement-v1-run${{ github.run_id }}
+          path: artifacts/T3_B3_heldout_reviewer_complement_v1
+          if-no-files-found: error
+          retention-days: 90
