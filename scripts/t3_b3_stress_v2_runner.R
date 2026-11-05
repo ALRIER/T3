@@ -43,20 +43,36 @@ params_v2<-function(role){
 }
 make_scenario<-function(id,role,params,reps){
  row<-grid[grid$scenario_id==id,,drop=FALSE]
- mat<-matrix(NA_real_,reps,26L,dimnames=list(NULL,ESTIMATOR_NAMES))
- for(b in seq_len(reps)){
+ worker<-function(b){
+  # Per-replicate deterministic seed means sequential and 2-core execution are identical.
   set.seed(seedv2(role,seed,n,id,b))
   x<-generate_population(fam,n,params)
   if(row$contamination>0)x<-inject_outliers_realistic(x,
     as.numeric(row$contamination),as.numeric(row$mad_scale),
     as.character(row$mechanism))
-  mat[b,]<-component_vector(x)
+  component_vector(x)
  }
- if(any(!is.finite(mat)))stop('Nonfinite component matrix')
- t2_v3_prepare_scenario(list(T=mat,target=analytic_mean_from_params(fam,params),
+ cores<-as.integer(Sys.getenv('T3_STRESS_MC_WORKERS','2'))
+ if(is.na(cores)||cores<1L||cores>2L)stop('MC worker count must be 1 or 2')
+ if(reps<50L)cores<-1L
+ if(cores>1L&&.Platform$OS.type=='unix'){
+  pieces<-parallel::mclapply(seq_len(reps),worker,
+   mc.cores=cores,mc.set.seed=FALSE,mc.preschedule=TRUE)
+  if(any(vapply(pieces,inherits,logical(1),'try-error')))stop('MC worker failed')
+  mat<-t(vapply(pieces,as.double,numeric(26L)))
+ } else {
+  mat<-t(vapply(seq_len(reps),worker,numeric(26L)))
+ }
+ colnames(mat)<-ESTIMATOR_NAMES
+ if(!identical(dim(mat),c(as.integer(reps),26L))||any(!is.finite(mat)))
+  stop('Nonfinite or incomplete component matrix')
+ sc<-list(T=mat,target=analytic_mean_from_params(fam,params),
   scenario_id=as.integer(id),contamination=as.numeric(row$contamination),
   mad_scale=as.numeric(row$mad_scale),mechanism=as.character(row$mechanism),
-  band=as.character(row$band),component_names=ESTIMATOR_NAMES))
+  band=as.character(row$band),component_names=ESTIMATOR_NAMES)
+ # Original scoring needs only (T,target). Precomputed calibration benchmarks
+ # are required solely by the four optimizer fitness functions.
+ if(mode=='train-adapt')t2_v3_prepare_scenario(sc) else sc
 }
 load_models<-function(root,n,adapted=FALSE){
  if(!nzchar(root)||!dir.exists(root))stop('Model root missing')
@@ -226,7 +242,7 @@ write.csv(data.frame(protocol='T3_B3_STRESS_V2',
  rows=expected,seed_role=role,score_sha256=t2_sha256(target),
  original_Discovery_retrained=FALSE,
  input_weight_count=length(models),score_precision='float64',mc_compression='gzip',
- peak_R_vcells_mb=max(gc()[,6]),peak_R_ncells_mb=max(gc()[,6]),
+ peak_R_vcells_mb=gc()[2L,6L],peak_R_ncells_mb=gc()[1L,6L],
  source_mc_sha256=if(mode=='score-adapt')t2_sha256(file.path(mcroot,'score_manifest.csv')) else '',
  stringsAsFactors=FALSE),file.path(out,'score_manifest.csv'),row.names=FALSE)
 cat('STRESS_V2_NEW_SCORE_PASS',fam,seed,n,expected,'\n')
