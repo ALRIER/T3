@@ -2,12 +2,13 @@
 # Independent Stress V2: frozen original W*, fresh seeds 50:59, or near-adapted 60:69.
 # Original Monte Carlo, Discovery, Held-out and Stress files are NEVER mutated.
 a<-commandArgs(trailingOnly=TRUE)
-if(length(a)<5L)stop('MODE FAMILY SEED N OUTPUT [DISCOVERY_ROOT] [ADAPTED_ROOT]')
+if(length(a)<5L)stop('MODE FAMILY SEED N OUTPUT [DISCOVERY_ROOT] [ADAPTED_ROOT] [ORIGINAL_NEW_MC_ROOT]')
 mode<-a[1L];fam<-a[2L];seed<-as.integer(a[3L]);n<-as.integer(a[4L]);out<-a[5L]
 droot<-if(length(a)>=6L)a[6L] else ''
 aroot<-if(length(a)>=7L)a[7L] else ''
+mcroot<-if(length(a)>=8L)a[8L] else ''
 families<-c('normal','lognormal','weibull','invgauss','exgaussian','exwald')
-if(!mode%in%c('smoke','score-new','train-adapt','index-adapt'))stop('Invalid mode')
+if(!mode%in%c('smoke','score-new','score-adapt','train-adapt','index-adapt'))stop('Invalid mode')
 if(mode!='index-adapt'&&(!fam%in%families||!n%in%c(200L,1000L,3000L)||
  !seed%in%if(mode=='train-adapt')60:69 else 50:59))stop('Seed role/family/n mismatch')
 source('R/00_shared/load_all.R');t2_load('.')
@@ -139,12 +140,24 @@ if(mode=='train-adapt'){
  cat('STRESS_V2_NEAR_ADAPTED_DISCOVERY_PASS',fam,seed,n,'\n')
  quit(save='no',status=0L)
 }
-models<-c(load_models(droot,n,FALSE),if(nzchar(aroot))load_models(aroot,n,TRUE))
-if(length(models)!=(if(nzchar(aroot))480L else 240L))stop('Candidate panel incomplete')
+models<-if(mode=='score-adapt')load_models(aroot,n,TRUE) else load_models(droot,n,FALSE)
+if(length(models)!=240L)stop('Candidate panel incomplete')
+if(mode=='score-adapt'){
+ if(!nzchar(mcroot)||!dir.exists(mcroot))stop('Missing frozen 50:59 Monte Carlo checkpoint')
+ meta_path<-file.path(mcroot,'score_manifest.csv')
+ original<-file.path(mcroot,'scores.csv')
+ if(!file.exists(meta_path)||!file.exists(original))stop('Independent test checkpoint missing')
+ meta<-read.csv(meta_path,stringsAsFactors=FALSE)
+ if(nrow(meta)!=1L||as.integer(meta$seed)!=seed||as.integer(meta$n)!=n||
+   as.character(meta$family)!=fam||as.character(meta$score_sha256)!=t2_sha256(original)||
+   as.integer(meta$adapted_candidates)!=0L)stop('Independent Monte Carlo provenance mismatch')
+ if(!file.copy(original,file.path(out,'scores.csv'),overwrite=FALSE))stop('Cannot copy immutable original W score')
+}
 W<-do.call(cbind,lapply(models,function(x)x$weights))
 target<-file.path(out,'scores.csv')
 for(i in seq_along(ids)){
- sc<-make_scenario(ids[[i]],role,params,reps)
+ sc<-if(mode=='score-adapt')readRDS(file.path(mcroot,'mc',sprintf('scenario_%04d.rds',ids[[i]]))) else make_scenario(ids[[i]],role,params,reps)
+ if(mode=='score-adapt' && (identical(sc$scenario_id,ids[[i]])==FALSE||!identical(dim(sc$T),c(500L,26L))))stop('Corrupt independent MC checkpoint')
  if(mode=='score-new'){
   dir.create(file.path(out,'mc'),showWarnings=FALSE)
   saveRDS(sc,file.path(out,'mc',sprintf('scenario_%04d.rds',sc$scenario_id)),compress='xz')
@@ -166,20 +179,21 @@ for(i in seq_along(ids)){
   discovery_sha256=vapply(models,function(z)z$discovery_sha256,character(1)),
   mse=colMeans(loss),q95=apply(loss,2L,quantile,probs=.95,type=8,names=FALSE),
   stringsAsFactors=FALSE)
- z<-rbind(do.call(rbind,classical),learned)
+ z<-if(mode=='score-adapt')learned else rbind(do.call(rbind,classical),learned)
  z$evaluation_family<-fam;z$evaluation_seed<-seed;z$sample_n<-n
  z$scenario_id<-sc$scenario_id;z$mechanism<-sc$mechanism
  z$contamination<-sc$contamination;z$mad_scale<-sc$mad_scale;z$band<-sc$band
- write.table(z,target,sep=',',row.names=FALSE,col.names=i==1L,
-   append=i>1L,qmethod='double')
+ write.table(z,target,sep=',',row.names=FALSE,col.names=if(mode=='score-adapt')FALSE else i==1L,
+   append=(mode=='score-adapt'||i>1L),qmethod='double')
  if(i%%10L==0L)message('STRESS_V2_SCORE_PROGRESS ',fam,' seed ',seed,' n ',n,' ',i,'/',length(ids))
  rm(sc,z,loss,learned);invisible(gc(FALSE))
 }
-expected<-length(ids)*(26L+length(models))
+expected<-length(ids)*(if(mode=='score-adapt')26L+240L+length(models) else 26L+length(models))
 write.csv(data.frame(protocol='T3_B3_STRESS_V2',
  family=fam,seed=seed,n=n,reps=reps,scenarios=length(ids),
- original_candidates=240L,adapted_candidates=length(models)-240L,
+ original_candidates=240L,adapted_candidates=if(mode=='score-adapt')240L else 0L,
  rows=expected,seed_role=role,score_sha256=t2_sha256(target),
  original_Discovery_retrained=FALSE,
+ source_mc_sha256=if(mode=='score-adapt')t2_sha256(file.path(mcroot,'score_manifest.csv')) else '',
  stringsAsFactors=FALSE),file.path(out,'score_manifest.csv'),row.names=FALSE)
 cat('STRESS_V2_NEW_SCORE_PASS',fam,seed,n,expected,'\n')
