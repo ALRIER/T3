@@ -101,11 +101,12 @@ def grid_read(path):
 
 def parse_block(path):
  m=path.parent.name
+ if m.startswith('t3-heldout-individual-') and '-run' in m:
+  m=m.split('-run',1)[0].removeprefix('t3-heldout-individual-')
  if '-n' not in m:fail('Invalid recovered block directory: '+str(path))
  family,n=m.rsplit('-n',1)
- n=int(n)
- if family not in FAMILIES or n not in SIZES:fail('Unexpected held-out block: '+m)
- return family,n
+ if family not in FAMILIES or not n.isdigit() or int(n) not in SIZES:fail('Unexpected held-out block: '+m)
+ return family,int(n)
 
 def matching_key(row):
  return (row['candidate_id'],int(row['scenario_id']),row['benchmark_role'],row['benchmark'])
