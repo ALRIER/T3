@@ -11,10 +11,10 @@ permissions:
   packages: read
 concurrency:
   group: t3-heldout-seedwise-v1
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   registry:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
           retention-days: 90
   reduce:
     needs: registry
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
@@ -122,7 +122,7 @@ jobs:
           retention-days: 90
   finalize:
     needs: [registry,reduce]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
