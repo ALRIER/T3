@@ -45,7 +45,7 @@ params_v2<-function(role){
 # samples across adjacent severity conditions and across all 80 Stress scenarios.
 # Each base replicate has a deterministic seed independent of R fork scheduling.
 mechanism_fold<-function(m){
- if(m=='none')return(0L)
+ if(m%in%c('none','clean'))return(0L)
  if(m%in%c('upper_tail','clustered_upper','point_mass'))return(1L)
  if(m%in%c('lower_tail','clustered_symmetric','mixture_bimodal_near'))return(2L)
  if(m%in%c('symmetric_t','mixture_bimodal_far'))return(3L)
