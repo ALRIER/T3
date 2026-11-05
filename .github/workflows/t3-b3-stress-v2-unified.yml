@@ -3,7 +3,10 @@ run-name: Stress V2 seedwise recovery
 "on":
   push:
     branches: [main]
-    paths: ['.github/workflows/t3-b3-stress-v2-unified.yml']
+    paths:
+      - '.github/workflows/t3-b3-stress-v2-unified.yml'
+      - 'scripts/t3_b3_stress_v2_runner.R'
+      - 'scripts/t3_b3_stress_v2.py'
   workflow_dispatch:
     inputs:
       phase:
