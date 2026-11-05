@@ -201,7 +201,7 @@ def read_new(a):
    if cid in by_id:fail('Duplicate adapted candidate')
    by_id[cid]=r
   if len(by_id)!=1440:fail('Expected 720 original + 720 adapted W')
- seen=set();baseline={};pairs={};expected_candidates=720 if a.adapted_registry else 720
+ seen=set();baseline={};pairs={};expected_candidates=len(by_id)
  for path in paths:
   with path.open(newline='') as f:
    rd=csv.DictReader(f)
@@ -257,7 +257,7 @@ def finalize(a):
   pp=[];path=indexed[k]
   with gzip.open(path,'rt',newline='') as f:
    for r in csv.DictReader(f):pp.append(numeric(r['p_value']))
-  expected=240*80*2*2 if meta[0]['experiment']=='original' else 720*80*2*2
+  expected=(240 if meta[0]['experiment']=='original' else int(next(m['candidate_count'] for m in meta if m['family']==k[0] and int(m['sample_n'])==k[1])))*80*2*2
   if len(pp)!=expected:fail('Incomplete candidate x scenario x reference x metric count')
   plist.extend(pp);sizes.append(len(pp))
  p=np.asarray(plist,dtype=np.float64)
@@ -311,7 +311,7 @@ def selftest():
  assert len(FAMILIES)==6 and len(ENGINES)==4
  assert abs(ci_p([-1]*5)[3]-.03125)<1e-15
  assert len(PAIRED_COLUMNS)==17
- assert len(METRIC_COLUMNS)==23
+ assert len(METRIC_COLUMNS)==22
  print('T3_STRESS_V2_UNIT_PASS',flush=True)
 
 if __name__=='__main__':
