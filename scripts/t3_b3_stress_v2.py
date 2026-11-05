@@ -113,10 +113,12 @@ def read_original(a):
   if family!=a.family or n!=a.n or s not in range(20,30) or (scope,s) in seen:fail('Source identity outside original Stress grid')
   seen.add((scope,s))
   manifest=path.parent/('score_manifest.csv' if scope=='within' else 'transfer_manifest.csv')
-  if not manifest.exists():fail('Original score manifest missing: '+str(path))
-  m=next(csv.DictReader(manifest.open(newline='')))
-  sha=m.get('score_sha256') or m.get('scores_sha256')
-  if sha and sha.lower()!=digest(path):fail('Immutable score SHA mismatch: '+str(path))
+  if manifest.exists():
+   m=next(csv.DictReader(manifest.open(newline='')))
+   sha=m.get('score_sha256') or m.get('scores_sha256')
+   if sha and sha.lower()!=digest(path):fail('Immutable score SHA mismatch: '+str(path))
+  elif scope=='cross':fail('Cross-family scoring manifest required: '+str(path))
+  elif not (path.parent/'stage_contract.rds').exists():fail('Original own-family stage contract missing: '+str(path))
   count_candidates=set();count_classic=set()
   with path.open(newline='') as f:
    rd=csv.DictReader(f)
