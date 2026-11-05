@@ -41,12 +41,45 @@ params_v2<-function(role){
  if('mu'%in%names(p))p$mu<-p$mu+runif(1,-.30,.30)
  p
 }
+# Preserve the original four-fold parent-pool structure; reuse uncontaminated
+# samples across adjacent severity conditions and across all 80 Stress scenarios.
+# Each base replicate has a deterministic seed independent of R fork scheduling.
+mechanism_fold<-function(m){
+ if(m=='none')return(0L)
+ if(m%in%c('upper_tail','clustered_upper','point_mass'))return(1L)
+ if(m%in%c('lower_tail','clustered_symmetric','mixture_bimodal_near'))return(2L)
+ if(m%in%c('symmetric_t','mixture_bimodal_far'))return(3L)
+ stop('Unknown mechanism in B3 fold design: ',m)
+}
+base_pool_cache<-new.env(hash=TRUE,parent=emptyenv())
+base_pool<-function(fold,role,params,reps){
+ key<-paste(role,fold,reps,sep='|')
+ if(exists(key,envir=base_pool_cache,inherits=FALSE))return(get(key,envir=base_pool_cache))
+ worker<-function(b){
+  set.seed(seedv2(paste0(role,'_base_fold',fold),seed,n,-30L-fold,b))
+  generate_population(fam,n,params)
+ }
+ cores<-as.integer(Sys.getenv('T3_STRESS_MC_WORKERS','2'))
+ if(is.na(cores)||!cores%in%c(1L,2L))stop('Invalid base pool parallelism')
+ if(.Platform$OS.type=='unix'&&cores>1L&&reps>=50L){
+  ans<-parallel::mclapply(seq_len(reps),worker,mc.cores=cores,
+   mc.set.seed=FALSE,mc.preschedule=TRUE)
+  if(any(vapply(ans,inherits,logical(1),'try-error')))stop('Base pool worker failed')
+  pool<-vapply(ans,as.double,numeric(n))
+ } else pool<-vapply(seq_len(reps),worker,numeric(n))
+ if(!identical(dim(pool),c(as.integer(n),as.integer(reps)))||any(!is.finite(pool)))
+  stop('Invalid common Monte Carlo base pool')
+ assign(key,pool,envir=base_pool_cache)
+ pool
+}
 make_scenario<-function(id,role,params,reps){
  row<-grid[grid$scenario_id==id,,drop=FALSE]
+ pool<-base_pool(mechanism_fold(as.character(row$mechanism)),role,params,reps)
  worker<-function(b){
-  # Per-replicate deterministic seed means sequential and 2-core execution are identical.
+  # Same uncontaminated replicate is shared across severity cells in its mechanism fold.
+  # Distinct scenario RNG streams randomize contamination independently.
   set.seed(seedv2(role,seed,n,id,b))
-  x<-generate_population(fam,n,params)
+  x<-pool[,b]
   if(row$contamination>0)x<-inject_outliers_realistic(x,
     as.numeric(row$contamination),as.numeric(row$mad_scale),
     as.character(row$mechanism))
