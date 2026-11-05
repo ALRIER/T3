@@ -1,0 +1,6 @@
+T3/B3 Stress V2 one-time unified recovery, November 5 2026.
+Original 42068731220: preserve every successful adapted training artifact (180 possible), cancel original after inventory; never rerun successful W.
+Superseded 42069857481: cancel queued failed confirmation rescue before stopping original; retain successful preflight only.
+New unified pipeline uses max-parallel:22 for remaining Rediscovery and all 180 fresh 50-59 confirmation jobs, sharing the same SHA and final provenance.
+Original Stress frozen calibration 20-24 / confirmation 25-29: 42062234485, unchanged.
+New independent confirmation test seeds 50-59, adapted training 60-69; do not re-run original Discovery, historical Monte Carlo or prior successful training shards.
