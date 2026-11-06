@@ -97,7 +97,7 @@ def family(a):
   if any(v[0]!=10 for v in vals):die('Missing evaluation seeds 30-39 for independent parent '+str(key))
   if len(vals)>=5:
    stat=calc([v[1:] for v in vals],'independent_parent_generalization')
-   results.append(dict(zip(KEY,[*key[:6],'frozen_discovery_scenario_specific' if key[6]=='own' else 'mean']),**stat))
+   results.append(dict(zip(KEY,[*key[:7],'frozen_discovery_scenario_specific' if key[6]=='own' else 'mean']),**stat))
  for row in q:
   k=tuple(row[:7])
   if key is not None and k!=key:flush();vals=[]
