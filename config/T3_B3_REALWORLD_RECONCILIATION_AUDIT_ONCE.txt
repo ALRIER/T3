@@ -1,4 +1,2 @@
-ONE TIME NON-DESTRUCTIVE REAL WORLD BENCHMARK RECONCILIATION AUDIT
-Source-policy inference run: 42251598557
-Input raw scorer ledger: 856 immutable shards
-This push authorizes only an audit; never launch 216 reducer jobs automatically.
+ONE TIME REAL WORLD RECONCILIATION AUDIT — schema-only reviewer repair
+Prior audit run 42256800588 found compact neighborhood records have no training_seed field. This reruns only audit and never scores original datasets.

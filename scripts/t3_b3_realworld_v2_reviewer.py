@@ -28,8 +28,13 @@ def candidate(row):
  if not re.fullmatch(r"(normal|lognormal|weibull|invgauss|exgaussian|exwald)\|(ga|nsga2|de|dirichlet)\|seed0[0-9]\|n(200|1000|3000)",cid):
   stop("Invalid original 720-W candidate identity: "+cid)
  source,engine,seed,n=cid.split("|")
- if source!=row["source_family"] or int(n[1:])!=int(row["sample_n"]) or int(seed[4:])!=int(row["training_seed"]):
-  stop("Candidate identity differs from its row")
+ if source!=row["source_family"] or int(n[1:])!=int(row["sample_n"]):
+  stop("Candidate family or sample size differs from its row")
+ # Compact neighborhood edges retain candidate_id but omit training_seed.
+ # In inferential tables, require the explicit frozen-seed column to agree.
+ if "training_seed" in row and str(row["training_seed"]).strip():
+  if int(seed[4:])!=int(row["training_seed"]):
+   stop("Candidate seed differs from its row")
  return cid
 def write(p,rows,keys):
  with open(p,"w",newline="") as f:
@@ -158,6 +163,7 @@ def inspect(a):
 def selftest():
  assert len(FAMILIES)==6
  assert candidate({"candidate_id":"normal|ga|seed00|n200","source_family":"normal","sample_n":"200","training_seed":"0"})=="normal|ga|seed00|n200"
+ assert candidate({"candidate_id":"normal|ga|seed00|n200","source_family":"normal","sample_n":"200"})=="normal|ga|seed00|n200"
  print("REALWORLD_V2_REVIEWER_SELFTEST_PASS",flush=True)
 
 if __name__=="__main__":
