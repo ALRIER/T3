@@ -114,7 +114,7 @@ def read_input(path,family_map,bench,own_policy):
     seen_train[key].add(cid)
  if len(identity)!=40:die('Missing one of 40 distinct W per source family/n')
  if any(len(v)!=40 for v in seen_train.values()):die('Incomplete 10x4 candidate per child-depth')
- if any((key,'mean') not in refs or (key,bench[(source_family,key[5],n)]) not in refs for key in seen_train):
+ if any((key,'mean') not in refs or (key,bench[(own_benchmark_family(source_family,key[4],own_policy),key[5],n)]) not in refs for key in seen_train):
   die('Missing own / mean paired references')
  if len(learned)!=len(seen_train)*40:die('Unexpected raw score coverage')
  print('REALWORLD_V2_RAW_CONTRACT_PASS',source_family,eval_seed,n,

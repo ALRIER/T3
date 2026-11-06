@@ -1,2 +1,2 @@
-ONE TIME DESTINATION CLASSICAL BENCHMARK REAL DATA PILOT
-Source scoring run 41208956012, normal seed30 n200 only. No Monte Carlo, training or new scoring.
+ONE TIME DESTINATION BENCHMARK PILOT RECHECK
+The first pilot failed only the legacy source-family reference completeness test, after the original source comparison passed. The destination-family completeness check is now policy aware. This push launches one shard only.
