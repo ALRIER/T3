@@ -1,7 +1,1 @@
-ONE-TIME REAL WORLD FULL DESTINATION-BENCHMARK RECOVERY
-Explicit user authorization: run full pipeline on November 6, 2026.
-Validated immutable audit run 42257025451 and real-data pilot run 42257835687.
-Preserve all 856 original Real World score artifacts and original primary run 42251598557.
-Re-reduce only, 216 bounded checkpoints, six family jobs, parent-bootstrap 2000, global BH and reviewer.
-No Monte Carlo, no Discovery refitting and no new original scoring.
-Do not edit this launch file again; do not rerun without reviewing source lineage.
+Real World same full workload rerun | original ee658292 | 216 reducers | 856 immutable scoring artifacts | 6 family jobs | BH | reviewer | explicit November 6 user authorization. Correct HTTP 503 GitHub egress with 4 concurrent reducers, bounded retries. No successful artifact overwritten; no original scorer or Discovery refit.

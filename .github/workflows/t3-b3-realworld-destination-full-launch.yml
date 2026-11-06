@@ -1,5 +1,5 @@
 name: T3 B3 Real World — One-time full destination benchmark recovery
-run-name: "Real World full recovery | 856 frozen scorer artifacts | 720 W | audit 42257025451"
+run-name: "Real World FULL re-execution | same 216 reducers | 856 frozen scores | 720 W"
 "on":
   push:
     branches: [main]
@@ -214,7 +214,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 22
+      max-parallel: 4
       matrix: ${{ fromJSON(needs.plan-destination.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -254,8 +254,28 @@ jobs:
            if src['family']!=family:raise ValueError('Unexpected original source family')
            aid=src['artifact_id'];temp=pathlib.Path('incoming/raw')/str(aid)
            temp.mkdir(parents=True,exist_ok=False)
-           subprocess.run(['gh','run','download',str(src['run_id']),'--repo',os.environ['GITHUB_REPOSITORY'],
-             '--name',src['artifact_name'],'--dir',str(temp)],check=True)
+           # Retry only transient GitHub artifact-store egress failures (original HTTP 503).
+           # Do not rescore, retrain, or substitute any original artifact.
+           import time
+           cmd=['gh','run','download',str(src['run_id']),'--repo',os.environ['GITHUB_REPOSITORY'],
+             '--name',src['artifact_name'],'--dir',str(temp)]
+           for attempt in range(1,8):
+            try:
+             subprocess.run(cmd,check=True,capture_output=True,text=True,timeout=300)
+             break
+            except subprocess.CalledProcessError as exc:
+             msg=(exc.stderr or '')+' '+(exc.stdout or '')
+             if not any(t in msg for t in ('Egress is over the account limit','HTTP 503','HTTP 502','HTTP 429','HTTP 504')):
+              raise RuntimeError('Nontransient original score artifact download error: '+msg[:900]) from exc
+             if attempt==7:raise RuntimeError('GitHub artifact egress limit remains after seven bounded attempts; original score registry intact: '+str(aid)) from exc
+             delay=min(30*attempt,180)
+             print('REALWORLD_FULL_DOWNLOAD_BACKOFF',family,aid,'attempt',attempt,'delay_seconds',delay,flush=True)
+             time.sleep(delay)
+            except subprocess.TimeoutExpired:
+             if attempt==7:raise
+             delay=min(30*attempt,180)
+             print('REALWORLD_FULL_DOWNLOAD_TIMEOUT_RETRY',family,aid,attempt,delay,flush=True)
+             time.sleep(delay)
            scores=list(temp.rglob('scores.csv'))
            if len(scores)!=1:raise ValueError('One original score archive must have exactly one score CSV')
            subprocess.run(['python','scripts/t3_b3_realworld_v2_reduce.py',
