@@ -1,0 +1,9 @@
+ONE TIME T3/B3 REAL-WORLD V2 INDEPENDENT W RECONSTRUCTION
+Do not regenerate Real-World observation samples or Discovery W.
+Source: verified 856 original raw score shards from six complete/partially cancelled and repaired Actions runs.
+Exact 40 W per source family/sample n (720 total) kept distinct across training seeds 0-9.
+Real World scoring evaluation seeds 30-39; primary inference at parent_dataset_id only.
+Source-family and empirical-family transfer matrices, matched-scenario neighborhood descriptive diagnostics; two explicitly separate global BH panels.
+Checkpointed maximum 22 parallel independent raw-score reducers, no 6h job resimulation.
+Frozen classic comparator from Discovery map run 41478038812; matched destinations from run 41514871500.
+Historical aggregate run 41699936409 preserved; not mixed into new candidate-wise inference.
