@@ -1,0 +1,332 @@
+name: T3 B3 Real World — Resume remaining 91 destination reducer jobs with original 22 parallelism
+run-name: "Real World complete remaining work | preserve 125 | resume 91 of 216 | max 22"
+"on":
+  push:
+    branches: [main]
+    paths: ['config/T3_B3_RW_DESTINATION_RESUME_91_ONCE.txt']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-rw-destination-preserve125-resume91-once
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+jobs:
+  verify-checkpoints:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    outputs:
+      matrix: ${{ steps.gate.outputs.matrix }}
+      families_with_repairs: ${{ steps.gate.outputs.families_with_repairs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-856-source-ledger-run42286256315
+          run-id: '42286256315'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/ledger
+      - name: Verify 125 successful reducers and schedule only the other 91 original blocks
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os,subprocess,pathlib
+          ledger=json.loads(pathlib.Path('incoming/ledger/full_input_source_ledger.json').read_text())
+          if ledger['source_shards']!=856 or ledger['reduction_jobs']!=216:raise ValueError('Frozen raw source inventory mismatch')
+          groups=[]
+          for fam in ('normal','lognormal','weibull','invgauss','exgaussian','exwald'):
+           ordered=sorted((r for r in ledger['all_artifacts'] if r['family']==fam),key=lambda z:(z['seed'],z['n'],z['block_id'],z['run_id']))
+           for i in range(0,len(ordered),4):groups.append(dict(family=fam,block=i//4,sources=ordered[i:i+4]))
+          if len(groups)!=216:raise ValueError('Original 216 reducer grouping changed')
+          run=42286256315;repo=os.environ['GITHUB_REPOSITORY'];present=set()
+          for page in range(1,5):
+           b=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))['artifacts']
+           for a in b:
+            if a['expired']:raise ValueError('Expired checkpoint')
+            present.add(a['name'])
+           if len(b)<100:break
+          prefix='t3-rw-v3-destination-reduced-'
+          found={n for n in present if n.startswith(prefix)}
+          expected={f"{prefix}{g['family']}-b{g['block']}-run{run}" for g in groups}
+          if len(found)!=125 or not found.issubset(expected):raise ValueError('The 125 successful current reducer artifacts are incomplete')
+          missing=[g for g in groups if f"{prefix}{g['family']}-b{g['block']}-run{run}" not in found]
+          if len(missing)!=91 or len(found|{f"{prefix}{g['family']}-b{g['block']}-run{run}" for g in missing})!=216:
+           raise ValueError('Exact missing original 91 of 216 reducer groups not established')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as fd:
+           print('matrix='+json.dumps({'include':missing},separators=(',',':')),file=fd)
+           print('families_with_repairs='+','.join(sorted({g['family'] for g in missing})),file=fd)
+          print('REALWORLD_ORIGINAL_125_SUCCESSFUL_REDUCERS_PRESERVED_91_RESUME_ONLY',flush=True)
+          PY
+  recover-missing:
+    needs: verify-checkpoints
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 22
+      matrix: ${{ fromJSON(needs.verify-checkpoints.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - name: Download frozen empirical family map with rate-limit-aware retry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/t3_b3_rw_artifact_retry.py --run 41514871500 --repo '${{ github.repository }}' --name t3-b3-realworld-block-plan-run41514871500 --dir incoming/maps
+      - name: Download Discovery-frozen classical benchmark with rate-limit-aware retry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/t3_b3_rw_artifact_retry.py --run 41478038812 --repo '${{ github.repository }}' --name t3-b3-discovery-own-benchmark-map-run41478038812 --dir incoming/benchmark
+      - name: Re-reduce at most four immutable raw score artifacts without simulation or model training
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCES_JSON: ${{ toJSON(matrix.sources) }}
+          SOURCE_FAMILY: ${{ matrix.family }}
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,shutil,subprocess
+          sources=json.loads(os.environ['SOURCES_JSON'])
+          family=os.environ['SOURCE_FAMILY']
+          if not 1<=len(sources)<=4:raise ValueError('Unbounded Real World scoring archive batch')
+          maps=list(pathlib.Path('incoming/maps').rglob('empirical_family_proximity.csv'))
+          benches=list(pathlib.Path('incoming/benchmark').rglob('own_benchmark_map.csv'))
+          if len(maps)!=1 or len(benches)!=1:raise ValueError('Frozen destination map and Discovery benchmark must be unique')
+          out=pathlib.Path('artifacts/reconcile_destination/reduced')
+          out.mkdir(parents=True,exist_ok=True)
+          for src in sources:
+           if src['family']!=family:raise ValueError('Unexpected original source family')
+           aid=src['artifact_id'];temp=pathlib.Path('incoming/raw')/str(aid)
+           temp.mkdir(parents=True,exist_ok=False)
+           subprocess.run(['python','scripts/t3_b3_rw_artifact_retry.py',
+             '--run',str(src['run_id']),'--repo',os.environ['GITHUB_REPOSITORY'],
+             '--name',src['artifact_name'],'--dir',str(temp)],check=True)
+           scores=list(temp.rglob('scores.csv'))
+           if len(scores)!=1:raise ValueError('One original score archive must have exactly one score CSV')
+           subprocess.run(['python','scripts/t3_b3_realworld_v2_reduce.py',
+             '--input',str(scores[0]),'--family-map',str(maps[0]),'--benchmark',str(benches[0]),
+             '--own-policy','destination',
+             '--output',str(out/f'parent_{aid}.csv.gz'),
+             '--neighbor-output',str(out/f'neighbor_{aid}.csv.gz')],check=True)
+           shutil.rmtree(temp)
+          if len(list(out.glob('parent_*.csv.gz')))!=len(sources) or len(list(out.glob('neighbor_*.csv.gz')))!=len(sources):
+           raise ValueError('Missing bounded reducer outputs')
+          print('REALWORLD_DESTINATION_ONLY_REDUCER_PASS',family,len(sources))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-reduced-${{ matrix.family }}-b${{ matrix.block }}-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/reduced
+          if-no-files-found: error
+          retention-days: 90
+
+  family-destination:
+    needs: [verify-checkpoints, recover-missing]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-856-source-ledger-run42286256315
+          run-id: '42286256315'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/ledger
+      - name: Restore only successful 125 old reducers plus repaired 91 reducers, without rerunning successful jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py --run 42286256315 \
+            --repo '${{ github.repository }}' \
+            --pattern 't3-rw-v3-destination-reduced-${{ matrix.family }}-b*-run42286256315' \
+            --dir incoming/reduced
+          if [[ ",${{ needs.verify-checkpoints.outputs.families_with_repairs }}," == *",${{ matrix.family }},"* ]]; then
+            python scripts/t3_b3_rw_artifact_retry.py --run '${{ github.run_id }}' \
+              --repo '${{ github.repository }}' \
+              --pattern 't3-rw-v3-destination-reduced-${{ matrix.family }}-b*-run${{ github.run_id }}' \
+              --dir incoming/reduced
+          fi
+      - name: Verify full original source coverage and frozen destination policy
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          source=json.loads(pathlib.Path('incoming/ledger/full_input_source_ledger.json').read_text())
+          fam='${{ matrix.family }}'
+          expected=sum(x['family']==fam for x in source['all_artifacts'])
+          p=list(pathlib.Path('incoming/reduced').rglob('parent_*.csv.gz'))
+          n=list(pathlib.Path('incoming/reduced').rglob('neighbor_*.csv.gz'))
+          manifests=list(pathlib.Path('incoming/reduced').rglob('parent_*.manifest.json'))
+          if len(p)!=expected or len(n)!=expected or len(manifests)!=expected:
+           raise ValueError('Incomplete source-family or hash lineage')
+          ids=set()
+          for path in manifests:
+           m=json.loads(path.read_text())
+           if m.get('own_benchmark_family_policy')!='destination':raise ValueError('Mixed benchmark policy')
+           if m['raw_score_sha256'] in ids:raise ValueError('Duplicate original scorer')
+           ids.add(m['raw_score_sha256'])
+          print('REALWORLD_FAMILY_DESTINATION_COVERAGE_PASS',fam,expected)
+          PY
+      - name: Recalculate parent-independent inference with separate destination hypotheses and paired bootstrap sensitivity
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py family \
+            --input incoming/reduced --family '${{ matrix.family }}' \
+            --bootstrap-reps '2000' \
+            --output artifacts/reconcile_destination/family/${{ matrix.family }}
+      - name: Recalculate descriptive-only scenario adjacency without p-values
+        run: |
+          python scripts/t3_b3_realworld_v2_neighborhood.py \
+            --input incoming/reduced --family '${{ matrix.family }}' \
+            --grid config/T2_V3_B3_prospective_321_grid.csv \
+            --output artifacts/reconcile_destination/neighborhood/${{ matrix.family }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-parent-${{ matrix.family }}-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/family/${{ matrix.family }}
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-neighbors-${{ matrix.family }}-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/neighborhood/${{ matrix.family }}
+          if-no-files-found: error
+          retention-days: 90
+
+  global-destination:
+    needs: family-destination
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v3-destination-parent-*-run${{ github.run_id }}
+          path: incoming/families
+      - name: Apply one global BH adjustment in each prespecified parent and empirical-destination panel
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py global \
+            --input incoming/families --output artifacts/reconcile_destination/global
+          python - <<'PY'
+          import csv,gzip,json,pathlib
+          out=pathlib.Path('artifacts/reconcile_destination/global')
+          m=json.loads((out/'scientific_provenance.json').read_text())
+          if m['own_benchmark_family_policy']!='destination' or m['original_candidate_count']!=720:
+           raise ValueError('Unexpected scientific benchmark policy or candidate registry')
+          if m['primary_hypotheses']<=0 or m['secondary_hypotheses']<=0:
+           raise ValueError('Empty global family of hypotheses')
+          for name in ('primary_parent_BH_taxonomy.csv.gz','secondary_family_transfer_BH_taxonomy.csv.gz'):
+           with gzip.open(out/name,'rt',newline='') as f:
+            rows=list(csv.DictReader(f))
+           if len({r['candidate_id'] for r in rows})!=720:
+            raise ValueError('Lost original training-seed candidate identities')
+          print('REALWORLD_V3_DESTINATION_COMPLETE_PRIMARY_SECONDARY_BH_PASS',m['primary_hypotheses'],m['secondary_hypotheses'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-global-taxonomy-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/global
+          if-no-files-found: error
+          retention-days: 90
+
+  reviewer-and-handoff:
+    needs: [verify-checkpoints, global-destination, family-destination]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-global-taxonomy-run${{ github.run_id }}
+          path: incoming/global
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v3-destination-neighbors-*-run${{ github.run_id }}
+          path: incoming/neighbors
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-856-source-ledger-run42286256315
+          run-id: '42286256315'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/ledger
+      - name: Reviewer verifies all 720 individual W, BH taxonomy, parent coverage and descriptive neighborhood boundaries
+        run: |
+          python scripts/t3_b3_realworld_v2_reviewer.py inspect \
+            --global-root incoming/global --neighborhood-root incoming/neighbors \
+            --output artifacts/reconcile_destination/reviewer --source-run '${{ github.run_id }}'
+      - name: Publish immutable Codex lineage, not a replacement for the original source-policy result
+        env:
+          AUDIT_RUN: 42257025451
+        run: |
+          python - <<'PY'
+          import json,os,pathlib
+          src=json.loads(pathlib.Path('incoming/ledger/full_input_source_ledger.json').read_text())
+          result=json.loads(pathlib.Path('incoming/global/scientific_provenance.json').read_text())
+          if src['source_shards']!=856 or result['own_benchmark_family_policy']!='destination':
+           raise ValueError('Missing recovery lineage')
+          out=pathlib.Path('artifacts/reconcile_destination/handoff')
+          out.mkdir(parents=True,exist_ok=False)
+          meta={'protocol':'T3_B3_RW_V3_DESTINATION_CLASSICAL_COMPARATOR_SENSITIVITY',
+                'original_source_score_runs':src['original_source_runs'],
+                'original_scorer_artifacts':856,'original_training_seeds':list(range(10)),
+                'original_realworld_seeds':list(range(30,40)),
+                'original_source_policy_global_run':42251598557,
+                'audit_run':int(os.environ['AUDIT_RUN']),
+                'destination_reduction_and_inference_run':int(os.environ['GITHUB_RUN_ID']),
+                'preserved_successful_reduction_run':42286256315,
+                'preserved_successful_reduction_job_count':125,
+                'recomputed_missing_reduction_jobs':91,
+                'frozen_parent_map_run':41514871500,'frozen_classical_benchmark_run':41478038812,
+                'original_engine_averaged_tournament_run':41699936409,
+                'distinct_original_candidate_W':720,
+                'parent_unit':'parent_dataset_id',
+                'reference_policy':'estimated_empirical_destination_family',
+                'inference_status':'supplementary_benchmark_sensitivity_not_primary_replacement',
+                'primary_hypotheses':result['primary_hypotheses'],
+                'secondary_hypotheses':result['secondary_hypotheses'],
+                'parent_bootstrap_reps':result['parent_bootstrap_reps'],
+                'no_simulation_or_Discovery_refitting':True,'no_original_results_overwritten':True,
+                'scoring_reexecution':False,'reviewer_required':True}
+          (out/'codex_lineage.json').write_text(json.dumps(meta,indent=2)+'\n')
+          (out/'CODEX_IMPORT.md').write_text(
+           '# Real World benchmark reconciliation\n\n'
+           'Keep the original 856 raw scores, the 720 individual Discovery W, and '
+           'the successful source-family benchmark primary inference from run 42251598557. '
+           'This destination-reference re-reduction is a separate sensitivity analysis; '
+           'never append its rows to the old primary BH hypothesis family. '
+           'Full scoring, Monte Carlo, and Discovery are not rerun. '
+           'Use the frozen parent_id as the independent inferential unit; '
+           'neighbor scenarios are descriptive only. '
+           'Bootstrap CIs are sensitivity checks and do not override global BH. '
+           'Control optimizers are not present in the 856 source artifacts and require separate work.\n')
+          print('REALWORLD_V3_DESTINATION_FINAL_CODEX_PROVENANCE_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-verified-reviewer-lineage-run${{ github.run_id }}
+          path: |
+            artifacts/reconcile_destination/reviewer
+            artifacts/reconcile_destination/handoff
+          if-no-files-found: error
+          retention-days: 90
