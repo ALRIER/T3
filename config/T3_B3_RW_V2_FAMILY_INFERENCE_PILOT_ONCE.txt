@@ -1,0 +1,1 @@
+Check full ten-seed parent inference and observational-neighbor migration using 134 existing (already completed) normal-family raw-score reduction checkpoints from run 42249952933. No resimulation or repeated individual score reduction.
