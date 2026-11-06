@@ -1,0 +1,4 @@
+T3 B3 Real-World V2 candidate seedwise raw score recovery pilot.
+One original 720 MB realworld scoring shard from successful source 41208956012.
+Verify original score manifest SHA, source family, 40 individual W per source family/n, 2 frozen benchmarks, 743 outcome-blind empirical destination children, parent unit and matched scenario identities.
+No original scoring or Discovery rerun.
