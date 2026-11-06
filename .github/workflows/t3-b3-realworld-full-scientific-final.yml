@@ -1,0 +1,268 @@
+name: T3 B3 Real World — Complete scientific finalization of all frozen evidence
+run-name: "Real World FULL | all 856 source shards | 720 individual W | source + destination | final reviewer"
+"on":
+  push:
+    branches: [main]
+    paths: ['config/T3_B3_REALWORLD_COMPLETE_FINAL_LAUNCH_ONCE.txt']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-realworld-complete-scientific-final-20261106
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+jobs:
+  full-provenance-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - name: Validate complete original 856 raw scorer and all 216+216 reduction histories, and both finished global policies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os,subprocess
+          repo=os.environ['GITHUB_REPOSITORY']
+          def get(path):
+           return json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/{path}'],text=True))
+          for rid in (40508641708,41478038812,41514871500,42251598557,42257025451,42257835687,42282378329):
+           x=get('actions/runs/'+str(rid))
+           if x['conclusion']!='success':raise ValueError('Incomplete primary frozen experiment or recovery '+str(rid))
+          def arts(rid):
+           out={}
+           for p in range(1,8):
+            records=get(f'actions/runs/{rid}/artifacts?per_page=100&page={p}')['artifacts']
+            for x in records:
+             if x['expired']:raise ValueError('Expired preserved artifact: '+x['name'])
+             if x['name'] in out:raise ValueError('Duplicate preserved artifact name '+x['name'])
+             out[x['name']]=x
+            if len(records)<100:break
+           return out
+          source=arts(42251598557);destination=arts(42282378329)
+          orig=arts(42280205758);repaired=arts(42282378329)
+          original_reductions={x for x in orig if x.startswith('t3-rw-v3-destination-reduced-')}
+          rescue_reductions={x for x in repaired if x.startswith('t3-rw-v3-destination-reduced-')}
+          if len(original_reductions)!=213 or len(rescue_reductions)!=3:
+           raise ValueError('Destination checkpoint coverage is not complete (213+3)')
+          full_source='t3-rw-v2-recovered-720W-global-BH-taxonomy-run42251598557'
+          full_dest='t3-rw-v3-destination-global-taxonomy-run42282378329'
+          if full_source not in source or full_dest not in destination:raise ValueError('Missing a complete global policy')
+          for family in ('normal','lognormal','weibull','invgauss','exgaussian','exwald'):
+           for kind in ('parent','neighborhood'):
+            prefix=f't3-rw-v2-recovered-{kind}-{family}-run42251598557'
+            if prefix not in source:raise ValueError('Missing source-family '+prefix)
+           for kind in ('parent','neighbors'):
+            if f't3-rw-v3-destination-{kind}-{family}-run42282378329' not in destination:
+             raise ValueError('Missing destination-family '+family+'/'+kind)
+          print('REALWORLD_FULL_ALL_FAMILIES_SOURCE_DESTINATION_856_720W_PROVENANCE_PASS',flush=True)
+          PY
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v2-preserved-856-source-lineage-run42251598557
+          run-id: '42251598557'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/ledger
+      - name: Independently verify frozen original scorer artifact identities
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          f=pathlib.Path('incoming/ledger/full_input_source_ledger.json')
+          d=json.loads(f.read_text())
+          x=d['all_artifacts']
+          if len(x)!=856 or len({r['artifact_id'] for r in x})!=856 or d['reduction_jobs']!=216:
+           raise ValueError('Immutable original 856 source registry inconsistent')
+          print('REALWORLD_FULL_FROZEN_856_SOURCE_IDENTITY_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-full-preserved-856-source-lineage-run${{ github.run_id }}
+          path: incoming/ledger/full_input_source_ledger.json
+          if-no-files-found: error
+          retention-days: 90
+
+  source-policy-review:
+    needs: full-provenance-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v2-recovered-720W-global-BH-taxonomy-run42251598557
+          run-id: '42251598557'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/global
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v2-recovered-neighborhood-*-run42251598557
+          run-id: '42251598557'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/neighbors
+      - name: Independent complete original source-family policy reviewer (720 W, 2 BH panels, six neighborhoods)
+        run: |
+          python scripts/t3_b3_realworld_v2_reviewer.py inspect \
+            --global-root incoming/global --neighborhood-root incoming/neighbors \
+            --output artifacts/final/source/reviewer --source-run 42251598557
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-full-source-policy-review-run${{ github.run_id }}
+          path: artifacts/final/source/reviewer
+          if-no-files-found: error
+          retention-days: 90
+
+  destination-policy-review:
+    needs: full-provenance-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-global-taxonomy-run42282378329
+          run-id: '42282378329'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/global
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v3-destination-neighbors-*-run42282378329
+          run-id: '42282378329'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/neighbors
+      - name: Independent complete empirical destination policy reviewer (720 W, 2 BH panels, six neighborhoods)
+        run: |
+          python scripts/t3_b3_realworld_v2_reviewer.py inspect \
+            --global-root incoming/global --neighborhood-root incoming/neighbors \
+            --output artifacts/final/destination/reviewer --source-run 42282378329
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-full-destination-policy-review-run${{ github.run_id }}
+          path: artifacts/final/destination/reviewer
+          if-no-files-found: error
+          retention-days: 90
+
+  complete-realworld-analysis:
+    needs: [full-provenance-gate,source-policy-review,destination-policy-review]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v2-recovered-720W-global-BH-taxonomy-run42251598557
+          run-id: '42251598557'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/source
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-global-taxonomy-run42282378329
+          run-id: '42282378329'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/destination
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-full-source-policy-review-run${{ github.run_id }}
+          path: incoming/reviews/source
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-full-destination-policy-review-run${{ github.run_id }}
+          path: incoming/reviews/destination
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-full-preserved-856-source-lineage-run${{ github.run_id }}
+          path: incoming/ledger
+      - name: Full scientific comparison all 720 W, both global BH panels, six families, own vs mean, source vs destination, tier migrations and provenance
+        run: |
+          python scripts/t3_b3_realworld_full_consolidation.py \
+            --source incoming/source --destination incoming/destination \
+            --source-review incoming/reviews/source \
+            --destination-review incoming/reviews/destination \
+            --ledger incoming/ledger/full_input_source_ledger.json \
+            --output artifacts/final/complete
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-full-complete-scientific-analysis-720W-run${{ github.run_id }}
+          path: artifacts/final/complete
+          if-no-files-found: error
+          retention-days: 90
+
+  complete-lineage-and-handoff:
+    needs: [full-provenance-gate,source-policy-review,destination-policy-review,complete-realworld-analysis]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-full-complete-scientific-analysis-720W-run${{ github.run_id }}
+          path: incoming/complete
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-full-preserved-856-source-lineage-run${{ github.run_id }}
+          path: incoming/ledger
+      - name: Final hard scientific gate and complete Codex experiment lineage
+        run: |
+          python - <<'PY'
+          import csv,json,pathlib,hashlib
+          root=pathlib.Path('incoming/complete')
+          meta=json.loads((root/'final_complete_provenance.json').read_text())
+          if meta['paired_contrasts_across_two_policies']!=18960 or meta['mean_reference_measurement_invariance_checked']!=9480:
+           raise ValueError('Incomplete 720W full two-policy paired panels')
+          with (root/'all_720_individual_W_cross_policy_summary.csv').open(newline='') as f:
+           rows=list(csv.DictReader(f))
+          if len(rows)!=720:raise ValueError('Missing frozen 720 candidate coverage')
+          destination=pathlib.Path('artifacts/T3_B3_REALWORLD_FULL_CODEX_HANDOFF')
+          destination.mkdir(parents=True)
+          input_ledger=pathlib.Path('incoming/ledger/full_input_source_ledger.json')
+          provenance={'mode':'T3_B3_REALWORLD_FULL_COMPLETED_STAGE_CONSOLIDATION',
+           'original_external_score_sources':json.loads(input_ledger.read_text())['original_source_runs'],
+           'original_score_shards':856,'independent_external_parents':642,'classified_child_profiles':743,
+           'frozen_individual_W':720,'original_training_seeds':list(range(10)),
+           'external_eval_seeds':list(range(30,40)),
+           'primary_source_policy_run':42251598557,'destination_policy_sensitivity_run':42282378329,
+           'destination_reducer_213_job_original_run':42280205758,
+           'destination_reducer_3_job_rescue_run':42282378329,
+           'new_complete_synthesis_run':'${{ github.run_id }}',
+           'complete_comparison_artifact':'t3-rw-full-complete-scientific-analysis-720W-run${{ github.run_id }}',
+           'original_856_ledger_sha256':hashlib.sha256(input_ledger.read_bytes()).hexdigest(),
+           'publication_inference':'parent_dataset_id independent; per-policy global BH separate',
+           'additional_non_evolutionary_controls_scored_in_this_parent_block_experiment':False,
+           'historical_engine_averaged_tournament':'archived; invalid for individual W inference',
+           'raw_scorer_and_optimizer_retraining':False}
+          (destination/'codex_full_lineage.json').write_text(json.dumps(provenance,indent=2)+'\n')
+          (destination/'README.md').write_text(
+           '# T3/B3 Real World — Full stage scientific finalization\n\n'
+           'This run verifies all 856 original scoring artifacts, 720 independently identified trained W, '
+           'all six source families, all three n, ten original evaluation seeds, two classical benchmark policies, '
+           'two separate BH panels per policy, six family neighborhood summaries per policy, and a complete reviewer.\n\n'
+           'Use the complete scientific analysis artifact for 18,960 aligned individual-W comparisons across two policies. '
+           'Do not mix the original source-policy confirmatory q-values with the supplementary empirical-destination q-values. '
+           'Original raw scorer and Discovery W remain immutable. '
+           'The historical two non-evolutionary control optimizers were not included in the frozen 856-scoring dataset; '
+           'this handoff explicitly does not claim to have scored them.\n')
+          print('T3_B3_REALWORLD_FULL_LINEAGE_AND_720W_FINAL_REVIEW_PASS',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-full-final-Codex-lineage-run${{ github.run_id }}
+          path: artifacts/T3_B3_REALWORLD_FULL_CODEX_HANDOFF
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,4 @@
+ONE TIME COMPLETE REAL WORLD SCIENTIFIC EXECUTION
+User explicitly authorized full complete Real World pipeline, November 6, 2026.
+This pipeline requires both successful source-family primary (42251598557) and destination-family sensitivity (42282378329), original 856 scorer artifacts with all 216 source and destination reduction blocks, and computes 720 W fully paired global source/destination inference comparison, six family neighbourhoods, two independent reviewer audits, final complete lineage.
+Do not retrain Discovery or rescore completed original Real World raw scores; do not mix BH q values across policies.
