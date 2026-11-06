@@ -1,0 +1,233 @@
+name: T3 B3 Real World — Recover invgauss family and finish destination analysis
+run-name: "Real World destination completion | invgauss only | reuse completed families | max 22"
+"on":
+  push:
+    branches: [main]
+    paths: ['config/T3_B3_RW_INVGAUSS_FINALIZE_ONCE.txt']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-rw-invgauss-finalization-once
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+jobs:
+  family-destination-invgauss:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-856-source-ledger-run42286256315
+          run-id: '42286256315'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/ledger
+      - name: Restore invgauss reducers from completed recovery, preserving all original score identities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py --run 42293967583 \
+            --repo '${{ github.repository }}' \
+            --pattern 't3-rw-v3-destination-reduced-invgauss-b*-run42293967583' \
+            --dir incoming/reduced
+      - name: Verify full original invgauss coverage, hash lineage and destination policy
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          source=json.loads(pathlib.Path('incoming/ledger/full_input_source_ledger.json').read_text())
+          expected=sum(x['family']=='invgauss' for x in source['all_artifacts'])
+          root=pathlib.Path('incoming/reduced')
+          p=list(root.rglob('parent_*.csv.gz'))
+          n=list(root.rglob('neighbor_*.csv.gz'))
+          manifests=list(root.rglob('parent_*.manifest.json'))
+          if len(p)!=expected or len(n)!=expected or len(manifests)!=expected:
+           raise ValueError(f'Incomplete invgauss source coverage: {len(p)}, {len(n)}, {len(manifests)} / {expected}')
+          ids=set()
+          for path in manifests:
+           m=json.loads(path.read_text())
+           if m.get('own_benchmark_family_policy')!='destination':raise ValueError('Mixed benchmark policy')
+           if m['raw_score_sha256'] in ids:raise ValueError('Duplicate original scorer')
+           ids.add(m['raw_score_sha256'])
+          print('REALWORLD_INVGAUSS_COVERAGE_PASS',expected,flush=True)
+          PY
+      - name: Recalculate invgauss parent-independent inference
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py family \
+            --input incoming/reduced --family invgauss \
+            --bootstrap-reps '2000' \
+            --output artifacts/reconcile_destination/family/invgauss
+      - name: Recalculate invgauss descriptive-only scenario adjacency
+        run: |
+          python scripts/t3_b3_realworld_v2_neighborhood.py \
+            --input incoming/reduced --family invgauss \
+            --grid config/T2_V3_B3_prospective_321_grid.csv \
+            --output artifacts/reconcile_destination/neighborhood/invgauss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-parent-invgauss-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/family/invgauss
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-neighbors-invgauss-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/neighborhood/invgauss
+          if-no-files-found: error
+          retention-days: 90
+
+  global-destination:
+    needs: family-destination-invgauss
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - name: Restore five successful independent family results
+        uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v3-destination-parent-*-run42293967583
+          run-id: '42293967583'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: incoming/families
+      - name: Restore repaired invgauss family result
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-parent-invgauss-run${{ github.run_id }}
+          path: incoming/families
+      - name: Confirm exactly six family results and run global BH inference
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py global \
+            --input incoming/families --output artifacts/reconcile_destination/global
+          python - <<'PY'
+          import csv,gzip,json,pathlib
+          out=pathlib.Path('artifacts/reconcile_destination/global')
+          m=json.loads((out/'scientific_provenance.json').read_text())
+          if m['own_benchmark_family_policy']!='destination' or m['original_candidate_count']!=720:
+           raise ValueError('Unexpected benchmark policy or original candidate registry')
+          if m['primary_hypotheses']<=0 or m['secondary_hypotheses']<=0:
+           raise ValueError('Empty global hypothesis family')
+          for name in ('primary_parent_BH_taxonomy.csv.gz','secondary_family_transfer_BH_taxonomy.csv.gz'):
+           with gzip.open(out/name,'rt',newline='') as f:rows=list(csv.DictReader(f))
+           if len({r['candidate_id'] for r in rows})!=720:
+            raise ValueError('Original training-seed identities lost')
+          print('REALWORLD_DESTINATION_GLOBAL_BH_PASS',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-global-taxonomy-run${{ github.run_id }}
+          path: artifacts/reconcile_destination/global
+          if-no-files-found: error
+          retention-days: 90
+
+  reviewer-and-handoff:
+    needs: [family-destination-invgauss, global-destination]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-global-taxonomy-run${{ github.run_id }}
+          path: incoming/global
+      - name: Restore five completed neighborhood artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v3-destination-neighbors-*-run42293967583
+          run-id: '42293967583'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: incoming/neighbors
+      - name: Restore invgauss neighborhood artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-neighbors-invgauss-run${{ github.run_id }}
+          path: incoming/neighbors
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v3-destination-856-source-ledger-run42286256315
+          run-id: '42286256315'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/ledger
+      - name: Run original reviewer audit of family coverage, 720 weights and descriptive limits
+        run: |
+          python scripts/t3_b3_realworld_v2_reviewer.py inspect \
+            --global-root incoming/global --neighborhood-root incoming/neighbors \
+            --output artifacts/reconcile_destination/reviewer --source-run '${{ github.run_id }}'
+      - name: Publish immutable original-and-recovery provenance
+        env:
+          AUDIT_RUN: 42257025451
+        run: |
+          python - <<'PY'
+          import json,os,pathlib
+          src=json.loads(pathlib.Path('incoming/ledger/full_input_source_ledger.json').read_text())
+          result=json.loads(pathlib.Path('incoming/global/scientific_provenance.json').read_text())
+          if src['source_shards']!=856 or result['own_benchmark_family_policy']!='destination':
+           raise ValueError('Missing original scorer or frozen policy lineage')
+          out=pathlib.Path('artifacts/reconcile_destination/handoff')
+          out.mkdir(parents=True,exist_ok=False)
+          meta={'protocol':'T3_B3_RW_V3_DESTINATION_CLASSICAL_COMPARATOR_SENSITIVITY',
+                'original_source_score_runs':src['original_source_runs'],
+                'original_scorer_artifacts':856,
+                'original_training_seeds':list(range(10)),
+                'original_realworld_seeds':list(range(30,40)),
+                'original_source_policy_global_run':42251598557,
+                'audit_run':int(os.environ['AUDIT_RUN']),
+                'destination_reduction_and_inference_run':int(os.environ['GITHUB_RUN_ID']),
+                'preserved_reducer_run':42286256315,
+                'preserved_reducer_jobs':125,
+                'recovered_reducer_run':42293967583,
+                'recovered_reducer_jobs':91,
+                'preserved_five_family_inference_run':42293967583,
+                'recomputed_family':'invgauss',
+                'frozen_parent_map_run':41514871500,
+                'frozen_classical_benchmark_run':41478038812,
+                'original_engine_averaged_tournament_run':41699936409,
+                'distinct_original_candidate_W':720,
+                'parent_unit':'parent_dataset_id',
+                'reference_policy':'estimated_empirical_destination_family',
+                'inference_status':'supplementary_benchmark_sensitivity_not_primary_replacement',
+                'primary_hypotheses':result['primary_hypotheses'],
+                'secondary_hypotheses':result['secondary_hypotheses'],
+                'parent_bootstrap_reps':result['parent_bootstrap_reps'],
+                'no_simulation_or_Discovery_refitting':True,
+                'no_original_results_overwritten':True,
+                'scoring_reexecution':False,
+                'reviewer_required':True}
+          (out/'codex_lineage.json').write_text(json.dumps(meta,indent=2)+'\n')
+          (out/'CODEX_IMPORT.md').write_text(
+           '# Real World destination benchmark recovery\n\n'
+           'Keep the original 856 raw scores and 720 distinct Discovery weights. '
+           'Retain all 125 old reducers and 91 recovered reducers; preserve the five '
+           'successful original destination-family analyses and recompute invgauss only. '
+           'This destination-reference reconciliation is a separate benchmark sensitivity '
+           'analysis, not the original source-family primary result. '
+           'The parent dataset remains the independent inferential unit; '
+           'scenario adjacency is descriptive only. '
+           'No scoring, Monte Carlo or Discovery training was rerun.\n')
+          print('REALWORLD_DESTINATION_FINAL_CODEX_PROVENANCE_PASS',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-destination-verified-reviewer-lineage-run${{ github.run_id }}
+          path: |
+            artifacts/reconcile_destination/reviewer
+            artifacts/reconcile_destination/handoff
+          if-no-files-found: error
+          retention-days: 90
