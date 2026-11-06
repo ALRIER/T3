@@ -1,0 +1,40 @@
+name: T3 B3 Real-World V2 — Existing-Checkpoint Family Inference Pilot
+"on":
+  push:
+    branches: [main]
+    paths: ['config/T3_B3_RW_V2_FAMILY_INFERENCE_PILOT_ONCE.txt']
+permissions: {contents: read, actions: read}
+jobs:
+  independently-audit-one-complete-family:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - name: Reuse all 34 completed normal-family reduction groups without original scoring
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 42249952933 --repo '${{ github.repository }}' \
+           --pattern 't3-rw-v2-reduced-normal-b*-run42249952933' \
+           --dir incoming/reduced
+          test "$(find incoming/reduced -name 'parent_*.csv.gz' | wc -l)" -eq 134
+          test "$(find incoming/reduced -name 'neighbor_*.csv.gz' | wc -l)" -eq 134
+      - name: Test independent-parent inference with all ten evaluation seeds 30–39
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py family \
+           --input incoming/reduced --family normal \
+           --output artifacts/rw_v2_test/normal-parent
+      - name: Test observed matched-scenario adjacency and cross-scenario migration
+        run: |
+          python scripts/t3_b3_realworld_v2_neighborhood.py \
+           --input incoming/reduced --family normal \
+           --grid config/T2_V3_B3_prospective_321_grid.csv \
+           --output artifacts/rw_v2_test/normal-neighbor
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-confirmed-normal-family-inference-run${{ github.run_id }}
+          path: artifacts/rw_v2_test
+          if-no-files-found: error
+          retention-days: 90
