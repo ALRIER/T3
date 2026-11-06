@@ -1,0 +1,100 @@
+name: T3 B3 Real World — One-shard destination benchmark pilot
+run-name: "Real World destination benchmark | one immutable raw-score pilot"
+"on":
+  push:
+    branches: [main]
+    paths: ['config/T3_B3_RW_DESTINATION_PILOT_ONCE.txt']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-realworld-destination-pilot-one-shard
+  cancel-in-progress: false
+jobs:
+  compare-one-preserved-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - name: Obtain immutable outcome-blind destination and classical benchmark maps
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-block-plan-run41514871500
+          run-id: '41514871500'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/maps
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run41478038812
+          run-id: '41478038812'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/benchmark
+      - name: Download only original normal/seed30/n200 raw scorer archive, with its original score manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 41208956012 --repo '${{ github.repository }}' \
+            --name 't3-b3-realworld-normal-s30-n200-run41208956012' --dir incoming/raw
+      - name: Score neither models nor datasets; test the two frozen benchmark policies against the same original score file
+        run: |
+          python - <<'PY'
+          import csv,gzip,json,pathlib,subprocess,hashlib
+          score=list(pathlib.Path('incoming/raw').rglob('scores.csv'))
+          fam=list(pathlib.Path('incoming/maps').rglob('empirical_family_proximity.csv'))
+          benchmark=list(pathlib.Path('incoming/benchmark').rglob('own_benchmark_map.csv'))
+          if len(score)!=1 or len(fam)!=1 or len(benchmark)!=1:
+           raise ValueError('Expected exactly one immutable scorer and one of each frozen map')
+          root=pathlib.Path('artifacts/realworld_destination_pilot');root.mkdir(parents=True)
+          for policy in ('source','destination'):
+           subprocess.run(['python','scripts/t3_b3_realworld_v2_reduce.py',
+            '--input',str(score[0]),'--family-map',str(fam[0]),'--benchmark',str(benchmark[0]),
+            '--own-policy',policy,'--output',str(root/(policy+'.csv.gz')),
+            '--neighbor-output',str(root/(policy+'_neighbor.csv.gz'))],check=True)
+          def read(policy):
+           with gzip.open(root/(policy+'.csv.gz'),'rt',newline='') as f:
+            rows=list(csv.DictReader(f))
+           keys={tuple(r[k] for k in ('source_family','candidate_id','training_seed','sample_n','realworld_seed',
+                'parent_dataset_id','transfer_scope','evaluation_family','benchmark_role')):r for r in rows}
+           if len(keys)!=len(rows):raise ValueError('Duplicate paired output key')
+           return keys
+          a=read('source');b=read('destination')
+          if a.keys()!=b.keys():raise ValueError('Candidate or parent pairing differs by frozen benchmark policy')
+          changed=0;mean=0;own=0
+          for k,x in a.items():
+           y=b[k]
+           if k[-1]=='mean':
+            mean+=1
+            for m in ('mse_difference','q95_difference','mse_gain_pct','q95_gain_pct'):
+             if x[m]!=y[m]:raise ValueError('The mean reference changed despite only changing the classical comparator policy')
+           else:
+            own+=1
+            if any(x[m]!=y[m] for m in ('mse_difference','q95_difference','mse_gain_pct','q95_gain_pct')):
+             changed+=1
+          ids={k[1] for k in a}
+          if len(ids)!=40 or mean!=own:
+           raise ValueError('Failed 40 frozen W or two-benchmark pairing coverage')
+          source_meta=json.loads((root/'source.csv.manifest.json').read_text())
+          destination_meta=json.loads((root/'destination.csv.manifest.json').read_text())
+          if source_meta['raw_score_sha256']!=destination_meta['raw_score_sha256']:
+           raise ValueError('Different historical original scorer SHA between policies')
+          out={'protocol':'T3_B3_RW_DESTINATION_ONE_SHARD_SMOKE',
+               'original_scoring_run':41208956012,'original_candidate_W_in_one_source_family_n':40,
+               'raw_scorer_sha256':source_meta['raw_score_sha256'],'paired_source_rows':len(a),
+               'source_classical_rows':own,'classical_reference_changed_rows':changed,
+               'arithmetic_mean_comparison_rows_unchanged':mean,
+               'both_frozen_policies_succeeded':True,'no_new_scoring_or_retraining':True,
+               'evaluation_seed':30,'source_family':'normal','sample_n':200}
+          (root/'pilot_report.json').write_text(json.dumps(out,indent=2)+'\n')
+          print('REALWORLD_DESTINATION_REAL_RAW_SCORE_PILOT_PASS',len(a),'paired output rows,',changed,'changed own-comparator rows')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v3-one-source-destination-policy-pilot-run${{ github.run_id }}
+          path: artifacts/realworld_destination_pilot
+          if-no-files-found: error
+          retention-days: 90

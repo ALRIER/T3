@@ -1,0 +1,2 @@
+ONE TIME DESTINATION CLASSICAL BENCHMARK REAL DATA PILOT
+Source scoring run 41208956012, normal seed30 n200 only. No Monte Carlo, training or new scoring.
