@@ -1,0 +1,66 @@
+name: T3 B3 Real-World V2 — Single Raw-Score Recovery Pilot
+"on":
+  push:
+    branches: [main]
+    paths: ['config/T3_B3_RW_V2_PILOT_ONCE.txt']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  raw-contract-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-exwald-s39-n200-run41208956012
+          run-id: '41208956012'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/raw
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-block-plan-run41514871500
+          run-id: '41514871500'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/parent-plan
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run41478038812
+          run-id: '41478038812'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/bench
+      - name: Validate original single-shard score provenance and 40 independent W
+        run: |
+          set -euo pipefail
+          RAW="$(find incoming/raw -name scores.csv -print -quit)"
+          MAP="$(find incoming/parent-plan -name empirical_family_proximity.csv -print -quit)"
+          BENCH="$(find incoming/bench -name own_benchmark_map.csv -print -quit)"
+          test -s "$RAW" -a -s "$MAP" -a -s "$BENCH"
+          python scripts/t3_b3_realworld_v2_reduce.py \
+            --input "$RAW" --family-map "$MAP" --benchmark "$BENCH" \
+            --output artifacts/realworld_v2/parent_13122009089.csv.gz \
+            --neighbor-output artifacts/realworld_v2/neighbor_13122009089.csv.gz
+          python - <<'PY'
+          import gzip,csv,collections,json,pathlib
+          p=pathlib.Path('artifacts/realworld_v2/parent_13122009089.csv.gz')
+          with gzip.open(p,'rt') as f:
+           rows=list(csv.DictReader(f))
+          assert len(rows)>1000
+          ids=set(x['candidate_id'] for x in rows)
+          assert len(ids)==40
+          assert all(x['training_seed'] in map(str,range(10)) for x in rows)
+          assert set(x['benchmark_role'] for x in rows)=={'own','mean'}
+          print('REALWORLD_V2_RAW_INDIVIDUAL_PILOT_PASS',len(rows),'rows',len(ids),'W')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-realworld-v2-pilot-run${{ github.run_id }}
+          path: artifacts/realworld_v2
+          if-no-files-found: error
+          retention-days: 90
