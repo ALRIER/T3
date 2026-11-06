@@ -39,7 +39,7 @@ def read_benchmark(p):
   if r['own_benchmark'] not in CLASSICS or r['own_benchmark']=='mean':
    die('Nonclassic or mean own comparator')
   out[key]=r['own_benchmark']
- if len(out)!=6*321*3:die('Incomplete Discovery-frozen benchmark map')
+ if len(out)!=6*241*3:die('Incomplete Discovery-frozen 241-support-scenario benchmark map')
  return out
 
 def read_family_map(p):
