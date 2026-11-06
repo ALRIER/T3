@@ -1,0 +1,276 @@
+name: T3 B3 Real-World V2 — Unified Individual-W Reanalysis
+run-name: Real-World V2 | 856 immutable scores | 720 frozen W | parent-level BH
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'config/T3_B3_REALWORLD_V2_FULL_LAUNCH_ONCE.txt'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Full existing-raw-score reanalysis only
+        type: choice
+        options: [full]
+        required: true
+        default: full
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-realworld-v2-full-immutable-sources
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+
+jobs:
+  plan-raw:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      matrix: ${{ steps.raw.outputs.matrix }}
+      jobs_expected: ${{ steps.raw.outputs.n_jobs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - name: Validate successful raw-source runs and completed Real-World V2 pilot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/${{ github.repository }}/actions/runs/42249242302 --jq .conclusion)" = success
+          test "$(gh api repos/${{ github.repository }}/actions/runs/40508641708 --jq .conclusion)" = success
+          test "$(gh api repos/${{ github.repository }}/actions/runs/41514871500 --jq .conclusion)" = success
+          test "$(gh api repos/${{ github.repository }}/actions/runs/41478038812 --jq .conclusion)" = success
+          echo 'REALWORLD_V2_FROZEN_SOURCE_AND_SINGLE_SHARD_PILOT_PASS'
+      - name: Freeze complete raw-score input inventory and 4-shard matrix
+        id: raw
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_realworld_v2_plan.py \
+            --output artifacts/rw_v2/full_input_source_ledger.json \
+            --github-output "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-856-raw-source-ledger-run${{ github.run_id }}
+          path: artifacts/rw_v2/full_input_source_ledger.json
+          if-no-files-found: error
+          retention-days: 90
+
+  individual-reduce:
+    needs: plan-raw
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 22
+      matrix: ${{ fromJSON(needs.plan-raw.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-realworld-block-plan-run41514871500
+          run-id: '41514871500'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/maps
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run41478038812
+          run-id: '41478038812'
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/benchmark
+      - name: Download, hash-verify, reduce, delete one source at a time (maximum four)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCES_JSON: ${{ toJSON(matrix.sources) }}
+          EXPECTED_FAMILY: ${{ matrix.family }}
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,subprocess,shutil
+          sources=json.loads(os.environ['SOURCES_JSON'])
+          fam=os.environ['EXPECTED_FAMILY']
+          if not 1<=len(sources)<=4:raise RuntimeError('Invalid bounded reducer shard')
+          m=list(pathlib.Path('incoming/maps').rglob('empirical_family_proximity.csv'))
+          b=list(pathlib.Path('incoming/benchmark').rglob('own_benchmark_map.csv'))
+          if len(m)!=1 or len(b)!=1:raise RuntimeError('Frozen outcome-blind map or benchmark not unique')
+          out=pathlib.Path('artifacts/realworld_v2/reduced')
+          out.mkdir(parents=True,exist_ok=True)
+          for entry in sources:
+           if entry['family']!=fam:raise RuntimeError('Family boundary collision')
+           aid=entry['artifact_id']
+           temp=pathlib.Path('incoming/raw')/str(aid);temp.mkdir(parents=True,exist_ok=False)
+           subprocess.run(['gh','run','download',str(entry['run_id']),'--repo',os.environ['GITHUB_REPOSITORY'],
+             '--name',entry['artifact_name'],'--dir',str(temp)],check=True)
+           files=list(temp.rglob('scores.csv'))
+           if len(files)!=1:raise RuntimeError('Expected a single original score CSV per immutable artifact')
+           subprocess.run(['python','scripts/t3_b3_realworld_v2_reduce.py',
+             '--input',str(files[0]),'--family-map',str(m[0]),'--benchmark',str(b[0]),
+             '--output',str(out/f'parent_{aid}.csv.gz'),
+             '--neighbor-output',str(out/f'neighbor_{aid}.csv.gz')],check=True)
+           shutil.rmtree(temp)
+          if len(list(out.glob('parent_*.csv.gz')))!=len(sources) or len(list(out.glob('neighbor_*.csv.gz')))!=len(sources):
+           raise RuntimeError('Lost individual W or neighborhood shard during reduction')
+          print('REALWORLD_V2_SCORE_REUSE_REDUCER_BLOCK_PASS',fam,len(sources))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-reduced-${{ matrix.family }}-b${{ matrix.block }}-run${{ github.run_id }}
+          path: artifacts/realworld_v2/reduced
+          if-no-files-found: error
+          retention-days: 90
+
+  family-parent-and-neighbors:
+    needs: [plan-raw,individual-reduce]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - name: Restore reduced individual W parent and neighbor checkpoints for one source family
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download '${{ github.run_id }}' --repo '${{ github.repository }}' \
+            --pattern 't3-rw-v2-reduced-${{ matrix.family }}-b*-run${{ github.run_id }}' \
+            --dir incoming/reduced
+      - name: Validate source coverage for this family before inference
+        run: |
+          python - <<'PY'
+          import pathlib,json
+          p=pathlib.Path('incoming/reduced')
+          m=list(p.rglob('parent_*.csv.gz'))
+          x=list(p.rglob('neighbor_*.csv.gz'))
+          if len(m)!=len(x) or not 130<=len(m)<=150:raise ValueError('Incomplete or duplicated family scorer input blocks')
+          if len({f.name for f in m})!=len(m):raise ValueError('Duplicated original score artifact ID')
+          print('REALWORLD_V2_FAMILY_SCORE_CHECKPOINTS_PASS',len(m))
+          PY
+      - name: Infer primary W winners across independent parents; secondary cross-family transfer separate
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py family \
+            --input incoming/reduced --family '${{ matrix.family }}' \
+            --output artifacts/realworld_v2/family/${{ matrix.family }}
+      - name: Independently audit observed adjacent scenarios and cross-scenario transfer
+        run: |
+          python scripts/t3_b3_realworld_v2_neighborhood.py \
+            --input incoming/reduced \
+            --grid config/T2_V3_B3_prospective_321_grid.csv \
+            --family '${{ matrix.family }}' \
+            --output artifacts/realworld_v2/neighbor/${{ matrix.family }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-family-parent-${{ matrix.family }}-run${{ github.run_id }}
+          path: artifacts/realworld_v2/family/${{ matrix.family }}
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-family-neighbor-${{ matrix.family }}-run${{ github.run_id }}
+          path: artifacts/realworld_v2/neighbor/${{ matrix.family }}
+          if-no-files-found: error
+          retention-days: 90
+
+  global-primary-secondary-and-taxonomy:
+    needs: family-parent-and-neighbors
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-rw-v2-family-parent-*-run${{ github.run_id }}
+          path: incoming/families
+      - name: Apply separate complete-panel global BH-FDR once and issue four-tier taxonomy
+        run: |
+          python scripts/t3_b3_realworld_v2_infer.py global \
+            --input incoming/families \
+            --output artifacts/realworld_v2/global
+          python - <<'PY'
+          import json,gzip,csv,pathlib
+          root=pathlib.Path('artifacts/realworld_v2/global')
+          m=json.loads((root/'scientific_provenance.json').read_text())
+          if m['primary_hypotheses']<=0 or m['secondary_hypotheses']<=0:raise ValueError('Empty Real-World inference')
+          for name in ('primary_parent_BH_taxonomy.csv.gz','secondary_family_transfer_BH_taxonomy.csv.gz'):
+           with gzip.open(root/name,'rt') as f:
+            r=csv.DictReader(f)
+            if 'tier1_joint_bh_fdr' not in r.fieldnames or 'highest_tier' not in r.fieldnames:
+             raise ValueError('Four-tier scientific taxonomy missing')
+          print('REALWORLD_V2_GLOBAL_PRIMARY_BH_TAXONOMY_PASS',m['primary_hypotheses'],m['secondary_hypotheses'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-complete-720W-global-parent-transfer-taxonomy-run${{ github.run_id }}
+          path: artifacts/realworld_v2/global
+          if-no-files-found: error
+          retention-days: 90
+
+  scientific-handoff:
+    needs: [plan-raw,global-primary-secondary-and-taxonomy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v2-856-raw-source-ledger-run${{ github.run_id }}
+          path: incoming/source
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-v2-complete-720W-global-parent-transfer-taxonomy-run${{ github.run_id }}
+          path: incoming/final
+      - name: Write traceable Codex handoff; preserve original source score artifacts
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          orig=json.loads(pathlib.Path('incoming/source/full_input_source_ledger.json').read_text())
+          result=json.loads(pathlib.Path('incoming/final/scientific_provenance.json').read_text())
+          assert orig['source_shards']==856 and result['primary_hypotheses']>0
+          out=pathlib.Path('artifacts/realworld_v2/handoff');out.mkdir(parents=True)
+          (out/'CODEX_IMPORT.md').write_text(
+           '# T3/B3 Real-World V2 independently recovered 720 W\n\n'
+           'Original RAW scoring is complete and immutable: source shards in the ledger, '
+           'original n=200/1000/3000, Real-World evaluation seeds 30–39.\n'
+           'This run re-reduced original scores without resimulation or retraining Discovery. '
+           'Never concatenate old engine-averaged tournament tables with this per-W inference.\n'
+           'Key: source_family / engine / training_seed / n, paired benchmark, parent_dataset_id. '
+           'Only parent_dataset_id is independent across datasets. Secondary empirical '
+           'destination class inference has a separate BH family.\n'
+           'Scenario-neighborhood files are descriptive only: matched synthetic grid '
+           'label does not identify the true DGP, and neighboring cells can share parents.\n'
+           'Target: child/depth full-sample sample-mean proxy, not unknown population truth.\n')
+          (out/'lineage.json').write_text(json.dumps({
+           'protocol':'T3_B3_RW_V2_856_SHARD_COMPLETE_LINEAGE',
+           'raw_scores':orig['original_source_runs'],
+           'source_catalog_freeze':40508641708,
+           'parent_block_plan':41514871500,
+           'benchmark_freeze':41478038812,
+           'legacy_engine_averaged_tournament':41699936409,
+           'new_raw_score_reducer_run':'${{ github.run_id }}',
+           'individual_frozen_W':720,
+           'primary_parent_BH_hypotheses':result['primary_hypotheses'],
+           'secondary_family_BH_hypotheses':result['secondary_hypotheses']},indent=2)+'\n')
+          print('REALWORLD_V2_FULL_CROSSRUN_PROVENANCE_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-v2-complete-Codex-handoff-run${{ github.run_id }}
+          path: artifacts/realworld_v2/handoff
+          if-no-files-found: error
+          retention-days: 90
