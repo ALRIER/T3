@@ -53,7 +53,12 @@ def read_family_map(p):
  if len(m)!=743:die('Expected 743 frozen empirical child profiles')
  return m
 
-def read_input(path,family_map,bench):
+def own_benchmark_family(source_family,evaluation_family,policy):
+ if policy=='source':return source_family
+ if policy=='destination':return evaluation_family
+ die('Unknown frozen benchmark-family policy '+str(policy))
+
+def read_input(path,family_map,bench,own_policy):
  path=Path(path);mp=path.parent/'score_manifest.csv'
  if not mp.exists():die('Missing original immutable manifest '+str(path))
  man=list(csv.DictReader(mp.open(newline='')))
@@ -82,7 +87,7 @@ def read_input(path,family_map,bench):
    role=r['transfer_scope']
    if role not in ('within_regime','within_family_neighborhood','cross_family_transfer'):
     die('Unknown frozen transfer scope')
-   expected=bench.get((source_family,sid,n))
+   expected=bench.get((own_benchmark_family(source_family,dst,own_policy),sid,n))
    if not expected:die('Missing frozen own benchmark')
    key=(pid,did,depth,role,dst,sid)
    z=(float(r['mse']),float(r['q95']))
@@ -118,7 +123,7 @@ def read_input(path,family_map,bench):
 
 def reduce(a):
  map_=read_family_map(a.family_map);bench=read_benchmark(a.benchmark)
- path=Path(a.input);man,family,n,ev,refs,learned,identity=read_input(path,map_,bench)
+ path=Path(a.input);man,family,n,ev,refs,learned,identity=read_input(path,map_,bench,a.own_policy)
  output=Path(a.output)
  if output.exists():die('Refusing to overwrite existing Real-World V2 reduction')
  output.parent.mkdir(parents=True,exist_ok=True)
@@ -128,7 +133,7 @@ def reduce(a):
  neighbors=[]
  for (key,cid),val in learned.items():
   pid,did,depth,scope,dst,sid=key
-  for role,ref in (('own',bench[(family,sid,n)]),('mean','mean')):
+  for role,ref in (('own',bench[(own_benchmark_family(family,dst,a.own_policy),sid,n)]),('mean','mean')):
    baseline=refs[(key,ref)]
    mse=val[0]-baseline[0];q95=val[1]-baseline[1]
    gm=100*(baseline[0]-val[0])/max(abs(baseline[0]),EPS)
@@ -163,6 +168,7 @@ def reduce(a):
   'raw_score_sha256':sha(path),'source_score_manifest_sha256':sha(path.parent/'score_manifest.csv'),
   'frozen_family_map_sha256':sha(a.family_map),'frozen_benchmark_map_sha256':sha(a.benchmark),
   'source_family':family,'sample_n':n,'realworld_seed':ev,
+  'own_benchmark_family_policy':a.own_policy,
   'distinct_candidate_weights':len(identity),'primary_effect_rows':len(parent),
   'primary_reduced_sha256':sha(output),
   'neighbor_descriptive_only':True,'parent_dataset_id_is_only_independent_unit':True,
@@ -174,6 +180,7 @@ if __name__=='__main__':
  p=argparse.ArgumentParser()
  p.add_argument('--input',required=True)
  p.add_argument('--family-map',required=True)
+ p.add_argument('--own-policy',choices=('source','destination'),default='source')
  p.add_argument('--benchmark',required=True)
  p.add_argument('--output',required=True)
  p.add_argument('--neighbor-output')

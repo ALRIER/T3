@@ -28,17 +28,36 @@ def intervals(values):
   return m,m,m,(2.**(-n) if m<0 else 1.)
  se=sd/math.sqrt(n);crit=float(stats.t.ppf(.975,n-1))
  return m,m-crit*se,m+crit*se,float(stats.t.cdf(m/se,n-1))
-def calc(r,kind):
+def calc(r,kind,bootstrap_reps=0,bootstrap_key=''):
  vals_m=[x[0] for x in r];vals_q=[x[1] for x in r]
  gain_m=[x[2] for x in r];gain_q=[x[3] for x in r]
  m=intervals(vals_m);q=intervals(vals_q);gm=intervals(gain_m);gq=intervals(gain_q)
- return {'inference_scope':kind,'independent_parent_datasets':len(r),
+ result={'inference_scope':kind,'independent_parent_datasets':len(r),
  'mse_difference':m[0],'mse_ci_lower':m[1],'mse_ci_upper':m[2],'mse_p':m[3],
  'q95_difference':q[0],'q95_ci_lower':q[1],'q95_ci_upper':q[2],'q95_p':q[3],
  'mse_gain_pct':gm[0],'mse_gain_pct_ci_lower':gm[1],'mse_gain_pct_ci_upper':gm[2],
  'q95_gain_pct':gq[0],'q95_gain_pct_ci_lower':gq[1],'q95_gain_pct_ci_upper':gq[2],
  'parent_positive_mse_fraction':sum(x<0 for x in vals_m)/len(r),
  'parent_positive_q95_fraction':sum(x<0 for x in vals_q)/len(r)}
+ if bootstrap_reps:
+  if not 500<=bootstrap_reps<=5000:die('Parent-bootstrap replications must be 500 to 5000')
+  # Paired parent bootstrap is a sensitivity analysis, never a replacement
+  # for the prespecified t-test p-values and global BH correction.
+  arr=np.asarray(r,dtype=np.float64)
+  if arr.ndim!=2 or arr.shape[1]!=4:die('Invalid paired parent bootstrap input')
+  seed=int.from_bytes(hashlib.sha256((kind+'|'+str(bootstrap_key)).encode()).digest()[:8],'big')
+  rng=np.random.default_rng(seed)
+  samples=np.empty((bootstrap_reps,4),dtype=np.float64)
+  for start in range(0,bootstrap_reps,64):
+   stop=min(start+64,bootstrap_reps)
+   draws=rng.integers(0,len(arr),size=(stop-start,len(arr)))
+   samples[start:stop,:]=arr[draws].mean(axis=1)
+  lo,hi=np.quantile(samples,(.025,.975),axis=0)
+  for k,name in enumerate(('mse','q95','mse_gain_pct','q95_gain_pct')):
+   result[name+'_parent_boot_ci_lower']=float(lo[k])
+   result[name+'_parent_boot_ci_upper']=float(hi[k])
+  result['joint_parent_boot_ci_negative']=bool(hi[0]<0 and hi[1]<0)
+ return result
 def family(a):
  folder=Path(a.input)
  files=sorted(folder.rglob('parent_*.csv.gz'))
@@ -52,13 +71,14 @@ def family(a):
  cols=['source_family','candidate_id','engine','training_seed','sample_n','realworld_seed',
        'parent_dataset_id','transfer_scope','evaluation_family','benchmark_role','benchmark',
        'mse_difference','q95_difference','mse_gain_pct','q95_gain_pct','n_children']
- seen=set();batch=[];nrows=0;source_sha=[]
+ seen=set();batch=[];nrows=0;source_sha=[];policies=set()
  for path in files:
   mp=path.with_suffix('.manifest.json')
   if not mp.exists():die('Missing per-source SHA manifest: '+str(path))
   m=json.loads(mp.read_text())
   if m['primary_reduced_sha256']!=filehash(path):die('Reduced data differs from immutable manifest')
   if m['source_family']!=a.family:die('Cross-family archive contamination')
+  policies.add(m.get('own_benchmark_family_policy','source'))
   key=(m['source_family'],m['sample_n'],m['realworld_seed'],m['raw_score_sha256'])
   if key in seen:die('Original raw score shard repeated')
   seen.add(key)
@@ -74,6 +94,8 @@ def family(a):
      db.executemany('INSERT INTO d VALUES ('+','.join('?'*16)+')',batch)
      batch=[];nrows+=10000
  if batch:db.executemany('INSERT INTO d VALUES ('+','.join('?'*16)+')',batch);nrows+=len(batch)
+ if len(policies)!=1 or not policies.issubset({'source','destination'}):
+  die('Mixed or unrecognized frozen benchmark policies in family inputs')
  db.commit()
  # Three-stage average prevents children or repeated seeds being used as
  # independent parents: (a) child-weighted profile mean within parent/seed,
@@ -96,7 +118,7 @@ def family(a):
   if not vals:return
   if any(v[0]!=10 for v in vals):die('Missing evaluation seeds 30-39 for independent parent '+str(key))
   if len(vals)>=5:
-   stat=calc([v[1:] for v in vals],'independent_parent_generalization')
+   stat=calc([v[1:] for v in vals],'independent_parent_generalization',a.bootstrap_reps,key)
    results.append(dict(zip(KEY,[*key[:7],'frozen_discovery_scenario_specific' if key[6]=='own' else 'mean']),**stat))
  for row in q:
   k=tuple(row[:7])
@@ -114,12 +136,13 @@ def family(a):
  # Within each destination, raw rows can include 10 seeds; only parent level
  # is used for inference. Seed-presence is separately validated.
  for row in cur:
+  if row[9]!=10:die('Incomplete evaluation seeds 30-39 in destination family: '+str(row[:9]))
   k=(*row[:5],row[6],row[8],row[7]);secondary.setdefault(k,[]).append((row[5],*row[10:]))
  secondary_results=[]
  for k,items in secondary.items():
   if len(items)<5:continue
   if len({v[0] for v in items})!=len(items):die('Repeated independent parent in secondary destination')
-  stat=calc([v[1:] for v in items],'empirical_family_subgroup_secondary')
+  stat=calc([v[1:] for v in items],'empirical_family_subgroup_secondary',a.bootstrap_reps,k)
   result=dict(zip(['source_family','candidate_id','engine','training_seed','sample_n',
     'transfer_scope','benchmark_role','evaluation_family'],k))
   result['benchmark']='frozen_discovery_scenario_specific' if result['benchmark_role']=='own' else 'mean'
@@ -136,21 +159,26 @@ def family(a):
   'secondary_hypothesis_pairs':len(secondary_results),
   'source_training_seeds':list(range(10)),'evaluation_seeds':list(range(30,40)),
   'primary_unit':'parent_dataset_id','target':'child_depth_full_sample_mean_proxy',
-  'single_W_per_training_seed':True},indent=2)+'\n')
+  'single_W_per_training_seed':True,'own_benchmark_family_policy':next(iter(policies)),
+  'parent_bootstrap_reps':a.bootstrap_reps},indent=2)+'\n')
  db.close();(out/'internal.sqlite').unlink()
  print('REALWORLD_V2_PARENT_FAMILY_PASS',a.family,len(files),len(results),len(secondary_results),flush=True)
 def global_fdr(a):
  folders=sorted(Path(a.input).rglob('family_provenance.json'))
  if len(folders)!=6:die('Exactly six destination/source family analyses are mandatory')
- all_primary=[];all_secondary=[];ids=set()
+ all_primary=[];all_secondary=[];ids=set();policies=set();bootstrap_reps=set()
  for meta in folders:
   m=json.loads(meta.read_text())
   if m['source_family'] in ids:die('Duplicate source family inference')
   ids.add(m['source_family'])
+  policies.add(m.get('own_benchmark_family_policy','source'))
+  bootstrap_reps.add(m.get('parent_bootstrap_reps',0))
   for filename,arr in [('primary_parent_inference_unadjusted.csv.gz',all_primary),
                        ('secondary_family_transfer_unadjusted.csv.gz',all_secondary)]:
    with gzip.open(meta.parent/filename,'rt',newline='') as f:arr.extend(csv.DictReader(f))
  if ids!={'normal','lognormal','weibull','invgauss','exgaussian','exwald'}:die('Incomplete source family coverage')
+ if len(policies)!=1 or not policies.issubset({'source','destination'}) or len(bootstrap_reps)!=1:
+  die('Inconsistent benchmark family policies or bootstrap protocols across source families')
  out=Path(a.output)
  if out.exists():die('Refuse to overwrite global inference')
  out.mkdir(parents=True)
@@ -187,6 +215,9 @@ def global_fdr(a):
   'alpha':0.05,'bh_scope':'two separate global BH panels: parent primary and destination secondary',
   'primary_hypotheses':2*len(all_primary),'secondary_hypotheses':2*len(all_secondary),
   'original_candidate_count':720,'training_seeds':list(range(10)),
+  'own_benchmark_family_policy':next(iter(policies)),
+  'parent_bootstrap_reps':next(iter(bootstrap_reps)),
+  'parent_bootstrap_scope':'paired_parent_percentile_sensitivity_only_not_BH',
   'realworld_seeds':list(range(30,40)),'parent_independence':True,
   'migration_neighborhood_status':'descriptive only, no overlapping-neighborhood BH claims',
   'realworld_target':'child-depth empirical full-sample mean proxy, not known population truth'},indent=2)+'\n')
@@ -194,7 +225,7 @@ def global_fdr(a):
 if __name__=='__main__':
  p=argparse.ArgumentParser()
  sub=p.add_subparsers(dest='mode',required=True)
- s=sub.add_parser('family');s.add_argument('--input',required=True);s.add_argument('--family',required=True);s.add_argument('--output',required=True)
+ s=sub.add_parser('family');s.add_argument('--input',required=True);s.add_argument('--family',required=True);s.add_argument('--output',required=True);s.add_argument('--bootstrap-reps',type=int,default=0)
  s=sub.add_parser('global');s.add_argument('--input',required=True);s.add_argument('--output',required=True)
  args=p.parse_args()
  {'family':family,'global':global_fdr}[args.mode](args)

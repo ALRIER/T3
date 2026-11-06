@@ -1,0 +1,4 @@
+ONE TIME NON-DESTRUCTIVE REAL WORLD BENCHMARK RECONCILIATION AUDIT
+Source-policy inference run: 42251598557
+Input raw scorer ledger: 856 immutable shards
+This push authorizes only an audit; never launch 216 reducer jobs automatically.
