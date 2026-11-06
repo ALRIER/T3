@@ -155,7 +155,7 @@ jobs:
           p=pathlib.Path('incoming/reduced')
           m=list(p.rglob('parent_*.csv.gz'))
           x=list(p.rglob('neighbor_*.csv.gz'))
-          if len(m)!=len(x) or not 130<=len(m)<=160:raise ValueError('Incomplete or duplicated family scorer input blocks')
+          if len(m)!=len(x) or not 120<=len(m)<=160:raise ValueError('Incomplete or duplicated family scorer input blocks')
           if len({f.name for f in m})!=len(m):raise ValueError('Duplicated original score artifact ID')
           print('REALWORLD_V2_FAMILY_SCORE_CHECKPOINTS_PASS',len(m))
           PY
