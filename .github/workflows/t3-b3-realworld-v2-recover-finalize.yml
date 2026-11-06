@@ -91,7 +91,36 @@ jobs:
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: incoming/ledger
+      - name: Reuse any already-successful original family parent AND neighbor artifacts
+        id: reuse
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os,subprocess,pathlib
+          repo=os.environ['GITHUB_REPOSITORY'];run=42249952933
+          fam='${{ matrix.family }}';names=set()
+          for page in range(1,8):
+           payload=json.loads(subprocess.check_output(['gh','api',
+             f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))
+           names|={x['name'] for x in payload['artifacts'] if not x['expired']}
+           if len(payload['artifacts'])<100:break
+          p=f't3-rw-v2-family-parent-{fam}-run{run}'
+          n=f't3-rw-v2-family-neighbor-{fam}-run{run}'
+          reuse=p in names and n in names
+          if reuse:
+           for name,dest in ((p,f'artifacts/realworld_v2/family/{fam}'),
+                             (n,f'artifacts/realworld_v2/neighborhood/{fam}')):
+            pathlib.Path(dest).mkdir(parents=True,exist_ok=True)
+            subprocess.run(['gh','run','download',str(run),'--repo',repo,'--name',name,'--dir',dest],check=True)
+           if not (pathlib.Path(f'artifacts/realworld_v2/family/{fam}/family_provenance.json').is_file()
+                   and pathlib.Path(f'artifacts/realworld_v2/neighborhood/{fam}/neighborhood_scope.json').is_file()):
+            raise ValueError('Reused family model/neighbor artifacts are structurally incomplete')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as w:print('reuse='+str(reuse).lower(),file=w)
+          print('REALWORLD_V2_FAMILY_REUSE_GATE',fam,'reused' if reuse else 'needs finalize')
+          PY
       - name: Recover only successful prior reductions for this source family
+        if: ${{ steps.reuse.outputs.reuse != 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -99,6 +128,7 @@ jobs:
             --pattern 't3-rw-v2-reduced-${{ matrix.family }}-b*-run42249952933' \
             --dir incoming/reduced
       - name: Verify exact original family-specific raw scoring shard coverage
+        if: ${{ steps.reuse.outputs.reuse != 'true' }}
         run: |
           python - <<'PY'
           import pathlib,json,os
@@ -112,11 +142,13 @@ jobs:
           print('REALWORLD_V2_REUSED_CHECKPOINTS_PASS',family,expected)
           PY
       - name: Recalculate independent-parent primary and destination-family secondary inference
+        if: ${{ steps.reuse.outputs.reuse != 'true' }}
         run: |
           python scripts/t3_b3_realworld_v2_infer.py family \
             --input incoming/reduced --family '${{ matrix.family }}' \
             --output artifacts/realworld_v2/family/${{ matrix.family }}
       - name: Audit observed destination scenario adjacency without duplicating parent samples
+        if: ${{ steps.reuse.outputs.reuse != 'true' }}
         run: |
           python scripts/t3_b3_realworld_v2_neighborhood.py \
             --input incoming/reduced --family '${{ matrix.family }}' \
