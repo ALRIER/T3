@@ -100,13 +100,12 @@ jobs:
           run-id: '42293967583'
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
-          merge-multiple: true
           path: incoming/families
       - name: Restore repaired invgauss family result
         uses: actions/download-artifact@v5
         with:
           name: t3-rw-v3-destination-parent-invgauss-run${{ github.run_id }}
-          path: incoming/families
+          path: incoming/families/t3-rw-v3-destination-parent-invgauss-run${{ github.run_id }}
       - name: Confirm exactly six family results and run global BH inference
         run: |
           python scripts/t3_b3_realworld_v2_infer.py global \
@@ -151,13 +150,12 @@ jobs:
           run-id: '42293967583'
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
-          merge-multiple: true
           path: incoming/neighbors
       - name: Restore invgauss neighborhood artifact
         uses: actions/download-artifact@v5
         with:
           name: t3-rw-v3-destination-neighbors-invgauss-run${{ github.run_id }}
-          path: incoming/neighbors
+          path: incoming/neighbors/t3-rw-v3-destination-neighbors-invgauss-run${{ github.run_id }}
       - uses: actions/download-artifact@v5
         with:
           name: t3-rw-v3-destination-856-source-ledger-run42286256315
