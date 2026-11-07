@@ -17,6 +17,10 @@ if(!all(required%in%names(tab))||!nrow(tab)||any(tab$training_family!=family)||
    any(tab$parent_block_id!=block))stop('Frozen family/block source manifest mismatch')
 if(anyDuplicated(tab$dataset_id)||anyDuplicated(paste(tab$parent_dataset_id,tab$dataset_id)))
  stop('Duplicate child ID in parent block')
+# Pilot evaluates one genuine frozen child, while production always includes every child.
+pilot_limit<-as.integer(Sys.getenv('T3_RW_PUBLICATION_PILOT_CHILD_LIMIT','0'))
+if(is.na(pilot_limit)||pilot_limit<0L)stop('Invalid pilot child limit')
+if(pilot_limit>0L)tab<-tab[seq_len(min(nrow(tab),pilot_limit)),,drop=FALSE]
 root<-normalizePath(Sys.getenv('T3_REALWORLD_SOURCE_ROOT','.'),mustWork=TRUE)
 resolve<-function(p){p<-as.character(p);if(startsWith(p,'/'))p else file.path(root,p)}
 for(i in seq_len(nrow(tab))) {

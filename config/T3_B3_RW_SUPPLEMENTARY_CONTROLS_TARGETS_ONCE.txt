@@ -1,7 +1,1 @@
-T3 B3 REAL WORLD — FROZEN OPTIMIZATION CONTROLS, SPLIT-REFERENCE TARGET SENSITIVITY, PARENT HETEROGENEITY, AND STABILITY
-User explicitly requested complete supplementary publication-validation run November 7, 2026.
-Exactly six frozen source families x 14 original parent-intact blocks x three sample sizes = 252 scoring jobs.
-Each job checks immutable parent input data and sample-size-matched frozen Discovery models, scores ten Real World evaluation seeds 30-39, training weights 0-9, four frozen evolutionary engines, the two training-only frozen non-evolutionary controls and sample mean; paired disjoint split-reference and full sample mean sensitivity.
-A single pilot verifies executable R scoring and seven-model/two-target contract before any 252-job matrix.
-Maximum parallel reduction/scoring = 22. Family analysis maximum 6. No Discovery retraining and no mutation of original 856 scoring artifacts, original parent-level BH and source/destination policy results.
-Full success requires six family heterogeneity panels, global separate BH and target stability, reviewer verifying ALL 252 scoring checkpoints and ALL 720 individual W and both controls.
+Real World supplementary validation rerun, November 7 2026: original 42376964282 failed only after successful R scoring due JSON auto_unbox of singleton evaluation seed at pilot gate. Fix accepts scalar or singleton, runs one true parent child for rapid contract gate; full 252 scoring jobs remain intact, full 10 seeds, all children, max-parallel 22. User explicitly requested relaunch.

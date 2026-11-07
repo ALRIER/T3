@@ -110,6 +110,7 @@ jobs:
         env:
           T3_REALWORLD_SOURCE_ROOT: input/parent_block
           T3_RW_PUBLICATION_EVAL_SEEDS: '30'
+          T3_RW_PUBLICATION_PILOT_CHILD_LIMIT: '1'
           T3_REALWORLD_BLOCK_ID: b01
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
@@ -120,7 +121,7 @@ jobs:
           import json,gzip,csv,pathlib
           root=pathlib.Path('artifacts/rw_pub_validation/normal/b01_n200')
           m=json.loads((root/'validation_manifest.json').read_text())
-          if m['evaluation_seeds']!=[30] or m['models_per_fit']!=7 or m['replications']!=500:raise ValueError('Pilot coverage')
+          if m['evaluation_seeds'] not in ([30],30) or m['models_per_fit']!=7 or m['replications']!=500:raise ValueError('Pilot coverage')
           r=list(csv.DictReader(gzip.open(root/'replicate_sensitivity.csv.gz','rt')))
           if not r or len({x['model'] for x in r})!=70:raise ValueError('Expected ten frozen training seeds by seven model identities')
           if {x['reference_policy'] for x in r}!={'holdout_half_mean','full_sample_mean'}:raise ValueError('Split-target gate missing')
