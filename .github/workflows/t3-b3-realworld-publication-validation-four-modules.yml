@@ -123,7 +123,19 @@ jobs:
           m=json.loads((root/'validation_manifest.json').read_text())
           if m['evaluation_seeds'] not in ([30],30) or m['models_per_fit']!=7 or m['replications']!=500:raise ValueError('Pilot coverage')
           r=list(csv.DictReader(gzip.open(root/'replicate_sensitivity.csv.gz','rt')))
-          if not r or len({x['model'] for x in r})!=70:raise ValueError('Expected ten frozen training seeds by seven model identities')
+          if not r:raise ValueError('Pilot scoring file empty')
+          expected_seeds=set(range(10))
+          pairs={(int(x['training_seed']),x['model']) for x in r}
+          if len(pairs)!=70 or {t for t,_ in pairs}!=expected_seeds:
+           raise ValueError(f'Expected exactly 70 distinct (training_seed, model) pairs; got {len(pairs)}')
+          common={x['model'] for x in r if x['model']=='mean'}
+          if common!={'mean'}:raise ValueError('Missing shared arithmetic-mean baseline')
+          for seed in expected_seeds:
+           models={model for train,model in pairs if train==seed}
+           if len(models)!=7 or sum('convex_mse' in x for x in models)!=1 or sum('local_deterministic' in x for x in models)!=1:
+            raise ValueError(f'Missing one of seven models or non-evolutionary controls for training seed {seed}')
+          if len({x['model'] for x in r})!=61:
+           raise ValueError('Expected 61 model names: 1 common mean and 6 seed-specific models x 10')
           if {x['reference_policy'] for x in r}!={'holdout_half_mean','full_sample_mean'}:raise ValueError('Split-target gate missing')
           print('REALWORLD_PUBLICATION_PILOT_SEVEN_MODELS_TWO_REFERENCES_PASS')
           PY
