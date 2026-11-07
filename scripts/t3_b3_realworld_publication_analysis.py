@@ -32,21 +32,22 @@ def identify(family,name,train):
  return model
 def family_stage(args):
  p=pathlib.Path(args.input);data=sorted(p.rglob('replicate_sensitivity.csv.gz'))
- check(len(data)==42,'Exactly 14 independent parent-intact source blocks x three n required: '+str(len(data)))
+ check(len(data)==210,'Exactly 14 source blocks x three n x five disjoint seed groups required: '+str(len(data)))
  check(args.family in FAMILIES,'Invalid source family')
  allscores={};metas=[];characteristics=collections.defaultdict(list);seen=set()
  for f in data:
   mpath=f.parent/'validation_manifest.json'
   m=json.loads(mpath.read_text())
   check(m['source_family']==args.family and m['sample_n'] in (200,1000,3000) and
-        m['evaluation_seeds']==list(range(30,40)) and m['models_per_fit']==7 and m['replications']==500,
+        m['evaluation_seeds'] in ([30,31],[32,33],[34,35],[36,37],[38,39]) and m['models_per_fit']==7 and m['replications']==500,
         'Incomplete 10-seed/7-model validated scoring contract')
-  key=(m['block_id'],m['sample_n'])
+  key=(m['block_id'],m['sample_n'],tuple(m['evaluation_seeds']))
   check(key not in seen,'Duplicate frozen parent block / n')
   seen.add(key);metas.append(m)
-  for row in csv.DictReader((f.parent/'frozen_child_characteristics.csv').open()):
-   pkey=(row['parent_dataset_id'],m['sample_n'])
-   characteristics[pkey].append(row)
+  if m['evaluation_seeds']==[30,31]:
+   for row in csv.DictReader((f.parent/'frozen_child_characteristics.csv').open()):
+    pkey=(row['parent_dataset_id'],m['sample_n'])
+    characteristics[pkey].append(row)
   for r in read(f):
    check(r['source_family']==args.family and int(r['sample_n'])==m['sample_n'] and
          r['block_id']==m['block_id'],'Scoring shard mixup')
@@ -60,7 +61,11 @@ def family_stage(args):
    check(all(map(math.isfinite,(mse,q95))) and mse>=0 and q95>=0,'Invalid empirical loss')
    allscores[k]=(mse,q95)
   print('PUBLICATION_SCORING_BLOCK_VERIFIED',args.family,m['block_id'],m['sample_n'],flush=True)
- check(len(seen)==42 and len({k[0] for k in seen})==14,'Missing source family parent-block/sample-size coverage')
+ check(len(seen)==210 and len({k[0] for k in seen})==14,'Missing source family parent-block/sample-size/seed coverage')
+ for block in {k[0] for k in seen}:
+  for n in (200,1000,3000):
+   have={grp for b,sz,grp in seen if b==block and sz==n}
+   check(have=={(30,31),(32,33),(34,35),(36,37),(38,39)},'Missing seed groups for '+str((block,n)))
  parents=collections.defaultdict(set)
  for k in allscores:parents[(k[1],k[2],k[4])].add(k[0])
  # Candidate and benchmark models must share identical evaluation seed blocks per parent.
@@ -135,7 +140,7 @@ def family_stage(args):
  write(out/'unadjusted_parent_level_inference.csv.gz',infer)
  write(out/'parent_heterogeneity_exploratory.csv.gz',hetero)
  (out/'family_provenance.json').write_text(json.dumps(dict(source_family=args.family,original_source_blocks=14,
-  frozen_sample_sizes=[200,1000,3000],source_job_artifacts=len(data),
+  frozen_sample_sizes=[200,1000,3000],source_job_artifacts=len(data),seed_group_cardinality=5,
   original_training_seeds=list(range(10)),external_evaluation_seeds=list(range(30,40)),
   source_qualified_parent_ids=len({r['parent_dataset_id'] for r in parent_results}),
   paired_parent_rows=len(parent_results),unadjusted_contrasts=len(infer),
@@ -202,7 +207,7 @@ def global_stage(args):
   secondary_target='full_sample_mean',two_disjoint_folds=True,replications_per_fold=500,
   score_evaluation_seeds=list(range(30,40)),
   independent_unit='parent_dataset_id',separate_BH_panels=panel_counts,
-  score_jobs_expected=252,original_primary_BH_not_recomputed=True,
+  score_jobs_expected=1260,seed_batches=[[30,31],[32,33],[34,35],[36,37],[38,39]],original_primary_BH_not_recomputed=True,
   moderator_results='exploratory_descriptive_not_confirmatory',
   real_population_mean_known=False,results_are_empirical_reference_sensitivity_not_absolute_MSE_truth=True),indent=2)+'\n')
  (out/'interpretation_limits.md').write_text(

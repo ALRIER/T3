@@ -1,5 +1,5 @@
 name: T3 B3 Real World — Frozen Optimization Controls, Split-Reference Targets, Parent Heterogeneity and Stability
-run-name: "Real World controls + disjoint target sensitivity + parent heterogeneity + stability | 252 complete scoring shards"
+run-name: "Real World controls + disjoint target sensitivity + parent heterogeneity + stability | 1260 two-seed checkpoint shards | max 22 overall"
 "on":
   push:
     branches: [main]
@@ -10,7 +10,7 @@ permissions:
   actions: read
 concurrency:
   group: t3-b3-realworld-frozen-controls-targets-full-20261107
-  cancel-in-progress: false
+  cancel-in-progress: true
 env:
   PYTHONUNBUFFERED: '1'
   OPENBLAS_NUM_THREADS: '1'
@@ -146,13 +146,13 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-  full-frozen-model-and-target-scoring:
+  frozen-score-seeds-30-31:
     needs: [plan,pilot-scoring-contract]
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 22
+      max-parallel: 5
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -194,10 +194,10 @@ jobs:
           tar -xzf "$bundle" -C artifacts/discovery_v3
           test "$(find artifacts/discovery_v3/${{ matrix.family }} -type f -name discovery.rds | wc -l)" -eq 10
           test -s input/parent_block/parent_block_manifest.csv
-      - name: Score four frozen evolutionary weights, two Discovery-frozen non-evolutionary controls and mean, for all ten Real World seeds and both target reference policies
+      - name: Score paired frozen estimators and split-reference targets for evaluation seeds 30-31 (of original 30-39)
         env:
           T3_REALWORLD_SOURCE_ROOT: input/parent_block
-          T3_RW_PUBLICATION_EVAL_SEEDS: '30,31,32,33,34,35,36,37,38,39'
+          T3_RW_PUBLICATION_EVAL_SEEDS: '30,31'
           T3_REALWORLD_BLOCK_ID: ${{ matrix.block }}
         run: |
           bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
@@ -205,13 +205,273 @@ jobs:
             input/parent_block/parent_block_manifest.csv artifacts/discovery_v3
       - uses: actions/upload-artifact@v4
         with:
-          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-run${{ github.run_id }}
+          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-g0-run${{ github.run_id }}
+          path: artifacts/rw_pub_validation/${{ matrix.family }}/${{ matrix.block }}_n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+
+  frozen-score-seeds-32-33:
+    needs: [plan,pilot-scoring-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore exact frozen family/block source, with bounded GitHub API quota retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41514871500 --repo '${{ github.repository }}' \
+            --name '${{ matrix.artifact }}' --dir incoming/parent
+      - name: Restore exactly the sample-size-specific frozen Discovery weights and non-evolutionary controls
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41487091262 --repo '${{ github.repository }}' \
+            --name 't3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262' --dir incoming/discovery
+      - name: Verify immutable original source SHA and frozen Discovery bundle before scoring
+        run: |
+          set -euo pipefail
+          mkdir -p input artifacts/discovery_v3
+          base="realworld-${{ matrix.family }}-${{ matrix.block }}.tar.gz"
+          archive="$(find incoming/parent -type f -name "$base" -print -quit)"
+          checksum="$(find incoming/parent -type f -name "$base.sha256" -print -quit)"
+          test -s "$archive" && test -s "$checksum"
+          test "$(sha256sum "$archive" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$archive" -C input
+          bundle="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz' -print -quit)"
+          checksum2="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz.sha256' -print -quit)"
+          test -s "$bundle" && test -s "$checksum2"
+          test "$(sha256sum "$bundle" | cut -d' ' -f1)" = "$(head -1 "$checksum2" | awk '{print $1}')"
+          tar -xzf "$bundle" -C artifacts/discovery_v3
+          test "$(find artifacts/discovery_v3/${{ matrix.family }} -type f -name discovery.rds | wc -l)" -eq 10
+          test -s input/parent_block/parent_block_manifest.csv
+      - name: Score paired frozen estimators and split-reference targets for evaluation seeds 32-33 (of original 30-39)
+        env:
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+          T3_RW_PUBLICATION_EVAL_SEEDS: '32,33'
+          T3_REALWORLD_BLOCK_ID: ${{ matrix.block }}
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
+            '${{ matrix.family }}' '${{ matrix.block }}' '${{ matrix.n }}' \
+            input/parent_block/parent_block_manifest.csv artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-g1-run${{ github.run_id }}
+          path: artifacts/rw_pub_validation/${{ matrix.family }}/${{ matrix.block }}_n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+
+  frozen-score-seeds-34-35:
+    needs: [plan,pilot-scoring-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore exact frozen family/block source, with bounded GitHub API quota retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41514871500 --repo '${{ github.repository }}' \
+            --name '${{ matrix.artifact }}' --dir incoming/parent
+      - name: Restore exactly the sample-size-specific frozen Discovery weights and non-evolutionary controls
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41487091262 --repo '${{ github.repository }}' \
+            --name 't3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262' --dir incoming/discovery
+      - name: Verify immutable original source SHA and frozen Discovery bundle before scoring
+        run: |
+          set -euo pipefail
+          mkdir -p input artifacts/discovery_v3
+          base="realworld-${{ matrix.family }}-${{ matrix.block }}.tar.gz"
+          archive="$(find incoming/parent -type f -name "$base" -print -quit)"
+          checksum="$(find incoming/parent -type f -name "$base.sha256" -print -quit)"
+          test -s "$archive" && test -s "$checksum"
+          test "$(sha256sum "$archive" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$archive" -C input
+          bundle="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz' -print -quit)"
+          checksum2="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz.sha256' -print -quit)"
+          test -s "$bundle" && test -s "$checksum2"
+          test "$(sha256sum "$bundle" | cut -d' ' -f1)" = "$(head -1 "$checksum2" | awk '{print $1}')"
+          tar -xzf "$bundle" -C artifacts/discovery_v3
+          test "$(find artifacts/discovery_v3/${{ matrix.family }} -type f -name discovery.rds | wc -l)" -eq 10
+          test -s input/parent_block/parent_block_manifest.csv
+      - name: Score paired frozen estimators and split-reference targets for evaluation seeds 34-35 (of original 30-39)
+        env:
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+          T3_RW_PUBLICATION_EVAL_SEEDS: '34,35'
+          T3_REALWORLD_BLOCK_ID: ${{ matrix.block }}
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
+            '${{ matrix.family }}' '${{ matrix.block }}' '${{ matrix.n }}' \
+            input/parent_block/parent_block_manifest.csv artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-g2-run${{ github.run_id }}
+          path: artifacts/rw_pub_validation/${{ matrix.family }}/${{ matrix.block }}_n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+
+  frozen-score-seeds-36-37:
+    needs: [plan,pilot-scoring-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore exact frozen family/block source, with bounded GitHub API quota retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41514871500 --repo '${{ github.repository }}' \
+            --name '${{ matrix.artifact }}' --dir incoming/parent
+      - name: Restore exactly the sample-size-specific frozen Discovery weights and non-evolutionary controls
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41487091262 --repo '${{ github.repository }}' \
+            --name 't3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262' --dir incoming/discovery
+      - name: Verify immutable original source SHA and frozen Discovery bundle before scoring
+        run: |
+          set -euo pipefail
+          mkdir -p input artifacts/discovery_v3
+          base="realworld-${{ matrix.family }}-${{ matrix.block }}.tar.gz"
+          archive="$(find incoming/parent -type f -name "$base" -print -quit)"
+          checksum="$(find incoming/parent -type f -name "$base.sha256" -print -quit)"
+          test -s "$archive" && test -s "$checksum"
+          test "$(sha256sum "$archive" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$archive" -C input
+          bundle="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz' -print -quit)"
+          checksum2="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz.sha256' -print -quit)"
+          test -s "$bundle" && test -s "$checksum2"
+          test "$(sha256sum "$bundle" | cut -d' ' -f1)" = "$(head -1 "$checksum2" | awk '{print $1}')"
+          tar -xzf "$bundle" -C artifacts/discovery_v3
+          test "$(find artifacts/discovery_v3/${{ matrix.family }} -type f -name discovery.rds | wc -l)" -eq 10
+          test -s input/parent_block/parent_block_manifest.csv
+      - name: Score paired frozen estimators and split-reference targets for evaluation seeds 36-37 (of original 30-39)
+        env:
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+          T3_RW_PUBLICATION_EVAL_SEEDS: '36,37'
+          T3_REALWORLD_BLOCK_ID: ${{ matrix.block }}
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
+            '${{ matrix.family }}' '${{ matrix.block }}' '${{ matrix.n }}' \
+            input/parent_block/parent_block_manifest.csv artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-g3-run${{ github.run_id }}
+          path: artifacts/rw_pub_validation/${{ matrix.family }}/${{ matrix.block }}_n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+
+  frozen-score-seeds-38-39:
+    needs: [plan,pilot-scoring-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore exact frozen family/block source, with bounded GitHub API quota retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41514871500 --repo '${{ github.repository }}' \
+            --name '${{ matrix.artifact }}' --dir incoming/parent
+      - name: Restore exactly the sample-size-specific frozen Discovery weights and non-evolutionary controls
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41487091262 --repo '${{ github.repository }}' \
+            --name 't3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262' --dir incoming/discovery
+      - name: Verify immutable original source SHA and frozen Discovery bundle before scoring
+        run: |
+          set -euo pipefail
+          mkdir -p input artifacts/discovery_v3
+          base="realworld-${{ matrix.family }}-${{ matrix.block }}.tar.gz"
+          archive="$(find incoming/parent -type f -name "$base" -print -quit)"
+          checksum="$(find incoming/parent -type f -name "$base.sha256" -print -quit)"
+          test -s "$archive" && test -s "$checksum"
+          test "$(sha256sum "$archive" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$archive" -C input
+          bundle="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz' -print -quit)"
+          checksum2="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz.sha256' -print -quit)"
+          test -s "$bundle" && test -s "$checksum2"
+          test "$(sha256sum "$bundle" | cut -d' ' -f1)" = "$(head -1 "$checksum2" | awk '{print $1}')"
+          tar -xzf "$bundle" -C artifacts/discovery_v3
+          test "$(find artifacts/discovery_v3/${{ matrix.family }} -type f -name discovery.rds | wc -l)" -eq 10
+          test -s input/parent_block/parent_block_manifest.csv
+      - name: Score paired frozen estimators and split-reference targets for evaluation seeds 38-39 (of original 30-39)
+        env:
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+          T3_RW_PUBLICATION_EVAL_SEEDS: '38,39'
+          T3_REALWORLD_BLOCK_ID: ${{ matrix.block }}
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
+            '${{ matrix.family }}' '${{ matrix.block }}' '${{ matrix.n }}' \
+            input/parent_block/parent_block_manifest.csv artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-g4-run${{ github.run_id }}
           path: artifacts/rw_pub_validation/${{ matrix.family }}/${{ matrix.block }}_n${{ matrix.n }}
           if-no-files-found: error
           retention-days: 90
 
   source-family-parent-heterogeneity:
-    needs: [plan,full-frozen-model-and-target-scoring]
+    needs: [plan,frozen-score-seeds-30-31,frozen-score-seeds-32-33,frozen-score-seeds-34-35,frozen-score-seeds-36-37,frozen-score-seeds-38-39]
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
@@ -231,7 +491,7 @@ jobs:
         run: |
           python scripts/t3_b3_rw_artifact_retry.py --run '${{ github.run_id }}' \
             --repo '${{ github.repository }}' \
-            --pattern 't3-rw-pub-validated-${{ matrix.family }}-b*-n*-run${{ github.run_id }}' \
+            --pattern 't3-rw-pub-validated-${{ matrix.family }}-b*-n*-g*-run${{ github.run_id }}' \
             --dir incoming/scored
       - name: Verify every source block and evaluation seed and calculate parent-independent heterogeneity and unadjusted control tests
         run: |
@@ -274,7 +534,7 @@ jobs:
           retention-days: 90
 
   independent-final-review-and-handoff:
-    needs: [plan,pilot-scoring-contract,full-frozen-model-and-target-scoring,source-family-parent-heterogeneity,global-target-robustness-and-controls]
+    needs: [plan,pilot-scoring-contract,frozen-score-seeds-30-31,frozen-score-seeds-32-33,frozen-score-seeds-34-35,frozen-score-seeds-36-37,frozen-score-seeds-38-39,source-family-parent-heterogeneity,global-target-robustness-and-controls]
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -292,7 +552,7 @@ jobs:
           import csv,gzip,json,os,pathlib,subprocess
           base=pathlib.Path('incoming/global')
           meta=json.loads((base/'publication_validation_provenance.json').read_text())
-          if (meta['score_jobs_expected']!=252 or meta['original_individual_frozen_W']!=720 or
+          if (meta['score_jobs_expected']!=1260 or meta['original_individual_frozen_W']!=720 or
               meta['additional_frozen_non_evolutionary_controls']!=['convex_mse','local_deterministic']):
            raise ValueError('Incomplete scientific design')
           with gzip.open(base/'supplementary_controls_and_target_BH.csv.gz','rt') as f:
@@ -311,14 +571,14 @@ jobs:
           if not stable:raise ValueError('Missing target and practical stability comparison')
           repo=os.environ['GITHUB_REPOSITORY'];run=os.environ['GITHUB_RUN_ID']
           found=set()
-          for page in range(1,7):
+          for page in range(1,17):
            d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{run}/artifacts?per_page=100&page={page}'],text=True))
            for a in d['artifacts']:
             if a['name'].startswith('t3-rw-pub-validated-') and a['name'].endswith('-run'+run):
              if a['expired']:raise ValueError('Expired scoring checkpoint')
              found.add(a['name'])
            if len(d['artifacts'])<100:break
-          if len(found)!=252:raise ValueError('Original 252 validation scoring checkpoints incomplete: '+str(len(found)))
+          if len(found)!=1260:raise ValueError('Exactly 1260 independently checkpointed two-seed scoring outputs required: '+str(len(found)))
           folder=pathlib.Path('artifacts/T3_B3_RW_PUB_VALIDATION_HANDOFF')
           folder.mkdir(parents=True,exist_ok=True)
           report=dict(protocol='T3_B3_RW_VALIDATION_FOUR_MODULES_FULL',
@@ -326,7 +586,7 @@ jobs:
             destination_benchmark_final_run=42299685581,
             original_preliminary_two_policy_comparison_run=42285271441,
             original_raw_score_shards=856,original_frozen_individual_W=720,
-            new_validation_source_block_n_shards=252,parents_independent=True,
+            new_validation_source_block_n_shards=1260,seed_groups_per_original_shard=5,parents_independent=True,
             new_control_models=['convex_mse','local_deterministic'],new_fit_from_external_data=False,
             global_two_target_three_benchmark_panels=6,
             additional_hypotheses_not_merged_with_original_predeclared_BH=True,
