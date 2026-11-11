@@ -1,0 +1,8 @@
+T3 B3 POST–REAL WORLD SCIENCE CODE PREFLIGHT
+November 11, 2026.
+Only run syntax checks, strict scientific gates and a bounded synthetic parent-cluster CI coverage diagnostic in this initial push.
+DO NOT repeat Discovery, Monte Carlo, Held Out, Stress or Real World.
+DO NOT launch training of regime policy with external outcomes until final Real World reviewer completes and parent-independent holdouts and outcome-blind descriptor artifacts are frozen.
+DO NOT label selection-adjusted null calibration complete without the native refit-retune-select-confirm runner and >=100 independent null worlds.
+The manual post-realworld phase will fail closed unless given successful final Real World run, verified frozen Discovery HPO registry and outcome-blind parent feature bundles.
+Preserve original 720 W, 856 score shards, 1260 post-Real World supplementary checkpoint identities, FDR panels and original manuscript.

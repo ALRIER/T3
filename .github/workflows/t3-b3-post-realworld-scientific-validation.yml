@@ -1,0 +1,212 @@
+name: T3 B3 — External Generalization, Inference Robustness and Regime Identification
+run-name: "T3 B3 post-Real World | ${{ inputs.phase || 'safe code smoke and synthetic CI diagnostics' }}"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_POST_RW_SCIENCE_CODE_PREFLIGHT_ONCE.txt
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "Use smoke until the final Real World global reviewer passes"
+        type: choice
+        required: true
+        default: smoke
+        options: [smoke,post-realworld]
+      realworld_run_id:
+        description: "Successful final Real World global review Actions run ID"
+        type: string
+        required: false
+        default: '0'
+      frozen_discovery_registry_run_id:
+        description: "Successful run exporting frozen Discovery metadata; no training allowed here"
+        type: string
+        required: false
+        default: '0'
+      frozen_parent_features_run_id:
+        description: "Successful run exporting outcome-blind parent-level covariates"
+        type: string
+        required: false
+        default: '0'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-post-realworld-${{ github.run_id }}
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+jobs:
+  safe-code-smoke-and-ci-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - name: Pin inference and classifier dependency versions
+        run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0 scikit-learn==1.7.2
+      - name: Verify that all four post Real World executables are syntactically valid
+        run: |
+          python -m py_compile \
+            scripts/t3_b3_post_realworld_audit.py \
+            scripts/t3_b3_post_realworld_regime.py \
+            scripts/t3_b3_post_realworld_null_replay.py
+          python scripts/t3_b3_post_realworld_audit.py smoke --output artifacts/post_rw_smoke
+          python scripts/t3_b3_post_realworld_regime.py smoke
+      - name: Independent synthetic inference interval coverage test, not fitted-W evidence
+        run: |
+          python scripts/t3_b3_post_realworld_audit.py interval-coverage \
+            --output artifacts/post_rw_ci_coverage --parents 30 --repetitions 100 --bootstrap 300
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-synthetic-ci-preflight-run${{ github.run_id }}
+          path: artifacts/post_rw_ci_coverage
+          if-no-files-found: error
+          retention-days: 90
+
+  freeze-realworld-reviewer-gate:
+    if: github.event_name == 'workflow_dispatch' && inputs.phase == 'post-realworld'
+    needs: safe-code-smoke-and-ci-diagnostic
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require final successful Real World reviewer, never a queued or failed run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RW_RUN: ${{ inputs.realworld_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$RW_RUN" =~ ^[1-9][0-9]{7,14}$ ]] || { echo "An explicit final successful Real World run ID is required"; exit 1; }
+          [[ "$(gh api "repos/${{ github.repository }}/actions/runs/$RW_RUN" --jq '.conclusion')" == success ]] \
+            || { echo "STOP: Real World final reviewer has not completed successfully"; exit 1; }
+          python scripts/t3_b3_rw_artifact_retry.py --run "$RW_RUN" \
+            --repo '${{ github.repository }}' \
+            --name "t3-rw-pub-four-module-global-validation-run$RW_RUN" \
+            --dir artifacts/final_realworld_global
+      - name: Strict frozen scientific scope gate
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          files=list(pathlib.Path('artifacts/final_realworld_global').rglob('publication_validation_provenance.json'))
+          if len(files)!=1:raise ValueError('Exactly one final Real World provenance manifest expected')
+          m=json.loads(files[0].read_text())
+          if (m.get('score_jobs_expected')!=1260 or m.get('original_individual_frozen_W')!=720
+              or m.get('independent_unit')!='parent_dataset_id'
+              or m.get('original_primary_BH_not_recomputed') is not True):
+           raise ValueError('Final Real World scientific lineage is incomplete')
+          print('T3_B3_POST_RW_FROZEN_INPUT_GATE_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-verified-global-input-run${{ github.run_id }}
+          path: artifacts/final_realworld_global
+          if-no-files-found: error
+          retention-days: 90
+
+  parent-level-inference-and-BH-audit:
+    needs: freeze-realworld-reviewer-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-post-rw-verified-global-input-run${{ github.run_id }}
+          path: artifacts/source_realworld
+      - name: Preserve original BH and evaluate independent-parent effect and robustness
+        run: |
+          set -euo pipefail
+          manifest="$(find artifacts/source_realworld -name publication_validation_provenance.json -print -quit)"
+          effects="$(find artifacts/source_realworld -name independent_parent_effects_all_families.csv.gz -print -quit)"
+          test -s "$manifest" && test -s "$effects"
+          python scripts/t3_b3_post_realworld_audit.py parent-inference \
+            --manifest "$manifest" --parent-effects "$effects" \
+            --output artifacts/post_rw_inference --bootstrap 1000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-parent-inference-run${{ github.run_id }}
+          path: artifacts/post_rw_inference
+          if-no-files-found: error
+          retention-days: 90
+
+  frozen-discovery-hpo-stability:
+    needs: freeze-realworld-reviewer-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - name: Require exact frozen Discovery registry source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REG_RUN: ${{ inputs.frozen_discovery_registry_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$REG_RUN" =~ ^[1-9][0-9]{7,14}$ ]] || { echo "Provide pinned frozen Discovery registry run ID"; exit 1; }
+          [[ "$(gh api "repos/${{ github.repository }}/actions/runs/$REG_RUN" --jq '.conclusion')" == success ]] || exit 1
+          python scripts/t3_b3_rw_artifact_retry.py --run "$REG_RUN" \
+            --repo '${{ github.repository }}' --name "t3-b3-frozen-discovery-hpo-registry-run$REG_RUN" \
+            --dir artifacts/frozen_hpo
+      - name: Audit all 720 individual weight hashes, optimizer budget and tuning stability
+        run: |
+          set -euo pipefail
+          registry="$(find artifacts/frozen_hpo -name frozen_discovery_hpo_registry.csv -print -quit)"
+          test -s "$registry"
+          python scripts/t3_b3_post_realworld_audit.py hyperparameters \
+            --registry "$registry" --output artifacts/post_rw_hpo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-frozen-discovery-hpo-stability-run${{ github.run_id }}
+          path: artifacts/post_rw_hpo
+          if-no-files-found: error
+          retention-days: 90
+
+  exploratory-regime-policy-and-abstention:
+    needs: [parent-level-inference-and-BH-audit,freeze-realworld-reviewer-gate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0 scikit-learn==1.7.2
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-post-rw-verified-global-input-run${{ github.run_id }}
+          path: artifacts/source_realworld
+      - name: Require independently frozen outcome-blind parent-level regime features
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FEATURES_RUN: ${{ inputs.frozen_parent_features_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$FEATURES_RUN" =~ ^[1-9][0-9]{7,14}$ ]] || { echo "Provide independently frozen parent-feature export run ID"; exit 1; }
+          [[ "$(gh api "repos/${{ github.repository }}/actions/runs/$FEATURES_RUN" --jq '.conclusion')" == success ]] || exit 1
+          python scripts/t3_b3_rw_artifact_retry.py --run "$FEATURES_RUN" \
+            --repo '${{ github.repository }}' --name "t3-b3-rw-parent-outcome-blind-features-run$FEATURES_RUN" \
+            --dir artifacts/parent_features
+      - name: Crossfit outcome-blind regime classifier on five disjoint external-parent folds; abstain under uncertainty
+        run: |
+          set -euo pipefail
+          effects="$(find artifacts/source_realworld -name independent_parent_effects_all_families.csv.gz -print -quit)"
+          features="$(find artifacts/parent_features -name outcome_blind_parent_features.csv -print -quit)"
+          test -s "$effects" && test -s "$features"
+          python scripts/t3_b3_post_realworld_regime.py crossfit \
+            --effects "$effects" --features "$features" --output artifacts/post_rw_regime \
+            --minimum-gain 0.001 --confidence 0.8 --margin 0.2 --profile-confidence 0.6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-regime-crossfit-exploratory-run${{ github.run_id }}
+          path: artifacts/post_rw_regime
+          if-no-files-found: error
+          retention-days: 90
