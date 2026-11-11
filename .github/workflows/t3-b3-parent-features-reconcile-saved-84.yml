@@ -1,5 +1,5 @@
 name: T3 B3 — Reconcile Frozen Parent Feature Identities and Consolidate Saved Exports
-run-name: "Audit 84 preserved parent feature artifacts | reconcile identical duplicates | freeze independent parent registry"
+run-name: "Reconcile 642 parent IDs x six source-family contexts x three sample sizes from 84 saved exports"
 "on":
   push:
     branches: [main]
@@ -24,7 +24,7 @@ jobs:
           pattern: t3-b3-post-rw-parent-profiles-*-run43103963144
           path: incoming/parent_profiles
           merge-multiple: true
-      - name: Diagnose duplicate source-parent keys; accept only byte-identical frozen feature records
+      - name: Validate 11556 source-context rows and 642 independent parent IDs without collapsing different families
         run: python scripts/t3_b3_reconcile_preserved_parent_features.py
       - name: Preserve exact collision diagnostics even if independent-parent gate fails
         if: always()

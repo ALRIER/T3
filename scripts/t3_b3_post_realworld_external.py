@@ -20,7 +20,7 @@ def write(path,rows):
   w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
 def compute(args):
  effects=load(args.effects);features=load(args.features)
- required_effect={'parent_dataset_id','sample_n','training_seed','engine','comparator',
+ required_effect={'parent_dataset_id','source_family','sample_n','training_seed','engine','comparator',
                   'reference_policy','mse_difference','q95_difference'}
  required_features={'parent_dataset_id','sample_n','source_family','data_source',
                     'profile_fit_confidence','family_assignment_status',
@@ -29,23 +29,23 @@ def compute(args):
  check(features and required_features<=features[0].keys(),'Outcome-blind feature schema mismatch')
  profiles={}
  for f in features:
-  key=(f['parent_dataset_id'],f['sample_n'])
-  check(key not in profiles,'Duplicate independent-parent/sample-size feature key')
+  key=(f['parent_dataset_id'],f['source_family'],f['sample_n'])
+  check(key not in profiles,'Duplicate independent-parent/source-family/sample-size feature key')
   profiles[key]=f
  # Do not multiply independent sample size by ten training seeds.
  within_parent=collections.defaultdict(list)
  for e in effects:
   if e['reference_policy']!='holdout_half_mean' or e['comparator']!='mean':continue
-  key=(e['parent_dataset_id'],e['sample_n'],e['engine'])
+  key=(e['parent_dataset_id'],e['source_family'],e['sample_n'],e['engine'])
   within_parent[key].append(e)
  reduced=[]
- for (pid,n,engine),rows in sorted(within_parent.items()):
+ for (pid,src,n,engine),rows in sorted(within_parent.items()):
   seeds={int(z['training_seed']) for z in rows}
   check(seeds==set(range(10)) and len(rows)==10,'Incomplete ten frozen training units for parent')
-  f=profiles.get((pid,n));check(f is not None,'Missing parent source profile')
+  f=profiles.get((pid,src,n));check(f is not None,'Missing parent source profile for source-family context')
   conf=float(f['profile_fit_confidence'])
   check(0<=conf<=1,'Invalid original outcome-blind assignment confidence')
-  src=f['source_family'];dst=f['empirical_family_assignment']
+  dst=f['empirical_family_assignment']
   assignment=('undetermined' if not dst or ';' in dst or dst.lower() in ('none','na','nan')
               else ('same' if dst==src else 'different'))
   strata=('high_confidence' if conf>=args.minimum_confidence else 'low_confidence')

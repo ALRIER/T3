@@ -48,7 +48,7 @@ def crossfit(args):
  # Each parent must have exactly one outcome-blind profile per sample size.
  featuremap={}
  for r in feat:
-  key=(r['parent_dataset_id'],r['sample_n'])
+  key=(r['parent_dataset_id'],r['source_family'],r['sample_n'])
   fail(key not in featuremap,'Duplicated parent feature row; child attributes must be aggregated first')
   fail(r['source_family'] in FAMILIES,'Unknown family')
   featuremap[key]=r
@@ -82,7 +82,7 @@ def crossfit(args):
   # Source family is NOT supplied as a predictor, since it is unknown at deployment.
   xtrain=[];ytrain=[];xval=[];valkeys=[];truth=[]
   for k in train:
-   rr=units[k];f=featuremap.get((k[0],k[1]))
+   rr=units[k];f=featuremap.get((k[0],k[2],k[1]))
    fail(f is not None,'Missing frozen train parent descriptor')
    fail(set(rr)=={'ga','nsga2','de','dirichlet'},'Incomplete four engines')
    # Only choose an evolutionary engine if BOTH MSE and Q95 improve by
@@ -91,7 +91,7 @@ def crossfit(args):
    winner=min(eligible,key=eligible.get) if eligible else 'mean'
    xtrain.append([numeric(f[z]) for z in FEATURES]);ytrain.append(winner)
   for k in test:
-   rr=units[k];f=featuremap.get((k[0],k[1]))
+   rr=units[k];f=featuremap.get((k[0],k[2],k[1]))
    fail(f is not None,'Missing frozen external parent descriptor')
    fail(set(rr)=={'ga','nsga2','de','dirichlet'},'Incomplete four engines')
    xval.append([numeric(f[z]) for z in FEATURES]);valkeys.append(k);truth.append(rr)
@@ -99,7 +99,7 @@ def crossfit(args):
   # No outcome-derived features are supplied to policy fit or prediction.
   p,classes=fit_predict(xtrain,ytrain,xval)
   for i,(key,rr) in enumerate(zip(valkeys,truth)):
-   f=featuremap[(key[0],key[1])]
+   f=featuremap[(key[0],key[2],key[1])]
    selected=classes[int(np.argmax(p[i]))]
    confidence=float(max(p[i]))
    margin=float(np.sort(p[i])[-1]-np.sort(p[i])[-2]) if len(classes)>1 else 0.
