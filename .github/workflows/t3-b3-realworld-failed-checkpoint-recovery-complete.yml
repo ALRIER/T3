@@ -1,0 +1,283 @@
+name: T3 B3 Real World — Failed Two-Seed Checkpoint Recovery and Remaining Four-Module Inference
+run-name: "Real World resume only failed two-seed scoring checkpoints | retain active original runner | parent inference + global review"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'config/T3_B3_RW_FAILED_SEED_CHECKPOINT_RECOVERY_ONCE.txt'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-rw-failed-checkpoints-non-disruptive-recovery
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+jobs:
+  plan-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      missing: ${{ steps.plan.outputs.missing }}
+      families: ${{ steps.plan.outputs.families }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find failed checkpoint identities; do not cancel or rerun active successful jobs
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/t3_b3_rw_failed_checkpoints_plan.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-failed-checkpoint-source-ledger-run${{ github.run_id }}
+          path: artifacts/realworld_recovery
+          if-no-files-found: error
+          retention-days: 90
+
+  recover-missing:
+    needs: plan-recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 21
+      matrix: ${{ fromJSON(needs.plan-recovery.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore exact frozen family/block source, with bounded GitHub API quota retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41514871500 --repo '${{ github.repository }}' \
+            --name '${{ matrix.artifact }}' --dir incoming/parent
+      - name: Restore exactly the sample-size-specific frozen Discovery weights and non-evolutionary controls
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py \
+            --run 41487091262 --repo '${{ github.repository }}' \
+            --name 't3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262' --dir incoming/discovery
+      - name: Verify immutable original source SHA and frozen Discovery bundle before scoring
+        run: |
+          set -euo pipefail
+          mkdir -p input artifacts/discovery_v3
+          base="realworld-${{ matrix.family }}-${{ matrix.block }}.tar.gz"
+          archive="$(find incoming/parent -type f -name "$base" -print -quit)"
+          checksum="$(find incoming/parent -type f -name "$base.sha256" -print -quit)"
+          test -s "$archive" && test -s "$checksum"
+          test "$(sha256sum "$archive" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$archive" -C input
+          bundle="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz' -print -quit)"
+          checksum2="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz.sha256' -print -quit)"
+          test -s "$bundle" && test -s "$checksum2"
+          test "$(sha256sum "$bundle" | cut -d' ' -f1)" = "$(head -1 "$checksum2" | awk '{print $1}')"
+          tar -xzf "$bundle" -C artifacts/discovery_v3
+          test "$(find artifacts/discovery_v3/${{ matrix.family }} -type f -name discovery.rds | wc -l)" -eq 10
+          test -s input/parent_block/parent_block_manifest.csv
+      - name: Recompute only one originally failed paired two-seed checkpoint without touching successful or active scoring
+        env:
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+          T3_RW_PUBLICATION_EVAL_SEEDS: '${{ matrix.seeds }}'
+          T3_REALWORLD_BLOCK_ID: ${{ matrix.block }}
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_realworld_publication_validation.R \
+            '${{ matrix.family }}' '${{ matrix.block }}' '${{ matrix.n }}' \
+            input/parent_block/parent_block_manifest.csv artifacts/discovery_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-validated-${{ matrix.family }}-${{ matrix.block }}-n${{ matrix.n }}-g${{ matrix.seed_group }}-run${{ github.run_id }}
+          path: artifacts/rw_pub_validation/${{ matrix.family }}/${{ matrix.block }}_n${{ matrix.n }}
+          if-no-files-found: error
+          retention-days: 90
+
+
+  verify-original-is-finished:
+    needs: [plan-recovery,recover-missing]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Let the remaining original scoring job finish normally; never cancel original
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,subprocess,time
+          repo='${{ github.repository }}';rid=42390283887
+          for attempt in range(160):
+           v=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{rid}'],text=True))
+           if v['status']=='completed':
+            if v['conclusion'] not in ('failure','success'):
+             raise RuntimeError('Original workflow unexpectedly cancelled; checkpoint coverage must be re-audited')
+            print('ORIGINAL_SCORING_RUN_FINISHED_WITHOUT_INTERRUPTION',v['conclusion'],flush=True)
+            break
+           print('PRESERVING_ORIGINAL_ACTIVE_SCORING_JOB',attempt,flush=True)
+           time.sleep(120)
+          else:raise RuntimeError('Original job still active after bounded wait; all recovery checkpoints preserved')
+          PY
+
+  source-family-parent-heterogeneity:
+    needs: [plan-recovery,recover-missing,verify-original-is-finished]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        family: [normal,lognormal,weibull,invgauss,exgaussian,exwald]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - name: Install pinned independent-parent inference package
+        run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - name: Restore all 42 frozen model and split-reference artifacts for this source family
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py --run 42390283887 \
+            --repo '${{ github.repository }}' \
+            --pattern 't3-rw-pub-validated-${{ matrix.family }}-b*-n*-g*-run42390283887' \
+            --dir incoming/scored/original
+          if [[ ",${{ needs.plan-recovery.outputs.families }}," == *",${{ matrix.family }},"* ]]; then
+            python scripts/t3_b3_rw_artifact_retry.py --run '${{ github.run_id }}' \
+              --repo '${{ github.repository }}' \
+              --pattern 't3-rw-pub-validated-${{ matrix.family }}-b*-n*-g*-run${{ github.run_id }}' \
+              --dir incoming/scored/recovery
+          fi
+      - name: Verify every source block and evaluation seed and calculate parent-independent heterogeneity and unadjusted control tests
+        run: |
+          python scripts/t3_b3_realworld_publication_analysis.py family \
+            --family '${{ matrix.family }}' --input incoming/scored \
+            --output artifacts/rw_pub_family/${{ matrix.family }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-parent-heterogeneity-${{ matrix.family }}-run${{ github.run_id }}
+          path: artifacts/rw_pub_family/${{ matrix.family }}
+          if-no-files-found: error
+          retention-days: 90
+
+  global-target-robustness-and-controls:
+    needs: [plan,source-family-parent-heterogeneity]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - name: Restore all six complete independent-parent family analyses
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py --run '${{ github.run_id }}' \
+            --repo '${{ github.repository }}' \
+            --pattern 't3-rw-pub-parent-heterogeneity-*-run${{ github.run_id }}' \
+            --dir incoming/families
+      - name: Apply separate supplementary BH corrections, evaluate practical stability and target sign concordance, and consolidate exploratory parent heterogeneity
+        run: |
+          python scripts/t3_b3_realworld_publication_analysis.py global \
+            --input incoming/families --output artifacts/rw_pub_global
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-four-module-global-validation-run${{ github.run_id }}
+          path: artifacts/rw_pub_global
+          if-no-files-found: error
+          retention-days: 90
+
+  independent-final-review-and-handoff:
+    needs: [plan-recovery,recover-missing,verify-original-is-finished,source-family-parent-heterogeneity,global-target-robustness-and-controls]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore global scientific evidence
+        uses: actions/download-artifact@v5
+        with:
+          name: t3-rw-pub-four-module-global-validation-run${{ github.run_id }}
+          path: incoming/global
+      - name: Hard gate all 1260 original-plus-recovered checkpoints, 720 W and two controls; audit provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import csv,gzip,json,os,pathlib,subprocess
+          base=pathlib.Path('incoming/global')
+          meta=json.loads((base/'publication_validation_provenance.json').read_text())
+          if (meta['score_jobs_expected']!=1260 or meta['original_individual_frozen_W']!=720 or
+              meta['additional_frozen_non_evolutionary_controls']!=['convex_mse','local_deterministic']):
+           raise ValueError('Incomplete scientific design')
+          with gzip.open(base/'supplementary_controls_and_target_BH.csv.gz','rt') as f:
+           rows=list(csv.DictReader(f))
+          got={r['candidate_id'] for r in rows}
+          if len(got)!=720:raise ValueError('Incomplete 720 trained weight identities')
+          if {r['reference_policy'] for r in rows}!={'holdout_half_mean','full_sample_mean'}:
+           raise ValueError('Missing independent empirical target sensitivity comparison')
+          if {r['comparator'] for r in rows}!={'mean','convex_mse','local_deterministic'}:
+           raise ValueError('Missing one of three essential comparison controls')
+          with gzip.open(base/'heterogeneity_exploratory_all_families.csv.gz','rt') as f:
+           hetero=list(csv.DictReader(f))
+          if not hetero:raise ValueError('Missing independent-parent heterogeneity analysis')
+          with gzip.open(base/'paired_target_policy_stability.csv.gz','rt') as f:
+           stable=list(csv.DictReader(f))
+          if not stable:raise ValueError('Missing target and practical stability comparison')
+          repo=os.environ['GITHUB_REPOSITORY'];run=os.environ['GITHUB_RUN_ID']
+          # Join original successful checkpoints with the current run's exact
+          # failed-only recovery. Original active worker must have finished.
+          found={}
+          for source_run in (42390283887,int(run)):
+           for page in range(1,17):
+            d=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{source_run}/artifacts?per_page=100&page={page}'],text=True))
+            for a in d['artifacts']:
+             name=a['name'];suffix='-run'+str(source_run)
+             if name.startswith('t3-rw-pub-validated-') and name.endswith(suffix):
+              if a['expired']:raise ValueError('Expired scoring checkpoint: '+name)
+              key=name[:-len(suffix)]
+              if key in found:raise ValueError('Duplicate original/recovered checkpoint: '+key)
+              found[key]=source_run
+            if len(d['artifacts'])<100:break
+          if len(found)!=1260:raise ValueError('Exactly 1260 original plus recovered checkpoints required: '+str(len(found)))
+          folder=pathlib.Path('artifacts/T3_B3_RW_PUB_VALIDATION_HANDOFF')
+          folder.mkdir(parents=True,exist_ok=True)
+          report=dict(protocol='T3_B3_RW_VALIDATION_FOUR_MODULES_FULL',
+            workflow_run_id=int(run),preserved_scoring_run=42390283887,failed_checkpoint_recovery_run=int(run),original_source_family_primary_run=42251598557,
+            destination_benchmark_final_run=42299685581,
+            original_preliminary_two_policy_comparison_run=42285271441,
+            original_raw_score_shards=856,original_frozen_individual_W=720,
+            new_validation_source_block_n_shards=1260,seed_groups_per_original_shard=5,parents_independent=True,
+            new_control_models=['convex_mse','local_deterministic'],new_fit_from_external_data=False,
+            global_two_target_three_benchmark_panels=6,
+            additional_hypotheses_not_merged_with_original_predeclared_BH=True,
+            all_four_analysis_modules_fully_scored=True,
+            empirical_true_mean_unobserved=True,posthoc_moderator_claims_exploratory=True)
+          (folder/'codex_lineage_and_scope.json').write_text(json.dumps(report,indent=2)+'\n')
+          (folder/'README.md').write_text(
+           '# T3 B3 Real World — Frozen optimization controls, split-reference target robustness, parent heterogeneity, and practical stability\n\n'
+           'Frozen external datasets: original catalog run 40508641708; parent-block bundles 41514871500. '
+           'Frozen Discovery models 41487091262. Original 720-W Real World source-policy inference 42251598557, '
+           'destination-policy sensitivity 42299685581. All original score artifacts and BH tables remain immutable.\n\n'
+           'This new stage evaluates two separate Discovery-frozen non-evolutionary controls, paired empirical '
+           'mean-target sensitivity with disjoint split halves, parent-level exploratory moderators, practical '
+           'effect sizes and target-policy stability. It scores all ten evaluation seeds on all three sample sizes '
+           'and 14 parent blocks per family. True population means are unavailable, and moderator claims are '
+           'not independent confirmation. Read publication_validation_provenance.json in the global artifact.\n')
+          print('REALWORLD_FOUR_MODULES_1260_ORIGINAL_PLUS_FAILED_ONLY_RECOVERED_720W_FINAL_REVIEW_PASS',len(rows),len(stable),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-rw-pub-four-module-final-Codex-lineage-run${{ github.run_id }}
+          path: artifacts/T3_B3_RW_PUB_VALIDATION_HANDOFF
+          if-no-files-found: error
+          retention-days: 90
