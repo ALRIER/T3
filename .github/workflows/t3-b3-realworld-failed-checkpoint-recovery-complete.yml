@@ -170,7 +170,7 @@ jobs:
           retention-days: 90
 
   global-target-robustness-and-controls:
-    needs: [plan,source-family-parent-heterogeneity]
+    needs: [plan-recovery,source-family-parent-heterogeneity]
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     steps:
