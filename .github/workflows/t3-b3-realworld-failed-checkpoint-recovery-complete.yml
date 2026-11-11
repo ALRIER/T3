@@ -27,7 +27,7 @@ jobs:
       families: ${{ steps.plan.outputs.families }}
     steps:
       - uses: actions/checkout@v4
-      - name: Find failed checkpoint identities; do not cancel or rerun active successful jobs
+      - name: Reconcile final 1260 expected source checkpoints against immutable original artifacts
         id: plan
         env:
           GH_TOKEN: ${{ github.token }}
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
-      - name: Let the remaining original scoring job finish normally; never cancel original
+      - name: Confirm completed original Real World source run and preserved artifact lineage
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

@@ -1,51 +1,74 @@
 #!/usr/bin/env python3
-"""Identify exactly failed Real World source-block/seed-pair checkpoints without touching live jobs."""
-import json,os,re,subprocess,time,collections
+"""Freeze missing checkpoints from original completed Real World artifact inventory.
+
+Avoid Actions job.name: GitHub truncates long matrix labels with ellipses.
+Only exact immutable scoring-artifact presence determines missing coverage.
+"""
+import collections,json,os,re,subprocess,time
 ORIGINAL=42390283887
-pattern=re.compile(r'^frozen-score-seeds-(30-31|32-33|34-35|36-37|38-39) \((normal|lognormal|weibull|invgauss|exgaussian|exwald), (b[0-9]{2}), (t3-b3-realworld-parentblock-[a-z]+-b[0-9]{2}-run41514871500), (200|1000|3000)\)$')
-groups={'30-31':0,'32-33':1,'34-35':2,'36-37':3,'38-39':4}
-def api(path):
- for attempt in range(8):
-  p=subprocess.run(['gh','api',path],text=True,capture_output=True)
-  if p.returncode==0:return json.loads(p.stdout)
-  if not any(t in p.stderr.lower() for t in ('rate limit','http 502','http 503','timeout')):raise RuntimeError(p.stderr[:900])
-  time.sleep(min(20*(attempt+1),90))
- raise RuntimeError('Persistent GitHub API installation quota: '+path)
+SHA="5799cd212e1df312abdbe022900b507c6466e601"
+FAMILIES=("normal","lognormal","weibull","invgauss","exgaussian","exwald")
+GROUPS=((30,31),(32,33),(34,35),(36,37),(38,39))
+SUFFIX="-run"+str(ORIGINAL)
+REGEX=re.compile(r"t3-rw-pub-validated-(normal|lognormal|weibull|invgauss|exgaussian|exwald)-(b[0-9]{2})-n(200|1000|3000)-g([0-4])-run42390283887")
+def api(repo,route):
+ for i in range(9):
+  z=subprocess.run(["gh","api",f"repos/{repo}/{route}"],capture_output=True,text=True,timeout=150)
+  if z.returncode==0:
+   return json.loads(z.stdout)
+  if not any(x in (z.stderr or "").lower() for x in ("rate limit","http 50","timeout","connection reset","connection refused")):
+   raise RuntimeError("GitHub API hard failure: "+(z.stderr or "")[:1200])
+  pause=min(25*(i+1),120)
+  print("RETRY_GITHUB_ARTIFACT_INVENTORY_API",route,pause,flush=True)
+  time.sleep(pause)
+ raise RuntimeError("GitHub API unavailable after retries: "+route)
 def main():
- repo=os.environ['GITHUB_REPOSITORY']
- original=api(f'repos/{repo}/actions/runs/{ORIGINAL}')
- if original['head_sha']!='5799cd212e1df312abdbe022900b507c6466e601':
-  raise RuntimeError('Original Real World frozen scoring commit differs')
- jobs=[];page=1
- while True:
-  body=api(f'repos/{repo}/actions/runs/{ORIGINAL}/jobs?per_page=100&page={page}')
-  jobs.extend(body['jobs'])
-  if len(body['jobs'])<100:break
-  page+=1
- if len(jobs)<1262:raise RuntimeError('Original Actions job list incomplete; preserve current run')
- failed=[j for j in jobs if j.get('conclusion')=='failure']
- missing=[];seen=set()
- for j in failed:
-  m=pattern.fullmatch(j['name'])
-  if not m:raise RuntimeError('Non-scoring job failure requires separate inspection: '+j['name'])
-  grp,family,block,artifact,n=m.groups()
-  key=(grp,family,block,int(n))
-  if key in seen:raise RuntimeError('Duplicate failed checkpoint')
-  seen.add(key)
-  low,high=map(int,grp.split('-'))
-  missing.append(dict(seed_group=groups[grp],seeds=f'{low},{high}',family=family,block=block,
-    artifact=artifact,n=int(n),original_job_id=j['id']))
- if not missing:raise RuntimeError('No failed checkpoint jobs found; do not launch redundant scoring')
- if len(missing)>100:raise RuntimeError('Unusually many failed jobs; require manual audit: '+str(len(missing)))
- os.makedirs('artifacts/realworld_recovery',exist_ok=True)
- with open('artifacts/realworld_recovery/failed_original_job_ledger.json','w') as f:
-  json.dump(dict(original_run=ORIGINAL,failed_count=len(missing),failed=missing,
-   live_jobs=[dict(id=j['id'],name=j['name']) for j in jobs if j['status']=='in_progress'],
-   keep_successful_artifacts_immutable=True),f,indent=2)
- with open(os.environ['GITHUB_OUTPUT'],'a') as f:
-  print('matrix='+json.dumps({'include':missing},separators=(',',':')),file=f)
-  print('missing='+str(len(missing)),file=f)
-  print('families='+','.join(sorted({z['family'] for z in missing})),file=f)
- print('REALWORLD_FAILED_CHECKPOINTS_ISOLATED',len(missing),
-       'original_running',sum(j['status']=='in_progress' for j in jobs),flush=True)
-if __name__=='__main__':main()
+ repo=os.environ["GITHUB_REPOSITORY"]
+ run=api(repo,f"actions/runs/{ORIGINAL}")
+ if run["head_sha"]!=SHA or run["status"]!="completed":
+  raise RuntimeError("Original source run not complete or is different SHA; leave active runs alone")
+ listed=[];total=None
+ for page in range(1,18):
+  r=api(repo,f"actions/runs/{ORIGINAL}/artifacts?per_page=100&page={page}")
+  if total is None:total=r["total_count"]
+  listed.extend(r["artifacts"])
+  if len(r["artifacts"])<100:break
+ if len(listed)!=total:raise RuntimeError(f"Incomplete immutable artifact inventory: {len(listed)} / {total}")
+ existing=set()
+ for art in listed:
+  m=REGEX.fullmatch(art["name"])
+  if m:
+   if art["expired"] or art["size_in_bytes"]<=0:
+    raise RuntimeError("Expired/empty original successful scoring artifact "+art["name"])
+   family,block,n,g=m.groups();key=(family,block,int(n),int(g))
+   if key in existing:raise RuntimeError("Duplicate completed checkpoint "+art["name"])
+   existing.add(key)
+ expected={(family,f"b{block:02d}",n,g)
+  for family in FAMILIES for block in range(1,15) for n in (200,1000,3000) for g in range(5)}
+ if not existing<=expected:raise RuntimeError("Unexpected checkpoint ID in source run")
+ missing=sorted(expected-existing)
+ if not missing:
+  raise RuntimeError("No missing checkpoint artifacts: original 1260 complete; do not rerun scoring")
+ if len(missing)>100:
+  raise RuntimeError("Unexpected broad recovery scope; review before launching "+str(len(missing)))
+ rows=[]
+ for family,block,n,g in missing:
+  lo,hi=GROUPS[g]
+  rows.append(dict(family=family,block=block,n=n,seed_group=g,seeds=f"{lo},{hi}",
+   artifact=f"t3-b3-realworld-parentblock-{family}-{block}-run41514871500",
+   original_expected_artifact=f"t3-rw-pub-validated-{family}-{block}-n{n}-g{g}{SUFFIX}"))
+ os.makedirs("artifacts/realworld_recovery",exist_ok=True)
+ ledger=dict(original_run=ORIGINAL,original_sha=SHA,source_run_conclusion=run["conclusion"],
+  expected_scoring_checkpoints=len(expected),preserved_scoring_checkpoints=len(existing),
+  missing_scoring_checkpoints=len(rows),non_scoring_artifacts=total-len(existing),
+  all_original_successful_artifacts_immutable=True,missing=rows)
+ with open("artifacts/realworld_recovery/failed_original_job_ledger.json","w") as f:
+  json.dump(ledger,f,indent=2)
+ with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+  print("matrix="+json.dumps({"include":rows},separators=(",",":")),file=f)
+  print("missing="+str(len(rows)),file=f)
+  print("families="+",".join(sorted({z["family"] for z in rows})),file=f)
+ print("REALWORLD_COMPLETED_ORIGINAL_ARTIFACT_RECONCILIATION_PASS",
+       "preserved",len(existing),"missing",len(rows),"other_artifacts",total-len(existing),flush=True)
+ for r in rows:print("RETRY_EXACT_MISSING_CHECKPOINT",r["original_expected_artifact"],flush=True)
+if __name__=="__main__":main()
