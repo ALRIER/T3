@@ -1,0 +1,45 @@
+name: T3 B3 — Reconcile Frozen Parent Feature Identities and Consolidate Saved Exports
+run-name: "Audit 84 preserved parent feature artifacts | reconcile identical duplicates | freeze independent parent registry"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_PARENT_FEATURES_RECONCILE_SAVED_ONCE.txt
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-parent-feature-reconcile-saved-43103963144
+  cancel-in-progress: false
+jobs:
+  diagnose-and-reconcile-preserved-84-feature-artifacts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          run-id: 43103963144
+          github-token: ${{ github.token }}
+          pattern: t3-b3-post-rw-parent-profiles-*-run43103963144
+          path: incoming/parent_profiles
+          merge-multiple: true
+      - name: Diagnose duplicate source-parent keys; accept only byte-identical frozen feature records
+        run: python scripts/t3_b3_reconcile_preserved_parent_features.py
+      - name: Preserve exact collision diagnostics even if independent-parent gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-parent-features-identity-audit-run${{ github.run_id }}
+          path: artifacts/post_rw_parent_features/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Publish canonical outcome-blind registry only after scientific identity audit succeeds
+        uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-rw-parent-outcome-blind-features-run${{ github.run_id }}
+          path: |
+            artifacts/post_rw_parent_features/outcome_blind_parent_features.csv
+            artifacts/post_rw_parent_features/frozen_parent_features_provenance.json
+          if-no-files-found: error
+          retention-days: 90
