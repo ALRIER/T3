@@ -1,5 +1,5 @@
 name: T3 B3 Real World — Failed Two-Seed Checkpoint Recovery and Remaining Four-Module Inference
-run-name: "Real World reconcile 1248 preserved + recover 12 missing checkpoints | finish parent inference and global review"
+run-name: "Real World artifact-based recovery | 12 missing of 1260 | parent inference and final audit"
 "on":
   push:
     branches: [main]
@@ -9,8 +9,8 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: t3-b3-rw-failed-checkpoints-non-disruptive-recovery
-  cancel-in-progress: true
+  group: t3-b3-rw-exact-12-artifact-recovery-nov11-v2
+  cancel-in-progress: false
 env:
   PYTHONUNBUFFERED: '1'
   OPENBLAS_NUM_THREADS: '1'
@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      max-parallel: 21
+      max-parallel: 22
       matrix: ${{ fromJSON(needs.plan-recovery.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
