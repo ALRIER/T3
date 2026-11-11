@@ -1,6 +1,10 @@
 name: T3 B3 — Frozen Parent Regime Features and Source-Domain Export
 run-name: "Export outcome-blind regime descriptors from 84 original Real World parent blocks"
 "on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_POST_RW_OUTCOME_BLIND_PARENT_FEATURES_ONCE.txt
   workflow_dispatch:
 permissions:
   contents: read
@@ -12,7 +16,48 @@ env:
   T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
   PYTHONUNBUFFERED: '1'
 jobs:
+  pilot-outcome-blind-source-hash-and-feature-schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download one original parent sample, verify both source hashes and compute pilot parent features
+        env:
+          GH_TOKEN: ${{ github.token }}
+          T3_REALWORLD_SOURCE_ROOT: input/parent_block
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_rw_artifact_retry.py --run 41514871500 \
+            --repo '${{ github.repository }}' \
+            --name 't3-b3-realworld-parentblock-normal-b01-run41514871500' \
+            --dir incoming/parent
+          mkdir -p input
+          archive="$(find incoming/parent -name realworld-normal-b01.tar.gz -print -quit)"
+          checksum="$(find incoming/parent -name realworld-normal-b01.tar.gz.sha256 -print -quit)"
+          test -s "$archive" && test -s "$checksum"
+          test "$(sha256sum "$archive" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$archive" -C input
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_export_outcome_blind_parent_features.R \
+            normal b01 input/parent_block/parent_block_manifest.csv \
+            artifacts/profile_pilot/normal_b01_profiles.csv
+          python - <<'PY'
+          import csv
+          rows=list(csv.DictReader(open('artifacts/profile_pilot/normal_b01_profiles.csv',newline='')))
+          assert rows and len(rows)%3==0, 'Pilot must emit all three sample size policies per parent'
+          assert {'parent_dataset_id','source_family','sample_n','data_source',
+           'profile_fit_confidence','skewness','kurtosis','tail_ratio'}<=set(rows[0])
+          assert {int(r['sample_n']) for r in rows}=={200,1000,3000}
+          print('T3_B3_OUTCOME_BLIND_PARENT_PROFILE_PILOT_PASS',len(rows))
+          PY
   export-outcome-blind-parent-block-features:
+    needs: pilot-outcome-blind-source-hash-and-feature-schema
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     strategy:
