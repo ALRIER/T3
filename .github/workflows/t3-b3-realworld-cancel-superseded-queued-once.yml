@@ -29,7 +29,12 @@ jobs:
             case "$status" in
               queued|pending|waiting|requested)
                 echo "Cancelling superseded run $id status $status"
-                gh api --method POST "repos/$GH_REPO/actions/runs/$id/cancel"
+                if ! gh api --method POST "repos/$GH_REPO/actions/runs/$id/cancel"; then
+                  echo "Normal cancellation rejected; trying force-cancel for superseded ID $id"
+                  if ! gh api --method POST "repos/$GH_REPO/actions/runs/$id/force-cancel"; then
+                    echo "::warning::GitHub rejected both cancel endpoints for superseded $id; original active recovery is untouched."
+                  fi
+                fi
                 ;;
               completed)
                 echo "Superseded run $id already completed; no action"

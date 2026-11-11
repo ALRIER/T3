@@ -1,1 +1,1 @@
-One-shot GitHub Actions cleanup of strictly superseded queued recovery attempts 43095259019 and 43097767206. Preserve current active recovery 43098925126 at commit 8587a07. Never cancel any other run. Authorized by user Nov 11, 2026.
+Retry cancellation of two exactly identified stale recovery runs (43095259019,43097767206), after GitHub returned HTTP409 'Cannot cancel a workflow run that has not been queued yet' to normal cancellation. Try force-cancel, never touch active recovery 43098925126. Record failures honestly; no science code changes.
