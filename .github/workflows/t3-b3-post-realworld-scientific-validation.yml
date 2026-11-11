@@ -54,6 +54,7 @@ jobs:
           python -m py_compile \
             scripts/t3_b3_post_realworld_audit.py \
             scripts/t3_b3_post_realworld_regime.py \
+            scripts/t3_b3_post_realworld_external.py \
             scripts/t3_b3_post_realworld_null_replay.py
           python scripts/t3_b3_post_realworld_audit.py smoke --output artifacts/post_rw_smoke
           python scripts/t3_b3_post_realworld_regime.py smoke
@@ -168,6 +169,46 @@ jobs:
         with:
           name: t3-b3-post-rw-frozen-discovery-hpo-stability-run${{ github.run_id }}
           path: artifacts/post_rw_hpo
+          if-no-files-found: error
+          retention-days: 90
+
+  empirical-assignment-and-source-domain-sensitivity:
+    needs: freeze-realworld-reviewer-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - run: python -m pip install --disable-pip-version-check numpy==2.3.5 scipy==1.17.0
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-post-rw-verified-global-input-run${{ github.run_id }}
+          path: artifacts/source_realworld
+      - name: Require complete independent outcome-blind parent covariate registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FEATURES_RUN: ${{ inputs.frozen_parent_features_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$FEATURES_RUN" =~ ^[1-9][0-9]{7,14}$ ]] || exit 1
+          [[ "$(gh api "repos/${{ github.repository }}/actions/runs/$FEATURES_RUN" --jq '.conclusion')" == success ]] || exit 1
+          python scripts/t3_b3_rw_artifact_retry.py --run "$FEATURES_RUN" \
+            --repo '${{ github.repository }}' --name "t3-b3-rw-parent-outcome-blind-features-run$FEATURES_RUN" \
+            --dir artifacts/frozen_source_profiles
+      - name: Descriptive source domain and empirical family assignment sensitivity without score-dependent stratification
+        run: |
+          set -euo pipefail
+          effects="$(find artifacts/source_realworld -name independent_parent_effects_all_families.csv.gz -print -quit)"
+          features="$(find artifacts/frozen_source_profiles -name outcome_blind_parent_features.csv -print -quit)"
+          test -s "$effects" && test -s "$features"
+          python scripts/t3_b3_post_realworld_external.py \
+            --effects "$effects" --features "$features" \
+            --output artifacts/post_rw_source_assignment --minimum-confidence 0.75
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-source-domain-assignment-sensitivity-run${{ github.run_id }}
+          path: artifacts/post_rw_source_assignment
           if-no-files-found: error
           retention-days: 90
 
