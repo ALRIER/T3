@@ -1,5 +1,5 @@
 name: T3 B3 Real World — Failed Two-Seed Checkpoint Recovery and Remaining Four-Module Inference
-run-name: "Real World resume only failed two-seed scoring checkpoints | retain active original runner | parent inference + global review"
+run-name: "Real World reconcile 1248 preserved + recover 12 missing checkpoints | finish parent inference and global review"
 "on":
   push:
     branches: [main]
@@ -10,7 +10,7 @@ permissions:
   actions: read
 concurrency:
   group: t3-b3-rw-failed-checkpoints-non-disruptive-recovery
-  cancel-in-progress: false
+  cancel-in-progress: true
 env:
   PYTHONUNBUFFERED: '1'
   OPENBLAS_NUM_THREADS: '1'
