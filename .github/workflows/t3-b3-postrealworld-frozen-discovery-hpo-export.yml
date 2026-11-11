@@ -1,0 +1,112 @@
+name: T3 B3 — Frozen Discovery HPO Metadata Export and Budget Stability Audit
+run-name: "Export original 720 frozen Discovery W metadata from all three n bundles | audit budgets and tuning"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_POST_RW_HPO_EXPORT_ONCE.txt
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-post-rw-frozen-discovery-hpo-metadata
+  cancel-in-progress: false
+env:
+  T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+  PYTHONUNBUFFERED: '1'
+jobs:
+  export-frozen-discovery-metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: {n: [200,1000,3000]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore immutable, sample-size-specific original Discovery bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/t3_b3_rw_artifact_retry.py --run 41487091262 \
+            --repo '${{ github.repository }}' \
+            --name 't3-b3-discovery-bundle-n${{ matrix.n }}-run41487091262' \
+            --dir incoming/discovery
+      - name: Verify original Discovery bundle SHA256 and extract
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/discovery_v3
+          bundle="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz' -print -quit)"
+          checksum="$(find incoming/discovery -type f -name 'discovery-n${{ matrix.n }}.tar.gz.sha256' -print -quit)"
+          test -s "$bundle" && test -s "$checksum"
+          test "$(sha256sum "$bundle" | cut -d' ' -f1)" = "$(head -1 "$checksum" | awk '{print $1}')"
+          tar -xzf "$bundle" -C artifacts/discovery_v3
+          test "$(find artifacts/discovery_v3 -type f -name discovery.rds | wc -l)" -eq 60
+      - name: Extract selected W SHA, actual evaluation budget and original HPO registry without retraining
+        run: |
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_export_frozen_discovery_hpo.R \
+            artifacts/discovery_v3 ${{ matrix.n }} \
+            artifacts/post_rw_hpo/frozen_discovery_hpo_n${{ matrix.n }}.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-post-rw-frozen-hpo-fragment-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/post_rw_hpo/frozen_discovery_hpo_n${{ matrix.n }}.csv
+          if-no-files-found: error
+          retention-days: 90
+  consolidate-and-verify-720-frozen-weights:
+    needs: export-frozen-discovery-metadata
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12.10'}
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-post-rw-frozen-hpo-fragment-*-run${{ github.run_id }}
+          path: incoming/frozen_hpo
+          merge-multiple: true
+      - name: Verify complete 720 individual frozen W keys and strong source references
+        run: |
+          python - <<'PY'
+          import csv,glob,hashlib,json,pathlib
+          src=glob.glob('incoming/frozen_hpo/frozen_discovery_hpo_n*.csv')
+          if len(src)!=3:raise ValueError('Exactly three immutable n Discovery fragments required')
+          rows=[]
+          for p in sorted(src):
+           with open(p,newline='') as f:rows+=list(csv.DictReader(f))
+          if len(rows)!=720:raise ValueError('Missing Discovery learned-W units')
+          seen=set()
+          for r in rows:
+           key=(r['family'],int(r['sample_n']),int(r['training_seed']),r['engine'])
+           if key in seen:raise ValueError('Frozen Discovery fit key repeated')
+           seen.add(key)
+           if len(r['frozen_weight_sha256'])!=64 or len(r['original_discovery_rds_sha256'])!=64:
+            raise ValueError('Missing original frozen hashes')
+          from collections import Counter
+          if any(Counter(k[1] for k in seen)[n]!=240 for n in (200,1000,3000)):
+           raise ValueError('Missing one n-specific model fit class')
+          out=pathlib.Path('artifacts/post_rw_frozen_registry');out.mkdir(parents=True,exist_ok=True)
+          target=out/'frozen_discovery_hpo_registry.csv'
+          with target.open('w',newline='') as f:
+           writer=csv.DictWriter(f,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
+          (out/'original_discovery_registry_provenance.json').write_text(json.dumps(
+           dict(source_run=41487091262,source_sha256=hashlib.sha256(target.read_bytes()).hexdigest(),
+           original_training_only_fitted_units=720,discovery_training_seeds=list(range(10)),
+           sample_sizes=[200,1000,3000],trained_on_realworld=False),indent=2)+'\n')
+          print('T3_B3_ORIGINAL_DISCOVERY_HPO_720_W_EXPORT_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-frozen-discovery-hpo-registry-run${{ github.run_id }}
+          path: artifacts/post_rw_frozen_registry
+          if-no-files-found: error
+          retention-days: 90
