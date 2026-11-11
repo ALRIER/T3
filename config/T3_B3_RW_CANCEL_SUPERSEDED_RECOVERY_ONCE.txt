@@ -1,0 +1,1 @@
+One-shot GitHub Actions cleanup of strictly superseded queued recovery attempts 43095259019 and 43097767206. Preserve current active recovery 43098925126 at commit 8587a07. Never cancel any other run. Authorized by user Nov 11, 2026.

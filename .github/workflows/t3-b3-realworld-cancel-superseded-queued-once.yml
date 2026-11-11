@@ -1,0 +1,46 @@
+name: T3 B3 Real World — Cancel Superseded Queued Recovery Attempts
+run-name: "Cancel only queued Real World recovery attempts 43095259019 and 43097767206"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_RW_CANCEL_SUPERSEDED_RECOVERY_ONCE.txt
+permissions:
+  contents: read
+  actions: write
+jobs:
+  cancel-only-superseded:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify current recovery is active and cancel only exact older queued run IDs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          active="$(gh api "repos/$GH_REPO/actions/runs/43098925126" --jq '.status')"
+          if [[ "$active" != "in_progress" && "$active" != "completed" ]]; then
+            echo "Refusing cancellation: current recovery is not running or completed: $active"
+            exit 1
+          fi
+          for id in 43095259019 43097767206; do
+            status="$(gh api "repos/$GH_REPO/actions/runs/$id" --jq '.status')"
+            case "$status" in
+              queued|pending|waiting|requested)
+                echo "Cancelling superseded run $id status $status"
+                gh api --method POST "repos/$GH_REPO/actions/runs/$id/cancel"
+                ;;
+              completed)
+                echo "Superseded run $id already completed; no action"
+                ;;
+              *)
+                echo "Unexpected status for $id: $status; refusing to cancel another active job"
+                exit 1
+                ;;
+            esac
+          done
+          for id in 43095259019 43097767206; do
+            gh api "repos/$GH_REPO/actions/runs/$id" --jq '{id: .id, status: .status, conclusion: .conclusion}'
+          done
+          gh api "repos/$GH_REPO/actions/runs/43098925126" --jq '{id: .id, status: .status, conclusion: .conclusion}'
