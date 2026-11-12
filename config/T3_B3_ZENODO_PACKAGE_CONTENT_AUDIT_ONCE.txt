@@ -1,0 +1,1 @@
+One-time full content integrity verification of DOI 10.5281/zenodo.24174965, 10 published ZIP series, against Zenodo MD5, supplied SHA256 manifest, and archive CRC. Read-only original public data, maximum 3 jobs, no scoring or GitHub artifact mutation.

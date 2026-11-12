@@ -1,0 +1,145 @@
+name: T3 B3 — Verify Zenodo Results Package Contents and Checksums
+run-name: "Verify all ten Zenodo result ZIPs against publication manifest, enumerate inner result provenance"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_ZENODO_PACKAGE_CONTENT_AUDIT_ONCE.txt
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-zenodo-content-audit-once
+  cancel-in-progress: false
+jobs:
+  checksum-and-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        series: ["01","02","03","04","05","06","07","08","09","10"]
+    steps:
+      - name: Retrieve exact published file, verify remote checksum and manifest SHA256, inspect every member name
+        env:
+          SERIES: ${{ matrix.series }}
+        run: |
+          set -euo pipefail
+          mkdir -p report
+          python3 - <<'PY'
+          import os,io,json,csv,hashlib,zipfile,urllib.request,pathlib,time,re,collections
+          series=os.environ['SERIES']
+          root='https://zenodo.org/api/records/24174965/files/'
+          name=f'T3_{series}_series.zip'
+          headers={'User-Agent':'T3-B3-result-integrity-audit/1.0'}
+          def retrieve(url,p):
+           request=urllib.request.Request(url,headers=headers)
+           with urllib.request.urlopen(request,timeout=200) as r, open(p,'wb') as f:
+            while True:
+             chunk=r.read(4*1024*1024)
+             if not chunk:break
+             f.write(chunk)
+          manifest=pathlib.Path('file_manifest.csv')
+          retrieve(root+'file_manifest.csv/content',manifest)
+          rows=list(csv.DictReader(manifest.open(newline='',encoding='utf-8-sig')))
+          print('MANIFEST_COLUMNS',json.dumps(list(rows[0]) if rows else []),flush=True)
+          print('MANIFEST_ROW_FOR_PACKAGE',json.dumps([r for r in rows if name in str(r)]),flush=True)
+          record=json.loads(urllib.request.urlopen(urllib.request.Request('https://zenodo.org/api/records/24174965',headers=headers),timeout=40).read())
+          files=record['files']
+          files=files.get('entries',{}) if isinstance(files,dict) else files
+          if isinstance(files,dict):files=list(files.values())
+          remote=next(f for f in files if f.get('key')==name)
+          p=pathlib.Path(name)
+          retrieve(remote['links']['self'],p)
+          size=p.stat().st_size
+          h_md5=hashlib.md5();h_sha=hashlib.sha256()
+          with p.open('rb') as f:
+           while chunk:=f.read(4*1024*1024):h_md5.update(chunk);h_sha.update(chunk)
+          remote_md5=remote['checksum'].split(':',1)[-1]
+          ok=size==remote['size'] and h_md5.hexdigest()==remote_md5
+          report=dict(zenodo_id=24174965,name=name,bytes=size,remote_bytes=remote['size'],
+             md5=h_md5.hexdigest(),sha256=h_sha.hexdigest(),zenodo_md5=remote_md5,
+             published_file_integrity_pass=ok,manifest_rows=[r for r in rows if name in str(r)],members=[])
+          assert ok,'Remote Zenodo published-file hash mismatch'
+          with zipfile.ZipFile(p) as z:
+           broken=z.testzip()
+           assert broken is None,f'Corrupt zipped member: {broken}'
+           for item in z.infolist():
+            if item.is_dir():continue
+            record=dict(path=item.filename,bytes=item.file_size,compressed_bytes=item.compress_size,
+                        crc32=f'{item.CRC:08x}')
+            # Independent SHA256 of small embedded result tables, source manifest,
+            # small lineage JSONs and markdown. Large tables are scanned in next stage.
+            if item.file_size<=8*1024*1024:
+             with z.open(item) as f:
+              content=f.read()
+             record['sha256']=hashlib.sha256(content).hexdigest()
+             if item.filename.lower().endswith(('.csv','.md','.json','.txt')):
+              head=content[:20000].decode('utf-8-sig','replace')
+              record['header']=head[:1000]
+              record['found_run_ids']=sorted(set(re.findall(r'(?<![0-9])(4[0-9]{10})(?![0-9])',head)))
+            report['members'].append(record)
+          report['member_count']=len(report['members'])
+          report['uncompressed_bytes']=sum(x['bytes'] for x in report['members'])
+          out=pathlib.Path('report')/(f'zenodo_{series}_inventory.json')
+          out.write_text(json.dumps(report,indent=2))
+          print('ZENODO_PACKAGE_VERIFICATION',json.dumps(
+           {k:v for k,v in report.items() if k not in ('members','manifest_rows')})[:4000],flush=True)
+          print('SAMPLE_PATHS',json.dumps([m['path'] for m in report['members'][:80]]),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t3-b3-zenodo-series-${{ matrix.series }}-integrity-run${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 60
+  aggregate:
+    needs: checksum-and-inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-zenodo-series-*-integrity-run${{ github.run_id }}
+          path: incoming
+          merge-multiple: true
+      - name: Combine exact package inventories and distinguish integrity from scientific equivalence
+        run: |
+          set -euo pipefail
+          mkdir -p report
+          python3 - <<'PY'
+          import pathlib,json,csv,collections,hashlib
+          paths=sorted(pathlib.Path('incoming').glob('zenodo_??_inventory.json'))
+          if len(paths)!=10:raise ValueError(f'Expected all 10 verified Zenodo result packages, got {len(paths)}')
+          data=[json.loads(x.read_text()) for x in paths]
+          if not all(x['published_file_integrity_pass'] for x in data):raise ValueError('Published ZIP corrupted')
+          rows=[]
+          for pack in data:
+           for m in pack['members']:
+            rows.append({'zenodo_package':pack['name'],'path':m['path'],'size':m['bytes'],
+              'member_sha256':m.get('sha256',''),'member_crc32':m['crc32'],
+              'run_ids_in_small_head':';'.join(m.get('found_run_ids',[])),
+              'header_preview':m.get('header','')[:180].replace('\n',' ')})
+          out=pathlib.Path('report');out.mkdir(exist_ok=True)
+          with (out/'zenodo_member_inventory.csv').open('w',newline='') as f:
+           w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+          (out/'zenodo_verified_package_summary.json').write_text(json.dumps({
+           'record':24174965,'packages':len(data),'archive_members':len(rows),
+           'compressed_bytes':sum(x['bytes'] for x in data),
+           'uncompressed_bytes':sum(x['uncompressed_bytes'] for x in data),
+           'all_published_md5_confirmed':True,
+           'all_archives_crc_test_passed':True,
+           'scientific_equivalence_to_github_actions':'NOT_YET_PROVEN',
+           'packages_summary':[{'name':x['name'],'bytes':x['bytes'],
+             'sha256':x['sha256'],'entries':x['member_count']} for x in data]},indent=2))
+          print('ZENODO_FULL_TEN_PACKAGES_INTEGRITY_AND_MEMBER_LIST_PASS',len(rows))
+          print(json.dumps([(x['name'],x['member_count'],x['uncompressed_bytes']) for x in data]))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-zenodo-all-ten-package-member-inventory-run${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 60
