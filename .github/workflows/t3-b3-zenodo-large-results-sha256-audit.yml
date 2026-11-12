@@ -1,0 +1,86 @@
+name: "T3 B3 — Verify Large Zenodo Result Tables Against Frozen Actions SHA256"
+run-name: "Prove 18 Held Out, reviewer full-cell and Real World 121MB files byte-identical"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_ZENODO_LARGE_SHA256_ONCE.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compare-large-saved-tables:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - name: Download original Actions SHA reference index
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh run download 43314309491 -R "$GH_REPO" \
+            --name 't3-b3-actions-reference-table-inventory-run43314309491' --dir input
+      - name: Read large Zenodo ZIP members directly and compare cryptographic hashes against original Actions bytes
+        run: |
+          set -euo pipefail
+          mkdir -p report
+          python3 - <<'PY'
+          import csv,os,json,hashlib,zipfile,urllib.request,pathlib,collections
+          with open('input/actions_reference_payload_sha256.csv',newline='') as f:
+           actions=list(csv.DictReader(f))
+          ref=json.loads(urllib.request.urlopen(urllib.request.Request(
+           'https://zenodo.org/api/records/24174965',headers={'User-Agent':'T3-B3-source-hash-equivalence/1.0'}),timeout=45).read())
+          files=ref['files'];files=files.get('entries',{}) if isinstance(files,dict) else files
+          if isinstance(files,dict):files=list(files.values())
+          proof=[];large_target=0
+          for series in ['03','04','09']:
+           name=f'T3_{series}_series.zip'
+           src=next(x for x in files if x['key']==name)
+           p=pathlib.Path(name)
+           req=urllib.request.Request(src['links']['self'],headers={'User-Agent':'T3-B3-source-hash-equivalence/1.0'})
+           with urllib.request.urlopen(req,timeout=240) as reader, p.open('wb') as out:
+            while block:=reader.read(4*1024*1024):out.write(block)
+           md5=hashlib.md5(p.read_bytes()).hexdigest()
+           if md5!=src['checksum'].split(':')[-1]:raise ValueError('Zenodo package changed '+name)
+           with zipfile.ZipFile(p) as z:
+            paths={x.filename:x for x in z.infolist() if not x.is_dir()}
+            for a in actions:
+             full=a['artifact'].strip('/')+'/'+a['path'].lstrip('/')
+             matched=[path for path in paths if full in path and path.endswith(a['path'])]
+             if not matched:continue
+             if int(a['bytes'])<=8*1024*1024:continue
+             if len(matched)!=1:raise ValueError('Ambiguous source correspondence: '+full)
+             with z.open(matched[0]) as f:
+              sha=hashlib.sha256()
+              size=0
+              while block:=f.read(4*1024*1024):sha.update(block);size+=len(block)
+             equal=sha.hexdigest()==a['sha256'] and size==int(a['bytes'])
+             proof.append(dict(zenodo_package=name,zenodo_path=matched[0],
+              source_run=a['run_id'],source_artifact=a['artifact'],
+              source_relative_path=a['path'],zenodo_sha256=sha.hexdigest(),
+              actions_sha256=a['sha256'],verified_bytes=size,exact_sha256_match=equal))
+             print('LARGE_RESULT_TABLE_SHA_PROOF',name,a['label'],a['path'],equal,size,flush=True)
+           p.unlink()
+          expected=20
+          if len(proof)!=expected:
+           raise ValueError(f'Expected 18 Held Out + reviewer + Real World = {expected} large tables, got {len(proof)}')
+          out=pathlib.Path('report')
+          with (out/'zenodo_vs_actions_large_tables_sha256.csv').open('w',newline='') as f:
+           writer=csv.DictWriter(f,fieldnames=list(proof[0]));writer.writeheader();writer.writerows(proof)
+          summary=dict(zenodo_doi='10.5281/zenodo.24174965',large_members=len(proof),
+           matching=sum(z['exact_sha256_match'] for z in proof),
+           mismatches=sum(not z['exact_sha256_match'] for z in proof),
+           evidence='complete member SHA256 and byte count compared with independently fetched Actions source reference',
+           original_data_unmodified=True)
+          (out/'large_result_tables_audit.json').write_text(json.dumps(summary,indent=2))
+          print('ZENODO_LARGE_SCIENTIFIC_RESULT_HASH_AUDIT',json.dumps(summary),flush=True)
+          if summary['mismatches']:raise ValueError('Found proven mismatches in Zenodo large result tables')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t3-b3-zenodo-large-table-byte-proof-run${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 90

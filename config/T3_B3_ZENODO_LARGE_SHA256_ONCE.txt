@@ -1,0 +1,1 @@
+Explicit SHA256 check of original 18 Heldout 720W large inference tables, one heldout full reviewer, one Real World independent parent effect 121MB table, across Zenodo ZIPs T3_03,04,09. Compare exact bytes with authoritative GitHub Actions runs. Avoid data changes, no rescoring.
