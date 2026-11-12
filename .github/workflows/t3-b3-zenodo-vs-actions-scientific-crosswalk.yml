@@ -1,0 +1,112 @@
+name: T3 B3 — Scientific Result Hash Crosswalk: Zenodo versus Actions
+run-name: "Compare curated Zenodo result files against their exact immutable Actions parent artifacts"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_ZENODO_VS_ACTIONS_CROSSWALK_ONCE.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compare-verified-source-payload-hashes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Download independent Zenodo archive SHA inventory (from ten fully verified ZIPs)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for iteration in $(seq 1 90); do
+            current="$(gh api "repos/$GH_REPO/actions/runs/43313617900" --jq '.status')"
+            if [[ "$current" == "completed" ]]; then break; fi
+            sleep 10
+          done
+          [[ "$(gh api "repos/$GH_REPO/actions/runs/43313617900" --jq '.conclusion')" == success ]] || { echo "Stop: all ten Zenodo package audits must succeed"; exit 1; }
+          gh run download 43313617900 -R "$GH_REPO" \
+            --pattern 't3-b3-zenodo-series-*-integrity-run43313617900' --dir incoming/zenodo
+          gh run download 43314309491 -R "$GH_REPO" \
+            --pattern 't3-b3-actions-source-*-run43314309491' --dir incoming/actions
+      - name: Cross-check exact original artifact name, nested relative path, source run and content digest
+        run: |
+          set -euo pipefail
+          mkdir -p report
+          python3 - <<'PY'
+          import json,csv,pathlib,collections,hashlib
+          zfiles=sorted(pathlib.Path('incoming/zenodo').rglob('zenodo_??_inventory.json'))
+          afiles=sorted(pathlib.Path('incoming/actions').rglob('*.json'))
+          if len(zfiles)!=10 or len(afiles)!=9:
+           raise ValueError(f'Incomplete two-sided provenance inventory: Zenodo {len(zfiles)}/10, GH {len(afiles)}/9')
+          Z=[json.loads(x.read_text()) for x in zfiles]
+          A=[json.loads(x.read_text()) for x in afiles]
+          checks=[];count=[]
+          for pkg in Z:
+           original=pkg['manifest_rows'][0]
+           recorded=int(original['archive_members'])
+           actual=pkg['member_count']
+           listed={m['path'].split('/')[-1] for m in pkg['members']}
+           if pkg['sha256']!=original['sha256'] or pkg['bytes']!=int(original['bytes']):
+            raise ValueError('Zenodo ZIP mismatches published SHA256/size manifest: '+pkg['name'])
+           count.append(dict(package=pkg['name'],reported_members=recorded,files_in_zip=actual,
+              difference=actual-recorded,contains_checksums_csv=('checksums.csv' in listed),
+              sha256_matches_manifest=True,md5_matches_zenodo=pkg['published_file_integrity_pass']))
+           for m in pkg['members']:
+            checks.append(dict(package=pkg['name'],**m))
+          sha_index=collections.defaultdict(list)
+          for z in checks:
+           if z.get('sha256'):sha_index[z['sha256']].append(z)
+          comparison=[];sources={}
+          for a in A:
+           label=a['label'];sources[label]=dict(run=a['original_run'],artifact=a['artifact'],files=len(a['files']))
+           for src in a['files']:
+            full=a['artifact'].strip('/')+'/'+src['path'].lstrip('/')
+            candidates=[z for z in checks if full in z['path']]
+            exact=sha_index.get(src['sha256'],[])
+            same_parent=[z for z in exact if str(a['original_run']) in z['path']]
+            if any(z.get('sha256')==src['sha256'] for z in candidates):
+             status='SAME_BYTES_VERIFIED'
+            elif candidates and any(z.get('sha256') for z in candidates):
+             status='DIFFERENT_BYTES_SAME_SOURCE_PATH'
+            elif candidates:
+             status='SOURCE_PATH_PRESENT_HASH_NOT_CALCULATED'
+            elif same_parent:
+             status='SAME_BYTES_DIFFERENT_PATH'
+            else:
+             status='NOT_FOUND_IN_CURATED_ZENODO'
+            picked=candidates[:4] if candidates else same_parent[:4]
+            comparison.append(dict(reference_label=label,reference_run=a['original_run'],
+               reference_artifact=a['artifact'],reference_path=src['path'],
+               reference_size=src['size'],reference_sha256=src['sha256'],
+               status=status,zenodo_package=';'.join(sorted({x['package'] for x in picked})),
+               zenodo_paths=';'.join(x['path'] for x in picked)[:1200],
+               zenodo_verified_hash=';'.join(x.get('sha256','') for x in picked)))
+          counts=collections.Counter(x['status'] for x in comparison)
+          summ=collections.defaultdict(collections.Counter)
+          for row in comparison:summ[row['reference_label']][row['status']]+=1
+          out=pathlib.Path('report')
+          for fname,rows in [('zenodo_vs_actions_file_hash_crosswalk.csv',comparison),
+                             ('zenodo_archive_member_count_reconciliation.csv',count)]:
+           with (out/fname).open('w',newline='') as f:
+            w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+          report=dict(zenodo_doi='10.5281/zenodo.24174965',
+            reference_run_ids=sorted({x['run'] for x in sources.values()}),
+            zenodo_package_count=len(Z),zenodo_members=len(checks),
+            actions_reference_files=len(comparison),counts=dict(counts),
+            by_source={k:dict(v) for k,v in summ.items()},
+            member_count_discrepancy=count,
+            limitations=['SHA-only comparison excludes numerical-semantic equivalence when files were intentionally recompressed.',
+             'Missing Actions artifact in a curated archive is a completeness issue, not proof of corrupted numerical data.',
+             'Compressed members larger than eight megabytes have ZIP CRC proof but their SHA256 still requires a targeted bytewise comparison.'])
+          (out/'zenodo_vs_actions_scientific_hash_audit.json').write_text(json.dumps(report,indent=2))
+          print('ZENODO_VS_ACTIONS_HASH_REPORT',json.dumps(report)[:22000])
+          print('ZENODO_VS_ACTIONS_SAMPLE_DISAGREEMENTS',json.dumps(
+           [x for x in comparison if x['status']=='DIFFERENT_BYTES_SAME_SOURCE_PATH'][:18])[:11000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-zenodo-vs-actions-verified-file-crosswalk-run${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 90
