@@ -1,4 +1,4 @@
-name: T3 B3 — Scientific Result Hash Crosswalk: Zenodo versus Actions
+name: "T3 B3 — Scientific Result Hash Crosswalk: Zenodo versus Actions"
 run-name: "Compare curated Zenodo result files against their exact immutable Actions parent artifacts"
 "on":
   push:
