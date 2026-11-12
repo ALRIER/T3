@@ -1,0 +1,1 @@
+Read-only SHA256 audit of original source tables for Monte Carlo/Discovery/Heldout/Stress/Real World Zenodo result correspondence. Nine verified existing GitHub Actions artifact bundles. No rescore, no modification or upload to Zenodo; max two concurrent jobs.

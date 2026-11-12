@@ -1,0 +1,112 @@
+name: T3 B3 — Verify Original Actions Result Payloads
+run-name: "Hash and inventory frozen Actions reference tables for Zenodo comparison"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_ACTIONS_PAYLOAD_REFERENCE_ONCE.txt
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: t3-b3-actions-payload-reference
+  cancel-in-progress: false
+jobs:
+  inspect-immutable-reference-payload:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {label: heldout-720w, run: 42045005791, artifact: t3-heldout-720W-individual-final-run42045005791}
+          - {label: heldout-reviewer, run: 42050564002, artifact: t3-b3-heldout-reviewer-complement-v1-run42050564002}
+          - {label: stress-original, run: 42062234485, artifact: stress-v2-original-global-run42062234485}
+          - {label: realworld-source, run: 42251598557, artifact: t3-rw-v2-recovered-720W-global-BH-taxonomy-run42251598557}
+          - {label: realworld-destination, run: 42299685581, artifact: t3-rw-v3-destination-global-taxonomy-run42299685581}
+          - {label: realworld-supplemental, run: 43098925126, artifact: t3-rw-pub-four-module-global-validation-run43098925126}
+          - {label: discovery-frozen-n200, run: 41487091262, artifact: t3-b3-discovery-bundle-n200-run41487091262}
+          - {label: discovery-hpo-metadata, run: 43102984348, artifact: t3-b3-frozen-discovery-hpo-registry-run43102984348}
+          - {label: realworld-parent-features, run: 43110499408, artifact: t3-b3-rw-parent-outcome-blind-features-run43110499408}
+    steps:
+      - name: Download exact immutable source artifact, not a recomputed score
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mkdir -p incoming
+          gh run download ${{ matrix.run }} -R "$GH_REPO" \
+            --name '${{ matrix.artifact }}' --dir incoming
+      - name: Hash individual file bytes and capture source provenance
+        env:
+          LABEL: ${{ matrix.label }}
+          SOURCE_RUN: ${{ matrix.run }}
+          ARTIFACT: ${{ matrix.artifact }}
+        run: |
+          set -euo pipefail
+          mkdir -p report
+          python3 - <<'PY'
+          import os,json,pathlib,hashlib,zipfile,re
+          root=pathlib.Path('incoming');items=[];n=0
+          for p in sorted(root.rglob('*')):
+           if not p.is_file():continue
+           n+=1
+           sha=hashlib.sha256();size=0
+           with p.open('rb') as f:
+            while chunk:=f.read(4*1024*1024):
+             sha.update(chunk);size+=len(chunk)
+           item={'path':str(p.relative_to(root)),'basename':p.name,'size':size,'sha256':sha.hexdigest()}
+           if size<4000000 and p.name.lower().endswith(('.csv','.json','.txt','.md','.tsv')):
+            head=p.open('rb').read(2048).decode('utf-8-sig','replace')
+            item['header']=head[:400]
+            item['mentioned_run_ids']=sorted(set(re.findall(r'(?<![0-9])(4[0-9]{10})(?![0-9])',head)))
+           items.append(item)
+          result={'label':os.environ['LABEL'],'original_run':os.environ['SOURCE_RUN'],
+                  'artifact':os.environ['ARTIFACT'],'file_count':n,'files':items}
+          pathlib.Path('report',os.environ['LABEL']+'.json').write_text(json.dumps(result,indent=2))
+          print('ACTIONS_REFERENCE_PAYLOAD',json.dumps({'label':result['label'],'count':n,
+              'bytes':sum(f['size'] for f in items)}))
+          print('SOURCE_PATHS',json.dumps([x['path'] for x in items[:75]]))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t3-b3-actions-source-${{ matrix.label }}-run${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 60
+  aggregate:
+    needs: inspect-immutable-reference-payload
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: t3-b3-actions-source-*-run${{ github.run_id }}
+          path: incoming
+          merge-multiple: true
+      - name: Publish immutable reference hash inventory
+        run: |
+          mkdir -p report
+          python3 - <<'PY'
+          import json,pathlib,csv
+          files=sorted(pathlib.Path('incoming').glob('*.json'))
+          if len(files)!=9:raise ValueError(f'Only {len(files)} source inventories; expected nine')
+          all=[]
+          for p in files:
+           x=json.loads(p.read_text())
+           for f in x['files']:
+            all.append(dict(label=x['label'],run_id=x['original_run'],
+                 artifact=x['artifact'],path=f['path'],sha256=f['sha256'],bytes=f['size']))
+          with pathlib.Path('report/actions_reference_payload_sha256.csv').open('w',newline='') as f:
+           w=csv.DictWriter(f,fieldnames=list(all[0]));w.writeheader();w.writerows(all)
+          print('VERIFIED_ACTIONS_REFERENCE_TABLE_INVENTORY',len(all))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-actions-reference-table-inventory-run${{ github.run_id }}
+          path: report/
+          if-no-files-found: error
+          retention-days: 60
