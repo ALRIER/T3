@@ -1,0 +1,1 @@
+One-time read-only comparison probe for Zenodo DOI 10.5281/zenodo.24174965. Fetch public deposit JSON and inventory GitHub Actions artifact provenance. Never change datasets or run scientific scoring. Requested Nov 12 2026.

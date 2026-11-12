@@ -1,0 +1,56 @@
+name: T3 B3 — Zenodo Results Deposit Provenance Probe
+run-name: "Read-only Zenodo 24174965 file inventory and GitHub Actions source inventory"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - config/T3_B3_ZENODO_RESULTS_PROBE_ONCE.txt
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inventory-zenodo-and-actions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Query public Zenodo record and Actions source inventories, no changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          python3 - <<'PY'
+          import os,json,urllib.request,urllib.error,datetime,pathlib
+          paths=['https://zenodo.org/api/records/24174965',
+                 'https://zenodo.org/records/24174965']
+          out={'checked_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'url_checks':[]}
+          for url in paths:
+           try:
+            req=urllib.request.Request(url,headers={'User-Agent':'T3-B3-scholarly-artifact-provenance-audit/1.0','Accept':'application/json'})
+            with urllib.request.urlopen(req,timeout=35) as r:
+             raw=r.read(4000000)
+             item={'url':url,'status':r.status,'content_type':r.headers.get('Content-Type'),'bytes':len(raw)}
+             if '/api/records/' in url and r.status==200:
+              data=json.loads(raw)
+              pathlib.Path('audit/zenodo-record.json').write_text(json.dumps(data,indent=2))
+              item['file_inventory']=[{'name':f.get('key'),'size':f.get('size'),'checksum':f.get('checksum'),
+                'links':f.get('links')} for f in (data.get('files') or {}).get('entries',{}).values()] if isinstance(data.get('files'),dict) else data.get('files')
+             out['url_checks'].append(item)
+           except Exception as e:
+            out['url_checks'].append({'url':url,'error':str(e)})
+          pathlib.Path('audit/zenodo-probe.json').write_text(json.dumps(out,indent=2))
+          print(json.dumps(out,indent=2)[:25000])
+          PY
+          for id in 40239277660 41487091262 42045005791 42062234485 42092352487 42251598557 42299685581 42390283887 43098925126 43102984348 43110499408; do
+            gh api "repos/$GH_REPO/actions/runs/$id" --jq '{id: .id, status: .status, conclusion: .conclusion, head_sha: .head_sha}' >> audit/github-runs.jsonl
+            gh api --paginate "repos/$GH_REPO/actions/runs/$id/artifacts?per_page=100" --jq '.artifacts[] | {id: .id, name: .name, size_in_bytes: .size_in_bytes, expired: .expired, workflow_run_id: .workflow_run.id}' >> audit/github-artifacts.jsonl
+          done
+          wc -l audit/*.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t3-b3-zenodo-public-provenance-probe-${{ github.run_id }}
+          path: audit/
+          if-no-files-found: error
+          retention-days: 30
