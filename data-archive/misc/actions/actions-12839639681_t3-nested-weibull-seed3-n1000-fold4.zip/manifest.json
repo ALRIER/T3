@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8ea78ff383a58e8f2b6b39ba3d586c82",
+  "parts": [
+    {
+      "bytes": 136039,
+      "name": "part-00001.lfs",
+      "sha256": "ddad93c333c02375954ad2d80a96e39dc0604313364479126db6c8cd40fb29fd"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ddad93c333c02375954ad2d80a96e39dc0604313364479126db6c8cd40fb29fd",
+  "size_bytes": 136039,
+  "source": {
+    "artifact_id": 12839639681,
+    "created_at": "2026-10-28T18:21:42Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-25T11:15:32Z",
+    "key": "actions-12839639681",
+    "name": "t3-nested-weibull-seed3-n1000-fold4.zip",
+    "run_id": 40494779825,
+    "size_bytes": 136039,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12839639681/zip"
+  }
+}
