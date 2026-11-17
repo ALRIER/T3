@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "882dbe3202cc7b8de8ca29f9468d0272",
+  "parts": [
+    {
+      "bytes": 1346461,
+      "name": "part-00001.lfs",
+      "sha256": "4246e38e8ea8ae0243f98db6ec352a5b07e1ea9446fa5f490ca1260c448287a9"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "4246e38e8ea8ae0243f98db6ec352a5b07e1ea9446fa5f490ca1260c448287a9",
+  "size_bytes": 1346461,
+  "source": {
+    "artifact_id": 13239911902,
+    "created_at": "2026-11-03T14:42:00Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T20:08:48Z",
+    "key": "actions-13239911902",
+    "name": "t3-b3-realworld-repair-weibull-s36-n3000-b02-run41516493453.zip",
+    "run_id": 41516493453,
+    "size_bytes": 1346461,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13239911902/zip"
+  }
+}
