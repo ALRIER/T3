@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "ac5c219a3f15b125273b0d995fa29934",
+  "parts": [
+    {
+      "bytes": 108797,
+      "name": "part-00001.lfs",
+      "sha256": "e4de5ff2deeae3722422be9521aa6160184ef8d6fb3a7b5db5526d0b300252b0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e4de5ff2deeae3722422be9521aa6160184ef8d6fb3a7b5db5526d0b300252b0",
+  "size_bytes": 108797,
+  "source": {
+    "artifact_id": 13018448456,
+    "created_at": "2026-10-30T22:52:35Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-28T19:15:18Z",
+    "key": "actions-13018448456",
+    "name": "t3-nested-exwald-seed6-n3000-fold5.zip",
+    "run_id": 41113724413,
+    "size_bytes": 108797,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13018448456/zip"
+  }
+}

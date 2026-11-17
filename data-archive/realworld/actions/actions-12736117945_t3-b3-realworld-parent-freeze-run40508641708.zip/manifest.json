@@ -1,0 +1,58 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "0ef38e80b32ec406b1e9c2db125e8608",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "99fa822c67ddc2ccfc190a2e471073b4fc2f51c4e4edaaa8db49279570bd2fdf"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "d0defe3ca58d776d546abad90007538910a88dfdc434a563c5e8a846c5d0f3bb"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "d65bbae023e0c103fc795644ef8a028715b25de26ac4c53084cf0cc88478d1a7"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "13cb485e87f40d0350e6e85aef23157d67e84cb4034accb1b833d703b814bcf0"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "92a9206f7444f19fa8fe5b24e6b3f9be6656a73068167c32588ac62900054532"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "2a045ada057f35bbdf747db1d0534a8094bf4fd0bfc6cd3a184a97cc98f9958e"
+    },
+    {
+      "bytes": 7910689,
+      "name": "part-00007.lfs",
+      "sha256": "3504074c2086406954b510a77bf9b91c332aa1889cdaa0353ff30a2a1d4ad997"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3094abad0143514ec2f6e82ca37a31c0bf876dfd40425ba630889f08037ca5f2",
+  "size_bytes": 209237281,
+  "source": {
+    "artifact_id": 12736117945,
+    "created_at": "2026-10-27T13:08:07Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-25T13:02:49Z",
+    "key": "actions-12736117945",
+    "name": "t3-b3-realworld-parent-freeze-run40508641708.zip",
+    "run_id": 40508641708,
+    "size_bytes": 209237281,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12736117945/zip"
+  }
+}
