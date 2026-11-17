@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f1596d333a4aadc64ddd7164f3ba922d",
+  "parts": [
+    {
+      "bytes": 16796945,
+      "name": "part-00001.lfs",
+      "sha256": "e8f71cbb8f42fe4d67d5d7d658d9932f85ecd4e85edb361838276bd168a80e28"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e8f71cbb8f42fe4d67d5d7d658d9932f85ecd4e85edb361838276bd168a80e28",
+  "size_bytes": 16796945,
+  "source": {
+    "artifact_id": 13108480121,
+    "created_at": "2026-11-02T00:39:47Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:11:12Z",
+    "key": "actions-13108480121",
+    "name": "t3-b3-realworld-exgaussian-s39-n1000-run41208956012.zip",
+    "run_id": 41208956012,
+    "size_bytes": 16796945,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13108480121/zip"
+  }
+}
