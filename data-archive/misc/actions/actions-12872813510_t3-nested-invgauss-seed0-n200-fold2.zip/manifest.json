@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "42935660a917f2c2831308b9428018df",
+  "parts": [
+    {
+      "bytes": 109602,
+      "name": "part-00001.lfs",
+      "sha256": "d7dd9fc170c477c72142cfacf503bcdb79ac372924589f41ef35a2c59eded24b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "d7dd9fc170c477c72142cfacf503bcdb79ac372924589f41ef35a2c59eded24b",
+  "size_bytes": 109602,
+  "source": {
+    "artifact_id": 12872813510,
+    "created_at": "2026-10-29T04:23:49Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-25T11:15:32Z",
+    "key": "actions-12872813510",
+    "name": "t3-nested-invgauss-seed0-n200-fold2.zip",
+    "run_id": 40494779825,
+    "size_bytes": 109602,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12872813510/zip"
+  }
+}
