@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "aa5d91d58bd7986fa0391d794f31e65c",
+  "parts": [
+    {
+      "bytes": 23798378,
+      "name": "part-00001.lfs",
+      "sha256": "0a97ca6407b4b84614f1972127323369b2c1eff4416d947f44f92be7723748f7"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0a97ca6407b4b84614f1972127323369b2c1eff4416d947f44f92be7723748f7",
+  "size_bytes": 23798378,
+  "source": {
+    "artifact_id": 12676366077,
+    "created_at": "2026-10-26T18:29:06Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T18:29:03Z",
+    "key": "actions-12676366077",
+    "name": "b3-mc-discovery-exwald-s5-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23798378,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12676366077/zip"
+  }
+}

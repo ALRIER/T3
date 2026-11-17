@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b1564e1f48652137913da33cd65f7fd2",
+  "parts": [
+    {
+      "bytes": 24183210,
+      "name": "part-00001.lfs",
+      "sha256": "27d29315a694221d3040ff341dc491295959afeb647044a11cdb6c47b98e0cf3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "27d29315a694221d3040ff341dc491295959afeb647044a11cdb6c47b98e0cf3",
+  "size_bytes": 24183210,
+  "source": {
+    "artifact_id": 12674315631,
+    "created_at": "2026-10-26T17:57:28Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T17:57:26Z",
+    "key": "actions-12674315631",
+    "name": "b3-mc-heldout-exwald-s16-n1000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24183210,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12674315631/zip"
+  }
+}

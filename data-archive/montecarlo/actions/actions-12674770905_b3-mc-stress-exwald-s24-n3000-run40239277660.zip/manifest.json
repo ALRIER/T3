@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "ffc0be3708ac660b2fd132a960277751",
+  "parts": [
+    {
+      "bytes": 23804003,
+      "name": "part-00001.lfs",
+      "sha256": "1c2a6da0d3cb403d66aae033285e5d5511620c8d505cc4530315723c8010078b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "1c2a6da0d3cb403d66aae033285e5d5511620c8d505cc4530315723c8010078b",
+  "size_bytes": 23804003,
+  "source": {
+    "artifact_id": 12674770905,
+    "created_at": "2026-10-26T18:05:17Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T18:05:16Z",
+    "key": "actions-12674770905",
+    "name": "b3-mc-stress-exwald-s24-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23804003,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12674770905/zip"
+  }
+}
