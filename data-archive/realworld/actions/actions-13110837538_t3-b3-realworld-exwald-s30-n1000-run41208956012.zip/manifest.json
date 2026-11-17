@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "df6bfdf5f95850eca906d99722bc66ff",
+  "parts": [
+    {
+      "bytes": 16569277,
+      "name": "part-00001.lfs",
+      "sha256": "3b7b3ce3ce4293645bf8be8376bab23f7ac642d21a4fd37b55dea5ccc7ef92b0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3b7b3ce3ce4293645bf8be8376bab23f7ac642d21a4fd37b55dea5ccc7ef92b0",
+  "size_bytes": 16569277,
+  "source": {
+    "artifact_id": 13110837538,
+    "created_at": "2026-11-02T01:59:46Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:11:12Z",
+    "key": "actions-13110837538",
+    "name": "t3-b3-realworld-exwald-s30-n1000-run41208956012.zip",
+    "run_id": 41208956012,
+    "size_bytes": 16569277,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13110837538/zip"
+  }
+}
