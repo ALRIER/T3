@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "63dcc5c4747d0f9bb0d2844d7129521a",
+  "parts": [
+    {
+      "bytes": 107124,
+      "name": "part-00001.lfs",
+      "sha256": "cb31cbd50b3965543026440423a38b71ae871f24bcfbfd8ff76e8eab813b0199"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "cb31cbd50b3965543026440423a38b71ae871f24bcfbfd8ff76e8eab813b0199",
+  "size_bytes": 107124,
+  "source": {
+    "artifact_id": 12937558148,
+    "created_at": "2026-10-29T22:37:54Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-25T11:15:32Z",
+    "key": "actions-12937558148",
+    "name": "t3-nested-exgaussian-seed4-n1000-fold4.zip",
+    "run_id": 40494779825,
+    "size_bytes": 107124,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12937558148/zip"
+  }
+}
