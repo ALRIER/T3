@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e5e62adf788b313b11957eb279237c92",
+  "parts": [
+    {
+      "bytes": 108685,
+      "name": "part-00001.lfs",
+      "sha256": "a7fdee26885dfdcc8139744902c7ad7b714d7fd7ee5aeec27bdac847e7c0b632"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a7fdee26885dfdcc8139744902c7ad7b714d7fd7ee5aeec27bdac847e7c0b632",
+  "size_bytes": 108685,
+  "source": {
+    "artifact_id": 12785780006,
+    "created_at": "2026-10-28T01:37:01Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-25T11:15:32Z",
+    "key": "actions-12785780006",
+    "name": "t3-nested-lognormal-seed0-n200-fold1.zip",
+    "run_id": 40494779825,
+    "size_bytes": 108685,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12785780006/zip"
+  }
+}
