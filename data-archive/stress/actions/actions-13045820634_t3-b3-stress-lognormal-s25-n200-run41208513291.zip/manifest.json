@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "25fafb58530e4f8c2b0228ee2a602647",
+  "parts": [
+    {
+      "bytes": 1083827,
+      "name": "part-00001.lfs",
+      "sha256": "09a8cc7ce77dd82233b0dc055358d376116f396061915bc826b2f8e52bd71a41"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "09a8cc7ce77dd82233b0dc055358d376116f396061915bc826b2f8e52bd71a41",
+  "size_bytes": 1083827,
+  "source": {
+    "artifact_id": 13045820634,
+    "created_at": "2026-10-31T14:13:08Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13045820634",
+    "name": "t3-b3-stress-lognormal-s25-n200-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 1083827,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13045820634/zip"
+  }
+}

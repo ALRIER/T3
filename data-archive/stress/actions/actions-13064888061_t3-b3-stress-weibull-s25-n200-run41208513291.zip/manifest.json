@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6df59899672f260e9da0316dcbdfe8ed",
+  "parts": [
+    {
+      "bytes": 1069790,
+      "name": "part-00001.lfs",
+      "sha256": "59191fbb00f20ca88f6634be3bba454c7f3221f2a79e9b3afee53c7830db9c67"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "59191fbb00f20ca88f6634be3bba454c7f3221f2a79e9b3afee53c7830db9c67",
+  "size_bytes": 1069790,
+  "source": {
+    "artifact_id": 13064888061,
+    "created_at": "2026-11-01T01:17:43Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13064888061",
+    "name": "t3-b3-stress-weibull-s25-n200-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 1069790,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13064888061/zip"
+  }
+}

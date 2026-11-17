@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c6ee064c2255d9d9f3dfd85782de4258",
+  "parts": [
+    {
+      "bytes": 1080414,
+      "name": "part-00001.lfs",
+      "sha256": "3b6d27c9ad9960fa251c812a7bd7aad9ad28b0c1fc1214e214113231bea84b54"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3b6d27c9ad9960fa251c812a7bd7aad9ad28b0c1fc1214e214113231bea84b54",
+  "size_bytes": 1080414,
+  "source": {
+    "artifact_id": 13045790095,
+    "created_at": "2026-10-31T14:07:45Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13045790095",
+    "name": "t3-b3-stress-normal-s27-n1000-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 1080414,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13045790095/zip"
+  }
+}
