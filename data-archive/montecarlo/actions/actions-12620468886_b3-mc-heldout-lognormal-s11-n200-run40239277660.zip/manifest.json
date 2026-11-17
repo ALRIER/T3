@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "2fcebee67f48fdf2c279658d633a221a",
+  "parts": [
+    {
+      "bytes": 23635887,
+      "name": "part-00001.lfs",
+      "sha256": "3778832ca955a1a54a57ae4767c4d28521c4440e132b9bd916225b36400de284"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3778832ca955a1a54a57ae4767c4d28521c4440e132b9bd916225b36400de284",
+  "size_bytes": 23635887,
+  "source": {
+    "artifact_id": 12620468886,
+    "created_at": "2026-10-26T01:15:49Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T01:15:47Z",
+    "key": "actions-12620468886",
+    "name": "b3-mc-heldout-lognormal-s11-n200-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23635887,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12620468886/zip"
+  }
+}

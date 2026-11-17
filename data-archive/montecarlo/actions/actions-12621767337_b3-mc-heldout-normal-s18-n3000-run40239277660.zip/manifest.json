@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "fefc5d3cf05850fbf0db214db8ad1b62",
+  "parts": [
+    {
+      "bytes": 23745403,
+      "name": "part-00001.lfs",
+      "sha256": "20050ed90f8fa2aa44f176787f4fc85ef97ccf184423c28f645bb423b97d24ff"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "20050ed90f8fa2aa44f176787f4fc85ef97ccf184423c28f645bb423b97d24ff",
+  "size_bytes": 23745403,
+  "source": {
+    "artifact_id": 12621767337,
+    "created_at": "2026-10-26T01:28:40Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T01:28:38Z",
+    "key": "actions-12621767337",
+    "name": "b3-mc-heldout-normal-s18-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23745403,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12621767337/zip"
+  }
+}
