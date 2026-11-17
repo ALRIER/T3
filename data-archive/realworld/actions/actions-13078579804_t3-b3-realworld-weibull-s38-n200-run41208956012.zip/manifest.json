@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "9d3a1e2b9b74baf75cf577f842fa7666",
+  "parts": [
+    {
+      "bytes": 16567297,
+      "name": "part-00001.lfs",
+      "sha256": "398bb3790c63696ee7c2e70305679373c4441cd9f6c1d7cf85ba46cd4d634be5"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "398bb3790c63696ee7c2e70305679373c4441cd9f6c1d7cf85ba46cd4d634be5",
+  "size_bytes": 16567297,
+  "source": {
+    "artifact_id": 13078579804,
+    "created_at": "2026-11-01T09:56:56Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:11:12Z",
+    "key": "actions-13078579804",
+    "name": "t3-b3-realworld-weibull-s38-n200-run41208956012.zip",
+    "run_id": 41208956012,
+    "size_bytes": 16567297,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13078579804/zip"
+  }
+}

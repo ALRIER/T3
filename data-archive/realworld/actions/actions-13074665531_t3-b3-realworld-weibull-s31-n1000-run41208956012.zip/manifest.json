@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8226c193c3bfb1d6f1a7278b782f9d62",
+  "parts": [
+    {
+      "bytes": 16640739,
+      "name": "part-00001.lfs",
+      "sha256": "3f0694cccf8a2d0be1ba0c4c3efe0429276ba973b16698a31ed3d553b4e20fcb"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3f0694cccf8a2d0be1ba0c4c3efe0429276ba973b16698a31ed3d553b4e20fcb",
+  "size_bytes": 16640739,
+  "source": {
+    "artifact_id": 13074665531,
+    "created_at": "2026-11-01T07:04:05Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:11:12Z",
+    "key": "actions-13074665531",
+    "name": "t3-b3-realworld-weibull-s31-n1000-run41208956012.zip",
+    "run_id": 41208956012,
+    "size_bytes": 16640739,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13074665531/zip"
+  }
+}
