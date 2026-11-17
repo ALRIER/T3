@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "2ff0a07cbb8eb46a82edb18b37ac6e4f",
+  "parts": [
+    {
+      "bytes": 6318719,
+      "name": "part-00001.lfs",
+      "sha256": "2493b10786160795fa2fee70c3a97a849323dcd8483aa8f384875c35be046260"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2493b10786160795fa2fee70c3a97a849323dcd8483aa8f384875c35be046260",
+  "size_bytes": 6318719,
+  "source": {
+    "artifact_id": 13066136456,
+    "created_at": "2026-11-01T02:05:48Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13066136456",
+    "name": "t3-b3-heldout-weibull-s12-n1000-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 6318719,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13066136456/zip"
+  }
+}

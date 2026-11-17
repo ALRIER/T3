@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a3a60f68d59537bbb0d6c3506ff91538",
+  "parts": [
+    {
+      "bytes": 6389312,
+      "name": "part-00001.lfs",
+      "sha256": "712d0ff44bcc7ce55b925722af75940b1f2e6063b7ade9ca38b98346f89aad9c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "712d0ff44bcc7ce55b925722af75940b1f2e6063b7ade9ca38b98346f89aad9c",
+  "size_bytes": 6389312,
+  "source": {
+    "artifact_id": 13083104462,
+    "created_at": "2026-11-01T12:39:13Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13083104462",
+    "name": "t3-b3-heldout-invgauss-s11-n3000-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 6389312,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13083104462/zip"
+  }
+}
