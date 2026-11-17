@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "cc0e902bde855195c115e0119ac0e462",
+  "parts": [
+    {
+      "bytes": 2691056,
+      "name": "part-00001.lfs",
+      "sha256": "bd1bb3f6c51d210b9efb28e1cf8d868d9c69bdd8cb4398eeba55f877ea0b8f62"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "bd1bb3f6c51d210b9efb28e1cf8d868d9c69bdd8cb4398eeba55f877ea0b8f62",
+  "size_bytes": 2691056,
+  "source": {
+    "artifact_id": 13165421428,
+    "created_at": "2026-11-02T17:41:07Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:02:37Z",
+    "key": "actions-13165421428",
+    "name": "t3-b3-crossfamily-stress-invgauss-s25-n3000-run41487292889.zip",
+    "run_id": 41487292889,
+    "size_bytes": 2691056,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13165421428/zip"
+  }
+}

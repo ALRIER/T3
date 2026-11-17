@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f9355a8c418c021abe0c41fa2008a382",
+  "parts": [
+    {
+      "bytes": 2651234,
+      "name": "part-00001.lfs",
+      "sha256": "35f854e23b1deb9e399635e4f31f8a0d9d71ca70650da836a2f6d6ba499519e8"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "35f854e23b1deb9e399635e4f31f8a0d9d71ca70650da836a2f6d6ba499519e8",
+  "size_bytes": 2651234,
+  "source": {
+    "artifact_id": 13165284119,
+    "created_at": "2026-11-02T17:57:42Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:02:37Z",
+    "key": "actions-13165284119",
+    "name": "t3-b3-crossfamily-stress-weibull-s28-n1000-run41487292889.zip",
+    "run_id": 41487292889,
+    "size_bytes": 2651234,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13165284119/zip"
+  }
+}

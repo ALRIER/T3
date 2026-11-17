@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "1411c3558bc8e6d5f923c27a44297fe0",
+  "parts": [
+    {
+      "bytes": 2685453,
+      "name": "part-00001.lfs",
+      "sha256": "3110c277321cd467743fd0c72a6c667affe0e2f0f716d4054d43dd6e51aa462b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3110c277321cd467743fd0c72a6c667affe0e2f0f716d4054d43dd6e51aa462b",
+  "size_bytes": 2685453,
+  "source": {
+    "artifact_id": 13166281309,
+    "created_at": "2026-11-02T17:48:51Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:02:37Z",
+    "key": "actions-13166281309",
+    "name": "t3-b3-crossfamily-stress-lognormal-s25-n1000-run41487292889.zip",
+    "run_id": 41487292889,
+    "size_bytes": 2685453,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13166281309/zip"
+  }
+}

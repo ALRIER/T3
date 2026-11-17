@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a5e15ee61bd4e8366531be7641fd106b",
+  "parts": [
+    {
+      "bytes": 2043709,
+      "name": "part-00001.lfs",
+      "sha256": "2503a1f1af3f44344bf51e628c24387c623fff9151349884c35c3f2d32ecd054"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2503a1f1af3f44344bf51e628c24387c623fff9151349884c35c3f2d32ecd054",
+  "size_bytes": 2043709,
+  "source": {
+    "artifact_id": 13167453371,
+    "created_at": "2026-11-02T18:23:25Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:21:52Z",
+    "key": "actions-13167453371",
+    "name": "t3-b3-tournament-reduced-heldout-exgaussian-n1000.zip",
+    "run_id": 41499852362,
+    "size_bytes": 2043709,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13167453371/zip"
+  }
+}
