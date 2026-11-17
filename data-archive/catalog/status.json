@@ -1,14 +1,14 @@
 {
-  "archived_original_bytes": 13570444293,
-  "archived_sources": 1671,
+  "archived_original_bytes": 13778300299,
+  "archived_sources": 1751,
   "by_stage": {
     "discovery": {
-      "archived": 225,
+      "archived": 245,
       "expected_bytes": 152514064,
       "total": 257
     },
     "heldout": {
-      "archived": 0,
+      "archived": 26,
       "expected_bytes": 5082770562,
       "total": 421
     },
@@ -33,7 +33,7 @@
       "total": 3793
     },
     "stress": {
-      "archived": 9,
+      "archived": 43,
       "expected_bytes": 5681595820,
       "total": 1035
     }
@@ -42,7 +42,7 @@
   "expected_original_bytes": 45354058307,
   "expired_unarchived": 0,
   "failed_unarchived": 0,
-  "pending_sources": 6323,
+  "pending_sources": 6243,
   "scope": "sources in recorded inventory only",
   "total_sources": 7994
 }

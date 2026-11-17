@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "acebbf3d9b6385e08a6a5772bec3a8ef",
+  "parts": [
+    {
+      "bytes": 6429697,
+      "name": "part-00001.lfs",
+      "sha256": "0f451193d207611fd45f6b310982c70febd98cb288093c759d2072367a2123d2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0f451193d207611fd45f6b310982c70febd98cb288093c759d2072367a2123d2",
+  "size_bytes": 6429697,
+  "source": {
+    "artifact_id": 13044903277,
+    "created_at": "2026-10-31T14:14:44Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13044903277",
+    "name": "t3-b3-heldout-lognormal-s11-n3000-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 6429697,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13044903277/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "9883111884603e9684aba2e549679370",
+  "parts": [
+    {
+      "bytes": 6392169,
+      "name": "part-00001.lfs",
+      "sha256": "a84bfc5e40c2c66031442ce0842d2b6c1fba212591810ee3a4568a16db96ce33"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a84bfc5e40c2c66031442ce0842d2b6c1fba212591810ee3a4568a16db96ce33",
+  "size_bytes": 6392169,
+  "source": {
+    "artifact_id": 13045252483,
+    "created_at": "2026-10-31T14:11:41Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13045252483",
+    "name": "t3-b3-heldout-normal-s10-n3000-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 6392169,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13045252483/zip"
+  }
+}

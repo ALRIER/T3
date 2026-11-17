@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "aa6adda16bb121e8180bd7f4beec4112",
+  "parts": [
+    {
+      "bytes": 261412,
+      "name": "part-00001.lfs",
+      "sha256": "b6a54e100426c875645ac793bf20fce547c162ae26fa991142eeca60671b5dbc"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b6a54e100426c875645ac793bf20fce547c162ae26fa991142eeca60671b5dbc",
+  "size_bytes": 261412,
+  "source": {
+    "artifact_id": 13044778512,
+    "created_at": "2026-10-31T14:01:12Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T13:54:10Z",
+    "key": "actions-13044778512",
+    "name": "t3-b3-discovery-normal-s0-n200-run41207646731.zip",
+    "run_id": 41207646731,
+    "size_bytes": 261412,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13044778512/zip"
+  }
+}
