@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e26feaa1891ac18913d1fbbe6efea12d",
+  "parts": [
+    {
+      "bytes": 22936100,
+      "name": "part-00001.lfs",
+      "sha256": "ace703f44b9a71a6a9720495d4b128f5cbc1fb30dfb6575f75c95648879c7567"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ace703f44b9a71a6a9720495d4b128f5cbc1fb30dfb6575f75c95648879c7567",
+  "size_bytes": 22936100,
+  "source": {
+    "artifact_id": 12625060731,
+    "created_at": "2026-10-26T03:00:55Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T03:00:53Z",
+    "key": "actions-12625060731",
+    "name": "b3-mc-stress-lognormal-s22-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 22936100,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12625060731/zip"
+  }
+}
