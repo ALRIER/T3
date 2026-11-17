@@ -1,6 +1,6 @@
 {
-  "archived_original_bytes": 21615890244,
-  "archived_sources": 3580,
+  "archived_original_bytes": 21748913438,
+  "archived_sources": 3660,
   "by_stage": {
     "discovery": {
       "archived": 252,
@@ -28,7 +28,7 @@
       "total": 25
     },
     "realworld": {
-      "archived": 1082,
+      "archived": 1162,
       "expected_bytes": 12672198110,
       "total": 3793
     },
@@ -42,7 +42,7 @@
   "expected_original_bytes": 45354058307,
   "expired_unarchived": 0,
   "failed_unarchived": 3,
-  "pending_sources": 4414,
+  "pending_sources": 4334,
   "scope": "sources in recorded inventory only",
   "total_sources": 7994
 }
