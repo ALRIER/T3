@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "cd667700baf3c5d4bab92dc76d63ef7e",
+  "parts": [
+    {
+      "bytes": 1412390,
+      "name": "part-00001.lfs",
+      "sha256": "992b9ce05d055123eb429cfc8df2785d2266c49ba8c098bb67b63dc83de262f7"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "992b9ce05d055123eb429cfc8df2785d2266c49ba8c098bb67b63dc83de262f7",
+  "size_bytes": 1412390,
+  "source": {
+    "artifact_id": 13195757764,
+    "created_at": "2026-11-03T01:27:01Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T20:08:47Z",
+    "key": "actions-13195757764",
+    "name": "t3-b3-realworld-repair-exwald-s37-n3000-b09-run41516493415.zip",
+    "run_id": 41516493415,
+    "size_bytes": 1412390,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13195757764/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "02784109ddc9d0aa53aa5e8b3fc07deb",
+  "parts": [
+    {
+      "bytes": 1307588,
+      "name": "part-00001.lfs",
+      "sha256": "bec01d29f04c031deaba0c82871475e8c5b9c340dc84a6800874072882da179b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "bec01d29f04c031deaba0c82871475e8c5b9c340dc84a6800874072882da179b",
+  "size_bytes": 1307588,
+  "source": {
+    "artifact_id": 13204029180,
+    "created_at": "2026-11-03T04:40:09Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T20:08:47Z",
+    "key": "actions-13204029180",
+    "name": "t3-b3-realworld-repair-invgauss-s32-n3000-b13-run41516493415.zip",
+    "run_id": 41516493415,
+    "size_bytes": 1307588,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13204029180/zip"
+  }
+}
