@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "4765213e1f628f47854e7e9646a9da3a",
+  "parts": [
+    {
+      "bytes": 1848179,
+      "name": "part-00001.lfs",
+      "sha256": "dc7aea093a9a1dc4c06ebcd8ed21b9bd65581e8449d2c60e55868c91f052a8dc"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "dc7aea093a9a1dc4c06ebcd8ed21b9bd65581e8449d2c60e55868c91f052a8dc",
+  "size_bytes": 1848179,
+  "source": {
+    "artifact_id": 13169222263,
+    "created_at": "2026-11-02T18:41:54Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:29Z",
+    "key": "actions-13169222263",
+    "name": "t3-b3-tournament-reduced-stress-weibull-n200.zip",
+    "run_id": 41502648179,
+    "size_bytes": 1848179,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13169222263/zip"
+  }
+}

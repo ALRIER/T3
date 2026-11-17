@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e22abda915739a04a73f4969f2326338",
+  "parts": [
+    {
+      "bytes": 5070579,
+      "name": "part-00001.lfs",
+      "sha256": "0ee799cb6684ab9a10b03f803060cb611db20f6cd579df3ac9ad520009d15ab3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0ee799cb6684ab9a10b03f803060cb611db20f6cd579df3ac9ad520009d15ab3",
+  "size_bytes": 5070579,
+  "source": {
+    "artifact_id": 13168962853,
+    "created_at": "2026-11-02T18:41:18Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:26Z",
+    "key": "actions-13168962853",
+    "name": "t3-b3-tournament-reduced-heldout-weibull-n1000.zip",
+    "run_id": 41502642569,
+    "size_bytes": 5070579,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13168962853/zip"
+  }
+}

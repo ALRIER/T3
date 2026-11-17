@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "7f79700971cea00e0ddeb389d29fd7e9",
+  "parts": [
+    {
+      "bytes": 700764,
+      "name": "part-00001.lfs",
+      "sha256": "d44c846de0162e0a1cf94e96d26e86a7a900474a2f5d14466d2a4b313a43278e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "d44c846de0162e0a1cf94e96d26e86a7a900474a2f5d14466d2a4b313a43278e",
+  "size_bytes": 700764,
+  "source": {
+    "artifact_id": 13167094622,
+    "created_at": "2026-11-02T18:22:29Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:21:54Z",
+    "key": "actions-13167094622",
+    "name": "t3-b3-tournament-reduced-stress-exgaussian-n200.zip",
+    "run_id": 41499856950,
+    "size_bytes": 700764,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13167094622/zip"
+  }
+}

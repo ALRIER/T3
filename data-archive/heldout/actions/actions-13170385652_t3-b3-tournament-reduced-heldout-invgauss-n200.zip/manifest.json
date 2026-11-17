@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "ab3b08300c9311b61511ecefcf823699",
+  "parts": [
+    {
+      "bytes": 5198543,
+      "name": "part-00001.lfs",
+      "sha256": "305b451d6eb39dc2b1e5cdea753513c693806422bab7bde4a62a5c75c62c025c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "305b451d6eb39dc2b1e5cdea753513c693806422bab7bde4a62a5c75c62c025c",
+  "size_bytes": 5198543,
+  "source": {
+    "artifact_id": 13170385652,
+    "created_at": "2026-11-02T18:41:21Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:26Z",
+    "key": "actions-13170385652",
+    "name": "t3-b3-tournament-reduced-heldout-invgauss-n200.zip",
+    "run_id": 41502642569,
+    "size_bytes": 5198543,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13170385652/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "66aa46779fed4e69ead02474c987c3f1",
+  "parts": [
+    {
+      "bytes": 5477597,
+      "name": "part-00001.lfs",
+      "sha256": "4340026ff9c26bb59f621fa03ed2514bfeeaec14e9b729350aa1a459ba464be0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "4340026ff9c26bb59f621fa03ed2514bfeeaec14e9b729350aa1a459ba464be0",
+  "size_bytes": 5477597,
+  "source": {
+    "artifact_id": 13168544896,
+    "created_at": "2026-11-02T18:41:14Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:26Z",
+    "key": "actions-13168544896",
+    "name": "t3-b3-tournament-reduced-heldout-lognormal-n200.zip",
+    "run_id": 41502642569,
+    "size_bytes": 5477597,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13168544896/zip"
+  }
+}

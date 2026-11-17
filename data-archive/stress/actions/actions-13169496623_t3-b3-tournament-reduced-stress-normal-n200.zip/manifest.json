@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "1825c9ec1f215a45b85d5d7db9d9d689",
+  "parts": [
+    {
+      "bytes": 1977121,
+      "name": "part-00001.lfs",
+      "sha256": "9ab6d2bfee64072bf9734a23ba27c1f5fda22dae18b9acb8cef559c55492c9d8"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "9ab6d2bfee64072bf9734a23ba27c1f5fda22dae18b9acb8cef559c55492c9d8",
+  "size_bytes": 1977121,
+  "source": {
+    "artifact_id": 13169496623,
+    "created_at": "2026-11-02T18:41:52Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:29Z",
+    "key": "actions-13169496623",
+    "name": "t3-b3-tournament-reduced-stress-normal-n200.zip",
+    "run_id": 41502648179,
+    "size_bytes": 1977121,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13169496623/zip"
+  }
+}

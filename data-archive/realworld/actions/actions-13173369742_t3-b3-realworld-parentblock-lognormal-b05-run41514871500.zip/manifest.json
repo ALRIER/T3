@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c73a47b35b7b7b1bbee27735a8270a40",
+  "parts": [
+    {
+      "bytes": 16903347,
+      "name": "part-00001.lfs",
+      "sha256": "2ff9d02963775474bb4eb57c162665f864cb462488a08da9b5be29c1d4dc453b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2ff9d02963775474bb4eb57c162665f864cb462488a08da9b5be29c1d4dc453b",
+  "size_bytes": 16903347,
+  "source": {
+    "artifact_id": 13173369742,
+    "created_at": "2026-11-02T20:00:42Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:58:28Z",
+    "key": "actions-13173369742",
+    "name": "t3-b3-realworld-parentblock-lognormal-b05-run41514871500.zip",
+    "run_id": 41514871500,
+    "size_bytes": 16903347,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13173369742/zip"
+  }
+}

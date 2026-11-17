@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b553ef75760905ddf41f9b1bac4721dd",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "80941368933291abed3945fec46bd4c421f09326da75363f5463eee7fb05676d"
+    },
+    {
+      "bytes": 2515732,
+      "name": "part-00002.lfs",
+      "sha256": "8952d2d4c787caebe887bb75fae98068d4f7043adf25b83b1f89f1d699c72a0d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "096130d7a27929858b1355de4933017eda757e327fbfdac2ddbc918ac06eeedb",
+  "size_bytes": 36070164,
+  "source": {
+    "artifact_id": 13170058489,
+    "created_at": "2026-11-02T18:54:49Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:29Z",
+    "key": "actions-13170058489",
+    "name": "t3-b3-pairwise-global-stress-run41502648179.zip",
+    "run_id": 41502648179,
+    "size_bytes": 36070164,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13170058489/zip"
+  }
+}

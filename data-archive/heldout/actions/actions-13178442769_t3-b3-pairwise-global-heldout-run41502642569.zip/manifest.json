@@ -1,0 +1,48 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6b172389564f4847549213d3110655d7",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "36ea906d4add0276686e480f928ff845079bdd009fbed6760d7c5733cfc50466"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "5ad904b07cefb60dd765e4fb9fb99a7df18db2b183d74eb286c8f1c0e3ce0659"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "95669c1f6fc3e6fddf855532888979709f6a5044c3c4352eba59ee6b039668d2"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "2b49bba2ea0c53e9c1295732811bc384147c109f715b52bfd8212506bb09e1bc"
+    },
+    {
+      "bytes": 20635894,
+      "name": "part-00005.lfs",
+      "sha256": "9a83a0e1653adcec19e59ff6c7dee3c0dae7f190abe94c62744ea3d7637b9ff8"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "17b8501d7017d7b131bb6ec81b9b483df3782e315c94d7df6591f55847066a4a",
+  "size_bytes": 154853622,
+  "source": {
+    "artifact_id": 13178442769,
+    "created_at": "2026-11-02T21:03:26Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:28:25Z",
+    "key": "actions-13178442769",
+    "name": "t3-b3-pairwise-global-heldout-run41502642569.zip",
+    "run_id": 41502642569,
+    "size_bytes": 154853622,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13178442769/zip"
+  }
+}

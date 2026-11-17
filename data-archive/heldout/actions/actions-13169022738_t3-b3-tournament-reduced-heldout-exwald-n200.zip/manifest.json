@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "111e8a59c1815e3eadbb036d28fc913e",
+  "parts": [
+    {
+      "bytes": 5097306,
+      "name": "part-00001.lfs",
+      "sha256": "f6f821aa986d2f702143dea2e8e154c7acd6756be0ec10eb58f5df41b7aefd42"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f6f821aa986d2f702143dea2e8e154c7acd6756be0ec10eb58f5df41b7aefd42",
+  "size_bytes": 5097306,
+  "source": {
+    "artifact_id": 13169022738,
+    "created_at": "2026-11-02T18:41:11Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:26Z",
+    "key": "actions-13169022738",
+    "name": "t3-b3-tournament-reduced-heldout-exwald-n200.zip",
+    "run_id": 41502642569,
+    "size_bytes": 5097306,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13169022738/zip"
+  }
+}

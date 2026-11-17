@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "753b03085a60e4a3d3aaeaab3831879f",
+  "parts": [
+    {
+      "bytes": 1866624,
+      "name": "part-00001.lfs",
+      "sha256": "31a0155dce8e8a028df1a8004028fc47d1e2555dfdd8916ec40460d38a2b20c7"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "31a0155dce8e8a028df1a8004028fc47d1e2555dfdd8916ec40460d38a2b20c7",
+  "size_bytes": 1866624,
+  "source": {
+    "artifact_id": 13169291839,
+    "created_at": "2026-11-02T18:41:23Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T18:39:29Z",
+    "key": "actions-13169291839",
+    "name": "t3-b3-tournament-reduced-stress-exwald-n3000.zip",
+    "run_id": 41502648179,
+    "size_bytes": 1866624,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13169291839/zip"
+  }
+}
