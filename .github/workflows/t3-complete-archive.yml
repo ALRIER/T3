@@ -1,0 +1,81 @@
+name: T3 Complete Experiment Archive to Repository
+run-name: "Archive all recoverable T3 experiment outputs into stage folders"
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/t3-complete-archive.yml
+      - config/T3_ARCHIVE_BOOTSTRAP.txt
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [inventory, publish, verify]
+        default: inventory
+        description: Archive mode
+      max_items:
+        type: number
+        default: 8
+        description: Sources per batch
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: t3-complete-experiment-archive
+  cancel-in-progress: false
+jobs:
+  archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          lfs: false
+      - name: Configure Git LFS for immutable data pieces
+        run: |
+          set -euo pipefail
+          git lfs version || (sudo apt-get update && sudo apt-get install -y git-lfs)
+          git lfs install --local
+          git config --local lfs.concurrenttransfers 3
+          git check-attr filter data-archive/test/part-00001.lfs | grep -q lfs
+      - name: Inventory or archive original bytes (never rerun experiments)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          MODE="${{ github.event.inputs.mode || 'inventory' }}"
+          MAX_ITEMS="${{ github.event.inputs.max_items || '8' }}"
+          python3 scripts/archive/t3_archive.py "$MODE" --max-items "$MAX_ITEMS"
+      - name: Commit source data and status to the same main branch
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data-archive/
+          if git diff --cached --quiet; then
+            echo "Archive unchanged"
+          else
+            git commit -m "Preserve original T3 output archives and hashes [skip ci]"
+            for attempt in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then break; fi
+              if [ "$attempt" = 3 ]; then exit 1; fi
+              sleep 8
+            done
+          fi
+      - name: Self-schedule next bounded archive batch
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          NEXT="$(cat .archive-report/next.txt)"
+          if [ "$NEXT" = publish ]; then
+            gh workflow run t3-complete-archive.yml --ref main -f mode=publish -f max_items=8
+            echo "Next archive batch scheduled"
+          else
+            echo "No next archive batch; inspect data-archive/catalog/status.json"
+          fi
