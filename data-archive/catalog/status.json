@@ -1,39 +1,48 @@
 {
-  "archived_original_bytes": 834021341,
-  "archived_sources": 61,
+  "archived_original_bytes": 1580690944,
+  "archived_sources": 92,
   "by_stage": {
     "discovery": {
       "archived": 0,
+      "expected_bytes": 152514064,
       "total": 257
     },
     "heldout": {
       "archived": 0,
+      "expected_bytes": 5082770562,
       "total": 421
     },
     "misc": {
       "archived": 0,
+      "expected_bytes": 159894075,
       "total": 1432
     },
     "montecarlo": {
-      "archived": 61,
+      "archived": 92,
+      "expected_bytes": 21604329858,
       "total": 1031
     },
     "provenance": {
       "archived": 0,
+      "expected_bytes": 755818,
       "total": 25
     },
     "realworld": {
       "archived": 0,
+      "expected_bytes": 12672198110,
       "total": 3793
     },
     "stress": {
       "archived": 0,
+      "expected_bytes": 5681595820,
       "total": 1035
     }
   },
   "complete": false,
+  "expected_original_bytes": 45354058307,
   "expired_unarchived": 0,
-  "pending_sources": 7933,
+  "failed_unarchived": 0,
+  "pending_sources": 7902,
   "scope": "sources in recorded inventory only",
   "total_sources": 7994
 }
