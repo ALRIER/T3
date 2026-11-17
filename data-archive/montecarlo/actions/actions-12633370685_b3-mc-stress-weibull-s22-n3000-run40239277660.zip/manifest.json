@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e4e398a3495937e8de33c271ef179aa4",
+  "parts": [
+    {
+      "bytes": 24567461,
+      "name": "part-00001.lfs",
+      "sha256": "641a4a3e353ed0064653162313c014c275703563d0434f2972165df642a81d30"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "641a4a3e353ed0064653162313c014c275703563d0434f2972165df642a81d30",
+  "size_bytes": 24567461,
+  "source": {
+    "artifact_id": 12633370685,
+    "created_at": "2026-10-26T06:58:21Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T06:58:20Z",
+    "key": "actions-12633370685",
+    "name": "b3-mc-stress-weibull-s22-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24567461,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12633370685/zip"
+  }
+}
