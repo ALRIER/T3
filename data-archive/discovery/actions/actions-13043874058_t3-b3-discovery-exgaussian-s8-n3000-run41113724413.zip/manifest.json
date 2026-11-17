@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a42b8f173326ac2fa80f4e3e15a47d5f",
+  "parts": [
+    {
+      "bytes": 261625,
+      "name": "part-00001.lfs",
+      "sha256": "e33d2c33cbc4c3d43035ed6081606cf7bc376f37280a97518be2ba2e841f51a2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e33d2c33cbc4c3d43035ed6081606cf7bc376f37280a97518be2ba2e841f51a2",
+  "size_bytes": 261625,
+  "source": {
+    "artifact_id": 13043874058,
+    "created_at": "2026-10-31T13:25:31Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T11:05:30Z",
+    "key": "actions-13043874058",
+    "name": "t3-b3-discovery-exgaussian-s8-n3000-run41113724413.zip",
+    "run_id": 41113724413,
+    "size_bytes": 261625,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13043874058/zip"
+  }
+}

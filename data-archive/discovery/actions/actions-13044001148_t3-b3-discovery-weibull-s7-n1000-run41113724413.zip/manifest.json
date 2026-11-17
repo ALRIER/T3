@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a2e050122d595003fdcaf35cbcbffc81",
+  "parts": [
+    {
+      "bytes": 282923,
+      "name": "part-00001.lfs",
+      "sha256": "c2a7cc6201854b4ab258935cea5d3c640731b7cbed507018e8640ee1291fd365"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c2a7cc6201854b4ab258935cea5d3c640731b7cbed507018e8640ee1291fd365",
+  "size_bytes": 282923,
+  "source": {
+    "artifact_id": 13044001148,
+    "created_at": "2026-10-31T13:05:26Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T11:05:30Z",
+    "key": "actions-13044001148",
+    "name": "t3-b3-discovery-weibull-s7-n1000-run41113724413.zip",
+    "run_id": 41113724413,
+    "size_bytes": 282923,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13044001148/zip"
+  }
+}

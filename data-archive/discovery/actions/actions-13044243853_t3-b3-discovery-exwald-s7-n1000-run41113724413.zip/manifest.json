@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "55a805cbe3093326ea5b12928d4825d5",
+  "parts": [
+    {
+      "bytes": 267050,
+      "name": "part-00001.lfs",
+      "sha256": "b4c8a6a58880a4cd33adea211d5098d69ea9a4faab1f1ed742609fb76c892f3d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b4c8a6a58880a4cd33adea211d5098d69ea9a4faab1f1ed742609fb76c892f3d",
+  "size_bytes": 267050,
+  "source": {
+    "artifact_id": 13044243853,
+    "created_at": "2026-10-31T13:30:56Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T11:05:30Z",
+    "key": "actions-13044243853",
+    "name": "t3-b3-discovery-exwald-s7-n1000-run41113724413.zip",
+    "run_id": 41113724413,
+    "size_bytes": 267050,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13044243853/zip"
+  }
+}

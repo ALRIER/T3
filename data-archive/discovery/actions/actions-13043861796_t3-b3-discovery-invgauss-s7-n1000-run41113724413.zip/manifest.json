@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "caac5e4b91581d51d0cd82fc0c17651d",
+  "parts": [
+    {
+      "bytes": 261252,
+      "name": "part-00001.lfs",
+      "sha256": "8137cbb8beeb1e7e57ddb1732f3a988767bb8f18aac815ac0098ce6a88a446e2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "8137cbb8beeb1e7e57ddb1732f3a988767bb8f18aac815ac0098ce6a88a446e2",
+  "size_bytes": 261252,
+  "source": {
+    "artifact_id": 13043861796,
+    "created_at": "2026-10-31T13:15:41Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T11:05:30Z",
+    "key": "actions-13043861796",
+    "name": "t3-b3-discovery-invgauss-s7-n1000-run41113724413.zip",
+    "run_id": 41113724413,
+    "size_bytes": 261252,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13043861796/zip"
+  }
+}

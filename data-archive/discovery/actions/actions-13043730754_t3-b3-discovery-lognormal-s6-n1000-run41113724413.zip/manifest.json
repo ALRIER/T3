@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e7034dabb61cbff24185479a73380cc9",
+  "parts": [
+    {
+      "bytes": 262429,
+      "name": "part-00001.lfs",
+      "sha256": "766ead39c33b1a1b3b1f716e757812b37625bfac330ec9204b1784288d4c0787"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "766ead39c33b1a1b3b1f716e757812b37625bfac330ec9204b1784288d4c0787",
+  "size_bytes": 262429,
+  "source": {
+    "artifact_id": 13043730754,
+    "created_at": "2026-10-31T12:57:01Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T11:05:30Z",
+    "key": "actions-13043730754",
+    "name": "t3-b3-discovery-lognormal-s6-n1000-run41113724413.zip",
+    "run_id": 41113724413,
+    "size_bytes": 262429,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13043730754/zip"
+  }
+}
