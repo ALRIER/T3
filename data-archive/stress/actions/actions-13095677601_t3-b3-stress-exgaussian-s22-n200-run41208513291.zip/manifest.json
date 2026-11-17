@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "bd1a055896f0b273b1e458447d206d02",
+  "parts": [
+    {
+      "bytes": 1086360,
+      "name": "part-00001.lfs",
+      "sha256": "8ed1519332a1bfd1d8b3859a71a361ac17fd5ff46edfc3d451e57f3dafbba1e0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "8ed1519332a1bfd1d8b3859a71a361ac17fd5ff46edfc3d451e57f3dafbba1e0",
+  "size_bytes": 1086360,
+  "source": {
+    "artifact_id": 13095677601,
+    "created_at": "2026-11-01T18:34:22Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13095677601",
+    "name": "t3-b3-stress-exgaussian-s22-n200-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 1086360,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13095677601/zip"
+  }
+}

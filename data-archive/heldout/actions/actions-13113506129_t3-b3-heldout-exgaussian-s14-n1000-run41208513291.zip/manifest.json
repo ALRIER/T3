@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "475e5e8bd5d437fbea8e765aa04e2017",
+  "parts": [
+    {
+      "bytes": 6406386,
+      "name": "part-00001.lfs",
+      "sha256": "ecc494f496827a5ff29c2032c60a986f689ff4339ed17aff7af7e3df29f95ddb"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ecc494f496827a5ff29c2032c60a986f689ff4339ed17aff7af7e3df29f95ddb",
+  "size_bytes": 6406386,
+  "source": {
+    "artifact_id": 13113506129,
+    "created_at": "2026-11-02T02:58:57Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T14:05:32Z",
+    "key": "actions-13113506129",
+    "name": "t3-b3-heldout-exgaussian-s14-n1000-run41208513291.zip",
+    "run_id": 41208513291,
+    "size_bytes": 6406386,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13113506129/zip"
+  }
+}
