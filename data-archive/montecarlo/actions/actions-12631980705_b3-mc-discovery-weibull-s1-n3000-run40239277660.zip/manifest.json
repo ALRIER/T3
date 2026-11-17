@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "83b5b42dd4bf49318921eaa93a6e85c8",
+  "parts": [
+    {
+      "bytes": 24557219,
+      "name": "part-00001.lfs",
+      "sha256": "4212311d7e6b43e8eeacb72000866b5487086b69b6fad98ddff1b961161f6aa5"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "4212311d7e6b43e8eeacb72000866b5487086b69b6fad98ddff1b961161f6aa5",
+  "size_bytes": 24557219,
+  "source": {
+    "artifact_id": 12631980705,
+    "created_at": "2026-10-26T06:20:31Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T06:20:28Z",
+    "key": "actions-12631980705",
+    "name": "b3-mc-discovery-weibull-s1-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24557219,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12631980705/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "476a369e6ff64938787b359fbc5398fc",
+  "parts": [
+    {
+      "bytes": 24927372,
+      "name": "part-00001.lfs",
+      "sha256": "93fe08127d66a3e0e1e40dc6d35fcc970cb4c4e105c8dd337892175f7f7ceed2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "93fe08127d66a3e0e1e40dc6d35fcc970cb4c4e105c8dd337892175f7f7ceed2",
+  "size_bytes": 24927372,
+  "source": {
+    "artifact_id": 12628009833,
+    "created_at": "2026-10-26T05:19:56Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T05:19:54Z",
+    "key": "actions-12628009833",
+    "name": "b3-mc-heldout-weibull-s11-n1000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24927372,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12628009833/zip"
+  }
+}
