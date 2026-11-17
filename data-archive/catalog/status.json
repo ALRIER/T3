@@ -1,0 +1,39 @@
+{
+  "archived_original_bytes": 0,
+  "archived_sources": 0,
+  "by_stage": {
+    "discovery": {
+      "archived": 0,
+      "total": 257
+    },
+    "heldout": {
+      "archived": 0,
+      "total": 421
+    },
+    "misc": {
+      "archived": 0,
+      "total": 1432
+    },
+    "montecarlo": {
+      "archived": 0,
+      "total": 1031
+    },
+    "provenance": {
+      "archived": 0,
+      "total": 25
+    },
+    "realworld": {
+      "archived": 0,
+      "total": 3793
+    },
+    "stress": {
+      "archived": 0,
+      "total": 1035
+    }
+  },
+  "complete": false,
+  "expired_unarchived": 0,
+  "pending_sources": 7994,
+  "scope": "sources in recorded inventory only",
+  "total_sources": 7994
+}
