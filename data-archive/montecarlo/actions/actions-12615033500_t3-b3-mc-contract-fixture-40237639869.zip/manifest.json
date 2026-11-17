@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "752995d730e8563729bab215495f413e",
+  "parts": [
+    {
+      "bytes": 2595,
+      "name": "part-00001.lfs",
+      "sha256": "b6c74bec066ec9102d1676e99111f68f685d034349768dfa59b18626a76bda21"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b6c74bec066ec9102d1676e99111f68f685d034349768dfa59b18626a76bda21",
+  "size_bytes": 2595,
+  "source": {
+    "artifact_id": 12615033500,
+    "created_at": "2026-10-25T21:54:27Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-24T21:54:26Z",
+    "key": "actions-12615033500",
+    "name": "t3-b3-mc-contract-fixture-40237639869.zip",
+    "run_id": 40237639869,
+    "size_bytes": 2595,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12615033500/zip"
+  }
+}

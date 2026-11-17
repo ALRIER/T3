@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a4ad99042f9d1609724495670bd0ec22",
+  "parts": [
+    {
+      "bytes": 158675,
+      "name": "part-00001.lfs",
+      "sha256": "166bfe8bc06fa7f29cdadc913679056ff724cb3c9ebe1306557174054a34455d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "166bfe8bc06fa7f29cdadc913679056ff724cb3c9ebe1306557174054a34455d",
+  "size_bytes": 158675,
+  "source": {
+    "artifact_id": 12614829321,
+    "created_at": "2026-10-25T21:59:12Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-24T21:59:11Z",
+    "key": "actions-12614829321",
+    "name": "b3-mc-actual-normal-discovery-seed00-n200-r3-40237977422.zip",
+    "run_id": 40237977422,
+    "size_bytes": 158675,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12614829321/zip"
+  }
+}
