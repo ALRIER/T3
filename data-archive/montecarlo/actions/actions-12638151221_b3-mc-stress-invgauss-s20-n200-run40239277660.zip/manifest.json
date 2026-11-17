@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b329550b5a08688239b1e7c56dc215a6",
+  "parts": [
+    {
+      "bytes": 24744294,
+      "name": "part-00001.lfs",
+      "sha256": "99f62877879171cd813018b908915e53b59b7161688e0f1313429b95e05c2f80"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "99f62877879171cd813018b908915e53b59b7161688e0f1313429b95e05c2f80",
+  "size_bytes": 24744294,
+  "source": {
+    "artifact_id": 12638151221,
+    "created_at": "2026-10-26T08:56:15Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T08:56:13Z",
+    "key": "actions-12638151221",
+    "name": "b3-mc-stress-invgauss-s20-n200-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24744294,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12638151221/zip"
+  }
+}

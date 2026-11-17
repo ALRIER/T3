@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "206017172b7b1505d772af67cdd60aaa",
+  "parts": [
+    {
+      "bytes": 24933492,
+      "name": "part-00001.lfs",
+      "sha256": "8c38b09aa0bd981e491adbbc79c5c32892b9ef2bdc44288dc031ffbe857d5373"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "8c38b09aa0bd981e491adbbc79c5c32892b9ef2bdc44288dc031ffbe857d5373",
+  "size_bytes": 24933492,
+  "source": {
+    "artifact_id": 12636508079,
+    "created_at": "2026-10-26T08:18:14Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T08:18:12Z",
+    "key": "actions-12636508079",
+    "name": "b3-mc-stress-weibull-s28-n1000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24933492,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12636508079/zip"
+  }
+}
