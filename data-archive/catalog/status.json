@@ -1,6 +1,6 @@
 {
-  "archived_original_bytes": 37570434,
-  "archived_sources": 16,
+  "archived_original_bytes": 80891723,
+  "archived_sources": 24,
   "by_stage": {
     "discovery": {
       "archived": 0,
@@ -15,7 +15,7 @@
       "total": 1432
     },
     "montecarlo": {
-      "archived": 16,
+      "archived": 24,
       "total": 1031
     },
     "provenance": {
@@ -33,7 +33,7 @@
   },
   "complete": false,
   "expired_unarchived": 0,
-  "pending_sources": 7978,
+  "pending_sources": 7970,
   "scope": "sources in recorded inventory only",
   "total_sources": 7994
 }
