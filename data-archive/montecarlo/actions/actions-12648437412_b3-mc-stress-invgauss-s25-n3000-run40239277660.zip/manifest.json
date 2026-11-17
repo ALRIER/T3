@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "23c0e4775d47d6b28073805bbd1afd2d",
+  "parts": [
+    {
+      "bytes": 23998505,
+      "name": "part-00001.lfs",
+      "sha256": "0675f954ddc265b4ca6b0641582036a9d0168d684939df83c1099303df0b0281"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0675f954ddc265b4ca6b0641582036a9d0168d684939df83c1099303df0b0281",
+  "size_bytes": 23998505,
+  "source": {
+    "artifact_id": 12648437412,
+    "created_at": "2026-10-26T12:02:23Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T12:02:22Z",
+    "key": "actions-12648437412",
+    "name": "b3-mc-stress-invgauss-s25-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23998505,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12648437412/zip"
+  }
+}
