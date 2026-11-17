@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "02c2415f7527168ffa4e02740e83b859",
+  "parts": [
+    {
+      "bytes": 6705,
+      "name": "part-00001.lfs",
+      "sha256": "b801be0fb9db0330e39ba35e3a82332bb4d50a4000c498c65437ad86c25c29db"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b801be0fb9db0330e39ba35e3a82332bb4d50a4000c498c65437ad86c25c29db",
+  "size_bytes": 6705,
+  "source": {
+    "artifact_id": 13161864677,
+    "created_at": "2026-11-02T17:13:06Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T16:59:40Z",
+    "key": "actions-13161864677",
+    "name": "t3-b3-optimizer-variability-normal-seed0-n1000-run41486814836.zip",
+    "run_id": 41486814836,
+    "size_bytes": 6705,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13161864677/zip"
+  }
+}

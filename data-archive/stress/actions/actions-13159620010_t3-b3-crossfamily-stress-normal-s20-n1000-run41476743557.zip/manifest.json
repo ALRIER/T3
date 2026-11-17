@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "11a824a25bf1f0dbec533cf8ade98462",
+  "parts": [
+    {
+      "bytes": 2672453,
+      "name": "part-00001.lfs",
+      "sha256": "cb0fa976e4f0d42595e4645fc05e616df18fb01452d215d7a1264426c37dd26e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "cb0fa976e4f0d42595e4645fc05e616df18fb01452d215d7a1264426c37dd26e",
+  "size_bytes": 2672453,
+  "source": {
+    "artifact_id": 13159620010,
+    "created_at": "2026-11-02T16:09:34Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T15:57:48Z",
+    "key": "actions-13159620010",
+    "name": "t3-b3-crossfamily-stress-normal-s20-n1000-run41476743557.zip",
+    "run_id": 41476743557,
+    "size_bytes": 2672453,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13159620010/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f47d0ed020c55f328a8905c03f07b1ae",
+  "parts": [
+    {
+      "bytes": 8251652,
+      "name": "part-00001.lfs",
+      "sha256": "ba4f00566546f2dd6c89acca8864cbd524afc6b7dc7a5421ac8c59a95811edf9"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ba4f00566546f2dd6c89acca8864cbd524afc6b7dc7a5421ac8c59a95811edf9",
+  "size_bytes": 8251652,
+  "source": {
+    "artifact_id": 13163611219,
+    "created_at": "2026-11-02T17:13:34Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:01:53Z",
+    "key": "actions-13163611219",
+    "name": "t3-b3-crossfamily-heldout-exgaussian-s17-n3000-run41487179284.zip",
+    "run_id": 41487179284,
+    "size_bytes": 8251652,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13163611219/zip"
+  }
+}

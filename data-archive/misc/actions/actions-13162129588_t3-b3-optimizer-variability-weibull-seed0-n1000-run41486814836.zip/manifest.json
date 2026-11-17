@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "5476cf5d22bf600af2968dee566e04e0",
+  "parts": [
+    {
+      "bytes": 6716,
+      "name": "part-00001.lfs",
+      "sha256": "a67b012d9081af60ccb05204d21f8c985e3633ccab9e38d71318d6f4900eb016"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a67b012d9081af60ccb05204d21f8c985e3633ccab9e38d71318d6f4900eb016",
+  "size_bytes": 6716,
+  "source": {
+    "artifact_id": 13162129588,
+    "created_at": "2026-11-02T17:13:12Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T16:59:40Z",
+    "key": "actions-13162129588",
+    "name": "t3-b3-optimizer-variability-weibull-seed0-n1000-run41486814836.zip",
+    "run_id": 41486814836,
+    "size_bytes": 6716,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13162129588/zip"
+  }
+}
