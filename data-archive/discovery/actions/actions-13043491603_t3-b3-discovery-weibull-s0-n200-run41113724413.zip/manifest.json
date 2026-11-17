@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "44fd31f4ec45bbe8a78d486af197e6ad",
+  "parts": [
+    {
+      "bytes": 294860,
+      "name": "part-00001.lfs",
+      "sha256": "7cdaf09d9b6ffca38d4936eeacb8a3c860d507ff55f66a85d89ca4a0dd4f7e46"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7cdaf09d9b6ffca38d4936eeacb8a3c860d507ff55f66a85d89ca4a0dd4f7e46",
+  "size_bytes": 294860,
+  "source": {
+    "artifact_id": 13043491603,
+    "created_at": "2026-10-31T13:00:07Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-29T11:05:30Z",
+    "key": "actions-13043491603",
+    "name": "t3-b3-discovery-weibull-s0-n200-run41113724413.zip",
+    "run_id": 41113724413,
+    "size_bytes": 294860,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13043491603/zip"
+  }
+}
