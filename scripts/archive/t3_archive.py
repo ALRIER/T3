@@ -187,8 +187,10 @@ def status(catalog):
     x={"total_sources":len(src),"archived_sources":len(saved),
       "pending_sources":len(missing),"expired_unarchived":len(expired),
       "archived_original_bytes":sum(json.loads((item_dir(i)/"manifest.json").read_text())["size_bytes"] for i in saved),
+      "expected_original_bytes":sum(int(i.get("size_bytes") or 0) for i in src),
       "by_stage":{s:{"total":sum(i["stage"]==s for i in src),
-        "archived":sum(i["stage"]==s for i in saved)} for s in STAGES},
+        "archived":sum(i["stage"]==s for i in saved),
+        "expected_bytes":sum(int(i.get("size_bytes") or 0) for i in src if i["stage"]==s)} for s in STAGES},
       "complete":not missing,"scope":"sources in recorded inventory only"}
     CATALOG.parent.mkdir(parents=True,exist_ok=True)
     (CATALOG.parent/"status.json").write_text(json.dumps(x,indent=2,sort_keys=True)+"\n")
