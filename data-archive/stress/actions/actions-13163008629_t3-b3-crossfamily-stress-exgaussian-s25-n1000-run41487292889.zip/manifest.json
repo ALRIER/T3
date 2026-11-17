@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f716d7f48715614fb8a22c23dcb8f021",
+  "parts": [
+    {
+      "bytes": 2693274,
+      "name": "part-00001.lfs",
+      "sha256": "5c3d83d9d199747db9f2ab504cb4fef68b08037de455e12f3e645d288f3968a4"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "5c3d83d9d199747db9f2ab504cb4fef68b08037de455e12f3e645d288f3968a4",
+  "size_bytes": 2693274,
+  "source": {
+    "artifact_id": 13163008629,
+    "created_at": "2026-11-02T17:22:26Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:02:37Z",
+    "key": "actions-13163008629",
+    "name": "t3-b3-crossfamily-stress-exgaussian-s25-n1000-run41487292889.zip",
+    "run_id": 41487292889,
+    "size_bytes": 2693274,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13163008629/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "0e873f407c8e6f12116e0e2f6136351a",
+  "parts": [
+    {
+      "bytes": 2638839,
+      "name": "part-00001.lfs",
+      "sha256": "f84f93b18ce26908f6676bbfd87d94fe31cfc2a65e5c8053748517753a85954d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f84f93b18ce26908f6676bbfd87d94fe31cfc2a65e5c8053748517753a85954d",
+  "size_bytes": 2638839,
+  "source": {
+    "artifact_id": 13164751737,
+    "created_at": "2026-11-02T17:30:33Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:02:37Z",
+    "key": "actions-13164751737",
+    "name": "t3-b3-crossfamily-stress-exwald-s26-n200-run41487292889.zip",
+    "run_id": 41487292889,
+    "size_bytes": 2638839,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13164751737/zip"
+  }
+}
