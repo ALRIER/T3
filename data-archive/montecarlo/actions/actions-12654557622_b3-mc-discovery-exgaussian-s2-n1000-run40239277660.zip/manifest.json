@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6f6873ecd8b02e9ba2d7bf798202dac7",
+  "parts": [
+    {
+      "bytes": 24569400,
+      "name": "part-00001.lfs",
+      "sha256": "1c053995cd714cb554bde3408cfc7219f5982feb4d47610c6e2e6b12e4acce94"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "1c053995cd714cb554bde3408cfc7219f5982feb4d47610c6e2e6b12e4acce94",
+  "size_bytes": 24569400,
+  "source": {
+    "artifact_id": 12654557622,
+    "created_at": "2026-10-26T13:30:58Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T13:30:56Z",
+    "key": "actions-12654557622",
+    "name": "b3-mc-discovery-exgaussian-s2-n1000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24569400,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12654557622/zip"
+  }
+}
