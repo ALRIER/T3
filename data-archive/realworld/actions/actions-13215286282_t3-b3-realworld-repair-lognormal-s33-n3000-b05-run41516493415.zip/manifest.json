@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "2d5e0acfa187ad84b7ac12e161b18c83",
+  "parts": [
+    {
+      "bytes": 1329340,
+      "name": "part-00001.lfs",
+      "sha256": "05d3a449df7752eef3746b7d986c3357b086b2deb1a07487dc5773116554c865"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "05d3a449df7752eef3746b7d986c3357b086b2deb1a07487dc5773116554c865",
+  "size_bytes": 1329340,
+  "source": {
+    "artifact_id": 13215286282,
+    "created_at": "2026-11-03T08:19:38Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T20:08:47Z",
+    "key": "actions-13215286282",
+    "name": "t3-b3-realworld-repair-lognormal-s33-n3000-b05-run41516493415.zip",
+    "run_id": 41516493415,
+    "size_bytes": 1329340,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13215286282/zip"
+  }
+}
