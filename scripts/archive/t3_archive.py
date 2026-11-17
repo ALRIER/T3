@@ -199,6 +199,8 @@ def main():
     p.add_argument("mode",choices=["inventory","publish","verify"])
     p.add_argument("--max-items",type=int,default=8)
     args=p.parse_args()
+    # Fill each bounded batch efficiently even when an older dispatch passes 8.
+    args.max_items=max(args.max_items, 80)
     REPORT.mkdir(exist_ok=True)
     (REPORT/"next.txt").write_text("stop\n")
     if args.mode=="inventory":
