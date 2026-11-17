@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "42b2f7484e4dcdb57fde80769387091f",
+  "parts": [
+    {
+      "bytes": 8220406,
+      "name": "part-00001.lfs",
+      "sha256": "b62a535437f8777119e006a9672ef389575e265ee0fca20f69bc1edf34db74a1"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b62a535437f8777119e006a9672ef389575e265ee0fca20f69bc1edf34db74a1",
+  "size_bytes": 8220406,
+  "source": {
+    "artifact_id": 13165440587,
+    "created_at": "2026-11-02T17:35:54Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:01:53Z",
+    "key": "actions-13165440587",
+    "name": "t3-b3-crossfamily-heldout-invgauss-s17-n3000-run41487179284.zip",
+    "run_id": 41487179284,
+    "size_bytes": 8220406,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13165440587/zip"
+  }
+}

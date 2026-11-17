@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "3eeafde345e1b602036d64a5eb94ead3",
+  "parts": [
+    {
+      "bytes": 8162409,
+      "name": "part-00001.lfs",
+      "sha256": "3cb25a68ebf6dd24d746ed2f6202dd8c96d308bc769695da7885c9faa6624964"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3cb25a68ebf6dd24d746ed2f6202dd8c96d308bc769695da7885c9faa6624964",
+  "size_bytes": 8162409,
+  "source": {
+    "artifact_id": 13164650658,
+    "created_at": "2026-11-02T17:21:58Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:01:53Z",
+    "key": "actions-13164650658",
+    "name": "t3-b3-crossfamily-heldout-exwald-s16-n1000-run41487179284.zip",
+    "run_id": 41487179284,
+    "size_bytes": 8162409,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13164650658/zip"
+  }
+}

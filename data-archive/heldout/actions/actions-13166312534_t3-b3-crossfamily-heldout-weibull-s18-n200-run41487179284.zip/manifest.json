@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "855fc05243c59f3176fd960612517935",
+  "parts": [
+    {
+      "bytes": 8066084,
+      "name": "part-00001.lfs",
+      "sha256": "ff274fa68d29d35ffe581e7dc52830dc1e5e89fc343c80d30d5579803efe2268"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ff274fa68d29d35ffe581e7dc52830dc1e5e89fc343c80d30d5579803efe2268",
+  "size_bytes": 8066084,
+  "source": {
+    "artifact_id": 13166312534,
+    "created_at": "2026-11-02T17:58:06Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T17:01:53Z",
+    "key": "actions-13166312534",
+    "name": "t3-b3-crossfamily-heldout-weibull-s18-n200-run41487179284.zip",
+    "run_id": 41487179284,
+    "size_bytes": 8066084,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13166312534/zip"
+  }
+}
