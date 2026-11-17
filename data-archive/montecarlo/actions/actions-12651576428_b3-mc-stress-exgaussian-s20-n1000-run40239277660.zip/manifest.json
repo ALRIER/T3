@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "d65bb34aec6e7ad83b77d20ec45b500f",
+  "parts": [
+    {
+      "bytes": 24587350,
+      "name": "part-00001.lfs",
+      "sha256": "0a2544249d7b5e15df021ae60e6ee42af8766f3954d484ada61c899099b2b06f"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0a2544249d7b5e15df021ae60e6ee42af8766f3954d484ada61c899099b2b06f",
+  "size_bytes": 24587350,
+  "source": {
+    "artifact_id": 12651576428,
+    "created_at": "2026-10-26T12:56:40Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T12:56:37Z",
+    "key": "actions-12651576428",
+    "name": "b3-mc-stress-exgaussian-s20-n1000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24587350,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12651576428/zip"
+  }
+}
