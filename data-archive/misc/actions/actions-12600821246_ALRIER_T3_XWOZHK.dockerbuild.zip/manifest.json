@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "abe1ab3952e8f20f71b214d674fcbbb0",
+  "parts": [
+    {
+      "bytes": 48531,
+      "name": "part-00001.lfs",
+      "sha256": "c17a6786c511e6dcca23e84534de5bfea451c1c38687c47df7e39e7411cff7f2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c17a6786c511e6dcca23e84534de5bfea451c1c38687c47df7e39e7411cff7f2",
+  "size_bytes": 48531,
+  "source": {
+    "artifact_id": 12600821246,
+    "created_at": "2026-10-25T13:26:26Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-23T13:25:34Z",
+    "key": "actions-12600821246",
+    "name": "ALRIER~T3~XWOZHK.dockerbuild.zip",
+    "run_id": 40197549117,
+    "size_bytes": 48531,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12600821246/zip"
+  }
+}

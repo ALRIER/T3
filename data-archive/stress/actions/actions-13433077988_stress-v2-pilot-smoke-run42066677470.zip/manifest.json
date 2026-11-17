@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "57f9059a66ed6dc57013a90ad73ff59b",
+  "parts": [
+    {
+      "bytes": 37901,
+      "name": "part-00001.lfs",
+      "sha256": "51434da953e3f4db84c4f4d638504744f5b00ac08a85a5be533436a8e06904d0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "51434da953e3f4db84c4f4d638504744f5b00ac08a85a5be533436a8e06904d0",
+  "size_bytes": 37901,
+  "source": {
+    "artifact_id": 13433077988,
+    "created_at": "2026-11-05T16:40:20Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-12-05T16:40:19Z",
+    "key": "actions-13433077988",
+    "name": "stress-v2-pilot-smoke-run42066677470.zip",
+    "run_id": 42066677470,
+    "size_bytes": 37901,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13433077988/zip"
+  }
+}

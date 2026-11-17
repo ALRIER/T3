@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "08e00c39ebfbcb082b95697ebb2ba814",
+  "parts": [
+    {
+      "bytes": 111626,
+      "name": "part-00001.lfs",
+      "sha256": "d759452161a9d159308a68e98c59d087ab24d79de96b1660f0c2133ba1af4020"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "d759452161a9d159308a68e98c59d087ab24d79de96b1660f0c2133ba1af4020",
+  "size_bytes": 111626,
+  "source": {
+    "artifact_id": 12733716589,
+    "created_at": "2026-10-27T12:16:26Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-25T11:15:32Z",
+    "key": "actions-12733716589",
+    "name": "t3-nested-normal-seed0-n3000-fold4.zip",
+    "run_id": 40494779825,
+    "size_bytes": 111626,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12733716589/zip"
+  }
+}

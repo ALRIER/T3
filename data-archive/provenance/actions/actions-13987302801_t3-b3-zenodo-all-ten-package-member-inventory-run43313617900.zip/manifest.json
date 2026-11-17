@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "2321a2aafa26bf32c68650b340a00ee6",
+  "parts": [
+    {
+      "bytes": 213717,
+      "name": "part-00001.lfs",
+      "sha256": "f6ba89452dd6db56134630a831d66f151807405ec9abc5da994590d16fc0015e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f6ba89452dd6db56134630a831d66f151807405ec9abc5da994590d16fc0015e",
+  "size_bytes": 213717,
+  "source": {
+    "artifact_id": 13987302801,
+    "created_at": "2026-11-12T21:56:55Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-11T21:56:54Z",
+    "key": "actions-13987302801",
+    "name": "t3-b3-zenodo-all-ten-package-member-inventory-run43313617900.zip",
+    "run_id": 43313617900,
+    "size_bytes": 213717,
+    "source": "actions",
+    "stage": "provenance",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13987302801/zip"
+  }
+}

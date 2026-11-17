@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a1d590c0068fc52fe67e9f3ae427f4f7",
+  "parts": [
+    {
+      "bytes": 2648,
+      "name": "part-00001.lfs",
+      "sha256": "a3686682e61160119339421e5d7c6654b3635a7d68e1f6838117ddb4f94169bd"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a3686682e61160119339421e5d7c6654b3635a7d68e1f6838117ddb4f94169bd",
+  "size_bytes": 2648,
+  "source": {
+    "artifact_id": 13986418846,
+    "created_at": "2026-11-12T21:51:39Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-11T21:51:39Z",
+    "key": "actions-13986418846",
+    "name": "t3-b3-actions-source-stress-original-run43314309491.zip",
+    "run_id": 43314309491,
+    "size_bytes": 2648,
+    "source": "actions",
+    "stage": "provenance",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13986418846/zip"
+  }
+}

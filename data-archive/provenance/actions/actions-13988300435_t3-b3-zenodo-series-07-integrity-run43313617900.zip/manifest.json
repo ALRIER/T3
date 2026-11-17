@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f50bc920dab8b8b7f93b65e0c4242d44",
+  "parts": [
+    {
+      "bytes": 3069,
+      "name": "part-00001.lfs",
+      "sha256": "57a6ac36e357bc4e308296b7c9a87a9586ba835982b9bc82ed1d608e456dbcb2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "57a6ac36e357bc4e308296b7c9a87a9586ba835982b9bc82ed1d608e456dbcb2",
+  "size_bytes": 3069,
+  "source": {
+    "artifact_id": 13988300435,
+    "created_at": "2026-11-12T21:54:11Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-11T21:54:11Z",
+    "key": "actions-13988300435",
+    "name": "t3-b3-zenodo-series-07-integrity-run43313617900.zip",
+    "run_id": 43313617900,
+    "size_bytes": 3069,
+    "source": "actions",
+    "stage": "provenance",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13988300435/zip"
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "archived_original_bytes": 12735455600,
-  "archived_sources": 551,
+  "archived_original_bytes": 13220017935,
+  "archived_sources": 631,
   "by_stage": {
     "discovery": {
       "archived": 0,
@@ -13,17 +13,17 @@
       "total": 421
     },
     "misc": {
-      "archived": 0,
+      "archived": 29,
       "expected_bytes": 159894075,
       "total": 1432
     },
     "montecarlo": {
-      "archived": 551,
+      "archived": 571,
       "expected_bytes": 21604329858,
       "total": 1031
     },
     "provenance": {
-      "archived": 0,
+      "archived": 22,
       "expected_bytes": 755818,
       "total": 25
     },
@@ -33,7 +33,7 @@
       "total": 3793
     },
     "stress": {
-      "archived": 0,
+      "archived": 9,
       "expected_bytes": 5681595820,
       "total": 1035
     }
@@ -42,7 +42,7 @@
   "expected_original_bytes": 45354058307,
   "expired_unarchived": 0,
   "failed_unarchived": 0,
-  "pending_sources": 7443,
+  "pending_sources": 7363,
   "scope": "sources in recorded inventory only",
   "total_sources": 7994
 }

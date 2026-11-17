@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "0b8ef6c3cf6b36197f21d6a919a25e7d",
+  "parts": [
+    {
+      "bytes": 2218,
+      "name": "part-00001.lfs",
+      "sha256": "48d7be2e093952aec993ebf3f590d8fb941e4bb48402cbcd4024e659de704449"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "48d7be2e093952aec993ebf3f590d8fb941e4bb48402cbcd4024e659de704449",
+  "size_bytes": 2218,
+  "source": {
+    "artifact_id": 12599344568,
+    "created_at": "2026-10-25T13:01:10Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-23T13:01:04Z",
+    "key": "actions-12599344568",
+    "name": "T2_B3_PROSPECTIVE_321_GRID.zip",
+    "run_id": 40195696163,
+    "size_bytes": 2218,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12599344568/zip"
+  }
+}

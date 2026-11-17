@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "890f6ced308268b46497ff06514174bb",
+  "parts": [
+    {
+      "bytes": 38697,
+      "name": "part-00001.lfs",
+      "sha256": "8da00533992de88caa1da88937d6e0fb7fbe82769633c377f75f2f10f27c4430"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "8da00533992de88caa1da88937d6e0fb7fbe82769633c377f75f2f10f27c4430",
+  "size_bytes": 38697,
+  "source": {
+    "artifact_id": 13987032350,
+    "created_at": "2026-11-12T21:44:43Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-12-12T21:44:42Z",
+    "key": "actions-13987032350",
+    "name": "t3-b3-zenodo-public-provenance-probe-43313187401.zip",
+    "run_id": 43313187401,
+    "size_bytes": 38697,
+    "source": "actions",
+    "stage": "provenance",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13987032350/zip"
+  }
+}
