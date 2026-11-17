@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e36ff4e6522d30cb0fe44a648de241fb",
+  "parts": [
+    {
+      "bytes": 24831945,
+      "name": "part-00001.lfs",
+      "sha256": "35c1b082d8c5a14bc77220e78648919049f8ee4ffea7d78d564c31b37b38aa4e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "35c1b082d8c5a14bc77220e78648919049f8ee4ffea7d78d564c31b37b38aa4e",
+  "size_bytes": 24831945,
+  "source": {
+    "artifact_id": 12643474994,
+    "created_at": "2026-10-26T10:44:42Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T10:44:40Z",
+    "key": "actions-12643474994",
+    "name": "b3-mc-heldout-invgauss-s15-n200-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24831945,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12643474994/zip"
+  }
+}
