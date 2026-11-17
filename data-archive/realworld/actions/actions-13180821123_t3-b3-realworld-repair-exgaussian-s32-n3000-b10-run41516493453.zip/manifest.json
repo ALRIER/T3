@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "1c7db5bc0f9f6c26b54712c985c31768",
+  "parts": [
+    {
+      "bytes": 1336865,
+      "name": "part-00001.lfs",
+      "sha256": "2c7fe85fe9d14fdbb696b5558f8e50a706d96aa8b6a17623ee6afd9d6da8ac0a"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2c7fe85fe9d14fdbb696b5558f8e50a706d96aa8b6a17623ee6afd9d6da8ac0a",
+  "size_bytes": 1336865,
+  "source": {
+    "artifact_id": 13180821123,
+    "created_at": "2026-11-02T21:23:05Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T20:08:48Z",
+    "key": "actions-13180821123",
+    "name": "t3-b3-realworld-repair-exgaussian-s32-n3000-b10-run41516493453.zip",
+    "run_id": 41516493453,
+    "size_bytes": 1336865,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13180821123/zip"
+  }
+}
