@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "86d0cbba77dc498a83c858df68f4edc9",
+  "parts": [
+    {
+      "bytes": 11716591,
+      "name": "part-00001.lfs",
+      "sha256": "924b44f25c314773891df0b818f783f446596d465892d3405c77c515bb7aeb55"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "924b44f25c314773891df0b818f783f446596d465892d3405c77c515bb7aeb55",
+  "size_bytes": 11716591,
+  "source": {
+    "artifact_id": 13175600286,
+    "created_at": "2026-11-02T20:02:13Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:58:28Z",
+    "key": "actions-13175600286",
+    "name": "t3-b3-realworld-parentblock-weibull-b12-run41514871500.zip",
+    "run_id": 41514871500,
+    "size_bytes": 11716591,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13175600286/zip"
+  }
+}
