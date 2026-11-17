@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "37a6731cab2c0b7f5e7ab96a4180cd3d",
+  "parts": [
+    {
+      "bytes": 23955621,
+      "name": "part-00001.lfs",
+      "sha256": "f8b7c2e354b867f64c8e78741aaa50bf29e2ba57ac1c63d7d6f41f18d375ffc1"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f8b7c2e354b867f64c8e78741aaa50bf29e2ba57ac1c63d7d6f41f18d375ffc1",
+  "size_bytes": 23955621,
+  "source": {
+    "artifact_id": 12617281405,
+    "created_at": "2026-10-25T22:55:42Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-24T22:55:41Z",
+    "key": "actions-12617281405",
+    "name": "b3-mc-stress-normal-s21-n1000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23955621,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12617281405/zip"
+  }
+}

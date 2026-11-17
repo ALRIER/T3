@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "0037292f5c07ca93b0d30b697e70d6ff",
+  "parts": [
+    {
+      "bytes": 23712956,
+      "name": "part-00001.lfs",
+      "sha256": "4f985175ab809a96b6c476652667b7baedad3c4a5cea6d9434393e5550c6feff"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "4f985175ab809a96b6c476652667b7baedad3c4a5cea6d9434393e5550c6feff",
+  "size_bytes": 23712956,
+  "source": {
+    "artifact_id": 12617239485,
+    "created_at": "2026-10-25T23:18:18Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-24T23:18:17Z",
+    "key": "actions-12617239485",
+    "name": "b3-mc-stress-normal-s20-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 23712956,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12617239485/zip"
+  }
+}
