@@ -10,6 +10,7 @@ import urllib.error, urllib.request
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 STORE=ROOT/"data-archive"
 CATALOG=STORE/"catalog"/"sources.json"
+FAILURES=STORE/"catalog"/"failures.json"
 REPORT=ROOT/".archive-report"
 REPO=os.environ.get("GITHUB_REPOSITORY","ALRIER/T3")
 TOKEN=os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
@@ -184,8 +185,11 @@ def status(catalog):
     saved=[x for x in src if (item_dir(x)/"manifest.json").exists()]
     missing=[x for x in src if not (item_dir(x)/"manifest.json").exists()]
     expired=[x for x in missing if x.get("expired_at_inventory")]
+    failures=json.loads(FAILURES.read_text()) if FAILURES.exists() else {}
+    blocked=[x for x in missing if x["key"] in failures]
     x={"total_sources":len(src),"archived_sources":len(saved),
       "pending_sources":len(missing),"expired_unarchived":len(expired),
+      "failed_unarchived":len(blocked),
       "archived_original_bytes":sum(json.loads((item_dir(i)/"manifest.json").read_text())["size_bytes"] for i in saved),
       "expected_original_bytes":sum(int(i.get("size_bytes") or 0) for i in src),
       "by_stage":{s:{"total":sum(i["stage"]==s for i in src),
@@ -228,22 +232,27 @@ def main():
         if errors:raise RuntimeError("Broken part files: "+str(errors[:12]))
         print("ALL_AVAILABLE_LOCAL_PARTS_VERIFIED")
         return
-    n=0;bytes_this_batch=0
+    failures=json.loads(FAILURES.read_text()) if FAILURES.exists() else {}
+    n=0;attempts=0;bytes_this_batch=0
     for item in cat["sources"]:
-        if (item_dir(item)/"manifest.json").exists() or item.get("expired_at_inventory"):continue
-        if n>=args.max_items or (n and bytes_this_batch+int(item.get("size_bytes") or 0)>MAX_BATCH_BYTES):
+        if (item_dir(item)/"manifest.json").exists() or item.get("expired_at_inventory") or item["key"] in failures:continue
+        if attempts>=args.max_items or (n and bytes_this_batch+int(item.get("size_bytes") or 0)>MAX_BATCH_BYTES):
             break
+        attempts+=1
         try:
             if stream_parts(item):
                 n+=1;bytes_this_batch+=int(item.get("size_bytes") or 0)
         except Exception as e:
             print("DOWNLOAD_BLOCKED",item["key"],repr(e),file=sys.stderr,flush=True)
-            (REPORT/"failed_source.json").write_text(json.dumps(
-              {"source":item,"error":str(e)},indent=2))
-            break
+            failures[item["key"]]={"source":item,"error":str(e),"recorded_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())}
+            FAILURES.parent.mkdir(parents=True,exist_ok=True)
+            FAILURES.write_text(json.dumps(failures,indent=2,sort_keys=True)+"\n")
+            # Continue recovering other sources rather than letting one expired or
+            # inaccessible file interrupt the remainder of the entire experiment.
+            continue
     info=status(cat)
     print("ARCHIVE_STATUS",json.dumps(info),flush=True)
-    if n and info["pending_sources"]>info["expired_unarchived"]:
+    if (n or attempts) and info["pending_sources"]>info["expired_unarchived"]+info["failed_unarchived"]:
         (REPORT/"next.txt").write_text("publish\n")
     elif info["complete"]:print("INVENTORIED_ARCHIVE_COMPLETE",flush=True)
     else:print("ARCHIVE_BLOCKED_OR_EXPIRED",flush=True)
