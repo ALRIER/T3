@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "ee80604cf523462294fad222721a18fb",
+  "parts": [
+    {
+      "bytes": 17301803,
+      "name": "part-00001.lfs",
+      "sha256": "e7fd126b78dd5912edc05ac53b5d640b02a8353a24dfd54e23c4155a641e0a49"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e7fd126b78dd5912edc05ac53b5d640b02a8353a24dfd54e23c4155a641e0a49",
+  "size_bytes": 17301803,
+  "source": {
+    "artifact_id": 13174103856,
+    "created_at": "2026-11-02T20:03:57Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:58:28Z",
+    "key": "actions-13174103856",
+    "name": "t3-b3-realworld-parentblock-exgaussian-b08-run41514871500.zip",
+    "run_id": 41514871500,
+    "size_bytes": 17301803,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13174103856/zip"
+  }
+}

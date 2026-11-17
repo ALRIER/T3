@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "68440ba154acea5705644b4291d7bfdb",
+  "parts": [
+    {
+      "bytes": 10579181,
+      "name": "part-00001.lfs",
+      "sha256": "2d49a6c28aa87e8fab11051b2b9345cbf035dce686c0037e32c17b0fcdb20a2d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2d49a6c28aa87e8fab11051b2b9345cbf035dce686c0037e32c17b0fcdb20a2d",
+  "size_bytes": 10579181,
+  "source": {
+    "artifact_id": 13175342973,
+    "created_at": "2026-11-02T20:04:19Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:58:28Z",
+    "key": "actions-13175342973",
+    "name": "t3-b3-realworld-parentblock-exwald-b02-run41514871500.zip",
+    "run_id": 41514871500,
+    "size_bytes": 10579181,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13175342973/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "d4f7dc60eec1b71c16e211778cbb41e5",
+  "parts": [
+    {
+      "bytes": 11777330,
+      "name": "part-00001.lfs",
+      "sha256": "aeb78da636797fa901c3bb1074bd04493c216c1306093b823e7c860ac4344de8"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "aeb78da636797fa901c3bb1074bd04493c216c1306093b823e7c860ac4344de8",
+  "size_bytes": 11777330,
+  "source": {
+    "artifact_id": 13174538235,
+    "created_at": "2026-11-02T20:02:46Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:58:28Z",
+    "key": "actions-13174538235",
+    "name": "t3-b3-realworld-parentblock-invgauss-b06-run41514871500.zip",
+    "run_id": 41514871500,
+    "size_bytes": 11777330,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13174538235/zip"
+  }
+}

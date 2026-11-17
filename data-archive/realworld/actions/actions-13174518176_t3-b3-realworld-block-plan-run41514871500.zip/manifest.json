@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "04d54fd10478fe2dd318e2419f7fcc2e",
+  "parts": [
+    {
+      "bytes": 962246,
+      "name": "part-00001.lfs",
+      "sha256": "f8c3d3086a4c3a99ab69f866989215f3fdf27cabd18016feddfae8f0b258624a"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f8c3d3086a4c3a99ab69f866989215f3fdf27cabd18016feddfae8f0b258624a",
+  "size_bytes": 962246,
+  "source": {
+    "artifact_id": 13174518176,
+    "created_at": "2026-11-02T19:59:27Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-01-31T19:58:28Z",
+    "key": "actions-13174518176",
+    "name": "t3-b3-realworld-block-plan-run41514871500.zip",
+    "run_id": 41514871500,
+    "size_bytes": 962246,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13174518176/zip"
+  }
+}
