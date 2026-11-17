@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "9781e6c0f873d8bced43eac318b00891",
+  "parts": [
+    {
+      "bytes": 24206861,
+      "name": "part-00001.lfs",
+      "sha256": "2061118a925af6720979335063f6058342e8675149350144f503c1b69b3906fe"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2061118a925af6720979335063f6058342e8675149350144f503c1b69b3906fe",
+  "size_bytes": 24206861,
+  "source": {
+    "artifact_id": 12661664138,
+    "created_at": "2026-10-26T15:30:50Z",
+    "expired_at_inventory": false,
+    "expires_at": "2026-11-25T15:30:48Z",
+    "key": "actions-12661664138",
+    "name": "b3-mc-heldout-exgaussian-s19-n3000-run40239277660.zip",
+    "run_id": 40239277660,
+    "size_bytes": 24206861,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/12661664138/zip"
+  }
+}
