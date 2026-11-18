@@ -1,0 +1,127 @@
+name: R1 — Unified Q1 publication calibration, multiplicity and completeness audit
+run-name: "R1 Q1 unified | Stage 12 known-truth calibration 18 parallel blocks + global 216-test audit"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-q1-unified-final-calibration.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-q1-unified-final-calibration-main
+  cancel-in-progress: false
+
+jobs:
+  validate-original-R1-and-calibration-code:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install deterministic statistics dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2'
+      - name: Verify 5A, 5B, 12A archives and run calibration self-tests
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_b3_r1_stage12_unified_calibration.py
+          python scripts/t3_b3_r1_stage12_unified_calibration.py selftest
+          python scripts/t3_b3_r1_stage12_unified_calibration.py preflight --output /tmp/R1_stage12_source_gate.json
+          test "$(find R1/runs/44331514516/stage5a -name CHECK.json | wc -l)" -eq 18
+          test -s R1/runs/44331514516/stage12a/STAGE12A_FEASIBILITY.json
+          test -s R1/runs/44331514516/stage5b/RUNTIME_SCOPE.json
+          test -s R1/runs/44331514516/stage5_hpo_cost_global_by_engine.csv
+
+  calibrate-18-independent-family-sample-blocks:
+    needs: validate-original-R1-and-calibration-code
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install numerical dependencies (no optimizer training)
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2'
+      - name: Known-truth null, mixed-null, alternative and candidate-selection replays
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_r1_stage12_unified_calibration.py block \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --reps 4096 \
+            --output 'out/blocks/${{ matrix.family }}-n${{ matrix.n }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r1-q1-stage12-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  global-216-contrast-inference-and-preservation:
+    needs: [validate-original-R1-and-calibration-code, calibrate-18-independent-family-sample-blocks]
+    if: ${{ always() && needs.validate-original-R1-and-calibration-code.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download all 18 calibration partitions into one immutable R1 run folder
+        uses: actions/download-artifact@v4
+        with:
+          pattern: r1-q1-stage12-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Install final scientific visualization and analysis dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2' 'matplotlib>=3.8,<4'
+      - name: Archive source/computation scope and compute global Holm/BH and coverage
+        id: synthesis
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_r1_stage12_unified_calibration.py finalize \
+            --root 'R1/runs/${{ github.run_id }}'
+      - name: Preserve science as complete or explicitly partial (never silently successful)
+        run: |
+          set -euo pipefail
+          mkdir -p 'R1/runs/${{ github.run_id }}'
+          printf '# R1 unified Q1: Stage 12B empirical surrogate calibration\n\n' > 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'GitHub Actions source run: %s\n\n' '${{ github.run_id }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Original Stage 5A/5B and 12A: reused from R1/runs/44331514516; never rerun.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Parallel Stage 12 synthetic replay jobs: %s\nGlobal synthesis: %s\n' \
+            '${{ needs.calibrate-18-independent-family-sample-blocks.result }}' \
+            '${{ steps.synthesis.outcome }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf '\nFull original HPO/optimizer reselection was NOT replayed; do not claim fully selection-aware coverage.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'R1/runs/${{ github.run_id }}'
+          git commit -m 'Archive unified R1 Q1 216-contrast synthetic coverage and FWER/FDR calibration run ${{ github.run_id }}'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-q1-unified-stage12-results-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
+      - name: Mark workflow failure if any scientific analysis or global synthesis was incomplete
+        if: ${{ needs.calibrate-18-independent-family-sample-blocks.result != 'success' || steps.synthesis.outcome != 'success' }}
+        run: |
+          echo 'Incomplete Stage 12B: partial science preserved with explicit failures.'
+          exit 1
