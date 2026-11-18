@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8b8952e5947e1bbc3415dcb59cd9b53d",
+  "parts": [
+    {
+      "bytes": 16200,
+      "name": "part-00001.lfs",
+      "sha256": "cd4207c99bc2a29115677153f56b50fd17f4e182efd842185923405e32b3f32b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "cd4207c99bc2a29115677153f56b50fd17f4e182efd842185923405e32b3f32b",
+  "size_bytes": 16200,
+  "source": {
+    "artifact_id": 13892897222,
+    "created_at": "2026-11-11T21:27:32Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:25:55Z",
+    "key": "actions-13892897222",
+    "name": "t3-b3-post-rw-frozen-hpo-fragment-n1000-run43102984348.zip",
+    "run_id": 43102984348,
+    "size_bytes": 16200,
+    "source": "actions",
+    "stage": "discovery",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13892897222/zip"
+  }
+}

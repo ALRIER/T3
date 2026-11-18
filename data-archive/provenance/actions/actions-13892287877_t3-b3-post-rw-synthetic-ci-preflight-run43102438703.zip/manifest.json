@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "774dad955e92aa0194f1a9829f2d1414",
+  "parts": [
+    {
+      "bytes": 901,
+      "name": "part-00001.lfs",
+      "sha256": "1d4e0ec69a03f8a1ef2dbd26dbf4bf37aadef18cc6cc1c0605ff3338677cc05a"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "1d4e0ec69a03f8a1ef2dbd26dbf4bf37aadef18cc6cc1c0605ff3338677cc05a",
+  "size_bytes": 901,
+  "source": {
+    "artifact_id": 13892287877,
+    "created_at": "2026-11-11T21:22:33Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:22:11Z",
+    "key": "actions-13892287877",
+    "name": "t3-b3-post-rw-synthetic-ci-preflight-run43102438703.zip",
+    "run_id": 43102438703,
+    "size_bytes": 901,
+    "source": "actions",
+    "stage": "provenance",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13892287877/zip"
+  }
+}

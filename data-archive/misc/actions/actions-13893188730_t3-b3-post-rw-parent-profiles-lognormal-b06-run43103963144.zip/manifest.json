@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "34c1c4b564df9a568651dca74c15a61d",
+  "parts": [
+    {
+      "bytes": 5036,
+      "name": "part-00001.lfs",
+      "sha256": "19eb8c86475bf8e91cc629c9dd060c8e60102e1ceb5ca7401bc7987d1d1ba495"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "19eb8c86475bf8e91cc629c9dd060c8e60102e1ceb5ca7401bc7987d1d1ba495",
+  "size_bytes": 5036,
+  "source": {
+    "artifact_id": 13893188730,
+    "created_at": "2026-11-11T21:40:16Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:32:36Z",
+    "key": "actions-13893188730",
+    "name": "t3-b3-post-rw-parent-profiles-lognormal-b06-run43103963144.zip",
+    "run_id": 43103963144,
+    "size_bytes": 5036,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13893188730/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6c86b2115d711fde918397bbabf6285a",
+  "parts": [
+    {
+      "bytes": 1335,
+      "name": "part-00001.lfs",
+      "sha256": "676f4967f019594d08c3ac89bfb4aa13c48264da3ce5e9aa0c128605c6fe7f6b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "676f4967f019594d08c3ac89bfb4aa13c48264da3ce5e9aa0c128605c6fe7f6b",
+  "size_bytes": 1335,
+  "source": {
+    "artifact_id": 13900477061,
+    "created_at": "2026-11-11T23:35:03Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T20:57:35Z",
+    "key": "actions-13900477061",
+    "name": "t3-rw-pub-four-module-final-Codex-lineage-run43098925126.zip",
+    "run_id": 43098925126,
+    "size_bytes": 1335,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13900477061/zip"
+  }
+}

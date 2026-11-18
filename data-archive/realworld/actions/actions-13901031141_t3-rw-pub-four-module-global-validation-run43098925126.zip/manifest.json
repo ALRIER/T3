@@ -1,0 +1,43 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "416ef3b31e9a8baea6faa5615df5cd00",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "2e2bda162d97029e638da9fe15c3bfff371c7d36bab809cc93ac30c0d3c58079"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "d7bacc59c5dcfddb2513ef42d037fbdbb0af130bcec94113a0268e16cd6f45f7"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "22b4f084666ba4b420cbc231a62c250769bf145c1536551769449a80418206df"
+    },
+    {
+      "bytes": 22146878,
+      "name": "part-00004.lfs",
+      "sha256": "37dfafcdf53c7f4a138876bdb64c060b4e8bfb53210df7ad6a8f472b66c305e1"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c10edf560c8e1f8f6ccec910f6f8185d667df807900cbbcea2687b6615151f34",
+  "size_bytes": 122810174,
+  "source": {
+    "artifact_id": 13901031141,
+    "created_at": "2026-11-11T23:34:44Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T20:57:35Z",
+    "key": "actions-13901031141",
+    "name": "t3-rw-pub-four-module-global-validation-run43098925126.zip",
+    "run_id": 43098925126,
+    "size_bytes": 122810174,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13901031141/zip"
+  }
+}

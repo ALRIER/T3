@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "79c58eadcd8767c48f235da36657b927",
+  "parts": [
+    {
+      "bytes": 20360205,
+      "name": "part-00001.lfs",
+      "sha256": "b1a1ce9b9550dc4eccb853f992cb02e8a235e9d40bd2f65a0c0e7757f11b7e6d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b1a1ce9b9550dc4eccb853f992cb02e8a235e9d40bd2f65a0c0e7757f11b7e6d",
+  "size_bytes": 20360205,
+  "source": {
+    "artifact_id": 13901505092,
+    "created_at": "2026-11-11T23:33:46Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T20:57:35Z",
+    "key": "actions-13901505092",
+    "name": "t3-rw-pub-parent-heterogeneity-invgauss-run43098925126.zip",
+    "run_id": 43098925126,
+    "size_bytes": 20360205,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13901505092/zip"
+  }
+}
