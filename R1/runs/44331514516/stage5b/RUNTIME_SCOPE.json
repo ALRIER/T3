@@ -1,0 +1,25 @@
+{
+  "additional_discovery_runs": [
+    41113724413,
+    41487091262
+  ],
+  "captured_job_rows": 1298,
+  "captured_step_rows": 18303,
+  "no_optimizer_reexecution": true,
+  "per_engine_final_discovery_fit_elapsed_verified": false,
+  "source_hpo_runs": [
+    40494779825,
+    41061553686,
+    41113724413
+  ],
+  "source_runs_consulted": [
+    40494779825,
+    41061553686,
+    41113724413,
+    41487091262
+  ],
+  "stage": "5B",
+  "status": "COMPLETE_API_HISTORY",
+  "unreachable_runs": [],
+  "valid_inference": "Job-stage wall-clock duration is not a per-engine final-fit timing measurement"
+}
