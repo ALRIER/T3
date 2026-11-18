@@ -1,0 +1,24 @@
+# R1 — Result recovery and scientific provenance index
+
+Verified repository inventory on **2026-11-18**: **416 nonempty output files across six immutable run folders**, totaling **20,840,932 bytes**. This README is an additional recovery index and is not counted in those 416 files.
+
+| Original scientific output run | Files | Primary result | Internal integrity / provenance |
+|---|---:|---|---|
+| [44307352615](runs/44307352615/) | 74 | Held Out: 18 family × sample-size blocks, 216 optimizer pairwise contrasts | `manifest.json` and original score/recovery provenance per block |
+| [44310024979](runs/44310024979/) | 82 | Discovery ↔ Held Out, Pareto, training-seed stability, optimizer evaluations and SVG/PNG | `R1_FINAL_MANIFEST.json` (81 files + itself) |
+| [44313738898](runs/44313738898/) | 15 | Independent R reproduction of 216 paired comparisons and exact sign-flip sensitivity | `scientific_gate/SCIENTIFIC_GATE_MANIFEST.json` (eight SHA256 entries; AUDIT_SCOPE notes) |
+| [44318493492](runs/44318493492/) | 68 | Crossed training/evaluation seed, two-way bootstrap, posthoc joint effects, archive readiness | `R1_STAGED_FOLLOWUP_MANIFEST.json` (67 files + itself; original computation run 44318493492, publish recovery run 44319063735) |
+| [44322411124](runs/44322411124/) | 147 | 288 comparisons with independently evaluated frozen deterministic controls, original 500-replicate Q95 uncertainty, 720 actual optimizer evaluation counts | `R1_ALL_SOURCE_CHECKSUMS.json` (146 files + itself); source runs 41208513291 / 40239277660 / 41487091262 |
+| [44324757704](runs/44324757704/) | 30 | Joint RQ1 scientific synthesis, 216 contrasts, 72 method/stratum rows, reviewer assumptions, manuscript tables and publication figures | `synthesis/R1_FINAL_SHA256_INVENTORY.json` (11 synthesis files + itself; per-family `SOURCE_CHECKSUMS.json`) |
+
+**Recovery:** check out `main`, then read these six folders directly. The `R1/` results are ordinary Git blobs; their recovery does not require temporary GitHub Actions artifacts or rerunning Discovery. The preserved raw inputs are **separately located in** [`data-archive/`](../data-archive/) as segmented Git LFS source archives with SHA-256 manifests. Original raw archive reconstruction requires `git lfs install`, hydration of the *specific* archived `part-*.lfs` files, concatenation in manifest order, and verification against the original manifest `sha256` and `size_bytes`. Do **not** assume a complete raw archive exists merely because an archive pointer is present or because a catalog says its *inventoried sources* are complete.
+
+**Scientific status / caveats:**
+
+- The original 216 optimizer contrasts, 288 *posthoc* deterministic comparisons, Q95 Monte Carlo precision (500 original draws), and sensitivity analyses have been preserved.
+- **Stage 5 cost accounting remains partial**: 720 objective evaluation counts are verified. No original *per-engine* elapsed-time fields are recorded in the frozen Discovery fits. Historical GitHub Actions job/step timestamps can support **job-stage** runtimes, not identical per-method runtimes; original hyperparameter tuning and reproducible allocation across all engines must be inspected before any total-compute fairness claim.
+- **Stage 12 calibration remains incomplete**: the existing 10 independent Held Out evaluation seeds and 500 within-scenario Monte Carlo replicates do not themselves establish true nominal confidence-interval coverage or full selection-aware type-I error calibration. Existing exact sign-flip and global maxT sensitivity diagnostics rely on assumptions, and the global permutation results must not be called validation of those assumptions.
+- A pre-existing T2 calibration diagnostic (`scripts/t2_v3_b3_null_calibration_aggregate.py`) explicitly labels its output `diagnostic_only` and is not an RQ1 selection-aware calibration.
+- The 1% and 5% joint practical-effect thresholds are posthoc; no new samples, model optimizations or optimizer training were generated in these R1 followups.
+
+**Verification scope:** Repository Git tree filenames and byte sizes were checked against all listed individual SHA inventories; every listed file exists and matched the recorded size, with no zero-byte files. The actual SHA-256 values of **every individual file** were not independently recomputed in this audit. Do not treat the manifest check as a full cryptographic rehydration test. Original raw source catalog reports 7,994 inventoried source artifacts backed up, bounded by its explicitly stated inventory scope.
