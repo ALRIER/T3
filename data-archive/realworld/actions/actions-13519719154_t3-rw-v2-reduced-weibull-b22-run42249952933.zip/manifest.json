@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "65e5b19c2245cc26a9a70ec3d63e976c",
+  "parts": [
+    {
+      "bytes": 2947355,
+      "name": "part-00001.lfs",
+      "sha256": "61146d0e736319bc574e353fbed990f0b5b819fcf0aaf9df78f3b4e8c6c746d6"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "61146d0e736319bc574e353fbed990f0b5b819fcf0aaf9df78f3b4e8c6c746d6",
+  "size_bytes": 2947355,
+  "source": {
+    "artifact_id": 13519719154,
+    "created_at": "2026-11-06T16:14:18Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:10:59Z",
+    "key": "actions-13519719154",
+    "name": "t3-rw-v2-reduced-weibull-b22-run42249952933.zip",
+    "run_id": 42249952933,
+    "size_bytes": 2947355,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13519719154/zip"
+  }
+}

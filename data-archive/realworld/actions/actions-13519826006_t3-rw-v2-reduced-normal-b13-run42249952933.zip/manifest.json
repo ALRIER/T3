@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f752a13d663aaad20cdb3c1c3ed7037b",
+  "parts": [
+    {
+      "bytes": 2973653,
+      "name": "part-00001.lfs",
+      "sha256": "35a45cac89d5e305da4923a786105be1260773ae4488b0adbdda76f4526f26f5"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "35a45cac89d5e305da4923a786105be1260773ae4488b0adbdda76f4526f26f5",
+  "size_bytes": 2973653,
+  "source": {
+    "artifact_id": 13519826006,
+    "created_at": "2026-11-06T16:12:19Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:10:59Z",
+    "key": "actions-13519826006",
+    "name": "t3-rw-v2-reduced-normal-b13-run42249952933.zip",
+    "run_id": 42249952933,
+    "size_bytes": 2973653,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13519826006/zip"
+  }
+}
