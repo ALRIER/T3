@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "502030671b73ee870a4b3b419c91b408",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "3379c9459bb67bd6e4e513debabcce9b709193c8dcf1084636257e9409fc485c"
+    },
+    {
+      "bytes": 5419265,
+      "name": "part-00002.lfs",
+      "sha256": "b93d09cddd50427d3f69055a80467d6ac672e2e2acf2c386559d83d68e094c67"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "58224d76a1a86c65efff5e6f497b09342887fbabfb44473982136c2d6e4dafac",
+  "size_bytes": 38973697,
+  "source": {
+    "artifact_id": 13424960897,
+    "created_at": "2026-11-05T14:34:17Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T14:26:19Z",
+    "key": "actions-13424960897",
+    "name": "t3-heldout-individual-exwald-n200-run42045005791.zip",
+    "run_id": 42045005791,
+    "size_bytes": 38973697,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13424960897/zip"
+  }
+}

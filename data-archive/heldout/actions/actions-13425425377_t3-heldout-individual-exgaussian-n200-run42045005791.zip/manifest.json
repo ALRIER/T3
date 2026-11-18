@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "26300f3a13ae0434851a23daeb15b4d7",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "152596d122c1117210707ae3bd442ea8691c61c9f93beba4998c6b77746a84cd"
+    },
+    {
+      "bytes": 6697587,
+      "name": "part-00002.lfs",
+      "sha256": "2ceb600c25cacb717611d197909c37a8882e5536332ab77f38914b6f233f929f"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7026a23095cdd100b9690bdb4f37355fbe72878b16dbfb12a856b45c1441db20",
+  "size_bytes": 40252019,
+  "source": {
+    "artifact_id": 13425425377,
+    "created_at": "2026-11-05T14:34:11Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T14:26:19Z",
+    "key": "actions-13425425377",
+    "name": "t3-heldout-individual-exgaussian-n200-run42045005791.zip",
+    "run_id": 42045005791,
+    "size_bytes": 40252019,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13425425377/zip"
+  }
+}
