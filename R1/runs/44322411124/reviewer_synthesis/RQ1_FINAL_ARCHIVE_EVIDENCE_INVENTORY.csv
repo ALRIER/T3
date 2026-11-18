@@ -1,0 +1,5 @@
+source,result_count,what_is_directly_confirmed
+original_R1,216,original 216 method comparisons preserved
+original_separately_scored_deterministic_controls,288,"288 posthoc optimizer-vs-two-original-frozen-control comparisons, Holm across 288"
+original_500_rep_MC_q95,108,108 original 500-replicate Q95 method strata with order-statistic uncertainty
+original_Discovery_frozen_HPO,720,720 actual evolutionary candidate evaluation counts; explicit runtime availability checked

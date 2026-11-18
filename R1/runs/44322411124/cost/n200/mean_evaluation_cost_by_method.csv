@@ -1,0 +1,5 @@
+"method","actual_evaluations","fraction_budget_used"
+"de",5072.5,0.994607843137255
+"dirichlet",2126.25,0.416911764705882
+"ga",5100,1
+"nsga2",5100,1

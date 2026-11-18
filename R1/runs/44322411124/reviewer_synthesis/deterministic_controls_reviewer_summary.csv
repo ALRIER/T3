@@ -1,0 +1,17 @@
+candidate,control,metric,strata,contrasts_favor_candidate,holm_288_supported,median_relative_improvement_pct
+de,convex_mse,mse,18,14,18,3.5181158498875105
+de,convex_mse,q95,18,14,18,4.210924044413709
+de,local_deterministic,mse,18,18,18,42.446976210058125
+de,local_deterministic,q95,18,18,18,38.95681724692394
+dirichlet,convex_mse,mse,18,0,18,-134.2671144799622
+dirichlet,convex_mse,q95,18,1,18,-105.73485428395881
+dirichlet,local_deterministic,mse,18,5,18,-22.287850773968536
+dirichlet,local_deterministic,q95,18,5,18,-22.83689039582301
+ga,convex_mse,mse,18,4,18,-16.75415672598888
+ga,convex_mse,q95,18,5,18,-14.203542676938923
+ga,local_deterministic,mse,18,18,18,22.68364316235911
+ga,local_deterministic,q95,18,18,18,21.078299353954804
+nsga2,convex_mse,mse,18,3,17,-16.13006585086331
+nsga2,convex_mse,q95,18,6,17,-13.553508297389925
+nsga2,local_deterministic,mse,18,18,18,24.257763446835103
+nsga2,local_deterministic,q95,18,18,18,22.452017742213904

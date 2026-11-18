@@ -1,0 +1,198 @@
+{
+  "input_R1_runs": [
+    44307352615,
+    44310024979,
+    44313738898,
+    44318493492
+  ],
+  "original_heldout_score_run": 41208513291,
+  "original_complete_MC_run": 40239277660,
+  "original_Discovery_bundle_run": 41487091262,
+  "original_R1_method_versus_method_confirmatory_comparisons": 216,
+  "additional_original_independent_frozen_control_comparisons": 288,
+  "additional_control_global_Holm_supported_sensitivity": 286,
+  "Q95_source_reps_per_scenario": 500,
+  "Q95_methods": 6,
+  "Q95_family_sample_method_strata": 108,
+  "Q95_original_reconstruction_verified_against_R1": true,
+  "full_optimizer_evaluations_verified": 720,
+  "original_optimizer_wallclock_measurements_available": 0,
+  "full_HPO_wallclock_cannot_be_inferred_if_missing": true,
+  "exact_signflip_n_independent_seeds": 10,
+  "exact_signflip_min_two_sided_p": 0.001953125,
+  "global_Holm_first_threshold_216": 0.0002314814814814815,
+  "global_signflip_fwer_rejection_mathematically_possible": false,
+  "nominal_CI_coverage_calibration_from_existing_aggregate_panel": "NOT_IDENTIFIABLE",
+  "new_monte_carlo_samples_created": 0,
+  "new_weights_optimized": 0,
+  "experiment_repeated": false,
+  "independent_observation_note": "Ten evaluation seeds are independent; 241 scenarios and ten training-weight candidates are matched correlated strata.",
+  "inferential_status": "posthoc_original_backup_reviewer_audit_not_preregistered",
+  "provenance": [
+    {
+      "type": "q95",
+      "family": "normal",
+      "sample_n": 200,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "95b7a4f9d4e6bea2de1f6ea23df5231c6209b28d69b219a7e95b40a7b4462c5e"
+    },
+    {
+      "type": "q95",
+      "family": "normal",
+      "sample_n": 1000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "8928c951291e3d27a835325e284bf08c794370f6306278e3df13a6e0751b76ec"
+    },
+    {
+      "type": "q95",
+      "family": "normal",
+      "sample_n": 3000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "bbc144944bfbf21c0921f1bc4a8348c6f9d773aaa716332eb0e04c2f2f5c9f45"
+    },
+    {
+      "type": "q95",
+      "family": "lognormal",
+      "sample_n": 200,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "e4f6140ac1cc16771dffdec86f66ae6d678036103dfd13a543e9e6132720302a"
+    },
+    {
+      "type": "q95",
+      "family": "lognormal",
+      "sample_n": 1000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "a848542f3c50547cca2ff157de8d20e23f9a5f6002ed399caa1513b735301149"
+    },
+    {
+      "type": "q95",
+      "family": "lognormal",
+      "sample_n": 3000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "c447ee660712ac244ebbf7c70e5b78c19bd4a41c6825ab627e99a25eb40c310d"
+    },
+    {
+      "type": "q95",
+      "family": "weibull",
+      "sample_n": 200,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "5626a59dde83152a412a0f44e31bf2e7e1a864928b8017ee54a7478800ecf4c6"
+    },
+    {
+      "type": "q95",
+      "family": "weibull",
+      "sample_n": 1000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "b49ce170da8f3e2658d3978ad9dc1b2dec71736608682a4a1958567fa82cdf04"
+    },
+    {
+      "type": "q95",
+      "family": "weibull",
+      "sample_n": 3000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "1e1ab85dbba96b19691b27ab465f364fff26b7ffd02822f6977dcbc0dc4edd9f"
+    },
+    {
+      "type": "q95",
+      "family": "invgauss",
+      "sample_n": 200,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "2e94acafe4ca5ba3e6322b8fc28f27220fafc18afc7f3af7761ba8f5fe8970a3"
+    },
+    {
+      "type": "q95",
+      "family": "invgauss",
+      "sample_n": 1000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "c22d87b5c208cba0baf0974c3bc9e22ab37a8b23bb229050faa47738a45e959b"
+    },
+    {
+      "type": "q95",
+      "family": "invgauss",
+      "sample_n": 3000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "52bba1963058371c2839db13694600a6658babce14f7f1a82698cb052814c9e4"
+    },
+    {
+      "type": "q95",
+      "family": "exgaussian",
+      "sample_n": 200,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "c8287bd0a0ec522b7234287b7543a8f8bda3a99f8093e1ec1a2327675488381a"
+    },
+    {
+      "type": "q95",
+      "family": "exgaussian",
+      "sample_n": 1000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "1ba8519e8b09e12482ca04d5d7bcc66e560b3d8105b47e85a94cf11f0d34afe8"
+    },
+    {
+      "type": "q95",
+      "family": "exgaussian",
+      "sample_n": 3000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "f90c5866073def21e6ed3d4fe2456db63d443f3461fef36d9780633aaf7dcb19"
+    },
+    {
+      "type": "q95",
+      "family": "exwald",
+      "sample_n": 200,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "50c486d4996b034c3dba34362162367cbf7897cfc1e412a087d8adf36dae2f19"
+    },
+    {
+      "type": "q95",
+      "family": "exwald",
+      "sample_n": 1000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "a974d836e2cabcaf73b3cdaa0c9fabd9d95b06d739f6fed7251fb824b22b2c64"
+    },
+    {
+      "type": "q95",
+      "family": "exwald",
+      "sample_n": 3000,
+      "source_run": 40239277660,
+      "rows": 600,
+      "csv_sha256": "9287af37d807309a9022bd47485499e02c4c1bf4234587d52d0e7f08741ffd63"
+    },
+    {
+      "type": "cost",
+      "sample_n": 200,
+      "original_discovery_run": 41487091262,
+      "rows": 240,
+      "sha256": "ffa4ca143cc144f0cd87fd9ca2b49858f47b77b3679fec8a0aafbfc4cfe0ef48"
+    },
+    {
+      "type": "cost",
+      "sample_n": 1000,
+      "original_discovery_run": 41487091262,
+      "rows": 240,
+      "sha256": "96b46894d6c11130a07918d521fd0cbfdbae7fe143132e877d39377ec0472306"
+    },
+    {
+      "type": "cost",
+      "sample_n": 3000,
+      "original_discovery_run": 41487091262,
+      "rows": 240,
+      "sha256": "93f6c3c8334a091da1027350e84055f4ebb7b4fae695771bc6952daf6e0f3ad2"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "source": "original separate non_evolutionary_control_scores.csv inside original Held Out archives",
+  "source_run": 41208513291,
+  "family": "normal",
+  "sample_n": 1000,
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_evolutionary_scores_confirmed_against_R1": true,
+  "same_original_frozen_discovery_W_for_controls": true,
+  "no_retraining_or_rescoring": true,
+  "archives": [
+    {
+      "eval_seed": 10,
+      "source_archive_sha256": "cf95c81810a17f28c9a4ef589ee22b3d775a770cae7e1ac1bd0ffb327f87cf97",
+      "original_control_csv_sha256": "d06bfda4d5f5c40757948eec9be7d17cb789c4d981cca6cbffaef345247fc86e"
+    },
+    {
+      "eval_seed": 11,
+      "source_archive_sha256": "3e97c900d304605b22bc7b98affc10c22d81f8b33f8e9bf3660831bdf5eaf48c",
+      "original_control_csv_sha256": "11a4d3ab65c570cc4fff536ea76d40dcba9f072faabb4191fe99a1ffa9908920"
+    },
+    {
+      "eval_seed": 12,
+      "source_archive_sha256": "2dbc1a647fec61f5eabfcad3258a7012e0956213f29206e38e529eb881b788f7",
+      "original_control_csv_sha256": "bf5b36595a815d7756af4d8c5e6d8b9e425e9433ca681fce9974450227c45ce0"
+    },
+    {
+      "eval_seed": 13,
+      "source_archive_sha256": "55b830b84559828ecb0f967cf20f9e9ed8699d49342b1f77270dafef34d044a4",
+      "original_control_csv_sha256": "d90ea94029e3471a83dc0690f97bc246c2ea5d4f4770059f4c2e91c1850d2843"
+    },
+    {
+      "eval_seed": 14,
+      "source_archive_sha256": "7f5c705e3fe7c74704dc4a44cc913d7c7da3c284bff318cbe86412f39e1c2339",
+      "original_control_csv_sha256": "40b454ddf9e9419cadd37aa30e4ae5fc2a85da244902d840b0833bedd02f4717"
+    },
+    {
+      "eval_seed": 15,
+      "source_archive_sha256": "0c58e3553657ff2ab4c8fa6a4760e9f0da298194eaafd8706dfab7b2becb61fb",
+      "original_control_csv_sha256": "b12c1403c7a937952243ccd865f866acbfd5205504b5e45f7215d6ebcb525e96"
+    },
+    {
+      "eval_seed": 16,
+      "source_archive_sha256": "84be365ae575f953a7db93610406eaa2d24f2bbfe0c5a4815d980f70cca0858b",
+      "original_control_csv_sha256": "88eadf3292445efbe25dcd0d1b5b99314c552cf2031f3bbc757970b3f4940388"
+    },
+    {
+      "eval_seed": 17,
+      "source_archive_sha256": "9c178bc12f8e8abf15eb543c5f116f3242fafe91f9f61bc5228da1118df4ee0e",
+      "original_control_csv_sha256": "c3e81771620587866b3a88eae81c8567dd4732200135c11dfaf3bfcee3ccbddd"
+    },
+    {
+      "eval_seed": 18,
+      "source_archive_sha256": "fde02f923053b59130d7af65070b162e9b265fa04883e8db1014f1e45596a031",
+      "original_control_csv_sha256": "ecf4272dcaaa7ef1a3cbfe692db99f3344982a6efe117c1699171c9bd3483dfb"
+    },
+    {
+      "eval_seed": 19,
+      "source_archive_sha256": "65b093ddb66291fd5e8875d1f1239f396c514b48d0b19ebdb1da96faeb776e2c",
+      "original_control_csv_sha256": "9d5eb305e3812ff94eed8810cb16ea43398bb03eda4e70db70ed94b2f4bb42b2"
+    }
+  ],
+  "statistical_caveat": "Evaluation seed is the independent unit; no selection-aware inference claimed"
+}

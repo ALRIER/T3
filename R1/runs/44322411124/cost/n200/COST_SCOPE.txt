@@ -1,0 +1,8 @@
+# Original full optimizer cost feasibility and fairness audit
+Sample size n=200. Complete verified 240 frozen optimizer evaluation records.
+Original Discovery RDS records agree exactly with published R1 counts.
+Explicit verifiable per-engine elapsed-time fields: 0/240.
+Original nested HPO provenance metadata fields are inventoried, not guessed.
+Do not equate maximum budget or raw evaluations with complete wall-clock or HPO compute.
+If no original duration records exist, the full end-to-end compute comparison is UNRESOLVED.
+The repository-held source archives remain immutable; no optimizer or HPO rerun occurred.

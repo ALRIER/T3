@@ -1,0 +1,11 @@
+# Q95 precision from original Monte Carlo matrices
+Original 500-replicate component matrices on 241 support scenarios, 10 evaluation seeds,
+10 frozen training seeds and all six original optimizer and deterministic weights.
+No new Monte Carlo draws, no refitting, and no new weight choices.
+The original 400 evolutionary candidate-evaluation averages were reproduced from matrices.
+Binomial order statistic interval for Q95: ranks 465 through 485 out of 500.
+This interval concerns the conditional distribution of the within-scenario Q95 statistic.
+It is not a confidence interval for an optimizer performance difference, nor a
+validated nominal coverage rate for the 216 original between-method hypotheses.
+Cross-scenario observations may share base sample pools; no false independent scenario units are claimed.
+Original MC source SHA256 manifests: incoming/mc/seed10/SOURCE_LINEAGE.json;incoming/mc/seed11/SOURCE_LINEAGE.json;incoming/mc/seed12/SOURCE_LINEAGE.json;incoming/mc/seed13/SOURCE_LINEAGE.json;incoming/mc/seed14/SOURCE_LINEAGE.json;incoming/mc/seed15/SOURCE_LINEAGE.json;incoming/mc/seed16/SOURCE_LINEAGE.json;incoming/mc/seed17/SOURCE_LINEAGE.json;incoming/mc/seed18/SOURCE_LINEAGE.json;incoming/mc/seed19/SOURCE_LINEAGE.json
