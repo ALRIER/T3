@@ -1,0 +1,137 @@
+name: R1 — Final publication evidence, joint calibration sensitivity, figures and conclusions
+run-name: "R1 final scientific synthesis | 6 source families max-parallel 20 | no new scoring"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/t3-b3-r1-final-publication-scientific-gate.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: rq1-final-publication-evidence-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Preserve original R1 result provenance and validate new analysis syntax
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_b3_r1_final_scientific_synthesis.py
+          test -s R1/runs/44307352615/all_pairwise_global_holm.csv
+          test -s R1/runs/44310024979/R1_FINAL_MANIFEST.json
+          test -s R1/runs/44313738898/scientific_gate/SCIENTIFIC_GATE_MANIFEST.json
+          test -s R1/runs/44318493492/R1_STAGED_FOLLOWUP_MANIFEST.json
+          test -s R1/runs/44322411124/R1_ALL_SOURCE_CHECKSUMS.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          m=json.loads(Path('R1/runs/44322411124/reviewer_synthesis/FINAL_REVIEWER_AUDIT.json').read_text())
+          assert m['original_R1_method_versus_method_confirmatory_comparisons']==216
+          assert m['additional_original_independent_frozen_control_comparisons']==288
+          assert m['Q95_source_reps_per_scenario']==500
+          assert m['Q95_original_reconstruction_verified_against_R1']
+          assert m['full_optimizer_evaluations_verified']==720
+          assert m['new_monte_carlo_samples_created']==0
+          print('RQ1_FINAL_ORIGINAL_EVIDENCE_PREFLIGHT_PASS')
+          PY
+  six-family-independent-evidence-panels:
+    needs: source-preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check numpy pandas scipy matplotlib
+      - name: Reaudit signed paired Held Out results and integrate all original reviewer controls
+        run: |
+          python scripts/t3_b3_r1_final_scientific_synthesis.py family \
+            --family '${{ matrix.family }}' \
+            --output 'out/family/${{ matrix.family }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-final-family-${{ matrix.family }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+  global-reviewer-inference-and-publication-package:
+    needs: six-family-independent-evidence-panels
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-final-family-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - run: python -m pip install --disable-pip-version-check numpy pandas scipy matplotlib
+      - name: Global studentized maxT seed dependence sensitivity + all 216 pairwise and 288 deterministic-controls
+        run: |
+          python scripts/t3_b3_r1_final_scientific_synthesis.py finalize \
+            --input 'R1/runs/${{ github.run_id }}' \
+            --output 'R1/runs/${{ github.run_id }}/synthesis'
+      - name: Final R1 output coverage and figure-integrity audit
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import csv
+          base=Path('R1/runs/${{ github.run_id }}')
+          out=base/'synthesis'
+          files=[
+            ('table_RQ1_216_global_inference_sensitivity.csv',216),
+            ('table_RQ1_72_method_family_sample_integrated.csv',72),
+            ('table_RQ1_216_joint_MSE_Q95_exploratory.csv',216),
+            ('table_RQ1_four_method_scientific_summary.csv',4),
+            ('table_RQ1_inferential_evidence_and_scope.csv',6)]
+          for f,expected in files:
+            with (out/f).open(newline='') as inp:
+              observed=sum(1 for _ in csv.DictReader(inp))
+              assert observed==expected,(f,expected,observed)
+          for f in ('figure_RQ1_pareto_and_deterministic_control.svg',
+                    'figure_RQ1_pareto_and_deterministic_control.png',
+                    'figure_RQ1_inferential_sensitivity.svg',
+                    'figure_RQ1_inferential_sensitivity.png'):
+            assert (out/'figures'/f).stat().st_size>1000
+          j=json.loads((out/'RQ1_FINAL_SCIENTIFIC_MANIFEST.json').read_text())
+          assert j['new_Monte_Carlo_or_training'] is False
+          print('RQ1_FINAL_SCIENTIFIC_PUBLICATION_ASSET_GATE_PASS')
+          PY
+      - name: Permanently commit complete original scientific synthesis and figures to main
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'R1/runs/${{ github.run_id }}'
+          git commit -m 'Archive publication-ready RQ1 global reviewer inference, direction-aware controls, tables, figures and limitations run ${{ github.run_id }}'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-final-scientific-publication-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
