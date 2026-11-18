@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f0fb7ba84ad999a910f3b2af0ad9ee8c",
+  "parts": [
+    {
+      "bytes": 39139,
+      "name": "part-00001.lfs",
+      "sha256": "abe248c401938226ae53888fef673618b4eea247f54ded8079fa9197c6ca2014"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "abe248c401938226ae53888fef673618b4eea247f54ded8079fa9197c6ca2014",
+  "size_bytes": 39139,
+  "source": {
+    "artifact_id": 13307458207,
+    "created_at": "2026-11-04T08:44:29Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13307458207",
+    "name": "t3-b3-parametric-score-weibull-p9-s46-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39139,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13307458207/zip"
+  }
+}

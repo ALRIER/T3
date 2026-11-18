@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "943ea26877fe16376d0691a813fc6204",
+  "parts": [
+    {
+      "bytes": 39291,
+      "name": "part-00001.lfs",
+      "sha256": "1eb96ff0f0500a9dcfcb659db8e8110f404a78e5c40131a30670d9fa81eb2504"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "1eb96ff0f0500a9dcfcb659db8e8110f404a78e5c40131a30670d9fa81eb2504",
+  "size_bytes": 39291,
+  "source": {
+    "artifact_id": 13305845421,
+    "created_at": "2026-11-04T07:55:34Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13305845421",
+    "name": "t3-b3-parametric-score-lognormal-p5-s47-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39291,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13305845421/zip"
+  }
+}

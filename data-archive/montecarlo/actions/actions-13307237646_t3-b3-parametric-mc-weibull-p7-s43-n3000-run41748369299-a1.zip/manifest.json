@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c875bcbcafeddddf8ed863a91d8ddedc",
+  "parts": [
+    {
+      "bytes": 17639489,
+      "name": "part-00001.lfs",
+      "sha256": "7142b449c2d0295ff8cfb8f2efb4c7986aee4e75b82b3316d57743630867996c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7142b449c2d0295ff8cfb8f2efb4c7986aee4e75b82b3316d57743630867996c",
+  "size_bytes": 17639489,
+  "source": {
+    "artifact_id": 13307237646,
+    "created_at": "2026-11-04T08:36:59Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13307237646",
+    "name": "t3-b3-parametric-mc-weibull-p7-s43-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 17639489,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13307237646/zip"
+  }
+}

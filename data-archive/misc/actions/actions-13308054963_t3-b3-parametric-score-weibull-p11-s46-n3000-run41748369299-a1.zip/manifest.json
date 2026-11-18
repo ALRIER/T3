@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "09171f3a964f06290aacc8133c721521",
+  "parts": [
+    {
+      "bytes": 39209,
+      "name": "part-00001.lfs",
+      "sha256": "9b72b507a5868e68ba2ea81e526b44cbce79cd662b038c5fb0d8963dc6e96a7a"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "9b72b507a5868e68ba2ea81e526b44cbce79cd662b038c5fb0d8963dc6e96a7a",
+  "size_bytes": 39209,
+  "source": {
+    "artifact_id": 13308054963,
+    "created_at": "2026-11-04T08:58:48Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13308054963",
+    "name": "t3-b3-parametric-score-weibull-p11-s46-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39209,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13308054963/zip"
+  }
+}
