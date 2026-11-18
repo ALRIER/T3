@@ -1,0 +1,37 @@
+{
+  "family": "lognormal",
+  "original_R1": "44307352615",
+  "followup_R1": "44310024979",
+  "frozen_deterministic_R1": "44322411124",
+  "crossed_R1": "44318493492",
+  "original_independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_train_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "read_only_source_sha256": {
+    "R1/runs/44310024979/heldout/lognormal-n200/candidate_by_eval.csv": "f8e1e8cbe8667e99ca7cc1334a9ccd02e4eee0d8a7f5227431209eeeaabbe85e",
+    "R1/runs/44310024979/heldout/lognormal-n1000/candidate_by_eval.csv": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215",
+    "R1/runs/44310024979/heldout/lognormal-n3000/candidate_by_eval.csv": "2e0453429c25e55b77764e06d5cdfc58784d80b9f2f0aa8c508c5d057dfd8da2"
+  },
+  "no_new_sampling_or_retraining": true
+}

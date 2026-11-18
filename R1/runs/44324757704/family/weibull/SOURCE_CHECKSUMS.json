@@ -1,0 +1,37 @@
+{
+  "family": "weibull",
+  "original_R1": "44307352615",
+  "followup_R1": "44310024979",
+  "frozen_deterministic_R1": "44322411124",
+  "crossed_R1": "44318493492",
+  "original_independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_train_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "read_only_source_sha256": {
+    "R1/runs/44310024979/heldout/weibull-n200/candidate_by_eval.csv": "36e1fc7fea0e05904acebad2b00f4f32573e43102f38afcfeccdfd187ca79ceb",
+    "R1/runs/44310024979/heldout/weibull-n1000/candidate_by_eval.csv": "4cf2d69b715de6b83e7eae7e4b06089df8b13752c967add5bac9ee1779f2cc9c",
+    "R1/runs/44310024979/heldout/weibull-n3000/candidate_by_eval.csv": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c"
+  },
+  "no_new_sampling_or_retraining": true
+}

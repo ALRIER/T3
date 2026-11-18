@@ -1,0 +1,67 @@
+{
+  "source_R1_runs": [
+    "44307352615",
+    "44310024979",
+    "44318493492",
+    "44322411124"
+  ],
+  "read_only": true,
+  "new_simulations": false,
+  "files": [
+    {
+      "name": "RQ1_FINAL_SCIENTIFIC_MANIFEST.json",
+      "bytes": 1444,
+      "sha256": "387ba6afe56bafe0dc2a8cf3d38e442bba8b3936ea16a758f15e218f38e7788f"
+    },
+    {
+      "name": "RQ1_MANUSCRIPT_RESULTS_AND_CAVEATS.md",
+      "bytes": 2313,
+      "sha256": "d390060cff4eb2b305045ad7118c5716b8ef26f117efa7db97bec2c892adaf3a"
+    },
+    {
+      "name": "figures/figure_RQ1_inferential_sensitivity.png",
+      "bytes": 62676,
+      "sha256": "afb2ecb3cab7933e2621b4e15f4276edfcc393c43fc4c22f0c4c9c6477492b93"
+    },
+    {
+      "name": "figures/figure_RQ1_inferential_sensitivity.svg",
+      "bytes": 47966,
+      "sha256": "a8e1eb6b34664d4d9dcde9d4616759e52d913a6ffe7d7676459df2e0a79df95d"
+    },
+    {
+      "name": "figures/figure_RQ1_pareto_and_deterministic_control.png",
+      "bytes": 64353,
+      "sha256": "e724eb1c87b2c04de0a8eebb1adac9953d55345b4a94d77c6b140529ae7e3bee"
+    },
+    {
+      "name": "figures/figure_RQ1_pareto_and_deterministic_control.svg",
+      "bytes": 49816,
+      "sha256": "e7c2e64687a1d396bbb7189d9e033cf546748d48fee6cff8e536c29a1a1b64a6"
+    },
+    {
+      "name": "table_RQ1_216_global_inference_sensitivity.csv",
+      "bytes": 49137,
+      "sha256": "83a51fdf2dea4fc4d9f18500ff63eabc060ac321c269ecc007cde1edfb6dfee9"
+    },
+    {
+      "name": "table_RQ1_216_joint_MSE_Q95_exploratory.csv",
+      "bytes": 38878,
+      "sha256": "494eb03c8d6ee81eb493e2e8c00d165964df633a0ff58e4a63131c84d7a47e8e"
+    },
+    {
+      "name": "table_RQ1_72_method_family_sample_integrated.csv",
+      "bytes": 28266,
+      "sha256": "6ad1efe043e2c3c7848418a629862f4a16b060a68a49df3a1f750d6159cd906f"
+    },
+    {
+      "name": "table_RQ1_four_method_scientific_summary.csv",
+      "bytes": 840,
+      "sha256": "b4d0be79b80137786f507e32562404596db4c964afee658a87a8f51c39a80593"
+    },
+    {
+      "name": "table_RQ1_inferential_evidence_and_scope.csv",
+      "bytes": 716,
+      "sha256": "d550c78fb1c17209d745074a831cf0713740fa55da5346c58cacdbfb0b4297c2"
+    }
+  ]
+}

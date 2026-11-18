@@ -1,0 +1,37 @@
+{
+  "family": "exgaussian",
+  "original_R1": "44307352615",
+  "followup_R1": "44310024979",
+  "frozen_deterministic_R1": "44322411124",
+  "crossed_R1": "44318493492",
+  "original_independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_train_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "read_only_source_sha256": {
+    "R1/runs/44310024979/heldout/exgaussian-n200/candidate_by_eval.csv": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1",
+    "R1/runs/44310024979/heldout/exgaussian-n1000/candidate_by_eval.csv": "9a48a550eeb772412c193f3049171a6038d606feef232c020a071e88dc259bad",
+    "R1/runs/44310024979/heldout/exgaussian-n3000/candidate_by_eval.csv": "29ad25f918e9b54964d22bad1ee1592b0c75adb7ca301db8f4d41bd24e2660ba"
+  },
+  "no_new_sampling_or_retraining": true
+}

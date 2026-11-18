@@ -1,0 +1,5 @@
+method,strata,pareto_frontier_cells,both_metrics_gain_vs_convex_mse,both_metrics_global_holm_advantage_vs_convex_mse,both_metrics_global_holm_advantage_vs_local_deterministic,median_mse_percent_gain_vs_convex_mse,median_q95_percent_gain_vs_convex_mse,mean_objective_evaluations,mean_original_q95_MC_relative_interval_width_pct,avg_abs_discovery_to_heldout_mse_rank_shift,avg_abs_discovery_to_heldout_q95_rank_shift
+ga,18,0,4,4,18,-16.75415672598888,-14.203542676938923,5100.0,17.814638128489943,0.0,0.01666666666666667
+nsga2,18,1,3,3,18,-16.13006585086331,-13.553508297389925,5100.0,17.784252269226407,0.0,0.011111111111111112
+de,18,18,13,13,18,3.5181158498875105,4.210924044413709,5053.75,17.933626887511863,0.0,0.0
+dirichlet,18,0,0,0,5,-134.2671144799622,-105.73485428395881,2150.6944444444443,18.437096226817047,0.0,0.005555555555555556

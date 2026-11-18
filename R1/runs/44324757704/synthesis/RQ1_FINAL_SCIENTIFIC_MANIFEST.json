@@ -1,0 +1,35 @@
+{
+  "stage": "RQ1 final original-backup scientific synthesis",
+  "status": "ARCHIVED_SCIENTIFIC_SENSITIVITY_COMPLETE",
+  "original_R1_runs": [
+    "44307352615",
+    "44310024979",
+    "44318493492",
+    "44322411124"
+  ],
+  "independent_evaluation_seeds": 10,
+  "training_seeds": 10,
+  "sample_strata": 18,
+  "original_method_comparisons": 216,
+  "deterministic_control_comparisons": 288,
+  "maxT_approximate_randomizations": 8192,
+  "original_monte_carlo_replications": 500,
+  "original_trained_weight_candidates": 720,
+  "original_optimizer_timing_metadata_available": 0,
+  "new_Monte_Carlo_or_training": false,
+  "maxT_sensitivity": {
+    "B": 8192,
+    "min_adjusted_p": 0.001830831197363603,
+    "adjusted_supported": 215,
+    "assumption": "joint sign symmetry for paired eval-seed vectors, independent across distinct family-n strata; not established",
+    "resample_unit": "ten original evaluation seeds per family/sample block, all method/metric contrasts jointly signed",
+    "no_new_MC_draws": true
+  },
+  "scientific_limitations": {
+    "true_nominal_CI_coverage": "NOT_ESTIMABLE_WITHOUT_INDEPENDENT_KNOWN_TRUTH_REPLAY",
+    "full_end_to_end_measured_walltime": "NOT_RECORDED_IN_FROZEN_DISCOVERY_FITS",
+    "fully_selection_aware_FWER": "NOT_ESTIMATED",
+    "joint_practical_thresholds": "POSTHOC_1_AND_5_PERCENT",
+    "do_not_claim": "general domination across untested datasets or exact independence of 241 scenario cells"
+  }
+}
