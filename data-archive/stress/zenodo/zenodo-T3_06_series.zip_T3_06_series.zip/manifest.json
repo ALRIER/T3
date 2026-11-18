@@ -1,0 +1,45 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "0a81a15ee6aca800acd0cfbd2cda6805",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "8c08b5b064a96e09ae3bf0c24199d13452497b5551c5fe1113ae35fea3a37bc7"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "b4b95cb7f02e6bf60f48e6459157202dc2865d32495b9855405a9bb1370a58f6"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "ce99787e5b10e1583190f7fa87e8c1458fddafd100a9fa49a6aba5de1242cbe4"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "99a4b895f11909381f0f89633640599a1dd25e327f5fe0144285b5ea9b9633c6"
+    },
+    {
+      "bytes": 25518840,
+      "name": "part-00005.lfs",
+      "sha256": "64cb4b4a3549069c880c291b38034cdc8612bfc29637f27d7afee53700a959fe"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c8ce1f1bbe2879ed6ef5bfe8f411684aace1cd6c4f4300455043a943c5fc3817",
+  "size_bytes": 159736568,
+  "source": {
+    "checksum": "md5:0a81a15ee6aca800acd0cfbd2cda6805",
+    "key": "zenodo-T3_06_series.zip",
+    "name": "T3_06_series.zip",
+    "record_id": 24174965,
+    "size_bytes": 159736568,
+    "source": "zenodo",
+    "stage": "stress",
+    "url": "https://zenodo.org/api/records/24174965/files/T3_06_series.zip/content"
+  }
+}
