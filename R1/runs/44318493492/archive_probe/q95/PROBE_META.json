@@ -1,0 +1,9 @@
+{
+  "mode": "q95",
+  "only_read_existing_sources": true,
+  "no_new_mc_generation": true,
+  "no_optimizer_fitting": true,
+  "archive_inventory_scope": "sources in recorded inventory only",
+  "original_backup_status_verified": true,
+  "note": "Feasibility audit only; presence of filenames does not certify usable raw data"
+}

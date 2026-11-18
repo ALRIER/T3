@@ -1,0 +1,43 @@
+{
+  "source": "R1/runs/44310024979/heldout/lognormal-n1000/candidate_by_eval.csv",
+  "source_sha256": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215",
+  "family": "lognormal",
+  "sample_n": 1000,
+  "original_heldout_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "frozen_training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "bootstrap_replicates": 4000,
+  "bootstrap_axes": "training_seed_and_evaluation_seed_paired",
+  "training_seed_new_samples_generated": false,
+  "heldout_scoring_reexecuted": false,
+  "notes": [
+    "Posthoc sensitivity, original confirmatory inference unchanged.",
+    "Crossed variance components are balanced random-intercept moments; small cluster n limits accuracy.",
+    "Joint lower bounds are Bonferroni for two metrics within ONE direction/pair, not global 216-test FWER.",
+    "Thresholds 1% and 5% are posthoc sensitivity probes, not prespecified success rules.",
+    "Scenarios are fixed; inference does not generalize to unstudied scenarios.",
+    "Crossed bootstrap quantifies between-seed sampling only, NOT replicate-level Q95 Monte Carlo uncertainty.",
+    "Nominal CI coverage cannot be estimated without known-truth independent null/outer replay."
+  ]
+}
