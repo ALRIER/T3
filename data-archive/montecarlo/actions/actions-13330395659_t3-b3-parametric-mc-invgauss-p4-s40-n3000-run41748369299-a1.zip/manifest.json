@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c27aaa743663c2b00e033c9b779a4f4b",
+  "parts": [
+    {
+      "bytes": 17820780,
+      "name": "part-00001.lfs",
+      "sha256": "dab796842502b172dad4dfe9a3cf43c3388f3a270b26811e8639dac836a72b3c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "dab796842502b172dad4dfe9a3cf43c3388f3a270b26811e8639dac836a72b3c",
+  "size_bytes": 17820780,
+  "source": {
+    "artifact_id": 13330395659,
+    "created_at": "2026-11-04T14:02:40Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13330395659",
+    "name": "t3-b3-parametric-mc-invgauss-p4-s40-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 17820780,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13330395659/zip"
+  }
+}

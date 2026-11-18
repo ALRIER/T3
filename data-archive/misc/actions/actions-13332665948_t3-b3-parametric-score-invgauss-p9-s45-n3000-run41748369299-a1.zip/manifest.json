@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "d4d189f980bb43adc9986d8da5019bae",
+  "parts": [
+    {
+      "bytes": 39543,
+      "name": "part-00001.lfs",
+      "sha256": "f1f70cee18cff255add422d5295c35f0ed8a69160641de76eb059a19dbc435bf"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f1f70cee18cff255add422d5295c35f0ed8a69160641de76eb059a19dbc435bf",
+  "size_bytes": 39543,
+  "source": {
+    "artifact_id": 13332665948,
+    "created_at": "2026-11-04T14:33:19Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13332665948",
+    "name": "t3-b3-parametric-score-invgauss-p9-s45-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39543,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13332665948/zip"
+  }
+}

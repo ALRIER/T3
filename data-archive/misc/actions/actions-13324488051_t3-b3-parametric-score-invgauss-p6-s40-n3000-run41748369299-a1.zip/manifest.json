@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "7d3c5aea3f933d55d620fdfbe8ba5ebe",
+  "parts": [
+    {
+      "bytes": 39515,
+      "name": "part-00001.lfs",
+      "sha256": "8ccdf0a64fd2f669f177a7af03c75ac8b40c997d938a3042a2b865271c60aaa0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "8ccdf0a64fd2f669f177a7af03c75ac8b40c997d938a3042a2b865271c60aaa0",
+  "size_bytes": 39515,
+  "source": {
+    "artifact_id": 13324488051,
+    "created_at": "2026-11-04T13:05:04Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13324488051",
+    "name": "t3-b3-parametric-score-invgauss-p6-s40-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39515,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13324488051/zip"
+  }
+}
