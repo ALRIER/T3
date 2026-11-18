@@ -1,6 +1,6 @@
 {
-  "archived_original_bytes": 26851046917,
-  "archived_sources": 4780,
+  "archived_original_bytes": 27571913179,
+  "archived_sources": 4860,
   "by_stage": {
     "discovery": {
       "archived": 252,
@@ -13,12 +13,12 @@
       "total": 421
     },
     "misc": {
-      "archived": 1109,
+      "archived": 1149,
       "expected_bytes": 159894075,
       "total": 1432
     },
     "montecarlo": {
-      "archived": 792,
+      "archived": 832,
       "expected_bytes": 21604329858,
       "total": 1031
     },
@@ -42,7 +42,7 @@
   "expected_original_bytes": 45354058307,
   "expired_unarchived": 0,
   "failed_unarchived": 3,
-  "pending_sources": 3214,
+  "pending_sources": 3134,
   "scope": "sources in recorded inventory only",
   "total_sources": 7994
 }
