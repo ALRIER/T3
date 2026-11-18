@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "4ad4c08d678e62f3fdb3aad8c9217715",
+  "parts": [
+    {
+      "bytes": 140141,
+      "name": "part-00001.lfs",
+      "sha256": "a1e22d9b7a56c199542afbc9985f32b66adc4e535fff41be8ed295d7bff8d258"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a1e22d9b7a56c199542afbc9985f32b66adc4e535fff41be8ed295d7bff8d258",
+  "size_bytes": 140141,
+  "source": {
+    "artifact_id": 13450560981,
+    "created_at": "2026-11-05T20:16:49Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13450560981",
+    "name": "stress-v2-resumed-adapt-exwald-s61-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 140141,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13450560981/zip"
+  }
+}

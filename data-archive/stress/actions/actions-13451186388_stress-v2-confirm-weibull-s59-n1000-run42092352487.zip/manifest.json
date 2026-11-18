@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "3e0f301b80de6d30030d7756e91a9e1a",
+  "parts": [
+    {
+      "bytes": 8548315,
+      "name": "part-00001.lfs",
+      "sha256": "f3caf6ce738f0448cee884e3bbf5f1a3362cffadc719f6c7bd23cea7c46facef"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f3caf6ce738f0448cee884e3bbf5f1a3362cffadc719f6c7bd23cea7c46facef",
+  "size_bytes": 8548315,
+  "source": {
+    "artifact_id": 13451186388,
+    "created_at": "2026-11-05T20:35:41Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13451186388",
+    "name": "stress-v2-confirm-weibull-s59-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 8548315,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13451186388/zip"
+  }
+}

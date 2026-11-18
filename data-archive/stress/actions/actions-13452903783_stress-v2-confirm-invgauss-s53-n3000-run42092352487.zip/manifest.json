@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "4370db7e1edf8fd43486036f8187030b",
+  "parts": [
+    {
+      "bytes": 8472334,
+      "name": "part-00001.lfs",
+      "sha256": "cd4f53bf0fb0c89d5184ff34c56c5f199cc41bd7ad385681c6bff4dd67becc6b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "cd4f53bf0fb0c89d5184ff34c56c5f199cc41bd7ad385681c6bff4dd67becc6b",
+  "size_bytes": 8472334,
+  "source": {
+    "artifact_id": 13452903783,
+    "created_at": "2026-11-05T21:12:15Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13452903783",
+    "name": "stress-v2-confirm-invgauss-s53-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 8472334,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13452903783/zip"
+  }
+}
