@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "36132a0278b6573ad23fe72f6a028869",
+  "parts": [
+    {
+      "bytes": 1287909,
+      "name": "part-00001.lfs",
+      "sha256": "9ce6ec932c0331756e9ce8c1e9bc063a5738db81c04ebbf46a68e72fcb22184c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "9ce6ec932c0331756e9ce8c1e9bc063a5738db81c04ebbf46a68e72fcb22184c",
+  "size_bytes": 1287909,
+  "source": {
+    "artifact_id": 13262628486,
+    "created_at": "2026-11-03T19:12:06Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:11:22Z",
+    "key": "actions-13262628486",
+    "name": "t3-b3-parametric-input-normal-n200-run41700914681.zip",
+    "run_id": 41700914681,
+    "size_bytes": 1287909,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13262628486/zip"
+  }
+}

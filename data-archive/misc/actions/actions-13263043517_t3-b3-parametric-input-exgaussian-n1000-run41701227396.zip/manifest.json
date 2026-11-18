@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8fccfebdbe2be4af141e9a8b1ca966c9",
+  "parts": [
+    {
+      "bytes": 1286449,
+      "name": "part-00001.lfs",
+      "sha256": "b75a9590274c3fd672c71480dbbc58ae82b4db3edde018535320a04be3f92ecb"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b75a9590274c3fd672c71480dbbc58ae82b4db3edde018535320a04be3f92ecb",
+  "size_bytes": 1286449,
+  "source": {
+    "artifact_id": 13263043517,
+    "created_at": "2026-11-03T19:14:37Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:13:22Z",
+    "key": "actions-13263043517",
+    "name": "t3-b3-parametric-input-exgaussian-n1000-run41701227396.zip",
+    "run_id": 41701227396,
+    "size_bytes": 1286449,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13263043517/zip"
+  }
+}

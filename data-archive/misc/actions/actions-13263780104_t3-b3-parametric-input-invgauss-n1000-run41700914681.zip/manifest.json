@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "697aaf9966b36e3f2a634bbd38facbe2",
+  "parts": [
+    {
+      "bytes": 1297643,
+      "name": "part-00001.lfs",
+      "sha256": "c42d0fbfdfbfbaf8b3e5a3dc9f33e1299fe13600f8bc40ff1cfc610f20e639a2"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c42d0fbfdfbfbaf8b3e5a3dc9f33e1299fe13600f8bc40ff1cfc610f20e639a2",
+  "size_bytes": 1297643,
+  "source": {
+    "artifact_id": 13263780104,
+    "created_at": "2026-11-03T19:12:20Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:11:22Z",
+    "key": "actions-13263780104",
+    "name": "t3-b3-parametric-input-invgauss-n1000-run41700914681.zip",
+    "run_id": 41700914681,
+    "size_bytes": 1297643,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13263780104/zip"
+  }
+}

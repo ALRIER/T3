@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6b11cda4972e71cdd79aef986862acfd",
+  "parts": [
+    {
+      "bytes": 1433385,
+      "name": "part-00001.lfs",
+      "sha256": "f6a957bc5c9b65ec36fbe09c8afa49dc0bfb4eac05d977ed0cce895cc9f23a26"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f6a957bc5c9b65ec36fbe09c8afa49dc0bfb4eac05d977ed0cce895cc9f23a26",
+  "size_bytes": 1433385,
+  "source": {
+    "artifact_id": 13261414932,
+    "created_at": "2026-11-03T19:12:14Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:11:22Z",
+    "key": "actions-13261414932",
+    "name": "t3-b3-parametric-input-weibull-n200-run41700914681.zip",
+    "run_id": 41700914681,
+    "size_bytes": 1433385,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13261414932/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8279255550fd0a1e7a4a841d7e266eb6",
+  "parts": [
+    {
+      "bytes": 1286257,
+      "name": "part-00001.lfs",
+      "sha256": "048d6e2f0b52ed054f59593ffb1b725e9c7df6c630ec0369c244d0e452e6a7d1"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "048d6e2f0b52ed054f59593ffb1b725e9c7df6c630ec0369c244d0e452e6a7d1",
+  "size_bytes": 1286257,
+  "source": {
+    "artifact_id": 13263910221,
+    "created_at": "2026-11-03T19:14:07Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:13:22Z",
+    "key": "actions-13263910221",
+    "name": "t3-b3-parametric-input-lognormal-n3000-run41701227396.zip",
+    "run_id": 41701227396,
+    "size_bytes": 1286257,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13263910221/zip"
+  }
+}

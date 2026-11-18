@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e0030edb918d83ea19bd1b4848196a50",
+  "parts": [
+    {
+      "bytes": 1303537,
+      "name": "part-00001.lfs",
+      "sha256": "a448343ff9fc787e90b62c425afc2a2acb14c9e40c14bd2b1b91e368e553999c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a448343ff9fc787e90b62c425afc2a2acb14c9e40c14bd2b1b91e368e553999c",
+  "size_bytes": 1303537,
+  "source": {
+    "artifact_id": 13262259850,
+    "created_at": "2026-11-03T19:12:35Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:11:22Z",
+    "key": "actions-13262259850",
+    "name": "t3-b3-parametric-input-exwald-n200-run41700914681.zip",
+    "run_id": 41700914681,
+    "size_bytes": 1303537,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13262259850/zip"
+  }
+}
