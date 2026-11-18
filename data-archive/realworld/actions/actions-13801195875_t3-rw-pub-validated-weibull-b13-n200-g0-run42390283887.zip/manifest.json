@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "95cdb7f7379d16d99506f84ad7cfae9b",
+  "parts": [
+    {
+      "bytes": 309575,
+      "name": "part-00001.lfs",
+      "sha256": "f70634fb549e0318731f590a8a8b004f078e197125d0445ebacf84feb809c093"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "f70634fb549e0318731f590a8a8b004f078e197125d0445ebacf84feb809c093",
+  "size_bytes": 309575,
+  "source": {
+    "artifact_id": 13801195875,
+    "created_at": "2026-11-10T20:32:44Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-05T16:14:24Z",
+    "key": "actions-13801195875",
+    "name": "t3-rw-pub-validated-weibull-b13-n200-g0-run42390283887.zip",
+    "run_id": 42390283887,
+    "size_bytes": 309575,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13801195875/zip"
+  }
+}
