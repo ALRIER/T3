@@ -1,0 +1,195 @@
+name: R1 — Crossed uncertainty, joint effects, then archive readiness (no new simulations)
+run-name: "R1 reviewer expansion | 20 parallel | crossed seeds → joint effects → archive inspection"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-crossed-and-archive-gates.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-crossed-archive-readiness-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate code, frozen source panels, and statistical selftests
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check numpy pandas scipy
+          python -m py_compile scripts/t3_b3_r1_crossed_reviewer.py scripts/t3_b3_r1_archive_probe.py
+          python scripts/t3_b3_r1_crossed_reviewer.py selftest
+          test -s R1/runs/44307352615/all_pairwise_global_holm.csv
+          test -s R1/runs/44310024979/R1_FINAL_MANIFEST.json
+          test -s R1/runs/44313738898/scientific_gate/SCIENTIFIC_GATE_MANIFEST.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          meta=json.loads(Path('R1/runs/44313738898/scientific_gate/SCIENTIFIC_GATE_MANIFEST.json').read_text())
+          assert meta['status']=='pass' and meta['independent_r_reaudited']==216
+          print('R1_ORIGINAL_3_RUN_PREFLIGHT_PASS')
+          PY
+  crossed-blocks:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install statistical analysis libraries (no R rebuild needed)
+        run: python -m pip install --disable-pip-version-check numpy pandas scipy
+      - name: Crossed random-effects moments, two-way bootstrap, joint MSE and Q95
+        run: |
+          python scripts/t3_b3_r1_crossed_reviewer.py block \
+            --family "${{ matrix.family }}" \
+            --n "${{ matrix.n }}" \
+            --source R1/runs/44310024979 \
+            --bootstrap 4000 \
+            --output "out/blocks/${{ matrix.family }}-n${{ matrix.n }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-crossed-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+  first-stage-scientific-synthesis:
+    needs: crossed-blocks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-crossed-*
+          path: incoming
+          merge-multiple: true
+      - name: Validate complete 18-block crossed-grid, joint thresholds, and original 216 contrasts
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check numpy pandas scipy
+          python scripts/t3_b3_r1_crossed_reviewer.py finalize \
+            --root incoming \
+            --output incoming/analysis
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-crossed-synthesis-complete
+          path: incoming/analysis/
+          if-no-files-found: error
+          retention-days: 90
+  archive-inspection:
+    needs: first-stage-scientific-synthesis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        mode: [deterministic, q95, cost]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Restore only six original Held Out seed-10 n200 sample shards for control inspection
+        if: matrix.mode == 'deterministic'
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git lfs pull --include='data-archive/heldout/actions/actions-*_t3-b3-heldout-*-s10-n200-run41208513291.zip/part-*.lfs' --exclude=''
+      - name: Inspect only existing immutable backup manifests and sampled score models
+        run: |
+          python scripts/t3_b3_r1_archive_probe.py \
+            --mode "${{ matrix.mode }}" \
+            --archive-root data-archive \
+            --output "out/archive_probe/${{ matrix.mode }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-archive-inspection-${{ matrix.mode }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+  integrate-and-preserve:
+    needs: [first-stage-scientific-synthesis, archive-inspection]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-crossed-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-archive-inspection-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Check scientific/feasibility products and create SHA256 inventory
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('R1/runs/${{ github.run_id }}')
+          for family in ('normal','lognormal','weibull','invgauss','exgaussian','exwald'):
+              for n in (200,1000,3000):
+                  b=root/'blocks'/f'{family}-n{n}'
+                  for file in ('crossed_inference.csv','joint_mse_q95.csv','provenance.json'):
+                      assert (b/file).is_file() and (b/file).stat().st_size>0
+          for file in ('crossed_hierarchical_inference_216.csv',
+                       'two_metric_joint_practical_216_directions.csv',
+                       'R1_REVIEWER_SCOPE.md','SUMMARY.json'):
+              assert (root/'analysis'/file).is_file()
+          for mode in ('deterministic','q95','cost'):
+              for file in ('ASSESSMENT.md','PROBE_META.json'):
+                  assert (root/'archive_probe'/mode/file).is_file()
+          blobs=sorted(p for p in root.rglob('*') if p.is_file())
+          manifest={'source_R1_runs':[44307352615,44310024979,44313738898],
+            'staged_workflow':True,'crossed_jobs':18,'archive_inspection_jobs':3,
+            'no_new_simulations':True,'repeated_discovery_training':False,
+            'repeated_heldout_scoring':False,
+            'scope':'posthoc reviewer sensitivity and original archive feasibility only',
+            'files':[{'path':str(p.relative_to(root)),
+                      'size':p.stat().st_size,
+                      'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in blobs]}
+          (root/'R1_STAGED_FOLLOWUP_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print('R1_REVIEWER_STAGED_FINAL_GATE_PASS',len(blobs),flush=True)
+          PY
+      - name: Commit all completed analyses and archive-inspection results on main under R1
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "R1/runs/${{ github.run_id }}"
+          git commit -m "Archive complete R1 crossed inference, joint reviewer tests and archived-input readiness run ${{ github.run_id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-staged-followup-complete-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
