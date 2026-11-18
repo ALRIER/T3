@@ -1,0 +1,61 @@
+name: T3 Independent Research Archive Completeness Audit
+run-name: "Deep audit: all manifest/LFS pointers, live Actions crosswalk, sampled reconstruction"
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/t3-archive-independent-audit.yml
+      - scripts/archive/audit_archive.py
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - name: Verify all manifests and pointers, crosscheck live GitHub artifact IDs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/archive/audit_archive.py
+      - name: Reconstruct original stored bytes from representative actual Git LFS objects
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          python3 - <<'PY'
+          import json,subprocess,pathlib,os,tempfile
+          targets=json.load(open("audit-output/spotcheck_targets.json"))
+          for target in targets:
+              directory=pathlib.Path(target["path"])
+              manifest=json.loads((directory/"manifest.json").read_text())
+              paths=[str(directory/p["name"]) for p in manifest["parts"]]
+              if not paths:continue
+              print("LFS_SPOTCHECK",target["stage"],target["key"],target["size_bytes"],flush=True)
+              subprocess.run(["git","lfs","pull","--include="+",".join(paths),"--exclude="],check=True,timeout=600)
+              with tempfile.TemporaryDirectory() as temp:
+                  out=pathlib.Path(temp)/"original.zip"
+                  subprocess.run(["python3","scripts/archive/restore_archive.py",
+                                  str(directory),"--output",str(out)],check=True,timeout=90)
+              # Revert only the downloaded LFS working files to pointer state.
+              subprocess.run(["git","lfs","uninstall","--local"],check=False)
+              subprocess.run(["git","-c","filter.lfs.smudge=","-c","filter.lfs.required=false",
+                              "checkout","HEAD","--",*paths],check=True)
+              subprocess.run(["git","lfs","install","--local"],check=True)
+          pathlib.Path("audit-output/spotcheck_complete.txt").write_text(
+              "All selected stage LFS originals reconstructed and SHA256 verified.\n")
+          PY
+      - name: Preserve the independent audit report outside the manuscript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t3-independent-research-archive-audit-${{ github.run_id }}
+          path: audit-output/
+          retention-days: 90
+          if-no-files-found: warn
