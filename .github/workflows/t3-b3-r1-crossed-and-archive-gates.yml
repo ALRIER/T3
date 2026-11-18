@@ -93,10 +93,14 @@ jobs:
           python scripts/t3_b3_r1_crossed_reviewer.py finalize \
             --root incoming \
             --output incoming/analysis
+      - name: Preserve analysis directory in the artifact layout for the downstream publisher
+        run: |
+          mkdir -p out
+          cp -a incoming/analysis out/analysis
       - uses: actions/upload-artifact@v4
         with:
           name: r1-crossed-synthesis-complete
-          path: incoming/analysis/
+          path: out/
           if-no-files-found: error
           retention-days: 90
   archive-inspection:
