@@ -1,0 +1,157 @@
+{
+  "all_18_calibration_source_hashes": [
+    {
+      "calibration_file_sha256": "16fe68068ead93edb1596fda7c174a6b0d137beb931b0d12a3b063ec49db0e42",
+      "family": "normal",
+      "n": 200,
+      "source_sha256": "16427cf2c2ccc1320ff8af8ac7a6e2ca032567661dc1768b2323bc4967b6c476"
+    },
+    {
+      "calibration_file_sha256": "045d5d999cb9b2b9e47f635b71e9d05678e6c2c78fdddedf9952ddbe74ffe46c",
+      "family": "normal",
+      "n": 1000,
+      "source_sha256": "28f6caa05cb4126e94e31b9a7600ba2e1a64a2a8f679740b979bcb18e0db9d75"
+    },
+    {
+      "calibration_file_sha256": "13c4d38acde317eb50295ab95853c5c608f0dfa7e8cd05db1cd15b07ab300fc4",
+      "family": "normal",
+      "n": 3000,
+      "source_sha256": "58bb89150aca707af6b6fbcd12f55ed9ec1bcdd799f041ce1fdf2477a91df508"
+    },
+    {
+      "calibration_file_sha256": "5448317faa5fdf638b99992e0675ec27a310c74793c24774849d594305c4461a",
+      "family": "lognormal",
+      "n": 200,
+      "source_sha256": "f8e1e8cbe8667e99ca7cc1334a9ccd02e4eee0d8a7f5227431209eeeaabbe85e"
+    },
+    {
+      "calibration_file_sha256": "8595a2401e1f5b5bee711ab2c5d45a5c6add418bc7ba7d2c65ba5e6a830f018b",
+      "family": "lognormal",
+      "n": 1000,
+      "source_sha256": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215"
+    },
+    {
+      "calibration_file_sha256": "a8d3a66b365e2d57f6908b44b409ca8334fa60316cf648dbea20e865cbf23f1d",
+      "family": "lognormal",
+      "n": 3000,
+      "source_sha256": "2e0453429c25e55b77764e06d5cdfc58784d80b9f2f0aa8c508c5d057dfd8da2"
+    },
+    {
+      "calibration_file_sha256": "dc89c4c71ec88f1a76c1a109f8bc0538378b14272b5a101da2abeb56fb107573",
+      "family": "weibull",
+      "n": 200,
+      "source_sha256": "36e1fc7fea0e05904acebad2b00f4f32573e43102f38afcfeccdfd187ca79ceb"
+    },
+    {
+      "calibration_file_sha256": "50282edf40f8eae668d1512f4c6cfad872412d21e59874827e58c76c99a321a8",
+      "family": "weibull",
+      "n": 1000,
+      "source_sha256": "4cf2d69b715de6b83e7eae7e4b06089df8b13752c967add5bac9ee1779f2cc9c"
+    },
+    {
+      "calibration_file_sha256": "d6c6c749deccb0e3ad1dcb495aa8a5b95fb049135b31a61414f90da1b01e1387",
+      "family": "weibull",
+      "n": 3000,
+      "source_sha256": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c"
+    },
+    {
+      "calibration_file_sha256": "7602f45456419a97eb5c5ec384dd198ed358f7b32bb6902b5e7d25f353b247c9",
+      "family": "invgauss",
+      "n": 200,
+      "source_sha256": "8a6574bc3066e3df991e1eb5469a96f7f1caa3021961e67d7943d40a721a3be4"
+    },
+    {
+      "calibration_file_sha256": "d55f133fa5f2ae6472d4869ea2a12bb624cf6be49e3f4a4fac3877e37ae4e59f",
+      "family": "invgauss",
+      "n": 1000,
+      "source_sha256": "153552bc156bde36f5447e8ce4a171dd373aa6968edcb653d6956a87d6117e95"
+    },
+    {
+      "calibration_file_sha256": "ba91b48d0817e19c837abe5bbe2e58d0486e3d74a28fb2b805da728ba72c3252",
+      "family": "invgauss",
+      "n": 3000,
+      "source_sha256": "0b93d2b34585beda5e83ecf5882e1ec257438cc1e20a023d0c813a478dee8a85"
+    },
+    {
+      "calibration_file_sha256": "cb4b82a0c129542bd07d9296264af0da7aafc56500cc4780783d0b7585d7cc30",
+      "family": "exgaussian",
+      "n": 200,
+      "source_sha256": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1"
+    },
+    {
+      "calibration_file_sha256": "9953a6143d83fe297631995f9d0c759de3d1e427d876549b40ff989e21c6de6d",
+      "family": "exgaussian",
+      "n": 1000,
+      "source_sha256": "9a48a550eeb772412c193f3049171a6038d606feef232c020a071e88dc259bad"
+    },
+    {
+      "calibration_file_sha256": "1453f080809cb0cd61641ead5a409e42a2136beac769067e5189281d108e86da",
+      "family": "exgaussian",
+      "n": 3000,
+      "source_sha256": "29ad25f918e9b54964d22bad1ee1592b0c75adb7ca301db8f4d41bd24e2660ba"
+    },
+    {
+      "calibration_file_sha256": "e23444e2509b20d1967f5c77f0dafdc63cdc486aa41eb3c266c699185fdd5db5",
+      "family": "exwald",
+      "n": 200,
+      "source_sha256": "36f0d1ccbad0240366d2e4bceb825ccf18f96dddbb24bfcfc2815c7b13321b53"
+    },
+    {
+      "calibration_file_sha256": "05c3617f32596e9499188b53424a7bf9906a58da20d42e558005781bee0dfadf",
+      "family": "exwald",
+      "n": 1000,
+      "source_sha256": "ec50b9c1e2d23eb754ee1515e5d052996b5eda540511b573549613ddb4451071"
+    },
+    {
+      "calibration_file_sha256": "8439c7490527bfbd36dbc7913b493f4dc1babca7f8406dbe3865a175b2bf6b50",
+      "family": "exwald",
+      "n": 3000,
+      "source_sha256": "ba1355cbc989b2f2a3590efa4e50f686e84de1d15ee997617c8117bd1c881018"
+    }
+  ],
+  "calibration_draws": 4096,
+  "calibration_run": "44340092503",
+  "confidence_of_nominal_FWER_cutoff_bound": 0.95,
+  "conservative_global_minP_critical_p": 7.884003141655672e-07,
+  "conservative_null_order_statistic_rank": 182,
+  "fully_selection_aware_original_pipeline_CI_coverage_established": false,
+  "global_comparisons": 216,
+  "independence_assumptions": "Independent synthetic block innovations conditional on original fitted empirical crossed-effects DGP",
+  "method": "Empirical null minimum nominal t9 p; independent calibration and validation",
+  "original_frozen_contrast_sensitivity": {
+    "empirically_calibrated_BH_supported": 177,
+    "empirically_calibrated_holm_supported": 0,
+    "globally_calibrated_minP_supported": 77,
+    "observed_method_contrasts": 216,
+    "scope": "posthoc original frozen contrasts, conditional on synthetic DGP only"
+  },
+  "original_optimizer_and_HPO_reselection_replayed": false,
+  "original_source": "R1/runs/44310024979",
+  "source_lineage_sha256": {
+    "exgaussian-1000": "9a48a550eeb772412c193f3049171a6038d606feef232c020a071e88dc259bad",
+    "exgaussian-200": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1",
+    "exgaussian-3000": "29ad25f918e9b54964d22bad1ee1592b0c75adb7ca301db8f4d41bd24e2660ba",
+    "exwald-1000": "ec50b9c1e2d23eb754ee1515e5d052996b5eda540511b573549613ddb4451071",
+    "exwald-200": "36f0d1ccbad0240366d2e4bceb825ccf18f96dddbb24bfcfc2815c7b13321b53",
+    "exwald-3000": "ba1355cbc989b2f2a3590efa4e50f686e84de1d15ee997617c8117bd1c881018",
+    "invgauss-1000": "153552bc156bde36f5447e8ce4a171dd373aa6968edcb653d6956a87d6117e95",
+    "invgauss-200": "8a6574bc3066e3df991e1eb5469a96f7f1caa3021961e67d7943d40a721a3be4",
+    "invgauss-3000": "0b93d2b34585beda5e83ecf5882e1ec257438cc1e20a023d0c813a478dee8a85",
+    "lognormal-1000": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215",
+    "lognormal-200": "f8e1e8cbe8667e99ca7cc1334a9ccd02e4eee0d8a7f5227431209eeeaabbe85e",
+    "lognormal-3000": "2e0453429c25e55b77764e06d5cdfc58784d80b9f2f0aa8c508c5d057dfd8da2",
+    "normal-1000": "28f6caa05cb4126e94e31b9a7600ba2e1a64a2a8f679740b979bcb18e0db9d75",
+    "normal-200": "16427cf2c2ccc1320ff8af8ac7a6e2ca032567661dc1768b2323bc4967b6c476",
+    "normal-3000": "58bb89150aca707af6b6fbcd12f55ed9ec1bcdd799f041ce1fdf2477a91df508",
+    "weibull-1000": "4cf2d69b715de6b83e7eae7e4b06089df8b13752c967add5bac9ee1779f2cc9c",
+    "weibull-200": "36e1fc7fea0e05904acebad2b00f4f32573e43102f38afcfeccdfd187ca79ceb",
+    "weibull-3000": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c"
+  },
+  "total_family_n_blocks": 18,
+  "validation_regimes": [
+    "global_null",
+    "mixed_null",
+    "observed_effect"
+  ],
+  "validation_reps_per_regime": 4096
+}

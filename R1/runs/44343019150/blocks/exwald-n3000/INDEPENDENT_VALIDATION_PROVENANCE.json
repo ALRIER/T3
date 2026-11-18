@@ -1,0 +1,19 @@
+{
+  "calibration_and_validation_independent_random_generators": true,
+  "calibration_draw_source": "R1/runs/44340092503",
+  "family": "exwald",
+  "frozen_original_HPO_and_weights_untouched": true,
+  "modes": [
+    "global_null",
+    "mixed_null",
+    "observed_effect"
+  ],
+  "sample_n": 3000,
+  "seed_rule": "stage12c-calibrated-inference-holdout-v1-20261118",
+  "selection_scope": "fixed four engines; training HPO not replayed",
+  "sha256": "ba1355cbc989b2f2a3590efa4e50f686e84de1d15ee997617c8117bd1c881018",
+  "source": "R1/runs/44310024979/heldout/exwald-n3000/candidate_by_eval.csv",
+  "stage": "12C",
+  "status": "INDEPENDENT_HOLDOUT_PASS",
+  "validation_reps_per_mode": 4096
+}

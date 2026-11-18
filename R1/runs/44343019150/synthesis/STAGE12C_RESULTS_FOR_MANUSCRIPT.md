@@ -1,0 +1,7 @@
+# Q1 Stage 12C — Independent calibration verification
+
+This final **frozen-estimand synthetic** calibration compares the original crossed-t9/Holm method with empirical-null recalibration. A fixed 4,096-draw global-null calibration panel from Stage 12B and an independently seeded 4,096-draw Stage 12C holdout panel in each of three regimes are used, with 18 family/sample-size blocks and 216 tests. We report pointwise and familywise interval coverage, FWER, FDR, and the effect on the original frozen contrasts as exploratory sensitivity. The minP cutoff uses a conservative one-sided 95% binomial order-statistic bound on its nominal 5% global-null tail, rather than tuning a cutoff against the validation set.
+
+**Scope boundary:** The surrogate's known truth is constructed from the fixed original crossed-seed score cells. Its heldout draws have independent innovations conditional on that fitted empirical distribution. This is NOT a replication of nested hyperparameter optimization, candidate weight discovery, optimizer training, nor an empirical proof of full end-to-end selection-aware inference. The calibrated original significance flags are posthoc and must not supersede the archived prespecified tests. The original method may be reported as a sensitivity with its demonstrated null-calibration weakness.
+
+The numerical outcomes are in the adjacent CSV tables, and full calibration/validation lineage is preserved in the run manifest.

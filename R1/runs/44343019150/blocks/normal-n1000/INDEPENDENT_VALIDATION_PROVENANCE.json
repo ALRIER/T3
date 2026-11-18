@@ -1,0 +1,19 @@
+{
+  "calibration_and_validation_independent_random_generators": true,
+  "calibration_draw_source": "R1/runs/44340092503",
+  "family": "normal",
+  "frozen_original_HPO_and_weights_untouched": true,
+  "modes": [
+    "global_null",
+    "mixed_null",
+    "observed_effect"
+  ],
+  "sample_n": 1000,
+  "seed_rule": "stage12c-calibrated-inference-holdout-v1-20261118",
+  "selection_scope": "fixed four engines; training HPO not replayed",
+  "sha256": "28f6caa05cb4126e94e31b9a7600ba2e1a64a2a8f679740b979bcb18e0db9d75",
+  "source": "R1/runs/44310024979/heldout/normal-n1000/candidate_by_eval.csv",
+  "stage": "12C",
+  "status": "INDEPENDENT_HOLDOUT_PASS",
+  "validation_reps_per_mode": 4096
+}

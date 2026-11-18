@@ -1,0 +1,19 @@
+{
+  "calibration_and_validation_independent_random_generators": true,
+  "calibration_draw_source": "R1/runs/44340092503",
+  "family": "exgaussian",
+  "frozen_original_HPO_and_weights_untouched": true,
+  "modes": [
+    "global_null",
+    "mixed_null",
+    "observed_effect"
+  ],
+  "sample_n": 200,
+  "seed_rule": "stage12c-calibrated-inference-holdout-v1-20261118",
+  "selection_scope": "fixed four engines; training HPO not replayed",
+  "sha256": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1",
+  "source": "R1/runs/44310024979/heldout/exgaussian-n200/candidate_by_eval.csv",
+  "stage": "12C",
+  "status": "INDEPENDENT_HOLDOUT_PASS",
+  "validation_reps_per_mode": 4096
+}
