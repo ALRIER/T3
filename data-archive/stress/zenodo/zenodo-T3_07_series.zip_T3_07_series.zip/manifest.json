@@ -1,0 +1,70 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "aa6156bd5ae6e7186372c9474d9a9fb3",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "d2efc2e4f79279e8915899863f18060d397f521b6790945f436be273f5d99545"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "fa0e080dac9bcdc7192761a4dd8ef04351fb7e127d8815dd560993cd26690cb2"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "3354a7bae80a525a127504e66819a7957270045d4ba9547f9c6bfbbc24fd7b06"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "9ccae9ef4cd6f626f59b05b1e4147f87d7a8c8a5a921694adafdfbe277541954"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "19a60d879cc64e330b2f18d18fd5aa5f87900064a4860e052085432e6afbbf09"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "17621f457e49987af2bab0a5cdbec4f5c771721e78928c4cb371111cbffacb19"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00007.lfs",
+      "sha256": "18aa730cb4f2999390747ed65d93934e0f2d2abf5e3615cfcf5531e1f4fe6dd3"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00008.lfs",
+      "sha256": "1ffb0d775961c72295cdfbfad25395b8058d2280812cc08aee5b9f8204b4bc17"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00009.lfs",
+      "sha256": "7d3eff0a8d2958024483ca8c356a36b98b48c90aa919a845e58518def4341be6"
+    },
+    {
+      "bytes": 17143414,
+      "name": "part-00010.lfs",
+      "sha256": "055124a0f5cd165a9d3ee8ee322b4757a9659f09abce7271dcad2f43220d01c6"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c37e1f977b78a08f9d1158f991f828908aabd176aa8dc71ad7c95b9ffcd775a1",
+  "size_bytes": 319133302,
+  "source": {
+    "checksum": "md5:aa6156bd5ae6e7186372c9474d9a9fb3",
+    "key": "zenodo-T3_07_series.zip",
+    "name": "T3_07_series.zip",
+    "record_id": 24174965,
+    "size_bytes": 319133302,
+    "source": "zenodo",
+    "stage": "stress",
+    "url": "https://zenodo.org/api/records/24174965/files/T3_07_series.zip/content"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "118031a7c9273d5eddf2cb20b2fd1b5f",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "63895ce11d00004913887450cd9c81c5a97dd65b6e3aa841adc13340723ab86f"
+    },
+    {
+      "bytes": 5193444,
+      "name": "part-00002.lfs",
+      "sha256": "c0d09f69eed9f019b611696eafa9f51a68ec9e0e0c72e8ffe1ad2f5179374077"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a8b65438480b5e4aaf48437445901165e850dbf2444f53fe0eddec3d2d97158e",
+  "size_bytes": 38747876,
+  "source": {
+    "checksum": "md5:118031a7c9273d5eddf2cb20b2fd1b5f",
+    "key": "zenodo-T3_08_series.zip",
+    "name": "T3_08_series.zip",
+    "record_id": 24174965,
+    "size_bytes": 38747876,
+    "source": "zenodo",
+    "stage": "realworld",
+    "url": "https://zenodo.org/api/records/24174965/files/T3_08_series.zip/content"
+  }
+}
