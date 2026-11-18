@@ -233,7 +233,7 @@ def timing(args):
                 if len(batch) < 30:
                     break
                 page += 1
-                assert page < 25, "Unbounded Actions history pagination"
+                assert page < 150, "Actions history exceeds safe pagination bound"
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
             missing.append(dict(source_run=run_id, reason=str(exc)))
     out = Path(args.output)
