@@ -1,0 +1,67 @@
+{
+  "analysis": {
+    "family": "lognormal",
+    "sample_n": 3000,
+    "paired_units": 24100,
+    "seed_count": 10,
+    "methods": [
+      "ga",
+      "nsga2",
+      "de",
+      "dirichlet"
+    ],
+    "note": "Holm adjustment is within block; global correction must be calculated after aggregation."
+  },
+  "input_archives": [
+    {
+      "seed": 15,
+      "archive": "actions-13056083857_t3-b3-heldout-lognormal-s15-n3000-run41208513291.zip",
+      "sha256": "746a3851709355adf694c633feed30c4e50f664fc848599740b38d0a11831374"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13054463728_t3-b3-heldout-lognormal-s14-n3000-run41208513291.zip",
+      "sha256": "5dcbdcb5fc6625887289f4236fb6599c0b79b464d1fc817a581d281d55a8b774"
+    },
+    {
+      "seed": 10,
+      "archive": "actions-13045134315_t3-b3-heldout-lognormal-s10-n3000-run41208513291.zip",
+      "sha256": "399a433f8b855f3711418439f1e05652275fa8fed70e7d03c3f6687648b6365f"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13060435329_t3-b3-heldout-lognormal-s17-n3000-run41208513291.zip",
+      "sha256": "4722d68281e88b5cc98eb083d1d18c38e302c6c50f2cda25f508c1d78f1b1b0d"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13054867130_t3-b3-heldout-lognormal-s13-n3000-run41208513291.zip",
+      "sha256": "b93df7f56b3b8c6889173a1f5787a3439170e0102d70c7913488600b4deb3f06"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13057357843_t3-b3-heldout-lognormal-s16-n3000-run41208513291.zip",
+      "sha256": "350b9d51fe84899eaab31cbcd18d41a2c2685a3eee780f4b3b18e5d6280abbde"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13044903277_t3-b3-heldout-lognormal-s11-n3000-run41208513291.zip",
+      "sha256": "0f451193d207611fd45f6b310982c70febd98cb288093c759d2072367a2123d2"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13060975771_t3-b3-heldout-lognormal-s19-n3000-run41208513291.zip",
+      "sha256": "4135da375e50c655474d6c02b92f29ebe9f3bab9c41f60c2a54c044a2a5ef512"
+    },
+    {
+      "seed": 12,
+      "archive": "actions-13051191534_t3-b3-heldout-lognormal-s12-n3000-run41208513291.zip",
+      "sha256": "d9600cd0c90fd4709a8a119bd57bda7596ce2a53824c416b362c14bea1a97a89"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13060102671_t3-b3-heldout-lognormal-s18-n3000-run41208513291.zip",
+      "sha256": "c51a87a94492bfb74ce301aa0145e91878ac62a68850e57eda758f1fdc7ae2dc"
+    }
+  ]
+}

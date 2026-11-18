@@ -1,0 +1,67 @@
+{
+  "analysis": {
+    "family": "invgauss",
+    "sample_n": 3000,
+    "paired_units": 24100,
+    "seed_count": 10,
+    "methods": [
+      "ga",
+      "nsga2",
+      "de",
+      "dirichlet"
+    ],
+    "note": "Holm adjustment is within block; global correction must be calculated after aggregation."
+  },
+  "input_archives": [
+    {
+      "seed": 10,
+      "archive": "actions-13080285156_t3-b3-heldout-invgauss-s10-n3000-run41208513291.zip",
+      "sha256": "505200020642fcafb701629d6588cbb34de37edf646851e95960610c7ee13d31"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13097149351_t3-b3-heldout-invgauss-s19-n3000-run41208513291.zip",
+      "sha256": "fccdfc3338b1fe5a0d99f7a631cde9d0c5d95d96f1c4aca14a17db49f9437bd2"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13097233455_t3-b3-heldout-invgauss-s18-n3000-run41208513291.zip",
+      "sha256": "f8c56c452c46d39de48ccf75135ddb82485e96402ec56cb28a8097b079ab7aff"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13096035436_t3-b3-heldout-invgauss-s16-n3000-run41208513291.zip",
+      "sha256": "a4fa05fb4dd62dfb4e26fd5083f822d2d439a7f350bcf77e1f48ba9f7ac4f411"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13096466650_t3-b3-heldout-invgauss-s17-n3000-run41208513291.zip",
+      "sha256": "d924c1b9381bf7e5f7f11e193c46cadcae3c71318dc94789a758b2e2ff0a467c"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13091062213_t3-b3-heldout-invgauss-s13-n3000-run41208513291.zip",
+      "sha256": "86ee63593bb9da14dd49ddfd901240135e94b27d079e49e2ec3cb1d92182bd6e"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13094703437_t3-b3-heldout-invgauss-s14-n3000-run41208513291.zip",
+      "sha256": "518db2d6534d5d78d05587631958dfe0a7f5fc884939a7cc125e50d39517d727"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13095626664_t3-b3-heldout-invgauss-s15-n3000-run41208513291.zip",
+      "sha256": "1750d1fba3657a942fd7f6bc139a1093e3a89a4711faf0a3ffc144585db12e1b"
+    },
+    {
+      "seed": 12,
+      "archive": "actions-13086381063_t3-b3-heldout-invgauss-s12-n3000-run41208513291.zip",
+      "sha256": "7de12fc5f68ec74f8c00b04aeb76bc93d67504651b8a2f157903f853afac7edc"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13083104462_t3-b3-heldout-invgauss-s11-n3000-run41208513291.zip",
+      "sha256": "712d0ff44bcc7ce55b925722af75940b1f2e6063b7ade9ca38b98346f89aad9c"
+    }
+  ]
+}

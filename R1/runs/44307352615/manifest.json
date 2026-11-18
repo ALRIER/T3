@@ -1,0 +1,8 @@
+{
+  "workflow_run": "44307352615",
+  "source": "verified split backup archives in data-archive/heldout/actions",
+  "independent_unit": "heldout evaluation seed",
+  "comparisons": 216,
+  "scope": "RQ1 direct method comparisons, Held Out only",
+  "limitations": "Discovery rankings, compute budget, and deterministic controls are not in this first module."
+}
