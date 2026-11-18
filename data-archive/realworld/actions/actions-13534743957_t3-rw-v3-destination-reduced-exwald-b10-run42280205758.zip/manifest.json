@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f1b5754b5982857670b1f0360875817f",
+  "parts": [
+    {
+      "bytes": 2956329,
+      "name": "part-00001.lfs",
+      "sha256": "e229e7ee327b77830bfb9a946de80185672df0c89ccb7f879c8f0c7cc18f0375"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e229e7ee327b77830bfb9a946de80185672df0c89ccb7f879c8f0c7cc18f0375",
+  "size_bytes": 2956329,
+  "source": {
+    "artifact_id": 13534743957,
+    "created_at": "2026-11-06T19:37:09Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T19:30:25Z",
+    "key": "actions-13534743957",
+    "name": "t3-rw-v3-destination-reduced-exwald-b10-run42280205758.zip",
+    "run_id": 42280205758,
+    "size_bytes": 2956329,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13534743957/zip"
+  }
+}

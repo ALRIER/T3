@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "d1f168bb73b9ab9dcc0ac708d38187f2",
+  "parts": [
+    {
+      "bytes": 2931052,
+      "name": "part-00001.lfs",
+      "sha256": "0f87885d84feab924ac1e0908ac30e5f87bddd595a1ba9fa343c1ce8668b3f9e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0f87885d84feab924ac1e0908ac30e5f87bddd595a1ba9fa343c1ce8668b3f9e",
+  "size_bytes": 2931052,
+  "source": {
+    "artifact_id": 13534997578,
+    "created_at": "2026-11-06T19:34:20Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T19:30:25Z",
+    "key": "actions-13534997578",
+    "name": "t3-rw-v3-destination-reduced-weibull-b37-run42280205758.zip",
+    "run_id": 42280205758,
+    "size_bytes": 2931052,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13534997578/zip"
+  }
+}
