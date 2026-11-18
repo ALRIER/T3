@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "3807d23369d2d1371d17a8db85a07741",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "896c9795c35b91febff962118df1f85a90e6d72ee84f559d10c55cd41e91fd81"
+    },
+    {
+      "bytes": 9037661,
+      "name": "part-00002.lfs",
+      "sha256": "81009b13b8635b921d5f790dc2cf3173ca10dc9e5171d7aeb249c76138c26452"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3e62cdd8676a34a488b0c1967505ff9529c35dccee1d78477e53ae3c7a8921c6",
+  "size_bytes": 42592093,
+  "source": {
+    "artifact_id": 13463873846,
+    "created_at": "2026-11-06T00:02:48Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463873846",
+    "name": "stress-v2-resumed-adapt-reduced-invgauss-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 42592093,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463873846/zip"
+  }
+}

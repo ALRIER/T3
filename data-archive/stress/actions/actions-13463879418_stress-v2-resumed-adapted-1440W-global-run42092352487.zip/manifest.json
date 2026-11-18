@@ -1,0 +1,73 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8e7a90af141366377f536745cfaf60c3",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "7b260218c7c4c20b2a2ad92a2432cbf1ed5b6696940fe6c20de5d0e3d431f8f4"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "d72f9c402db5f7b01021fb34230ef15b59b8f9054aa068c5b3fde44eb9e3b94d"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "c20c68cef1f09e381bf2c6bbc084c8c7af48b88f6fe81681ce20d9432b8ff154"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "668d2ab4f28b195ebdf664449f4c8843c372b58dbbc5c949e7be42e6a0ffecc1"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "1fa904aa8ab6ed6e32cc6a51ff6734cb67d3b15ed926db12422b52488fd43583"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "84de588209e9b250e9a6e682210d4ce0a0738e128b7f0b32096244683f0c3fdb"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00007.lfs",
+      "sha256": "1dadb52156f544192b13a078dab158426482bd1bb47157124bf7ebae484e7a1c"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00008.lfs",
+      "sha256": "785d5a7160a8add7567cc70b43cffad3b370931b60b6db6ea1559a5f0e2cb7b5"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00009.lfs",
+      "sha256": "8d1b995a49ec7fd57e67f8a2fde6055d880e44bb0277949511cba54b4bb34ae0"
+    },
+    {
+      "bytes": 17238278,
+      "name": "part-00010.lfs",
+      "sha256": "f915cc6f1e7aa60f92f2782549ecb002125224a132e5c717b9529dc9d4537e37"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ec36f89c1b7509339db18489e2556575480fe61540224bb5d5f7373351b31e98",
+  "size_bytes": 319228166,
+  "source": {
+    "artifact_id": 13463879418,
+    "created_at": "2026-11-06T00:07:04Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463879418",
+    "name": "stress-v2-resumed-adapted-1440W-global-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 319228166,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463879418/zip"
+  }
+}

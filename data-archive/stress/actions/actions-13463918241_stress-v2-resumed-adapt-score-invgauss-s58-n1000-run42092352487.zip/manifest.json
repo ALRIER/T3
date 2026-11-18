@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "4ebee38c1ab274740677d61c7ccdbfbf",
+  "parts": [
+    {
+      "bytes": 2935479,
+      "name": "part-00001.lfs",
+      "sha256": "700e5b79e8343891cb8a151c23fe7714cc97221912c70a6979b90fe400c3e776"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "700e5b79e8343891cb8a151c23fe7714cc97221912c70a6979b90fe400c3e776",
+  "size_bytes": 2935479,
+  "source": {
+    "artifact_id": 13463918241,
+    "created_at": "2026-11-05T23:59:45Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463918241",
+    "name": "stress-v2-resumed-adapt-score-invgauss-s58-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2935479,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463918241/zip"
+  }
+}

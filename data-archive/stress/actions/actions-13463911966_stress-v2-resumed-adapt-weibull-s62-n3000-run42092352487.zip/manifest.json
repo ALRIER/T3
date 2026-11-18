@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "632e52507cc3e281bb6644ed552ea875",
+  "parts": [
+    {
+      "bytes": 139531,
+      "name": "part-00001.lfs",
+      "sha256": "31133f332bda5f3da6097b140438bf6398f97bbb8ebc7e82a031d45f6f6fa6e4"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "31133f332bda5f3da6097b140438bf6398f97bbb8ebc7e82a031d45f6f6fa6e4",
+  "size_bytes": 139531,
+  "source": {
+    "artifact_id": 13463911966,
+    "created_at": "2026-11-05T23:49:43Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463911966",
+    "name": "stress-v2-resumed-adapt-weibull-s62-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 139531,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463911966/zip"
+  }
+}

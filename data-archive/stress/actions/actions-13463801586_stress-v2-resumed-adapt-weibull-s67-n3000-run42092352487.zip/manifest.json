@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a0ed4758f82416b8bb3d8a731de27570",
+  "parts": [
+    {
+      "bytes": 139574,
+      "name": "part-00001.lfs",
+      "sha256": "53bcb6542d250958c90966c201d35519b5a942b6203b853dd46ba0478d3842a0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "53bcb6542d250958c90966c201d35519b5a942b6203b853dd46ba0478d3842a0",
+  "size_bytes": 139574,
+  "source": {
+    "artifact_id": 13463801586,
+    "created_at": "2026-11-05T23:46:23Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463801586",
+    "name": "stress-v2-resumed-adapt-weibull-s67-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 139574,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463801586/zip"
+  }
+}

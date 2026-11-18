@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "af9d357ccae67ab8bd17ec2cca222801",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "00b7925a4cf7046ba7f76f6a669ea66159f30262e9e1dbb8f8c2dcbeb4392c99"
+    },
+    {
+      "bytes": 8791451,
+      "name": "part-00002.lfs",
+      "sha256": "236bbd9d8d7b1e999e76ce04ddcd3788bba2e3466379477b1dd696968ed73e07"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "57b631b0f7f1877d2969797b7dee1576edf6e5a0c57df40dfdcd294ed6d11eb8",
+  "size_bytes": 42345883,
+  "source": {
+    "artifact_id": 13463784071,
+    "created_at": "2026-11-06T00:03:36Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463784071",
+    "name": "stress-v2-resumed-adapt-reduced-exwald-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 42345883,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463784071/zip"
+  }
+}

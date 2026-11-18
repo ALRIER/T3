@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "585a2ed198eccdf863a70da40d17a889",
+  "parts": [
+    {
+      "bytes": 2923070,
+      "name": "part-00001.lfs",
+      "sha256": "85d590c3cafd57b1fcc30940ecff5645a0c36ef330085baea2219b11df4abcad"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "85d590c3cafd57b1fcc30940ecff5645a0c36ef330085baea2219b11df4abcad",
+  "size_bytes": 2923070,
+  "source": {
+    "artifact_id": 13463798638,
+    "created_at": "2026-11-06T00:00:11Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463798638",
+    "name": "stress-v2-resumed-adapt-score-exgaussian-s53-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2923070,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463798638/zip"
+  }
+}
