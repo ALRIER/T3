@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "adb18770b77717508ccba35394caa76f",
+  "parts": [
+    {
+      "bytes": 39203,
+      "name": "part-00001.lfs",
+      "sha256": "98e4bdb23b6c6b6cc79847762f57a8c6002ed4083bacd2b8d7ccb7c43ec8e156"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "98e4bdb23b6c6b6cc79847762f57a8c6002ed4083bacd2b8d7ccb7c43ec8e156",
+  "size_bytes": 39203,
+  "source": {
+    "artifact_id": 13309208848,
+    "created_at": "2026-11-04T09:11:56Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13309208848",
+    "name": "t3-b3-parametric-score-weibull-p7-s48-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39203,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13309208848/zip"
+  }
+}
