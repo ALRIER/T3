@@ -9,6 +9,7 @@ import collections
 import csv
 import datetime as dt
 import hashlib
+import http.client
 import io
 import json
 import os
@@ -178,7 +179,7 @@ def hpo(args):
 
 def github_api(path, token):
     url = "https://api.github.com/" + path.lstrip("/")
-    for attempt in range(3):
+    for attempt in range(5):
         req = urllib.request.Request(url, headers={
             "Accept": "application/vnd.github+json",
             "Authorization": "Bearer " + token,
@@ -187,8 +188,8 @@ def github_api(path, token):
         try:
             with urllib.request.urlopen(req, timeout=45) as resp:
                 return json.load(resp)
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
-            if attempt == 2:
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, http.client.IncompleteRead, ConnectionError, OSError, json.JSONDecodeError):
+            if attempt == 4:
                 raise
             time.sleep(2 ** attempt)
 
@@ -213,7 +214,7 @@ def timing(args):
             workflow = run.get("name", "")
             page = 1
             while True:
-                data = github_api(f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100&page={page}&filter=all", token)
+                data = github_api(f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=30&page={page}&filter=all", token)
                 batch = data.get("jobs", [])
                 for job in batch:
                     item = dict(source_run=run_id, source_workflow=workflow,
@@ -229,7 +230,7 @@ def timing(args):
                            job_name=job.get("name"), step_name=step.get("name"),
                            conclusion=step.get("conclusion"),
                            step_elapsed_seconds=seconds(step.get("started_at"),step.get("completed_at"))))
-                if len(batch) < 100:
+                if len(batch) < 30:
                     break
                 page += 1
                 assert page < 25, "Unbounded Actions history pagination"
