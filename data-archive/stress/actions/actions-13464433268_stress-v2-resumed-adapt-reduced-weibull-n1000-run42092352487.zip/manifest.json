@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "d6317d26fcc6b920e1e3a84efb7b729a",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "26512495a09e494a10ade2996b9716442458aef2fbf182b2038e00e25fd26ced"
+    },
+    {
+      "bytes": 9287495,
+      "name": "part-00002.lfs",
+      "sha256": "9ae1d528cf0aa074444f2212306d2d77a497345c4bb93ba8ca56daa3ed3aae18"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "53f630d26aefeb3a406e1409ac59b92ff15586a475a4824ec2a3236c3bc46a13",
+  "size_bytes": 42841927,
+  "source": {
+    "artifact_id": 13464433268,
+    "created_at": "2026-11-06T00:03:05Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13464433268",
+    "name": "stress-v2-resumed-adapt-reduced-weibull-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 42841927,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13464433268/zip"
+  }
+}

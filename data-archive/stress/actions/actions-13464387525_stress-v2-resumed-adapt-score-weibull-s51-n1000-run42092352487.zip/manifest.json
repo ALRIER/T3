@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "939173fa86ebdb3e2aaccdb4e877268c",
+  "parts": [
+    {
+      "bytes": 2928098,
+      "name": "part-00001.lfs",
+      "sha256": "a88131f0a2d20213e5fab5aeabdd8bd66736d9a23d24dd0ed299f552c24eeecd"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a88131f0a2d20213e5fab5aeabdd8bd66736d9a23d24dd0ed299f552c24eeecd",
+  "size_bytes": 2928098,
+  "source": {
+    "artifact_id": 13464387525,
+    "created_at": "2026-11-05T23:59:00Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13464387525",
+    "name": "stress-v2-resumed-adapt-score-weibull-s51-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2928098,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13464387525/zip"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "ad778e47679c1f69f252e177ab5e7173",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "a43014addb487719b0ac099d24e074531f0cb27eb9c67513dfc3481443341c58"
+    },
+    {
+      "bytes": 9229535,
+      "name": "part-00002.lfs",
+      "sha256": "72a6dcac2780455cdb5b10155fb8788bdfdc370d1c1b01cebf8a3bde6263866b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "abc9063c74a599750da7d2492d15cea04cb6027d8f5a82eaea9c3d6f3fa866d9",
+  "size_bytes": 42783967,
+  "source": {
+    "artifact_id": 13464952057,
+    "created_at": "2026-11-06T00:03:38Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13464952057",
+    "name": "stress-v2-resumed-adapt-reduced-normal-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 42783967,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13464952057/zip"
+  }
+}

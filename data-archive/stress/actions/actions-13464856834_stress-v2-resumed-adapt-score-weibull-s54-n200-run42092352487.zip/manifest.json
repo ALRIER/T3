@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "8a59750f08be9d856ce7c4064e351c52",
+  "parts": [
+    {
+      "bytes": 2926161,
+      "name": "part-00001.lfs",
+      "sha256": "29752d50753360b1f384f9847a907a3f278d00c939f6a4a56c32ee598bbffc86"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "29752d50753360b1f384f9847a907a3f278d00c939f6a4a56c32ee598bbffc86",
+  "size_bytes": 2926161,
+  "source": {
+    "artifact_id": 13464856834,
+    "created_at": "2026-11-05T23:58:46Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13464856834",
+    "name": "stress-v2-resumed-adapt-score-weibull-s54-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2926161,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13464856834/zip"
+  }
+}
