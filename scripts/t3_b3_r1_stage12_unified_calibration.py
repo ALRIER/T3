@@ -433,7 +433,7 @@ def selftest():
          "Holm stepdown logic is incorrect")
     need(adjust(p,"bh")[0,:].tolist()==[True,True,False],
          "BH stepup logic is incorrect")
-    need(wilson(0,100)[0]==0, "Wilson CI boundary invalid")
+    need(abs(wilson(0,100)[0])<1e-12, "Wilson CI boundary invalid")
     print("R1_STAGE12B_SYNTHETIC_UNIT_TEST_PASS")
 
 def main():
