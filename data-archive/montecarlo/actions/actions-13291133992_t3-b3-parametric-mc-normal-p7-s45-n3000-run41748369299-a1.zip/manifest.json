@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b09c5a14caa3b2ebb1613e1896ec652c",
+  "parts": [
+    {
+      "bytes": 18321993,
+      "name": "part-00001.lfs",
+      "sha256": "2b563937ec48fa9e2a483334d324088c8a4c9fc9c235faea164eef3381a24df3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2b563937ec48fa9e2a483334d324088c8a4c9fc9c235faea164eef3381a24df3",
+  "size_bytes": 18321993,
+  "source": {
+    "artifact_id": 13291133992,
+    "created_at": "2026-11-04T02:54:45Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13291133992",
+    "name": "t3-b3-parametric-mc-normal-p7-s45-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 18321993,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13291133992/zip"
+  }
+}
