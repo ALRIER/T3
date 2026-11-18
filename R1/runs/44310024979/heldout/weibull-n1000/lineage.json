@@ -1,0 +1,81 @@
+{
+  "family": "weibull",
+  "sample_n": 1000,
+  "original_r1_run": "44307352615",
+  "archived_scores": [
+    {
+      "seed": 11,
+      "archive": "actions-13066750415_t3-b3-heldout-weibull-s11-n1000-run41208513291.zip",
+      "sha256": "1d9bf4e663c10b601da11a77bdaf20cdc76d9088c9a24873a235208742ee4134"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13071819568_t3-b3-heldout-weibull-s13-n1000-run41208513291.zip",
+      "sha256": "325e209008d0c0e13dfe9bd497cb15a09e3a3468557679df6b16c3ee588ba7d2"
+    },
+    {
+      "seed": 10,
+      "archive": "actions-13065040342_t3-b3-heldout-weibull-s10-n1000-run41208513291.zip",
+      "sha256": "9d1e24f5ebf7e778f6853248c0596455eb25b5f714230556a6f0fd0a8c03cae4"
+    },
+    {
+      "seed": 12,
+      "archive": "actions-13066136456_t3-b3-heldout-weibull-s12-n1000-run41208513291.zip",
+      "sha256": "2493b10786160795fa2fee70c3a97a849323dcd8483aa8f384875c35be046260"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13074942307_t3-b3-heldout-weibull-s16-n1000-run41208513291.zip",
+      "sha256": "ee8ef451e68a71f015d6a34af04516b4f650f4a783784a3cb21ed7a99766d2d1"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13074897692_t3-b3-heldout-weibull-s17-n1000-run41208513291.zip",
+      "sha256": "ab51214485531ada862928ca8701f1962b93125fd25f6b666bfd1445c8285884"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13077540195_t3-b3-heldout-weibull-s18-n1000-run41208513291.zip",
+      "sha256": "45092e171412dc131f9c13e81435e22cbeaefe407530409ef7ddd9fb118da3e4"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13074559092_t3-b3-heldout-weibull-s15-n1000-run41208513291.zip",
+      "sha256": "3e0cf2baf087a635f234879ed85860027b0651f1022af63e94f310a1ef62ce54"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13074715577_t3-b3-heldout-weibull-s14-n1000-run41208513291.zip",
+      "sha256": "76452dc0eff16fd39553c448dc9b110270cc628a0aca4b9b1afb2f8ebbe229ef"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13078592526_t3-b3-heldout-weibull-s19-n1000-run41208513291.zip",
+      "sha256": "1476ba582ad6cf7fbbf2c226b0486d8e01eea82356c256bce540dd5f89e0df27"
+    }
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}

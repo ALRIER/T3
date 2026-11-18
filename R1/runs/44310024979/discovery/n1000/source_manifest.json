@@ -1,0 +1,8 @@
+{
+  "origin": "verified repository split archive",
+  "archive": "actions-13161508425_t3-b3-discovery-bundle-n1000-run41487091262.zip",
+  "archive_sha256": "a17d731d22d3c4f0339c766f52d8aadd7e84f303c663b07f77f234a76a7e9683",
+  "tar_sha256": "8a76f254a24938be92595ef2c7a0784bc546d1037b869d88ad39c96b2979220e",
+  "sample_n": 1000,
+  "rds_count": 60
+}

@@ -1,0 +1,81 @@
+{
+  "family": "lognormal",
+  "sample_n": 1000,
+  "original_r1_run": "44307352615",
+  "archived_scores": [
+    {
+      "seed": 12,
+      "archive": "actions-13045049954_t3-b3-heldout-lognormal-s12-n1000-run41208513291.zip",
+      "sha256": "fbe6aa892ea286e96234d703b1e2edac2eed3a0c02fb493d9a75798850e299f3"
+    },
+    {
+      "seed": 10,
+      "archive": "actions-13045692701_t3-b3-heldout-lognormal-s10-n1000-run41208513291.zip",
+      "sha256": "4d150e1d0aa7d0298ca8515f2a530ff18a53ac2e67ffb801b155f5376530077c"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13045517516_t3-b3-heldout-lognormal-s11-n1000-run41208513291.zip",
+      "sha256": "54641b46c216a55ab7473732d07944cc77a6effdb9fff3e8dd9d509ff1cfc51e"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13055039118_t3-b3-heldout-lognormal-s15-n1000-run41208513291.zip",
+      "sha256": "3c195a14318468dab2444265a3dba6b07aecb778cce69b8ffbc8251123274994"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13054549983_t3-b3-heldout-lognormal-s14-n1000-run41208513291.zip",
+      "sha256": "7aac783e8fdd52eb04435d8b6da4b010a199625b60807c7c4726a903441beec6"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13060495548_t3-b3-heldout-lognormal-s17-n1000-run41208513291.zip",
+      "sha256": "880cc627a0e1dee62fb7be275879f807cd79a3f018a38f3edc5dfacda73385cd"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13059739476_t3-b3-heldout-lognormal-s18-n1000-run41208513291.zip",
+      "sha256": "c919f7207be6468a101b7d3b5a7b0c90a99e87cfe03ad226c2172c9caddd1b99"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13052472716_t3-b3-heldout-lognormal-s13-n1000-run41208513291.zip",
+      "sha256": "1a643f81230b9bef3d7f5b709c10a833b4e8f1692dcaf7f2c8fc4d27cc1d91bb"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13061015278_t3-b3-heldout-lognormal-s19-n1000-run41208513291.zip",
+      "sha256": "e4e04dd4e37a60d130e6a1755cd9a9691685a19fa68118b60af94ca8d4d883ee"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13056383241_t3-b3-heldout-lognormal-s16-n1000-run41208513291.zip",
+      "sha256": "0b6622da25ef85156dffd035223db465ab8e9152a1647f4e69abc3c03b3d5cad"
+    }
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}

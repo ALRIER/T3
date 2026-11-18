@@ -1,0 +1,81 @@
+{
+  "family": "normal",
+  "sample_n": 1000,
+  "original_r1_run": "44307352615",
+  "archived_scores": [
+    {
+      "seed": 18,
+      "archive": "actions-13045437912_t3-b3-heldout-normal-s18-n1000-run41208513291.zip",
+      "sha256": "fde02f923053b59130d7af65070b162e9b265fa04883e8db1014f1e45596a031"
+    },
+    {
+      "seed": 12,
+      "archive": "actions-13045503352_t3-b3-heldout-normal-s12-n1000-run41208513291.zip",
+      "sha256": "2dbc1a647fec61f5eabfcad3258a7012e0956213f29206e38e529eb881b788f7"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13045702551_t3-b3-heldout-normal-s15-n1000-run41208513291.zip",
+      "sha256": "0c58e3553657ff2ab4c8fa6a4760e9f0da298194eaafd8706dfab7b2becb61fb"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13045258680_t3-b3-heldout-normal-s16-n1000-run41208513291.zip",
+      "sha256": "84be365ae575f953a7db93610406eaa2d24f2bbfe0c5a4815d980f70cca0858b"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13045352280_t3-b3-heldout-normal-s17-n1000-run41208513291.zip",
+      "sha256": "9c178bc12f8e8abf15eb543c5f116f3242fafe91f9f61bc5228da1118df4ee0e"
+    },
+    {
+      "seed": 10,
+      "archive": "actions-13044909343_t3-b3-heldout-normal-s10-n1000-run41208513291.zip",
+      "sha256": "cf95c81810a17f28c9a4ef589ee22b3d775a770cae7e1ac1bd0ffb327f87cf97"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13045985182_t3-b3-heldout-normal-s11-n1000-run41208513291.zip",
+      "sha256": "3e97c900d304605b22bc7b98affc10c22d81f8b33f8e9bf3660831bdf5eaf48c"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13045267218_t3-b3-heldout-normal-s19-n1000-run41208513291.zip",
+      "sha256": "65b093ddb66291fd5e8875d1f1239f396c514b48d0b19ebdb1da96faeb776e2c"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13045059186_t3-b3-heldout-normal-s13-n1000-run41208513291.zip",
+      "sha256": "55b830b84559828ecb0f967cf20f9e9ed8699d49342b1f77270dafef34d044a4"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13045567071_t3-b3-heldout-normal-s14-n1000-run41208513291.zip",
+      "sha256": "7f5c705e3fe7c74704dc4a44cc913d7c7da3c284bff318cbe86412f39e1c2339"
+    }
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}

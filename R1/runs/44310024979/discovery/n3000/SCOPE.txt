@@ -1,0 +1,4 @@
+Discovery scores and deterministic controls are training-only.
+Original RDS restored from repository backup: no frozen weights changed.
+Do not claim independent optimizer superiority from Discovery ranks.
+Evaluation-count comparisons exclude wall-clock and hyperparameter tuning.

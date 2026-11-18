@@ -1,0 +1,81 @@
+{
+  "family": "exwald",
+  "sample_n": 200,
+  "original_r1_run": "44307352615",
+  "archived_scores": [
+    {
+      "seed": 13,
+      "archive": "actions-13117107085_t3-b3-heldout-exwald-s13-n200-run41208513291.zip",
+      "sha256": "da7321f63eabba6f7fc37c7c79887c676e74d2ad7ecf5bf89e2352efdc190af8"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13117152844_t3-b3-heldout-exwald-s17-n200-run41208513291.zip",
+      "sha256": "8330cffe895afc888e6c9840c95ef4cd59b9521859d8cc2d7c598a9a33ea53aa"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13117555576_t3-b3-heldout-exwald-s14-n200-run41208513291.zip",
+      "sha256": "8d8eec8b7b0a57d0d5004932f16f2e7e53d01451849917b1253644fd57617b64"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13117896099_t3-b3-heldout-exwald-s19-n200-run41208513291.zip",
+      "sha256": "896af48558f4d5023e9ca8e627f5fe3172e7b10493edc8d9d8665bf62224e7c4"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13117178042_t3-b3-heldout-exwald-s18-n200-run41208513291.zip",
+      "sha256": "75b3bc2d1365cb34d0a5ff8c40a92e735ad5dd31bf493a7773944afba4aaeef9"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13116554759_t3-b3-heldout-exwald-s11-n200-run41208513291.zip",
+      "sha256": "84b1eca15223ea6b86ff4b6e02786555d67668bdbbf30a39c41e55509c08fb4b"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13117461800_t3-b3-heldout-exwald-s15-n200-run41208513291.zip",
+      "sha256": "c309270767364369547fc861c8ba41aa28bfd32b582dfa830ff9cd09bc69acf3"
+    },
+    {
+      "seed": 10,
+      "archive": "actions-13116424835_t3-b3-heldout-exwald-s10-n200-run41208513291.zip",
+      "sha256": "816b81752a332f1f596c49ff9c323ab1b22d39bc8ac189fbb948a95276234e5a"
+    },
+    {
+      "seed": 12,
+      "archive": "actions-13116704204_t3-b3-heldout-exwald-s12-n200-run41208513291.zip",
+      "sha256": "90df08414893d342cd7de2bb1d404c321e0a1e5a7e7e16180f10ba6596fce7e6"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13116967168_t3-b3-heldout-exwald-s16-n200-run41208513291.zip",
+      "sha256": "aa9f1e9f17f157fc91ac37eb900f8594a000351ffa43c94ddba019effae65d9e"
+    }
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}

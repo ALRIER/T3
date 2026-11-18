@@ -1,0 +1,81 @@
+{
+  "family": "exgaussian",
+  "sample_n": 200,
+  "original_r1_run": "44307352615",
+  "archived_scores": [
+    {
+      "seed": 12,
+      "archive": "actions-13104019770_t3-b3-heldout-exgaussian-s12-n200-run41208513291.zip",
+      "sha256": "31e527d4986ae1e01260b9e89daefc2aac441035632eb9db48b0a6bdff96f223"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13115919196_t3-b3-heldout-exgaussian-s19-n200-run41208513291.zip",
+      "sha256": "e18fd81c50891f08b674453a67d9a77c2affe1eb6b9e8bd57839657118e7b2f6"
+    },
+    {
+      "seed": 10,
+      "archive": "actions-13097756151_t3-b3-heldout-exgaussian-s10-n200-run41208513291.zip",
+      "sha256": "f7e82a16bd6eeed8e9da2370471cce635dc87a19da207a4d774edd9e607c3a93"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13099803381_t3-b3-heldout-exgaussian-s11-n200-run41208513291.zip",
+      "sha256": "694cfc1c180264b4807400267acaf0133f29e4f35d05c34e88bced0461530707"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13115913808_t3-b3-heldout-exgaussian-s18-n200-run41208513291.zip",
+      "sha256": "598af1c43d35471de7742410a2c7c9eaee64d440427983bb0c9a7d3645fbd704"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13112961665_t3-b3-heldout-exgaussian-s14-n200-run41208513291.zip",
+      "sha256": "c2b881fb483eb43ebc35ef61cf59fba7881906452d1caf30d47cf7ee8eb28d1d"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13116194322_t3-b3-heldout-exgaussian-s17-n200-run41208513291.zip",
+      "sha256": "72dbaa1eaccc5dc3c9fafff20566809b55829d78822d46b34040583417834cd3"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13116142765_t3-b3-heldout-exgaussian-s16-n200-run41208513291.zip",
+      "sha256": "3fdaf7bec0b1b76246d8916784c8b87b48fcd00cbc34fa686722cfa8decf4c2b"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13116228046_t3-b3-heldout-exgaussian-s15-n200-run41208513291.zip",
+      "sha256": "07e7b91f04023233536f1aa2d5973dd7eaab03a90e71d25e0808d96b1e5b2273"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13107637552_t3-b3-heldout-exgaussian-s13-n200-run41208513291.zip",
+      "sha256": "ff3b34937344a8076cbf9ba4c3e2ea15d612a954d443f12fc03fe964df5f0256"
+    }
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}

@@ -1,0 +1,433 @@
+{
+  "source_original_r1_run": "44307352615",
+  "independent_heldout_seeds": 10,
+  "training_seeds": 10,
+  "scenario_count": 241,
+  "source_families": [
+    "normal",
+    "lognormal",
+    "weibull",
+    "invgauss",
+    "exgaussian",
+    "exwald"
+  ],
+  "sample_sizes": [
+    200,
+    1000,
+    3000
+  ],
+  "frozen_candidate_count": 720,
+  "training_discovery_units": 180,
+  "no_retraining": true,
+  "primary_confirmatory_comparisons_reused": 216,
+  "additional_signflip_tests": "sensitivity_only_not_selection_aware",
+  "deterministic_control": "Discovery training scores only; no Held Out optimization superiority claim",
+  "computational_cost": "actual candidate evaluations; excludes wall time and tuning overhead",
+  "files": [
+    {
+      "path": "discovery/n1000/SCOPE.txt",
+      "sha256": "902fa0a9c2da2130c64716c92ad0b1c9b32182905ae4c4ee006f01c5d6b4b019",
+      "bytes": 280
+    },
+    {
+      "path": "discovery/n1000/source_manifest.json",
+      "sha256": "72dd4958c2a1cce594180250c6bab5ec7411d050838bbbfffbc98433b1341eaf",
+      "bytes": 346
+    },
+    {
+      "path": "discovery/n1000/training_deterministic_controls.csv.gz",
+      "sha256": "52baf624503a7855c62025a2c73f0ff0c8431756d62743408fff36f74ef2f9e8",
+      "bytes": 647423
+    },
+    {
+      "path": "discovery/n1000/training_method_scores.csv.gz",
+      "sha256": "b528b8d578ecb8ae466a576516e8493b952db7f5ee14e15cdf7f479d8b84a0b4",
+      "bytes": 1211095
+    },
+    {
+      "path": "discovery/n1000/training_optimizer_costs.csv",
+      "sha256": "c2ce46bc5836178562f0e5798e874f72cd2e066e5c22090d39c9a2f271a44b80",
+      "bytes": 22527
+    },
+    {
+      "path": "discovery/n200/SCOPE.txt",
+      "sha256": "902fa0a9c2da2130c64716c92ad0b1c9b32182905ae4c4ee006f01c5d6b4b019",
+      "bytes": 280
+    },
+    {
+      "path": "discovery/n200/source_manifest.json",
+      "sha256": "d46613d7a1c64f24fec4e0d23fb43b13b9e1025bfe73aa51e0340eaf75346ff8",
+      "bytes": 344
+    },
+    {
+      "path": "discovery/n200/training_deterministic_controls.csv.gz",
+      "sha256": "8cdd5ba56d5fb833f9d8f0365c10caf89dd4821c2d22574ef6f355b0a4fddcb8",
+      "bytes": 645570
+    },
+    {
+      "path": "discovery/n200/training_method_scores.csv.gz",
+      "sha256": "bee87d52df9aa331dd3027b7046d76bf7e0e781102875c1d47e04c8b61894dbe",
+      "bytes": 1201602
+    },
+    {
+      "path": "discovery/n200/training_optimizer_costs.csv",
+      "sha256": "e8440c2c79882b051ee59580f9a059632a12bb0c987bc07f8a7e1870e0a016d4",
+      "bytes": 22271
+    },
+    {
+      "path": "discovery/n3000/SCOPE.txt",
+      "sha256": "902fa0a9c2da2130c64716c92ad0b1c9b32182905ae4c4ee006f01c5d6b4b019",
+      "bytes": 280
+    },
+    {
+      "path": "discovery/n3000/source_manifest.json",
+      "sha256": "dc6584ae51604cd54f334b438af27edd4236104f3e496e7e34380deb145f909d",
+      "bytes": 346
+    },
+    {
+      "path": "discovery/n3000/training_deterministic_controls.csv.gz",
+      "sha256": "7c5ea7be57dd2285761aca340c8ebb1d84282b3514f2b2aedf2ec899196ee604",
+      "bytes": 649530
+    },
+    {
+      "path": "discovery/n3000/training_method_scores.csv.gz",
+      "sha256": "0b863799997b5d8d84639d64f3fef279dc7adbff4caac84855db89d2e01c742b",
+      "bytes": 1214147
+    },
+    {
+      "path": "discovery/n3000/training_optimizer_costs.csv",
+      "sha256": "27664c6e9345e015d447436a830fae0f3c58dd9f320669fc2a553718704f18b0",
+      "bytes": 22500
+    },
+    {
+      "path": "heldout/exgaussian-n1000/candidate_by_eval.csv",
+      "sha256": "9a48a550eeb772412c193f3049171a6038d606feef232c020a071e88dc259bad",
+      "bytes": 20603
+    },
+    {
+      "path": "heldout/exgaussian-n1000/lineage.json",
+      "sha256": "0c5910c8ed6ccdd9bc0298f9e864f577d5c9f495a9a5120268b5b5b1644d2c7c",
+      "bytes": 2401
+    },
+    {
+      "path": "heldout/exgaussian-n1000/scenario_descriptive.csv",
+      "sha256": "f0c197c91e3e19b8f6c60092b7898df3a13a4d33bf49b5be02e6b73ce41ac648",
+      "bytes": 49727
+    },
+    {
+      "path": "heldout/exgaussian-n200/candidate_by_eval.csv",
+      "sha256": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1",
+      "bytes": 20496
+    },
+    {
+      "path": "heldout/exgaussian-n200/lineage.json",
+      "sha256": "b4a4e3d2d4d142501f828f6a720a13d326fe3dbdeff4a85cf6eb29ffe6ccffed",
+      "bytes": 2390
+    },
+    {
+      "path": "heldout/exgaussian-n200/scenario_descriptive.csv",
+      "sha256": "61b8a11b4b8359224503855ee87f7fc91e6ab9d24f42f0ffd15451023da9028c",
+      "bytes": 48926
+    },
+    {
+      "path": "heldout/exgaussian-n3000/candidate_by_eval.csv",
+      "sha256": "29ad25f918e9b54964d22bad1ee1592b0c75adb7ca301db8f4d41bd24e2660ba",
+      "bytes": 20604
+    },
+    {
+      "path": "heldout/exgaussian-n3000/lineage.json",
+      "sha256": "38e5f5af9e5e1265c50ab60fae37bb09d470ba93a704773c3b4e4d025c5c43e8",
+      "bytes": 2401
+    },
+    {
+      "path": "heldout/exgaussian-n3000/scenario_descriptive.csv",
+      "sha256": "fce0c0a696b16b04f2a113c64b58d188dbf6861b999269ebadb6f102eab108fa",
+      "bytes": 50100
+    },
+    {
+      "path": "heldout/exwald-n1000/candidate_by_eval.csv",
+      "sha256": "ec50b9c1e2d23eb754ee1515e5d052996b5eda540511b573549613ddb4451071",
+      "bytes": 19197
+    },
+    {
+      "path": "heldout/exwald-n1000/lineage.json",
+      "sha256": "c8878e5f03ef84399d5d0217df3f9ec7c3842b279b1af947cce5d509c2836929",
+      "bytes": 2357
+    },
+    {
+      "path": "heldout/exwald-n1000/scenario_descriptive.csv",
+      "sha256": "e647bf1d3cee519638d81deafb550d9f398e46b26faf1bcebd5f9cfe19002c38",
+      "bytes": 45374
+    },
+    {
+      "path": "heldout/exwald-n200/candidate_by_eval.csv",
+      "sha256": "36f0d1ccbad0240366d2e4bceb825ccf18f96dddbb24bfcfc2815c7b13321b53",
+      "bytes": 19073
+    },
+    {
+      "path": "heldout/exwald-n200/lineage.json",
+      "sha256": "71f4777edc4134e8eaca8e8418570a40c5f834073c12750ede8a61bbe19174ec",
+      "bytes": 2346
+    },
+    {
+      "path": "heldout/exwald-n200/scenario_descriptive.csv",
+      "sha256": "fc2671fe0af9714a20fe8add997af20bc69785dc093efa27cc51ce0cfe11d896",
+      "bytes": 45052
+    },
+    {
+      "path": "heldout/exwald-n3000/candidate_by_eval.csv",
+      "sha256": "ba1355cbc989b2f2a3590efa4e50f686e84de1d15ee997617c8117bd1c881018",
+      "bytes": 19184
+    },
+    {
+      "path": "heldout/exwald-n3000/lineage.json",
+      "sha256": "afea852a2646813c21ab4c1696d36a7cdf9c3c1d4e4ae3fc9c258735d411bea5",
+      "bytes": 2357
+    },
+    {
+      "path": "heldout/exwald-n3000/scenario_descriptive.csv",
+      "sha256": "c2cb1421ae2e113902bccb2ef6469bc33973a1b72df4c8a77654bcec36bed3ad",
+      "bytes": 45454
+    },
+    {
+      "path": "heldout/invgauss-n1000/candidate_by_eval.csv",
+      "sha256": "153552bc156bde36f5447e8ce4a171dd373aa6968edcb653d6956a87d6117e95",
+      "bytes": 20723
+    },
+    {
+      "path": "heldout/invgauss-n1000/lineage.json",
+      "sha256": "fb0fec60eb5eea6b0a8262446779cf67c3c7b5f85f793862b92101f73c50b755",
+      "bytes": 2379
+    },
+    {
+      "path": "heldout/invgauss-n1000/scenario_descriptive.csv",
+      "sha256": "307d8b27ffe8f44ee1c7b4f54a19349b09913006ec849ca01f0330c8949096d8",
+      "bytes": 48873
+    },
+    {
+      "path": "heldout/invgauss-n200/candidate_by_eval.csv",
+      "sha256": "8a6574bc3066e3df991e1eb5469a96f7f1caa3021961e67d7943d40a721a3be4",
+      "bytes": 20592
+    },
+    {
+      "path": "heldout/invgauss-n200/lineage.json",
+      "sha256": "34c9ef402795e58fcd0ba0eb8f5398b655c52d172f82d357fb4ddbb0beb2018d",
+      "bytes": 2368
+    },
+    {
+      "path": "heldout/invgauss-n200/scenario_descriptive.csv",
+      "sha256": "7ebbf53278b1ddee293cd5eab7c1af1381f5c68e4e17ae892ade8f10daeb6952",
+      "bytes": 48643
+    },
+    {
+      "path": "heldout/invgauss-n3000/candidate_by_eval.csv",
+      "sha256": "0b93d2b34585beda5e83ecf5882e1ec257438cc1e20a023d0c813a478dee8a85",
+      "bytes": 20714
+    },
+    {
+      "path": "heldout/invgauss-n3000/lineage.json",
+      "sha256": "ec7ea5dbcc78f6ad4894785b9ceab83b43e046364ec4d0b63ec4d5a4781b8141",
+      "bytes": 2379
+    },
+    {
+      "path": "heldout/invgauss-n3000/scenario_descriptive.csv",
+      "sha256": "62545983cfd1a35f81849221a5882b67e483eb4abcaebfb5b1a2f12a887ab4d0",
+      "bytes": 48896
+    },
+    {
+      "path": "heldout/lognormal-n1000/candidate_by_eval.csv",
+      "sha256": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215",
+      "bytes": 20708
+    },
+    {
+      "path": "heldout/lognormal-n1000/lineage.json",
+      "sha256": "a84241290108df6f8decf0c6d1fd064ebff37ed6f965597dfde302f2f1d60c34",
+      "bytes": 2390
+    },
+    {
+      "path": "heldout/lognormal-n1000/scenario_descriptive.csv",
+      "sha256": "728b405fe4a6de028a5a0532376feda06a414b76d10b1a8fc501a155391412dd",
+      "bytes": 49638
+    },
+    {
+      "path": "heldout/lognormal-n200/candidate_by_eval.csv",
+      "sha256": "f8e1e8cbe8667e99ca7cc1334a9ccd02e4eee0d8a7f5227431209eeeaabbe85e",
+      "bytes": 20670
+    },
+    {
+      "path": "heldout/lognormal-n200/lineage.json",
+      "sha256": "ecfef43263efd1f8a1a2f9212ecffe3e21a5799a2a8f484c33804defdef897f3",
+      "bytes": 2379
+    },
+    {
+      "path": "heldout/lognormal-n200/scenario_descriptive.csv",
+      "sha256": "1a9b7c604849952bb215afd57224bfa6dfacbc343786f325d6c98fcd3a8164b5",
+      "bytes": 49158
+    },
+    {
+      "path": "heldout/lognormal-n3000/candidate_by_eval.csv",
+      "sha256": "2e0453429c25e55b77764e06d5cdfc58784d80b9f2f0aa8c508c5d057dfd8da2",
+      "bytes": 20735
+    },
+    {
+      "path": "heldout/lognormal-n3000/lineage.json",
+      "sha256": "9095d758b6aca43c250eaebc959b4ec1c1fd69563d1b1e131f621265837b63d0",
+      "bytes": 2390
+    },
+    {
+      "path": "heldout/lognormal-n3000/scenario_descriptive.csv",
+      "sha256": "1c443446274abe91286d9e8327ce256efc7b0d1553e55d70f5d63cbfe027262d",
+      "bytes": 49946
+    },
+    {
+      "path": "heldout/normal-n1000/candidate_by_eval.csv",
+      "sha256": "28f6caa05cb4126e94e31b9a7600ba2e1a64a2a8f679740b979bcb18e0db9d75",
+      "bytes": 20113
+    },
+    {
+      "path": "heldout/normal-n1000/lineage.json",
+      "sha256": "5325c2b62276c6d53321dd6ad35735e477207c75b68f55187413129e9355b71f",
+      "bytes": 2357
+    },
+    {
+      "path": "heldout/normal-n1000/scenario_descriptive.csv",
+      "sha256": "c3925d4e8d9d05e53efab8456c2b8e6fe502b3078b93edafb37c08f29af14edc",
+      "bytes": 48749
+    },
+    {
+      "path": "heldout/normal-n200/candidate_by_eval.csv",
+      "sha256": "16427cf2c2ccc1320ff8af8ac7a6e2ca032567661dc1768b2323bc4967b6c476",
+      "bytes": 20078
+    },
+    {
+      "path": "heldout/normal-n200/lineage.json",
+      "sha256": "dd4ed1b508b8308e818bf2bc50a1ee9fa93f1ae12029b7a657ca8ea257e7fe8f",
+      "bytes": 2346
+    },
+    {
+      "path": "heldout/normal-n200/scenario_descriptive.csv",
+      "sha256": "db6d979d520583c6d62083360594b5271c83a681b3c39c1234e2e1fb9db2bb40",
+      "bytes": 47999
+    },
+    {
+      "path": "heldout/normal-n3000/candidate_by_eval.csv",
+      "sha256": "58bb89150aca707af6b6fbcd12f55ed9ec1bcdd799f041ce1fdf2477a91df508",
+      "bytes": 20189
+    },
+    {
+      "path": "heldout/normal-n3000/lineage.json",
+      "sha256": "dcb176eca3afaac2c5f1d64207242c024e1476f0128da2b37f170daf577e445f",
+      "bytes": 2357
+    },
+    {
+      "path": "heldout/normal-n3000/scenario_descriptive.csv",
+      "sha256": "43896fd56287445d3d0a5f5afe3e4e8d9e7a897a6811c0205674b942fba1cdda",
+      "bytes": 49209
+    },
+    {
+      "path": "heldout/weibull-n1000/candidate_by_eval.csv",
+      "sha256": "4cf2d69b715de6b83e7eae7e4b06089df8b13752c967add5bac9ee1779f2cc9c",
+      "bytes": 20070
+    },
+    {
+      "path": "heldout/weibull-n1000/lineage.json",
+      "sha256": "78170b7998d0fce63b2a7a1500d4dc620e4bd41c7b84f59ff7b5ad5a986c4f77",
+      "bytes": 2368
+    },
+    {
+      "path": "heldout/weibull-n1000/scenario_descriptive.csv",
+      "sha256": "62fcbaf6689177f1c8712b740235914cfddab63d1dba4f4abe3904ed5522316b",
+      "bytes": 47363
+    },
+    {
+      "path": "heldout/weibull-n200/candidate_by_eval.csv",
+      "sha256": "36e1fc7fea0e05904acebad2b00f4f32573e43102f38afcfeccdfd187ca79ceb",
+      "bytes": 19866
+    },
+    {
+      "path": "heldout/weibull-n200/lineage.json",
+      "sha256": "6dba685ffdf9031e8a4eb72e2edc84b5172eeb8f87059d20c96e053afcf0f0f0",
+      "bytes": 2357
+    },
+    {
+      "path": "heldout/weibull-n200/scenario_descriptive.csv",
+      "sha256": "6fade47bd51950682ad9cd0906552a1061bd0256af38868e86ee8d49f24e5dfc",
+      "bytes": 46954
+    },
+    {
+      "path": "heldout/weibull-n3000/candidate_by_eval.csv",
+      "sha256": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c",
+      "bytes": 20075
+    },
+    {
+      "path": "heldout/weibull-n3000/lineage.json",
+      "sha256": "d316a44b7f5d6d8ea3a7862aa669671ea45ce30e7e30c979b5d9e9e65eedf827",
+      "bytes": 2368
+    },
+    {
+      "path": "heldout/weibull-n3000/scenario_descriptive.csv",
+      "sha256": "07f0d86d09ae56c2729f4ab6f02d63cc5b99ddeb748d314004c797f62d2cf9df",
+      "bytes": 47715
+    },
+    {
+      "path": "synthesis/compute_budget_vs_independent_improvement.csv",
+      "sha256": "d218b18e997530167d11f8273b827641e3edae00e73f71b287cc7c3e3eb8621f",
+      "bytes": 238411
+    },
+    {
+      "path": "synthesis/deterministic_training_only_controls.csv",
+      "sha256": "ee02b6d60ba809e4280fafcd188fe0b4b710378f468376d5e7a063bb18032f72",
+      "bytes": 8876929
+    },
+    {
+      "path": "synthesis/discovery_vs_heldout_rank_and_gap.csv",
+      "sha256": "4920e2b8d879ea38399d214374e525a7be6dc9afc0bb045dce0bcc0a12d724cd",
+      "bytes": 117096
+    },
+    {
+      "path": "synthesis/figure_r1_rank_retention.png",
+      "sha256": "ee8292f24a3f1866faf8af3e2559cc8365e5ad6bbc5455e7d72d5eb3b40ecf17",
+      "bytes": 56123
+    },
+    {
+      "path": "synthesis/figure_r1_rank_retention.svg",
+      "sha256": "b1886f3911747364de76e47a424723dbdadd5beaa1d41f3da5d6cd1b6a4f3e0c",
+      "bytes": 30570
+    },
+    {
+      "path": "synthesis/figure_r1_tradeoff.png",
+      "sha256": "3f59f6e38da41afaa63891705713c35c1b480e2c90ccd0ac025cd641debec7ae",
+      "bytes": 73871
+    },
+    {
+      "path": "synthesis/figure_r1_tradeoff.svg",
+      "sha256": "d11279bf3ac4b8de0cc2a68d11ee23335c5f7627466370ddd75f39a2b2ff91fc",
+      "bytes": 45947
+    },
+    {
+      "path": "synthesis/mse_q95_pareto_tradeoff.csv",
+      "sha256": "8327d295c4ba0db370b1ffedeedd9e38eb0becd71f66b65d6343efd34e708f3f",
+      "bytes": 4684
+    },
+    {
+      "path": "synthesis/optimizer_training_seed_stability.csv",
+      "sha256": "92b2682f8248add47530bdb1b42de38e6d9956a3127a7209b2611ef0c5d61656",
+      "bytes": 16090
+    },
+    {
+      "path": "synthesis/rank_probability_seed_bootstrap.csv",
+      "sha256": "994d817899e55981f032252fc84d907863ff72a5014e66b2d07c7a0311df422a",
+      "bytes": 5123
+    },
+    {
+      "path": "synthesis/ranking_preservation.csv",
+      "sha256": "26ba337820b810228f480dd859f86e1121ff0ad287ded2a2c658785d0f70120f",
+      "bytes": 12575
+    },
+    {
+      "path": "synthesis/reviewer_exact_signflip_loo_global_holm.csv",
+      "sha256": "6e2ac450b36875a27e84a38d987e028847b146c7d66857e54f50a44d6f0c1f24",
+      "bytes": 36770
+    }
+  ]
+}

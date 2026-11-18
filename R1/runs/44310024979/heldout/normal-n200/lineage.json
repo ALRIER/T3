@@ -1,0 +1,81 @@
+{
+  "family": "normal",
+  "sample_n": 200,
+  "original_r1_run": "44307352615",
+  "archived_scores": [
+    {
+      "seed": 10,
+      "archive": "actions-13045082279_t3-b3-heldout-normal-s10-n200-run41208513291.zip",
+      "sha256": "b16c96917d556ece0384cfa8b6afaab66956c59c330408017b4ccd3a9993e4be"
+    },
+    {
+      "seed": 13,
+      "archive": "actions-13044992872_t3-b3-heldout-normal-s13-n200-run41208513291.zip",
+      "sha256": "baac82d93637197455a357e1ab81769099a9b793bf7967ab5ee69bcb47dd8a0a"
+    },
+    {
+      "seed": 11,
+      "archive": "actions-13045840354_t3-b3-heldout-normal-s11-n200-run41208513291.zip",
+      "sha256": "fbfaaba546f5364d4ad6a33b2a360f9e2076d7744c5223b438a1fa7a8f67bf22"
+    },
+    {
+      "seed": 14,
+      "archive": "actions-13045411879_t3-b3-heldout-normal-s14-n200-run41208513291.zip",
+      "sha256": "3f7bb04038eec3ac5b7e8490c9eda66fc59259883c2fa0190b81cceb03bd6507"
+    },
+    {
+      "seed": 19,
+      "archive": "actions-13045088486_t3-b3-heldout-normal-s19-n200-run41208513291.zip",
+      "sha256": "317ca495404a0f6231bf8b913464d0efeade4f6c0346bc50420c03c3157c3622"
+    },
+    {
+      "seed": 18,
+      "archive": "actions-13045043937_t3-b3-heldout-normal-s18-n200-run41208513291.zip",
+      "sha256": "86c19f90a9d042bb8e3f55c6b89c91238b7d2ace9305edac397af9a02d90e8b2"
+    },
+    {
+      "seed": 12,
+      "archive": "actions-13045054176_t3-b3-heldout-normal-s12-n200-run41208513291.zip",
+      "sha256": "bc878589a1f695f5dbc1630514636ab26ffe69a8d440896b3aab203f961b4887"
+    },
+    {
+      "seed": 16,
+      "archive": "actions-13044804678_t3-b3-heldout-normal-s16-n200-run41208513291.zip",
+      "sha256": "c245f6f2c17e705e2fcc8157aa946f5559ebd05ea526c511d4d97dad8af39e33"
+    },
+    {
+      "seed": 17,
+      "archive": "actions-13045328520_t3-b3-heldout-normal-s17-n200-run41208513291.zip",
+      "sha256": "8b192e0c21164c59922ac0b638fd826b4b09b903fbcf08cdeb57e8722f46f7d8"
+    },
+    {
+      "seed": 15,
+      "archive": "actions-13045167503_t3-b3-heldout-normal-s15-n200-run41208513291.zip",
+      "sha256": "386421d57b2f676d1f312244243342f7dfd44d42013334ec58e085aaf743567f"
+    }
+  ],
+  "independent_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ]
+}
