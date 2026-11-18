@@ -1,0 +1,33 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6d79860c89c51a29a9b9fafb3b153492",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "5dd75c2459a5e6cdb91f65d1d96a9d14abe1f9f14496296384ef2c876e5cffd2"
+    },
+    {
+      "bytes": 4223152,
+      "name": "part-00002.lfs",
+      "sha256": "64858683b3c16cbb0c3a0f0c3a2c2d0b5f116e27c5dfa230585a8a05d0a10237"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "659ed9cdf742b059e5b43509d4342a79771c1baed99cb08d994302f5d6962158",
+  "size_bytes": 37777584,
+  "source": {
+    "artifact_id": 13423143704,
+    "created_at": "2026-11-05T14:31:11Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T14:26:19Z",
+    "key": "actions-13423143704",
+    "name": "t3-heldout-individual-weibull-n200-run42045005791.zip",
+    "run_id": 42045005791,
+    "size_bytes": 37777584,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13423143704/zip"
+  }
+}

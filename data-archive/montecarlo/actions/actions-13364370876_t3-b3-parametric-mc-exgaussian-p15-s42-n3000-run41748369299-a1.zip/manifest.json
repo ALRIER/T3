@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a3aecf4857aac4f88a9404c385baf5ab",
+  "parts": [
+    {
+      "bytes": 17433530,
+      "name": "part-00001.lfs",
+      "sha256": "7a44063db963fa54bbe276c967ac2da0d78a490e0a7825db77fd78b1811715b9"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7a44063db963fa54bbe276c967ac2da0d78a490e0a7825db77fd78b1811715b9",
+  "size_bytes": 17433530,
+  "source": {
+    "artifact_id": 13364370876,
+    "created_at": "2026-11-04T21:07:18Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13364370876",
+    "name": "t3-b3-parametric-mc-exgaussian-p15-s42-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 17433530,
+    "source": "actions",
+    "stage": "montecarlo",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13364370876/zip"
+  }
+}
