@@ -1,0 +1,104 @@
+name: R1 — RQ1 independent optimizer evidence from preserved backups
+on:
+  push:
+    paths:
+      - '.github/workflows/t3-b3-rq1-comprehensive-analysis.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-rq1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired-heldout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - name: Restore only the archived Held Out shards for this block
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          git lfs install --local
+          git lfs pull --include="data-archive/heldout/actions/*heldout-${FAMILY}-s*-n${SAMPLE_N}-run*.zip/part-*.lfs" --exclude=""
+          python3 - <<'PY'
+          import os,pathlib
+          root=pathlib.Path("data-archive/heldout/actions")
+          dirs=list(root.glob("*heldout-"+os.environ["FAMILY"]+"-s*-n"+os.environ["SAMPLE_N"]+"-run*.zip"))
+          assert len(dirs)==10, f"Expected 10 archived seeds; found {len(dirs)}"
+          for d in dirs:
+              for p in d.glob("part-*.lfs"):
+                  assert p.stat().st_size>200, f"Unhydrated LFS pointer: {p}"
+          PY
+      - name: Install statistical dependencies
+        run: python3 -m pip install --disable-pip-version-check numpy pandas scipy
+      - name: Run paired Held Out analysis
+        run: |
+          python3 scripts/t3_b3_rq1_analysis.py \
+            --archive-root data-archive/heldout/actions \
+            --family "${{ matrix.family }}" --n "${{ matrix.n }}" \
+            --output "out/${{ matrix.family }}-n${{ matrix.n }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          retention-days: 90
+          if-no-files-found: error
+  publish-r1:
+    needs: paired-heldout
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-*
+          path: R1/runs/${{ github.run_id }}/heldout
+          merge-multiple: true
+      - name: Global pairwise correction and publication manifest
+        run: |
+          python3 -m pip install --disable-pip-version-check pandas numpy
+          python3 - <<'PY'
+          import pathlib,pandas as pd,json
+          root=pathlib.Path("R1/runs/${{ github.run_id }}/heldout")
+          files=list(root.glob("*/pairwise.csv"))
+          assert len(files)==18, f"Expected 18 successful blocks, found {len(files)}"
+          d=pd.concat([pd.read_csv(f) for f in files],ignore_index=True)
+          assert len(d)==216
+          import numpy as np
+          p=d.p.to_numpy(); order=np.argsort(p); adj=np.empty(len(p)); running=0.
+          for rank,i in enumerate(order):
+              running=max(running,min(1.,float(p[i])*(len(p)-rank)))
+              adj[i]=running
+          d["holm_p_global"]=adj
+          d.to_csv(root.parent/"all_pairwise_global_holm.csv",index=False)
+          (root.parent/"manifest.json").write_text(json.dumps({
+            "workflow_run":"${{ github.run_id }}",
+            "source":"verified split backup archives in data-archive/heldout/actions",
+            "independent_unit":"heldout evaluation seed",
+            "comparisons":len(d),
+            "scope":"RQ1 direct method comparisons, Held Out only",
+            "limitations":"Discovery rankings, compute budget, and deterministic controls are not in this first module."
+          },indent=2))
+          PY
+      - name: Commit immutable R1 outputs to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "R1/runs/${{ github.run_id }}"
+          git commit -m "Archive R1 RQ1 paired Held Out evidence run ${{ github.run_id }}"
+          git push
