@@ -1,0 +1,38 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c4fc4ca42084f0e0b6c348724ada3aeb",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "aa237ee31f886dcce874e9b107a0d3427469b7e7c5410366aa3ba135bb7b9a30"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "5e029dbd60d3637ad663153e8cb3f3e433da856696d57484570d6d7e537f3f28"
+    },
+    {
+      "bytes": 23015504,
+      "name": "part-00003.lfs",
+      "sha256": "61c365312324e69a14e4f463ffabc41ba1472de6855ccc1876a2204d4f2004c3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "82530dad994f7542e267705346555c3a618b176f6c6e2bb0fc59e06c72fbd000",
+  "size_bytes": 90124368,
+  "source": {
+    "artifact_id": 13262006186,
+    "created_at": "2026-11-03T18:44:50Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T18:18:30Z",
+    "key": "actions-13262006186",
+    "name": "t3-b3-realworld-reduced-batch4-run41692539132.zip",
+    "run_id": 41692539132,
+    "size_bytes": 90124368,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13262006186/zip"
+  }
+}

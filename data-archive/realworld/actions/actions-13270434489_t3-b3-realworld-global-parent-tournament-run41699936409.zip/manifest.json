@@ -1,0 +1,88 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a015f67e672da5c852edd6abaea9d67a",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "b29e5b7f482cf498171091bb2771827a76910fa7e1a3191c944b874a8dbdd091"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "0b393409f1aac02874f1ea17ac7513fa69b9f2d742dee2a7693d3e4e80a438ac"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "8f4a264580ae7ea6e6068712f51f4a2153d3de82dc4e8b85264b1df5e40465c4"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "c94224863256bd9691867134871b3892970c5745ac6ecfd21637789b96530581"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "5b0fe2cf16090f0ade26a67117005e344c366ebc8c959743d2aa273e03136e6b"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "b3a9aba221240cdb4f9cb2019918a3da137031cc765e6fa218eb8a6f13cf26ff"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00007.lfs",
+      "sha256": "f505d3ac760d77485b44c41a492253c0a78210aab7c080796f7f8191d28027a3"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00008.lfs",
+      "sha256": "5e52c7608488092d6f8856f4de19bef7d4992669e13885534089c2441dded93a"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00009.lfs",
+      "sha256": "0df60ae0d95c7f23c029e1df74ef728774d608cab6af2e2199898b34b58c5e4b"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00010.lfs",
+      "sha256": "23fc54be0c438481c4c29be75c7aba28670011dffa4abcae9e829cd5983864a1"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00011.lfs",
+      "sha256": "2bb4f6337b517b785a79adc689d4bda205305666b0de20831273fa5314b23619"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00012.lfs",
+      "sha256": "1b4ed1b137d46729a89251d7946927138d8192b099ccd6b9001ebdb2565c6b6f"
+    },
+    {
+      "bytes": 20647463,
+      "name": "part-00013.lfs",
+      "sha256": "5c9c6387c632926a50128043502f36c0ea5f583bf18cf354c1fab77c08eadce6"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "d81117f12dfada0248eb98e07bcaaff6b592711a20e9db61bfbc92d6071bb9d0",
+  "size_bytes": 423300647,
+  "source": {
+    "artifact_id": 13270434489,
+    "created_at": "2026-11-03T21:11:16Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T19:05:14Z",
+    "key": "actions-13270434489",
+    "name": "t3-b3-realworld-global-parent-tournament-run41699936409.zip",
+    "run_id": 41699936409,
+    "size_bytes": 423300647,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13270434489/zip"
+  }
+}
