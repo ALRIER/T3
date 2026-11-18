@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "625635383f7df9df57df6087cd76b1c5",
+  "parts": [
+    {
+      "bytes": 21364405,
+      "name": "part-00001.lfs",
+      "sha256": "95d1e47d7e530c072ce580892c965f5ed14615851c58b76c1e2f0ce77e358086"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "95d1e47d7e530c072ce580892c965f5ed14615851c58b76c1e2f0ce77e358086",
+  "size_bytes": 21364405,
+  "source": {
+    "artifact_id": 13459615209,
+    "created_at": "2026-11-05T22:23:40Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13459615209",
+    "name": "stress-v2-resumed-confirm-reduced-invgauss-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 21364405,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13459615209/zip"
+  }
+}

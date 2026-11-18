@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "20618b624419bbfe9b9d493e9a6ace4c",
+  "parts": [
+    {
+      "bytes": 21577634,
+      "name": "part-00001.lfs",
+      "sha256": "3469a6a7dde08906c7cdb704cba4fab338b80b62bb891f898d8224be163cb08c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3469a6a7dde08906c7cdb704cba4fab338b80b62bb891f898d8224be163cb08c",
+  "size_bytes": 21577634,
+  "source": {
+    "artifact_id": 13458129905,
+    "created_at": "2026-11-05T22:25:53Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13458129905",
+    "name": "stress-v2-resumed-confirm-reduced-weibull-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 21577634,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13458129905/zip"
+  }
+}

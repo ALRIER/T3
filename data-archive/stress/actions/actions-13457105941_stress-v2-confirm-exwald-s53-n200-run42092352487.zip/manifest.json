@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "09a1bcbe8b453558485a7742f688fa7a",
+  "parts": [
+    {
+      "bytes": 8605803,
+      "name": "part-00001.lfs",
+      "sha256": "72454259068e11c90d25be073821d0f5dd3b811ee8a24a9d48eccdb9d4851d36"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "72454259068e11c90d25be073821d0f5dd3b811ee8a24a9d48eccdb9d4851d36",
+  "size_bytes": 8605803,
+  "source": {
+    "artifact_id": 13457105941,
+    "created_at": "2026-11-05T21:49:05Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13457105941",
+    "name": "stress-v2-confirm-exwald-s53-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 8605803,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13457105941/zip"
+  }
+}

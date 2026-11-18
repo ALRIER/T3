@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "415ab2f0125f253c3d243aa9ca4a4fa9",
+  "parts": [
+    {
+      "bytes": 138481,
+      "name": "part-00001.lfs",
+      "sha256": "2d3128a27c0e87a851519de1692870f788a3e27d77e0fa53885b91e0eb2436f8"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "2d3128a27c0e87a851519de1692870f788a3e27d77e0fa53885b91e0eb2436f8",
+  "size_bytes": 138481,
+  "source": {
+    "artifact_id": 13459786244,
+    "created_at": "2026-11-05T22:27:01Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13459786244",
+    "name": "stress-v2-resumed-adapt-invgauss-s66-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 138481,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13459786244/zip"
+  }
+}
