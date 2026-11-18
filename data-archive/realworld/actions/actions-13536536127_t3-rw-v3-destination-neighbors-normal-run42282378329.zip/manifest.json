@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "578b7256541758d7df5ef6f8522be9b1",
+  "parts": [
+    {
+      "bytes": 2063075,
+      "name": "part-00001.lfs",
+      "sha256": "66029a1749507e273c5320da4a7eadfb44520b7cc8c03825a32cd7650098994d"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "66029a1749507e273c5320da4a7eadfb44520b7cc8c03825a32cd7650098994d",
+  "size_bytes": 2063075,
+  "source": {
+    "artifact_id": 13536536127,
+    "created_at": "2026-11-06T19:49:22Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T19:45:09Z",
+    "key": "actions-13536536127",
+    "name": "t3-rw-v3-destination-neighbors-normal-run42282378329.zip",
+    "run_id": 42282378329,
+    "size_bytes": 2063075,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13536536127/zip"
+  }
+}

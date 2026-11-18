@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "bb401507b56ab24914dd9d3093cac95b",
+  "parts": [
+    {
+      "bytes": 1435,
+      "name": "part-00001.lfs",
+      "sha256": "ae6828ccbb7944b957d0239db8962f654220428082edf8195db34949c36c8c72"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ae6828ccbb7944b957d0239db8962f654220428082edf8195db34949c36c8c72",
+  "size_bytes": 1435,
+  "source": {
+    "artifact_id": 13536603690,
+    "created_at": "2026-11-06T20:06:12Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T20:05:07Z",
+    "key": "actions-13536603690",
+    "name": "t3-rw-full-final-Codex-lineage-run42285271441.zip",
+    "run_id": 42285271441,
+    "size_bytes": 1435,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13536603690/zip"
+  }
+}
