@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "fe5005ae033d0df33c56b2d76fe6b725",
+  "parts": [
+    {
+      "bytes": 284260,
+      "name": "part-00001.lfs",
+      "sha256": "65e3b15d352e39270f2b8d54a367405189c9728418bfc352c023b70cd1687aae"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "65e3b15d352e39270f2b8d54a367405189c9728418bfc352c023b70cd1687aae",
+  "size_bytes": 284260,
+  "source": {
+    "artifact_id": 13641118519,
+    "created_at": "2026-11-09T00:37:44Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-05T16:14:24Z",
+    "key": "actions-13641118519",
+    "name": "t3-rw-pub-validated-invgauss-b02-n200-g2-run42390283887.zip",
+    "run_id": 42390283887,
+    "size_bytes": 284260,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13641118519/zip"
+  }
+}
