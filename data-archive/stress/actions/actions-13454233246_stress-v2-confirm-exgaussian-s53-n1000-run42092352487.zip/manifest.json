@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b03164a19ff8fda8e64dd3a9a3d8394a",
+  "parts": [
+    {
+      "bytes": 8659451,
+      "name": "part-00001.lfs",
+      "sha256": "0d099d0b42fc4e25dfa5a93755a54567d4124ad59a87690eec31717ec6414de3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "0d099d0b42fc4e25dfa5a93755a54567d4124ad59a87690eec31717ec6414de3",
+  "size_bytes": 8659451,
+  "source": {
+    "artifact_id": 13454233246,
+    "created_at": "2026-11-05T21:29:32Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13454233246",
+    "name": "stress-v2-confirm-exgaussian-s53-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 8659451,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13454233246/zip"
+  }
+}
