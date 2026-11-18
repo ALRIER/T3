@@ -3,7 +3,9 @@ run-name: "R1 Q1 unified | Stage 12 known-truth calibration 18 parallel blocks +
 "on":
   push:
     branches: [main]
-    paths: [.github/workflows/t3-b3-r1-q1-unified-final-calibration.yml]
+    paths:
+      - .github/workflows/t3-b3-r1-q1-unified-final-calibration.yml
+      - scripts/t3_b3_r1_stage12_unified_calibration.py
   workflow_dispatch:
 permissions:
   contents: write
