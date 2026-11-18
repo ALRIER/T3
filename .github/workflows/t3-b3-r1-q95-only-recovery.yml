@@ -1,0 +1,144 @@
+name: R1 — Isolated original MC Q95 repair + integrate prior successful controls and cost
+run-name: "R1 Q95-only recovery | 1 validated pilot + 17 jobs | preserve 21 successful source jobs"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-q95-only-recovery.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+  packages: read
+concurrency:
+  group: r1-q95-only-recovery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-corrected-q95-on-one-full-original-block:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check numpy pandas scipy
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Corrected Q95 original MC and frozen-weight reproducibility pilot
+        run: bash scripts/t3_b3_r1_original_archive_worker.sh q95 normal 200
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-rescue-q95-normal-n200
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+
+  q95-remaining-seventeen-blocks:
+    needs: validate-corrected-q95-on-one-full-original-block
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+        exclude:
+          - {family: normal, n: 200}
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check numpy pandas scipy
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Corrected original MC Q95 precision, no new samples, frozen W and R1 score gate
+        run: |
+          bash scripts/t3_b3_r1_original_archive_worker.sh q95 \
+            "${{ matrix.family }}" "${{ matrix.n }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r1-rescue-q95-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  reuse-previous-successes-and-publish:
+    needs: q95-remaining-seventeen-blocks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse ALL 18 previous successful independent Held Out deterministic-control jobs
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: '44321854278'
+          github-token: ${{ github.token }}
+          pattern: r1-original-controls-*
+          merge-multiple: true
+          path: R1/runs/${{ github.run_id }}
+      - name: Reuse ALL 3 previous successful frozen Discovery cost jobs
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: '44321854278'
+          github-token: ${{ github.token }}
+          pattern: r1-original-cost-*
+          merge-multiple: true
+          path: R1/runs/${{ github.run_id }}
+      - name: Combine 18 corrected independent original MC Q95 blocks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: r1-rescue-q95-*
+          merge-multiple: true
+          path: R1/runs/${{ github.run_id }}
+      - name: Validate and globally adjust all 288 recovered deterministic comparisons
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check numpy pandas scipy
+          python scripts/t3_b3_r1_deterministic_from_original.py finalize \
+            --root "R1/runs/${{ github.run_id }}" \
+            --output "R1/runs/${{ github.run_id }}/reviewer_synthesis"
+      - name: Final scientific checks on Q95 500-replicate uncertainty, 720 original costs, provenance and calibration limits
+        run: python scripts/t3_b3_r1_archive_synthesis.py "R1/runs/${{ github.run_id }}"
+      - name: Commit complete reviewer evidence under new immutable R1 run on main
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "R1/runs/${{ github.run_id }}"
+          git commit -m "Archive complete R1 original Held Out controls, recovered original MC Q95 and verified cost evidence run ${{ github.run_id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-original-full-reviewer-complete-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
