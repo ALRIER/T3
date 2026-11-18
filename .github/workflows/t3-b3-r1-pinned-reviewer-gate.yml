@@ -1,0 +1,78 @@
+name: R1 — Independent reviewer replication using canonical pinned T3 image
+run-name: "R1 next-stage evidence gate | pinned GHCR image | 6 parallel families"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-pinned-reviewer-gate.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  packages: read
+  actions: read
+concurrency:
+  group: r1-pinned-reviewer-gate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  independent-r-verification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - name: Authenticate to previously built pinned T3 R image
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Independently reproduce R1 paired inference and exact sign-flip checks in pinned container
+        run: |
+          bash scripts/run_t3_default_analysis.sh Rscript \
+            scripts/t3_b3_r1_independent_reaudit.R \
+            "${{ matrix.family }}" R1/runs/44310024979 \
+            "out/reviewer/${{ matrix.family }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-pinned-reviewer-${{ matrix.family }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+  global-synthesis-and-permanent-backup:
+    needs: independent-r-verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-pinned-reviewer-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Independently audit all 216 contrasts, global Holm, ranking and budgets
+        run: |
+          python3 scripts/t3_b3_r1_audit_finalize.py "R1/runs/${{ github.run_id }}"
+      - name: Back up reviewer re-audit and SHA256 manifest under new immutable R1 run
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "R1/runs/${{ github.run_id }}"
+          git commit -m "Archive pinned T3-container independent R1 reviewer audit ${{ github.run_id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-pinned-reviewer-complete-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: error
