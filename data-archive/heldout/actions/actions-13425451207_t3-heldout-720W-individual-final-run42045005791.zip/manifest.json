@@ -1,0 +1,88 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "4d8d74fdd46f9af3116ef2742227aed5",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "7de010c459dd6546174e2d38f0a10c537cdb4898df0cc56f540dccdea08b179a"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "a318bcc755118d08e5f7c121365a1d55608670754135bedb260c4251ba2f8869"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "98039dd5b6621d93d0913ddd1b9af4ef5583e93ef1054a520ba531709e7273da"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "b99ea2559840cde87c8899e0b11576fbbb41da61780a8396de7dec2477c92a3d"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "35cb98af3bd21d8aff7a0460ef906d8930e7309266e32dd39d5d099ac20fd3c6"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "d802d1e020c0929fd4d6db5cc1b7c73693660ba5d53b493395fb0e0467717819"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00007.lfs",
+      "sha256": "3bb233fa80c5de882274548f0ef42064ddc41e37cd193b8852a68ff7471277cd"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00008.lfs",
+      "sha256": "1f887dc659ab48215ae274bed48fd3e4c291b77a1c85757d281ec4efad5d4108"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00009.lfs",
+      "sha256": "c7f3d59fc4ba231bbe5e0e707bd52d135771cb3a5e1c6f8def1e6d829ed0f752"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00010.lfs",
+      "sha256": "432b00ef845b80dfc1d49171281f7cb6c221068e4e8341e47b764d31904b5dd6"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00011.lfs",
+      "sha256": "fabd11ab33e9341871995b715dbc70737b7c3e4569b30e42b52e7f1394b55388"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00012.lfs",
+      "sha256": "a1775e2414cd1fe9b6de4cb0f390d71438e941262256988892bdfe39289a718d"
+    },
+    {
+      "bytes": 24555778,
+      "name": "part-00013.lfs",
+      "sha256": "1944317b7075427dbb7ea397ed72a32fea03c65708f519b31c201a9a5a924706"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "5f9e915698eb616904422deab5a8556e9abc819b13368e229e051939fde65f79",
+  "size_bytes": 427208962,
+  "source": {
+    "artifact_id": 13425451207,
+    "created_at": "2026-11-05T14:38:48Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T14:26:19Z",
+    "key": "actions-13425451207",
+    "name": "t3-heldout-720W-individual-final-run42045005791.zip",
+    "run_id": 42045005791,
+    "size_bytes": 427208962,
+    "source": "actions",
+    "stage": "heldout",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13425451207/zip"
+  }
+}
