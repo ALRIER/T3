@@ -1,0 +1,154 @@
+name: R1 — Original HPO cost and calibration feasibility audit
+run-name: "R1 stages 5A + 5B + 12A | 900 HPO folds | no retraining"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-stages5-12a-original-audit.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-original-stage5-12a
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - name: Validate code and 900 original archive manifests
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_b3_r1_stages5_12a.py
+          python3 scripts/t3_b3_r1_stages5_12a.py preflight --output /tmp/r1_hpo_preflight.json
+          test -s R1/runs/44307352615/all_pairwise_global_holm.csv
+          test -s R1/runs/44324757704/synthesis/table_RQ1_inferential_evidence_and_scope.csv
+          test -s R1/runs/44322411124/R1_ALL_SOURCE_CHECKSUMS.json
+
+  stage5a-original-hpo:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - name: Hydrate exactly the 50 relevant original nested-HPO archive shards
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git lfs pull --include="data-archive/discovery/actions/actions-*_t3-nested-${FAMILY}-seed*-n${SAMPLE_N}-fold*.zip/part-*.lfs,data-archive/misc/actions/actions-*_t3-nested-${FAMILY}-seed*-n${SAMPLE_N}-fold*.zip/part-*.lfs" --exclude=""
+      - name: Verify original SHA-256 and recover observed HPO trial costs
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_b3_r1_stages5_12a.py hpo \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output 'out/stage5a/${{ matrix.family }}/n${{ matrix.n }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r1-stages5-12a-hpo-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  stage5b-historical-actions:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - name: Recover original historical job and step timestamps
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_b3_r1_stages5_12a.py timing --output out/stage5b
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r1-stages5-12a-original-runtime-timestamps
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  stage12a-calibration-feasibility:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - name: Audit RQ1 inferential scope, multiplicity and coverage feasibility
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_b3_r1_stages5_12a.py calibration --output out/stage12a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-stages5-12a-calibration-feasibility
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+
+  synthesis-and-immutable-preservation:
+    needs: [stage5a-original-hpo, stage5b-historical-actions, stage12a-calibration-feasibility]
+    if: ${{ always() && needs.stage12a-calibration-feasibility.result != 'skipped' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-stages5-12a-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Verify complete original HPO recovery and build SHA-256 inventory
+        id: validate
+        continue-on-error: true
+        run: |
+          python3 scripts/t3_b3_r1_stages5_12a.py finalize \
+            --root 'R1/runs/${{ github.run_id }}'
+      - name: Preserve complete or explicitly partial scientific evidence on main
+        run: |
+          set -euo pipefail
+          mkdir -p 'R1/runs/${{ github.run_id }}'
+          printf '# R1 Stages 5A, 5B and 12A — original-only audit\n\n' > 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Actions run: %s\n\n' '${{ github.run_id }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Original archive scope: 900 nested-HPO folds; zero new optimizer fits or simulations.\n\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf '5A: %s\n5B: %s\n12A: %s\nSynthesis: %s\n\n' \
+            '${{ needs.stage5a-original-hpo.result }}' '${{ needs.stage5b-historical-actions.result }}' \
+            '${{ needs.stage12a-calibration-feasibility.result }}' '${{ steps.validate.outcome }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Per-optimizer final-fit runtimes and selection-aware CI coverage remain unverified unless explicitly established by separate source evidence.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'R1/runs/${{ github.run_id }}'
+          git commit -m 'Preserve R1 observed HPO, Actions timing and calibration-feasibility audit run ${{ github.run_id }}'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-stages5-12a-recovered-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
+      - name: Fail if original scientific reconstruction is incomplete
+        if: ${{ steps.validate.outcome != 'success' }}
+        run: |
+          echo 'R1 analysis incomplete; partial results were preserved with explicit status.'
+          exit 1
