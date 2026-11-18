@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "144de77a25299f18b9bf837f65daaab0",
+  "parts": [
+    {
+      "bytes": 2858661,
+      "name": "part-00001.lfs",
+      "sha256": "ad4016dec83b7040895864f4182a156c1491e6e3a6edd275f8cec8520f9d5638"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "ad4016dec83b7040895864f4182a156c1491e6e3a6edd275f8cec8520f9d5638",
+  "size_bytes": 2858661,
+  "source": {
+    "artifact_id": 13520770835,
+    "created_at": "2026-11-06T16:16:41Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:10:59Z",
+    "key": "actions-13520770835",
+    "name": "t3-rw-v2-reduced-exgaussian-b25-run42249952933.zip",
+    "run_id": 42249952933,
+    "size_bytes": 2858661,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13520770835/zip"
+  }
+}
