@@ -1,0 +1,5 @@
+family,sample_n,engine,nested_outer_fold_archives,original_inner_fold_trials,objective_evaluations,maximum_objective_evaluations,early_stop_saved,scenario_evaluations,observed_trial_elapsed_seconds,measurement
+lognormal,1000,ga,50,1200,6120000,6120000,0,786624000,69804.586,sum of original per-inner-fold elapsed_seconds; not whole-job time
+lognormal,1000,nsga2,50,1200,6120000,6120000,0,786624000,84762.435,sum of original per-inner-fold elapsed_seconds; not whole-job time
+lognormal,1000,de,50,1200,6114325,6120000,5675,785893200,82478.875,sum of original per-inner-fold elapsed_seconds; not whole-job time
+lognormal,1000,dirichlet,50,1200,2646200,6120000,3473800,340121125,32655.465,sum of original per-inner-fold elapsed_seconds; not whole-job time

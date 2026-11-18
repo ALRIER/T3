@@ -1,0 +1,15 @@
+{
+  "family": "exwald",
+  "individual_trial_costs": 4800,
+  "methods": 4,
+  "new_optimizer_fits": 0,
+  "restored_sha256_verified_sources": 50,
+  "sample_n": 200,
+  "source_run_ids": [
+    40494779825,
+    41061553686,
+    41113724413
+  ],
+  "stage": "5A",
+  "status": "PASS"
+}

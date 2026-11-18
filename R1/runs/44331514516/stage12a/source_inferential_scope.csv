@@ -1,0 +1,7 @@
+metric,count,denominator,interpretation
+original_paired_t_Holm_216,216,216,"original paired-t assumptions, 10 independent evaluation seeds"
+crossed_training_and_eval_t9_Holm_216,163,216,"approximate random effects moments and t9, reviewer sensitivity"
+joint_signflip_maxT_216,215,216,posthoc dependence-preserving seed signflip conditional on strong joint symmetry
+two_way_seed_bootstrap_95_CI_excludes_zero,182,216,"pointwise bootstrap, unadjusted across 216; descriptive only"
+original_frozen_controls_Holm_288,286,288,"two-sided adjusted differences can favor the CONTROL, not the optimizer"
+joint_direction_both_metrics_gt_0_within_pair,89,216,"two-metric within-pair only; exploratory, not global across pairs"

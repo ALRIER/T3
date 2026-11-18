@@ -1,0 +1,35 @@
+{
+  "blocks": 18,
+  "checked_original_optimizer_contrasts": 216,
+  "existing_sensitivity_evidence": [
+    "original_paired_t_Holm_216",
+    "crossed_training_and_eval_t9_Holm_216",
+    "joint_signflip_maxT_216",
+    "two_way_seed_bootstrap_95_CI_excludes_zero",
+    "original_frozen_controls_Holm_288",
+    "joint_direction_both_metrics_gt_0_within_pair"
+  ],
+  "fdr_calibration_validated": false,
+  "global_fwer_control_validated": false,
+  "independent_complete_resampling_of_selection_pipeline": false,
+  "independent_evaluation_seeds_per_block": 10,
+  "known_generating_reference_effects_for_optimizer_comparison": false,
+  "next_stage": "predeclare independent known-truth null/alternative experiments; replay selection and evaluation; assess empirical CI coverage, FWER/FDR and multiplicity under dependence",
+  "no_new_simulations": true,
+  "original_q95_mc_reps_per_scenario": 500,
+  "original_selection_replayed_under_valid_null": false,
+  "replay_requirements": [
+    "freeze reference effects and null data-generating processes before simulation",
+    "repeat selection including nested HPO and final fitting when those affect inference",
+    "independently score held-out samples using known truth",
+    "include training/evaluation-seed and scenario dependence in uncertainty calculation",
+    "measure nominal 95% interval coverage and uncertainty in the coverage estimate",
+    "measure familywise and false discovery error across the intended 216 hypotheses",
+    "retain failure cases and preregister exclusion and stopping criteria"
+  ],
+  "selection_aware_nominal_95_percent_ci_coverage_verified": false,
+  "source_t2_null_diagnostic_is_not_r1_calibration": true,
+  "stage": "12A",
+  "stage12b_required_for_empirical_coverage_claims": true,
+  "status": "FEASIBILITY_COMPLETE_COVERAGE_NOT_ESTABLISHED"
+}
