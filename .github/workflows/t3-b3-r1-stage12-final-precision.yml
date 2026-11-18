@@ -1,0 +1,121 @@
+name: R1 Q1 — Final Stage 12 high-resolution inference audit
+run-name: "R1 Q1 Stage 12 final | 20,480-draw null calibration + archived independent holdout"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/t3-b3-r1-stage12-final-precision.yml
+      - scripts/t3_b3_r1_stage12_final_precision.py
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-q1-stage12-final-precision-main
+  cancel-in-progress: false
+
+jobs:
+  verify-archived-sources-and-precision-plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install reproducible statistics
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2'
+      - name: Check Stage 12B calibration, 12C independent holdout and original archive
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_b3_r1_stage12_final_precision.py
+          python scripts/t3_b3_r1_stage12_final_precision.py selftest
+          test -s R1/runs/44340092503/STAGE12B_SHA256_MANIFEST.json
+          test -s R1/runs/44343019150/STAGE12C_SHA256_MANIFEST.json
+          test -s R1/runs/44331514516/R1_STAGE5_12A_SHA256_MANIFEST.json
+
+  high-precision-global-null-calibration-18-blocks:
+    needs: verify-archived-sources-and-precision-plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2'
+      - name: Generate 16,384 independent NEW known-truth null calibration records per block
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_r1_stage12_final_precision.py block \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output 'out/blocks/${{ matrix.family }}-n${{ matrix.n }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage12-final-precision-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  final-inference-figures-manifest-and-repository:
+    needs: [verify-archived-sources-and-precision-plan, high-precision-global-null-calibration-18-blocks]
+    if: ${{ always() && needs.verify-archived-sources-and-precision-plan.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, persist-credentials: true}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stage12-final-precision-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Install inferential plotting dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2' 'matplotlib>=3.8,<4'
+      - name: Evaluate calibrated Holm/minP, CI coverage and archived 216 original contrasts
+        id: scientific_synthesis
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_r1_stage12_final_precision.py finalize \
+            --root 'R1/runs/${{ github.run_id }}'
+      - name: Permanently preserve complete or explicitly partial Stage 12 results on main
+        run: |
+          set -euo pipefail
+          mkdir -p 'R1/runs/${{ github.run_id }}'
+          printf '# Q1 Stage 12 final null calibration precision\n\n' > 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'GitHub Actions run: %s\n' '${{ github.run_id }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf '18 new calibration partitions: %s\n' \
+            '${{ needs.high-precision-global-null-calibration-18-blocks.result }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Global calibrated synthesis: %s\n' \
+            '${{ steps.scientific_synthesis.outcome }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Reuse 4096 prior calibration + 16384 new calibration = 20480 null draws; reuse disjoint 4096 independent validation.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Scope: fixed estimands, fitted synthetic DGP only. Original nested HPO/weight selection remains untested.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'R1/runs/${{ github.run_id }}'
+          git commit -m 'Archive final Q1 Stage12 20480-null calibrated 216-test inference and independent validation run ${{ github.run_id }}'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q1-final-stage12-inference-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
+      - name: Scientifically incomplete pipeline must not silently pass
+        if: ${{ needs.high-precision-global-null-calibration-18-blocks.result != 'success' || steps.scientific_synthesis.outcome != 'success' }}
+        run: exit 1
