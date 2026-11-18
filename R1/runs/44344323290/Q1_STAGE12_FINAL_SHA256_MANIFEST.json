@@ -1,0 +1,234 @@
+{
+  "conditional_only": true,
+  "files": [
+    {
+      "bytes": 583,
+      "path": "blocks/exgaussian-n1000/CALIBRATION_LINEAGE.json",
+      "sha256": "889c12dd08f0d4c6d87d613ec195c7d0e0f50511892f74400ffac64476d4b3c9"
+    },
+    {
+      "bytes": 1484905,
+      "path": "blocks/exgaussian-n1000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "7a496715dbbcfa842b9a114aa27bed62b57a3531b45250ed496dad5e14dbd30b"
+    },
+    {
+      "bytes": 581,
+      "path": "blocks/exgaussian-n200/CALIBRATION_LINEAGE.json",
+      "sha256": "fe605ca7a6a841194be6f1a95c663a4d8ce622d094033bcd562e634fd959d192"
+    },
+    {
+      "bytes": 1484760,
+      "path": "blocks/exgaussian-n200/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "e961cfe65b737522418e5f6165fb4a435a53dd57528c0ecfb586f52a86a72e96"
+    },
+    {
+      "bytes": 583,
+      "path": "blocks/exgaussian-n3000/CALIBRATION_LINEAGE.json",
+      "sha256": "e271b786a22aa4d1281e7090bf6cc2cd74d99ee969627d6198d3b5795bcde334"
+    },
+    {
+      "bytes": 1484688,
+      "path": "blocks/exgaussian-n3000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "7e8c1ebec0abae527cf1e5390fff5108c31e6711807c4add83cd29240ea0dd3d"
+    },
+    {
+      "bytes": 575,
+      "path": "blocks/exwald-n1000/CALIBRATION_LINEAGE.json",
+      "sha256": "b629163e67e3dcaaeb28e2514ec97b775a7b7c1b864a21908e9955479fe1cbb7"
+    },
+    {
+      "bytes": 1484839,
+      "path": "blocks/exwald-n1000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "7b0d95dbcf268437972e1227de2b6782141644a60107cced2f75155304ab4144"
+    },
+    {
+      "bytes": 573,
+      "path": "blocks/exwald-n200/CALIBRATION_LINEAGE.json",
+      "sha256": "e70acb4e7e6a4077cd7875625181956127aec3a2d8c6e42c71b3cae09e4f08b4"
+    },
+    {
+      "bytes": 1484909,
+      "path": "blocks/exwald-n200/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "ddb3acf335587b8b3cfa708b4e1cb398e0e6b03709f15954b4d253293ee22ff3"
+    },
+    {
+      "bytes": 575,
+      "path": "blocks/exwald-n3000/CALIBRATION_LINEAGE.json",
+      "sha256": "760adb7c9dbc159f7f3a6a77c17f62b67baa353ce4fa0e01bdfd269c99b74760"
+    },
+    {
+      "bytes": 1484955,
+      "path": "blocks/exwald-n3000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "08d1b0c7c304073cb77695d9c6027836cc4a09443b0be078771916a95e631f0d"
+    },
+    {
+      "bytes": 579,
+      "path": "blocks/invgauss-n1000/CALIBRATION_LINEAGE.json",
+      "sha256": "2c76a2c31a9492cd3705bcb449726058950b780a4fafa06c4a8b0f7e326f1ed0"
+    },
+    {
+      "bytes": 1484761,
+      "path": "blocks/invgauss-n1000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "9afedefbea9f529e5dfa460f49fbd902c3d30fc59d0fdcea65532892ee35c778"
+    },
+    {
+      "bytes": 577,
+      "path": "blocks/invgauss-n200/CALIBRATION_LINEAGE.json",
+      "sha256": "bcd49ebfa76636857e3ff3c1be2bf17d0f754630fa984a1838213a347bd3814e"
+    },
+    {
+      "bytes": 1485259,
+      "path": "blocks/invgauss-n200/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "eab11e7ce6ebcf5ffa844db40bc5713750a6bbc56bf7dadb273a651508f8e627"
+    },
+    {
+      "bytes": 579,
+      "path": "blocks/invgauss-n3000/CALIBRATION_LINEAGE.json",
+      "sha256": "9cd8f8dde4fe8067fb6896562a351f075cb646fac5c7dc25b1b438b48d4a45e3"
+    },
+    {
+      "bytes": 1484850,
+      "path": "blocks/invgauss-n3000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "16229c2f6a0aef39f5d9e4b6bfe3c227558dac3aa91def69626485a90ae6683a"
+    },
+    {
+      "bytes": 581,
+      "path": "blocks/lognormal-n1000/CALIBRATION_LINEAGE.json",
+      "sha256": "54bf8182f8a9954aa279ba6f523ddef9b114e575a8a038fb18c499c003915a1c"
+    },
+    {
+      "bytes": 1485045,
+      "path": "blocks/lognormal-n1000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "7eb077bfd7cae3e7bc2fa1fe1df688eb8b38ed5d17a3a4004a721f213cbd95de"
+    },
+    {
+      "bytes": 579,
+      "path": "blocks/lognormal-n200/CALIBRATION_LINEAGE.json",
+      "sha256": "e0406685179c010d78ce024a521ec7ed35716d0f29d6ea33ae07b675560f65ce"
+    },
+    {
+      "bytes": 1484730,
+      "path": "blocks/lognormal-n200/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "266f197bd2e1e4b40f4fe0c3e5895c74df241d6cfacf36ae4e11a617196b27e0"
+    },
+    {
+      "bytes": 581,
+      "path": "blocks/lognormal-n3000/CALIBRATION_LINEAGE.json",
+      "sha256": "839a23e0f61254cd097278523916da73ff413d5ba191f0328041753236057b00"
+    },
+    {
+      "bytes": 1484883,
+      "path": "blocks/lognormal-n3000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "9870c654ce79e538ce4fb89a532005207b393e171ab2920db10f2978aee081fa"
+    },
+    {
+      "bytes": 575,
+      "path": "blocks/normal-n1000/CALIBRATION_LINEAGE.json",
+      "sha256": "13f912ecc70fcf35eae7bd97daa70a3807e0a31f8080a0b893420cf251e76d96"
+    },
+    {
+      "bytes": 1484740,
+      "path": "blocks/normal-n1000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "887152a0fc4ce285e85be80874c7ef01b04e0a785da7d52763336dd522442315"
+    },
+    {
+      "bytes": 573,
+      "path": "blocks/normal-n200/CALIBRATION_LINEAGE.json",
+      "sha256": "8f97ecb08f6ad06a2104070b02a14dd458a6970daff3a3090050f12a600fa9a7"
+    },
+    {
+      "bytes": 1484722,
+      "path": "blocks/normal-n200/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "fa1e83e4cbcbd8b5f5748c417d7e0ffc51f822c4f49464c431969b25c5d7fbbe"
+    },
+    {
+      "bytes": 575,
+      "path": "blocks/normal-n3000/CALIBRATION_LINEAGE.json",
+      "sha256": "63c02dac666206ce58adcfab51ce43072441fb3e0c16e9c79e86a91aafc42dc2"
+    },
+    {
+      "bytes": 1484662,
+      "path": "blocks/normal-n3000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "686211c220087cbc0c97524f05653ec2deb679090433ddf5f2f5b06891fa0f04"
+    },
+    {
+      "bytes": 577,
+      "path": "blocks/weibull-n1000/CALIBRATION_LINEAGE.json",
+      "sha256": "1b57b43b127f9226257477b9ae7021b380af55689ce95f36ffe546d61255e017"
+    },
+    {
+      "bytes": 1485146,
+      "path": "blocks/weibull-n1000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "f1f91ea4b3dd65355fc88844661a597dfabf63813abaa856348cce8c477c7780"
+    },
+    {
+      "bytes": 575,
+      "path": "blocks/weibull-n200/CALIBRATION_LINEAGE.json",
+      "sha256": "3c3d9af5366f03824ded4717bcbd15c78b0bde5b144ac879c04430ae35fe66ae"
+    },
+    {
+      "bytes": 1484646,
+      "path": "blocks/weibull-n200/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "9e368c76a9d5066b019c7ff4f8bacfe5ad6a8f5d86fb5ffd03dea90a1083def2"
+    },
+    {
+      "bytes": 577,
+      "path": "blocks/weibull-n3000/CALIBRATION_LINEAGE.json",
+      "sha256": "96f73cbfb5a6a15ca0d3acaecaa07278b581e3c73919fcbc5813d2f1ef10cb73"
+    },
+    {
+      "bytes": 1485304,
+      "path": "blocks/weibull-n3000/EXTRA_INDEPENDENT_NULL_DRAWS.npz",
+      "sha256": "5ca18ccbac4cb4dd8f282d8fe9f86c76f60a123c1b99de30a7c7a72075c95828"
+    },
+    {
+      "bytes": 94101,
+      "path": "synthesis/Q1_STAGE12_FINAL_648_contrast_pointwise_coverage.csv",
+      "sha256": "9c84b4fc48e9e1b629e4aec0f742ad14a1690b060fc766b21fe019fd9e04d2f3"
+    },
+    {
+      "bytes": 10775,
+      "path": "synthesis/Q1_STAGE12_FINAL_AUDIT_AND_DECISION.json",
+      "sha256": "19d30bd92fac7408c79927576cf9344f7019a5b9e3558df44519977b38a51b83"
+    },
+    {
+      "bytes": 60642,
+      "path": "synthesis/Q1_STAGE12_FINAL_FWER.png",
+      "sha256": "f6c6e38082c6c81df8dc00db11732a927ddd5b8f3b67a5405d22bb5644b11237"
+    },
+    {
+      "bytes": 39166,
+      "path": "synthesis/Q1_STAGE12_FINAL_FWER.svg",
+      "sha256": "fcde14853d406d6b45007a470895878f7aa3190963036fdfdeeb2ec130ee9e13"
+    },
+    {
+      "bytes": 53020,
+      "path": "synthesis/Q1_STAGE12_FINAL_POINTWISE_COVERAGE.png",
+      "sha256": "61620370b159d1ecbb3ba38b04b88a302a98ef5ff4345b0b4000cc6bb5341388"
+    },
+    {
+      "bytes": 34134,
+      "path": "synthesis/Q1_STAGE12_FINAL_POINTWISE_COVERAGE.svg",
+      "sha256": "bc0b5198601c111930a56adac2bc2b171670c7e9994890d863585e296775e1d0"
+    },
+    {
+      "bytes": 1397,
+      "path": "synthesis/Q1_STAGE12_FINAL_PUBLICATION_INTERPRETATION.md",
+      "sha256": "b2da2e73b38766d2700eac833c1dba318bf11bd4d5f677d39e3ba871ec697151"
+    },
+    {
+      "bytes": 5382,
+      "path": "synthesis/Q1_STAGE12_FINAL_independent_FWER_FDR_CI_validation.csv",
+      "sha256": "c9e50f363cfecadc1f70f0ee54bf03b837c8e10f41006783c790e7718420f988"
+    },
+    {
+      "bytes": 71816,
+      "path": "synthesis/Q1_STAGE12_FINAL_original_216_frozen_contrasts_calibrated.csv",
+      "sha256": "61769e67eff2a92956f58e02e2e902725eea82a3e0c2d7a0ef9b8ad0073886f4"
+    }
+  ],
+  "original_optimizer_training_and_HPO_selection_not_replayed": true,
+  "stage": "12_FINAL_PRECISION",
+  "status": "PASS",
+  "validation_complete": true
+}

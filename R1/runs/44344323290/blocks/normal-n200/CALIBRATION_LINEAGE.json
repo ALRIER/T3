@@ -1,0 +1,13 @@
+{
+  "family": "normal",
+  "independent_validation_run": "R1/runs/44343019150",
+  "n": 200,
+  "new_null_calibration_replicates": 16384,
+  "no_HPO_training_or_original_model_reexecution": true,
+  "original_frozen_score": "R1/runs/44310024979/heldout/normal-n200/candidate_by_eval.csv",
+  "original_sha256": "16427cf2c2ccc1320ff8af8ac7a6e2ca032567661dc1768b2323bc4967b6c476",
+  "previous_calibration_replicates": 4096,
+  "previous_calibration_run": "R1/runs/44340092503",
+  "seed_scheme": "R1-stage12-final-null-extension-v1-20261118-fixed",
+  "stage": "12_FINAL_PRECISION"
+}

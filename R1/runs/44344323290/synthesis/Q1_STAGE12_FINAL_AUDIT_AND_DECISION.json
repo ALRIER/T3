@@ -1,0 +1,254 @@
+{
+  "additional_null_calibration_draws": 16384,
+  "assumptions": [
+    "Independent synthetic trials at global experiment level conditional on empirical crossed-effects surrogate",
+    "Subset-pivotal joint distribution of t9 null contrast vectors under null and mixed-null shifts in this DGP",
+    "No repeat of original nested hyperparameter search or optimizer-selected weight vectors",
+    "Calibrated p-values reported as exploratory original-data sensitivity not preregistered confirmatory tests",
+    "No causal generalization beyond 241 observed support scenarios or unstudied distributions",
+    "Holm and BH operate on empirical marginal calibration p-values; minP controls global family under surrogates"
+  ],
+  "calibrated_pointwise_95CI_coverage_within_94_96pct": true,
+  "conditional_surrogate_inference_calibration_complete": true,
+  "conservative_minP_cutoff_p": 1.1898051359227879e-06,
+  "conservative_one_sided_95pct_order_statistic_rank": 973,
+  "earlier_null_calibration_draws": 4096,
+  "family_n_blocks": 18,
+  "full_original_HPO_and_weight_selection_inference_calibrated": false,
+  "hypothesis_scope": "Preexisting fixed four-method contrast estimands only",
+  "independent_holdout_validation_draws_per_regime": 4096,
+  "lineage_original_sha256": [
+    {
+      "calibration_file_sha256": "16fe68068ead93edb1596fda7c174a6b0d137beb931b0d12a3b063ec49db0e42",
+      "family": "normal",
+      "n": 200,
+      "source_sha256": "16427cf2c2ccc1320ff8af8ac7a6e2ca032567661dc1768b2323bc4967b6c476"
+    },
+    {
+      "calibration_file_sha256": "045d5d999cb9b2b9e47f635b71e9d05678e6c2c78fdddedf9952ddbe74ffe46c",
+      "family": "normal",
+      "n": 1000,
+      "source_sha256": "28f6caa05cb4126e94e31b9a7600ba2e1a64a2a8f679740b979bcb18e0db9d75"
+    },
+    {
+      "calibration_file_sha256": "13c4d38acde317eb50295ab95853c5c608f0dfa7e8cd05db1cd15b07ab300fc4",
+      "family": "normal",
+      "n": 3000,
+      "source_sha256": "58bb89150aca707af6b6fbcd12f55ed9ec1bcdd799f041ce1fdf2477a91df508"
+    },
+    {
+      "calibration_file_sha256": "5448317faa5fdf638b99992e0675ec27a310c74793c24774849d594305c4461a",
+      "family": "lognormal",
+      "n": 200,
+      "source_sha256": "f8e1e8cbe8667e99ca7cc1334a9ccd02e4eee0d8a7f5227431209eeeaabbe85e"
+    },
+    {
+      "calibration_file_sha256": "8595a2401e1f5b5bee711ab2c5d45a5c6add418bc7ba7d2c65ba5e6a830f018b",
+      "family": "lognormal",
+      "n": 1000,
+      "source_sha256": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215"
+    },
+    {
+      "calibration_file_sha256": "a8d3a66b365e2d57f6908b44b409ca8334fa60316cf648dbea20e865cbf23f1d",
+      "family": "lognormal",
+      "n": 3000,
+      "source_sha256": "2e0453429c25e55b77764e06d5cdfc58784d80b9f2f0aa8c508c5d057dfd8da2"
+    },
+    {
+      "calibration_file_sha256": "dc89c4c71ec88f1a76c1a109f8bc0538378b14272b5a101da2abeb56fb107573",
+      "family": "weibull",
+      "n": 200,
+      "source_sha256": "36e1fc7fea0e05904acebad2b00f4f32573e43102f38afcfeccdfd187ca79ceb"
+    },
+    {
+      "calibration_file_sha256": "50282edf40f8eae668d1512f4c6cfad872412d21e59874827e58c76c99a321a8",
+      "family": "weibull",
+      "n": 1000,
+      "source_sha256": "4cf2d69b715de6b83e7eae7e4b06089df8b13752c967add5bac9ee1779f2cc9c"
+    },
+    {
+      "calibration_file_sha256": "d6c6c749deccb0e3ad1dcb495aa8a5b95fb049135b31a61414f90da1b01e1387",
+      "family": "weibull",
+      "n": 3000,
+      "source_sha256": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c"
+    },
+    {
+      "calibration_file_sha256": "7602f45456419a97eb5c5ec384dd198ed358f7b32bb6902b5e7d25f353b247c9",
+      "family": "invgauss",
+      "n": 200,
+      "source_sha256": "8a6574bc3066e3df991e1eb5469a96f7f1caa3021961e67d7943d40a721a3be4"
+    },
+    {
+      "calibration_file_sha256": "d55f133fa5f2ae6472d4869ea2a12bb624cf6be49e3f4a4fac3877e37ae4e59f",
+      "family": "invgauss",
+      "n": 1000,
+      "source_sha256": "153552bc156bde36f5447e8ce4a171dd373aa6968edcb653d6956a87d6117e95"
+    },
+    {
+      "calibration_file_sha256": "ba91b48d0817e19c837abe5bbe2e58d0486e3d74a28fb2b805da728ba72c3252",
+      "family": "invgauss",
+      "n": 3000,
+      "source_sha256": "0b93d2b34585beda5e83ecf5882e1ec257438cc1e20a023d0c813a478dee8a85"
+    },
+    {
+      "calibration_file_sha256": "cb4b82a0c129542bd07d9296264af0da7aafc56500cc4780783d0b7585d7cc30",
+      "family": "exgaussian",
+      "n": 200,
+      "source_sha256": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1"
+    },
+    {
+      "calibration_file_sha256": "9953a6143d83fe297631995f9d0c759de3d1e427d876549b40ff989e21c6de6d",
+      "family": "exgaussian",
+      "n": 1000,
+      "source_sha256": "9a48a550eeb772412c193f3049171a6038d606feef232c020a071e88dc259bad"
+    },
+    {
+      "calibration_file_sha256": "1453f080809cb0cd61641ead5a409e42a2136beac769067e5189281d108e86da",
+      "family": "exgaussian",
+      "n": 3000,
+      "source_sha256": "29ad25f918e9b54964d22bad1ee1592b0c75adb7ca301db8f4d41bd24e2660ba"
+    },
+    {
+      "calibration_file_sha256": "e23444e2509b20d1967f5c77f0dafdc63cdc486aa41eb3c266c699185fdd5db5",
+      "family": "exwald",
+      "n": 200,
+      "source_sha256": "36f0d1ccbad0240366d2e4bceb825ccf18f96dddbb24bfcfc2815c7b13321b53"
+    },
+    {
+      "calibration_file_sha256": "05c3617f32596e9499188b53424a7bf9906a58da20d42e558005781bee0dfadf",
+      "family": "exwald",
+      "n": 1000,
+      "source_sha256": "ec50b9c1e2d23eb754ee1515e5d052996b5eda540511b573549613ddb4451071"
+    },
+    {
+      "calibration_file_sha256": "8439c7490527bfbd36dbc7913b493f4dc1babca7f8406dbe3865a175b2bf6b50",
+      "family": "exwald",
+      "n": 3000,
+      "source_sha256": "ba1355cbc989b2f2a3590efa4e50f686e84de1d15ee997617c8117bd1c881018"
+    }
+  ],
+  "original_contrasts": 216,
+  "original_frozen_contrast_sensitivity": {
+    "conservative_global_minP_supported": 82,
+    "contrasts": 216,
+    "empirical_marginal_BH_supported": 177,
+    "empirical_marginal_holm_supported": 130
+  },
+  "original_primary_R1_results_unmodified": true,
+  "precision_extension_sha256": [
+    {
+      "extension_sha256": "fa1e83e4cbcbd8b5f5748c417d7e0ffc51f822c4f49464c431969b25c5d7fbbe",
+      "family": "normal",
+      "n": 200,
+      "original_sha256": "16427cf2c2ccc1320ff8af8ac7a6e2ca032567661dc1768b2323bc4967b6c476"
+    },
+    {
+      "extension_sha256": "887152a0fc4ce285e85be80874c7ef01b04e0a785da7d52763336dd522442315",
+      "family": "normal",
+      "n": 1000,
+      "original_sha256": "28f6caa05cb4126e94e31b9a7600ba2e1a64a2a8f679740b979bcb18e0db9d75"
+    },
+    {
+      "extension_sha256": "686211c220087cbc0c97524f05653ec2deb679090433ddf5f2f5b06891fa0f04",
+      "family": "normal",
+      "n": 3000,
+      "original_sha256": "58bb89150aca707af6b6fbcd12f55ed9ec1bcdd799f041ce1fdf2477a91df508"
+    },
+    {
+      "extension_sha256": "266f197bd2e1e4b40f4fe0c3e5895c74df241d6cfacf36ae4e11a617196b27e0",
+      "family": "lognormal",
+      "n": 200,
+      "original_sha256": "f8e1e8cbe8667e99ca7cc1334a9ccd02e4eee0d8a7f5227431209eeeaabbe85e"
+    },
+    {
+      "extension_sha256": "7eb077bfd7cae3e7bc2fa1fe1df688eb8b38ed5d17a3a4004a721f213cbd95de",
+      "family": "lognormal",
+      "n": 1000,
+      "original_sha256": "f3d3c1658ad51e42a9bfcb2a6e479d6bfc348b75413387cc83bed3204d3e9215"
+    },
+    {
+      "extension_sha256": "9870c654ce79e538ce4fb89a532005207b393e171ab2920db10f2978aee081fa",
+      "family": "lognormal",
+      "n": 3000,
+      "original_sha256": "2e0453429c25e55b77764e06d5cdfc58784d80b9f2f0aa8c508c5d057dfd8da2"
+    },
+    {
+      "extension_sha256": "9e368c76a9d5066b019c7ff4f8bacfe5ad6a8f5d86fb5ffd03dea90a1083def2",
+      "family": "weibull",
+      "n": 200,
+      "original_sha256": "36e1fc7fea0e05904acebad2b00f4f32573e43102f38afcfeccdfd187ca79ceb"
+    },
+    {
+      "extension_sha256": "f1f91ea4b3dd65355fc88844661a597dfabf63813abaa856348cce8c477c7780",
+      "family": "weibull",
+      "n": 1000,
+      "original_sha256": "4cf2d69b715de6b83e7eae7e4b06089df8b13752c967add5bac9ee1779f2cc9c"
+    },
+    {
+      "extension_sha256": "5ca18ccbac4cb4dd8f282d8fe9f86c76f60a123c1b99de30a7c7a72075c95828",
+      "family": "weibull",
+      "n": 3000,
+      "original_sha256": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c"
+    },
+    {
+      "extension_sha256": "eab11e7ce6ebcf5ffa844db40bc5713750a6bbc56bf7dadb273a651508f8e627",
+      "family": "invgauss",
+      "n": 200,
+      "original_sha256": "8a6574bc3066e3df991e1eb5469a96f7f1caa3021961e67d7943d40a721a3be4"
+    },
+    {
+      "extension_sha256": "9afedefbea9f529e5dfa460f49fbd902c3d30fc59d0fdcea65532892ee35c778",
+      "family": "invgauss",
+      "n": 1000,
+      "original_sha256": "153552bc156bde36f5447e8ce4a171dd373aa6968edcb653d6956a87d6117e95"
+    },
+    {
+      "extension_sha256": "16229c2f6a0aef39f5d9e4b6bfe3c227558dac3aa91def69626485a90ae6683a",
+      "family": "invgauss",
+      "n": 3000,
+      "original_sha256": "0b93d2b34585beda5e83ecf5882e1ec257438cc1e20a023d0c813a478dee8a85"
+    },
+    {
+      "extension_sha256": "e961cfe65b737522418e5f6165fb4a435a53dd57528c0ecfb586f52a86a72e96",
+      "family": "exgaussian",
+      "n": 200,
+      "original_sha256": "6de95aefdbdefa479d04d8e2822a3fc6de2a1652d1fc0ab350906ab327c6adc1"
+    },
+    {
+      "extension_sha256": "7a496715dbbcfa842b9a114aa27bed62b57a3531b45250ed496dad5e14dbd30b",
+      "family": "exgaussian",
+      "n": 1000,
+      "original_sha256": "9a48a550eeb772412c193f3049171a6038d606feef232c020a071e88dc259bad"
+    },
+    {
+      "extension_sha256": "7e8c1ebec0abae527cf1e5390fff5108c31e6711807c4add83cd29240ea0dd3d",
+      "family": "exgaussian",
+      "n": 3000,
+      "original_sha256": "29ad25f918e9b54964d22bad1ee1592b0c75adb7ca301db8f4d41bd24e2660ba"
+    },
+    {
+      "extension_sha256": "ddb3acf335587b8b3cfa708b4e1cb398e0e6b03709f15954b4d253293ee22ff3",
+      "family": "exwald",
+      "n": 200,
+      "original_sha256": "36f0d1ccbad0240366d2e4bceb825ccf18f96dddbb24bfcfc2815c7b13321b53"
+    },
+    {
+      "extension_sha256": "7b0d95dbcf268437972e1227de2b6782141644a60107cced2f75155304ab4144",
+      "family": "exwald",
+      "n": 1000,
+      "original_sha256": "ec50b9c1e2d23eb754ee1515e5d052996b5eda540511b573549613ddb4451071"
+    },
+    {
+      "extension_sha256": "08d1b0c7c304073cb77695d9c6027836cc4a09443b0be078771916a95e631f0d",
+      "family": "exwald",
+      "n": 3000,
+      "original_sha256": "ba1355cbc989b2f2a3590efa4e50f686e84de1d15ee997617c8117bd1c881018"
+    }
+  ],
+  "source_original_scores": "R1/runs/44310024979",
+  "stage": "Q1_12_FINAL_PRECISION_VERIFIED",
+  "stage12B_calibration_source": "R1/runs/44340092503",
+  "stage12C_independent_validation": "R1/runs/44343019150",
+  "total_null_calibration_draws": 20480,
+  "validation_global_and_mixed_null_FWER_95CI_upper_at_most_5pct": true
+}

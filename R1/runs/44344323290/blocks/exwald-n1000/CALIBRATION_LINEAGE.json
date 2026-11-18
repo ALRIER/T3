@@ -1,0 +1,13 @@
+{
+  "family": "exwald",
+  "independent_validation_run": "R1/runs/44343019150",
+  "n": 1000,
+  "new_null_calibration_replicates": 16384,
+  "no_HPO_training_or_original_model_reexecution": true,
+  "original_frozen_score": "R1/runs/44310024979/heldout/exwald-n1000/candidate_by_eval.csv",
+  "original_sha256": "ec50b9c1e2d23eb754ee1515e5d052996b5eda540511b573549613ddb4451071",
+  "previous_calibration_replicates": 4096,
+  "previous_calibration_run": "R1/runs/44340092503",
+  "seed_scheme": "R1-stage12-final-null-extension-v1-20261118-fixed",
+  "stage": "12_FINAL_PRECISION"
+}
