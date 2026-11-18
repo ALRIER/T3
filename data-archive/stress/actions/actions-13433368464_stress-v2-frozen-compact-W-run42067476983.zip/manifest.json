@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "5343de2bb6095441ab940f2b9e8484a3",
+  "parts": [
+    {
+      "bytes": 189504,
+      "name": "part-00001.lfs",
+      "sha256": "9689c909fee85b3e59941a1b2616ebcd0201ca1ed6db69cdfde755ea3d739a2a"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "9689c909fee85b3e59941a1b2616ebcd0201ca1ed6db69cdfde755ea3d739a2a",
+  "size_bytes": 189504,
+  "source": {
+    "artifact_id": 13433368464,
+    "created_at": "2026-11-05T16:45:05Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T16:44:06Z",
+    "key": "actions-13433368464",
+    "name": "stress-v2-frozen-compact-W-run42067476983.zip",
+    "run_id": 42067476983,
+    "size_bytes": 189504,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13433368464/zip"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "aed81165a7e2d3c58c675aee6f6e5229",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "28f7af7ff55473736a543d2f9160abe90be8f20bdc228db9e4fb4dabefdec0b4"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "2649a5c678d192496a18994179aa3ed8d94a9f337cdd5b9556df9efac71781e4"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "d40466bba1cc7e33e5131c01ee23179c25f4ff0be2619ab86f31714eb58323a7"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "0cea74cb6d1773356d3da455f1294d8304a880c21783c8ecb80531a7ec32f734"
+    },
+    {
+      "bytes": 22475947,
+      "name": "part-00005.lfs",
+      "sha256": "d8384d504422f5840edef7191083aaf7b955834041d4f17b404555e5852e1ea7"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7e84223d677e61b91e9e31148253fc751b120cb98863fb2b4839258883db416b",
+  "size_bytes": 156693675,
+  "source": {
+    "artifact_id": 13432855386,
+    "created_at": "2026-11-05T16:21:10Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T16:13:37Z",
+    "key": "actions-13432855386",
+    "name": "stress-v2-original-global-run42062234485.zip",
+    "run_id": 42062234485,
+    "size_bytes": 156693675,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13432855386/zip"
+  }
+}

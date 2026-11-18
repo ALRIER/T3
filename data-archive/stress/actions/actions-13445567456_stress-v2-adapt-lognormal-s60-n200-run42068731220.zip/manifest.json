@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "f683f406a8adb46d75f85ecea64ccb8f",
+  "parts": [
+    {
+      "bytes": 138523,
+      "name": "part-00001.lfs",
+      "sha256": "57921358c22386fbee4c1870c2a4c95815d5a64e5efad13722a3f9f8af50d63e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "57921358c22386fbee4c1870c2a4c95815d5a64e5efad13722a3f9f8af50d63e",
+  "size_bytes": 138523,
+  "source": {
+    "artifact_id": 13445567456,
+    "created_at": "2026-11-05T19:12:36Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T16:51:20Z",
+    "key": "actions-13445567456",
+    "name": "stress-v2-adapt-lognormal-s60-n200-run42068731220.zip",
+    "run_id": 42068731220,
+    "size_bytes": 138523,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13445567456/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "421af9321e02b3ddccad8d710204ddf1",
+  "parts": [
+    {
+      "bytes": 139121,
+      "name": "part-00001.lfs",
+      "sha256": "c00c5505866c60dfc33a01d907550ae1bb0bf7bef783cb7f8c08d2a3c049680c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c00c5505866c60dfc33a01d907550ae1bb0bf7bef783cb7f8c08d2a3c049680c",
+  "size_bytes": 139121,
+  "source": {
+    "artifact_id": 13443264825,
+    "created_at": "2026-11-05T18:54:54Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T16:51:20Z",
+    "key": "actions-13443264825",
+    "name": "stress-v2-adapt-normal-s65-n3000-run42068731220.zip",
+    "run_id": 42068731220,
+    "size_bytes": 139121,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13443264825/zip"
+  }
+}
