@@ -1,0 +1,85 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "5fd50da926f0284020430bf4f235bff8",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "02cbcf3e45987e2956111ccf5573866dd8ba53030e69f53a42f7ac89d7a25706"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "6e8175f8f37d0d05a0fde08def972c3097f170092ab6ef47e1d163c17abc85f7"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "a159b3d5e107c39581917af0d72e4247afed0ba17c14cb988bc521fc8594699d"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "6b118c111e576d73deb499eb974fed98c978c9e9c7fc5b3d00d2b137eaae75b3"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "9998f8bee39165f4512ae2197c65a64942577f1199784c79eee5f2edc3f618c5"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "1314ac94a9b941fe4a5f9f0c6b11d6d9b1439a84275eb9832bac9e3c5fd7896a"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00007.lfs",
+      "sha256": "1c736909dac9f454650b680b514987a2b74897d140ad00d39451633d69310d69"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00008.lfs",
+      "sha256": "e8b2fe171d861cdc144ecc62e5ab3bc364ee4e49ffd59ff369694c3d73440c54"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00009.lfs",
+      "sha256": "5f23cf51e813a46c85590f1ea73c2d8e72142d327dbf7d6cc1326daa19b41970"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00010.lfs",
+      "sha256": "098cbebf91a9182df6471eae4bdddb9096abb4e06de025ac82049405c953c009"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00011.lfs",
+      "sha256": "30bb9b7ef5bc0f83e88e04e70817c37e5a4e697c799f1d8437b54fef8080c664"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00012.lfs",
+      "sha256": "ed00eb2732f99dc9ff969a0c632acfa77e0eb715d860a5901033dd77802acc70"
+    },
+    {
+      "bytes": 24519847,
+      "name": "part-00013.lfs",
+      "sha256": "cb9f6efd45b9305ac759ae2041904f0ac51bbc347b39f98646d4a55a5114f46e"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b111329caeb2f20afd6cf86466312061e8c6b07a5f388e508beb2453f9d217a4",
+  "size_bytes": 427173031,
+  "source": {
+    "checksum": "md5:5fd50da926f0284020430bf4f235bff8",
+    "key": "zenodo-T3_03_series.zip",
+    "name": "T3_03_series.zip",
+    "record_id": 24174965,
+    "size_bytes": 427173031,
+    "source": "zenodo",
+    "stage": "heldout",
+    "url": "https://zenodo.org/api/records/24174965/files/T3_03_series.zip/content"
+  }
+}

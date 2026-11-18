@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "6c0b9ff3b1c709b90e674ed00b0084da",
+  "parts": [
+    {
+      "bytes": 5175,
+      "name": "part-00001.lfs",
+      "sha256": "9b999809960356fe1f68a7cb044251fcf6460a4963e430478d975a46ec0a9c75"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "9b999809960356fe1f68a7cb044251fcf6460a4963e430478d975a46ec0a9c75",
+  "size_bytes": 5175,
+  "source": {
+    "artifact_id": 13894992232,
+    "created_at": "2026-11-11T22:02:13Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:32:36Z",
+    "key": "actions-13894992232",
+    "name": "t3-b3-post-rw-parent-profiles-exwald-b09-run43103963144.zip",
+    "run_id": 43103963144,
+    "size_bytes": 5175,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13894992232/zip"
+  }
+}

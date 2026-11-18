@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "d4a0e497ee387676ae87615b08f97aa7",
+  "parts": [
+    {
+      "bytes": 5286,
+      "name": "part-00001.lfs",
+      "sha256": "62a9aa9a130b707d3fc708fef47b15326b149aca37c1bf674d3a100c40ecceb5"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "62a9aa9a130b707d3fc708fef47b15326b149aca37c1bf674d3a100c40ecceb5",
+  "size_bytes": 5286,
+  "source": {
+    "artifact_id": 13894243359,
+    "created_at": "2026-11-11T21:57:44Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:32:36Z",
+    "key": "actions-13894243359",
+    "name": "t3-b3-post-rw-parent-profiles-exgaussian-b14-run43103963144.zip",
+    "run_id": 43103963144,
+    "size_bytes": 5286,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13894243359/zip"
+  }
+}

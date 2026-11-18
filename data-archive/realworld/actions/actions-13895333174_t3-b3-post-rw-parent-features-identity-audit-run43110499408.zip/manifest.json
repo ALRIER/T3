@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "a6f08b5de31819c5fa2ba5c0c76467e8",
+  "parts": [
+    {
+      "bytes": 110453,
+      "name": "part-00001.lfs",
+      "sha256": "fb3f1c24a6eaa7d0e5c745949c617f6d39d20693ebe7b18c5c7663cef0040468"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "fb3f1c24a6eaa7d0e5c745949c617f6d39d20693ebe7b18c5c7663cef0040468",
+  "size_bytes": 110453,
+  "source": {
+    "artifact_id": 13895333174,
+    "created_at": "2026-11-11T22:17:35Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T22:17:25Z",
+    "key": "actions-13895333174",
+    "name": "t3-b3-post-rw-parent-features-identity-audit-run43110499408.zip",
+    "run_id": 43110499408,
+    "size_bytes": 110453,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13895333174/zip"
+  }
+}

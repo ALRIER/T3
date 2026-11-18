@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c8edd4ea32842a5e83acb96365b97997",
+  "parts": [
+    {
+      "bytes": 5050,
+      "name": "part-00001.lfs",
+      "sha256": "bdb5ce037581e2f5ef6624cef10d33d6ed8a06e660f74ae14bf315bfcb625a32"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "bdb5ce037581e2f5ef6624cef10d33d6ed8a06e660f74ae14bf315bfcb625a32",
+  "size_bytes": 5050,
+  "source": {
+    "artifact_id": 13894835437,
+    "created_at": "2026-11-11T21:44:59Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:32:36Z",
+    "key": "actions-13894835437",
+    "name": "t3-b3-post-rw-parent-profiles-weibull-b05-run43103963144.zip",
+    "run_id": 43103963144,
+    "size_bytes": 5050,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13894835437/zip"
+  }
+}

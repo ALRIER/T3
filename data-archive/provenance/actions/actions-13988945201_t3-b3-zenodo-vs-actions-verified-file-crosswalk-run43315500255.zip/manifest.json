@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "c12b1a757bc9b0def531d7bbbdc08026",
+  "parts": [
+    {
+      "bytes": 8142,
+      "name": "part-00001.lfs",
+      "sha256": "311acfbfbf7aec9478fa9f57ee65f102d45e1ddebeeb9b7759c794c753ac6606"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "311acfbfbf7aec9478fa9f57ee65f102d45e1ddebeeb9b7759c794c753ac6606",
+  "size_bytes": 8142,
+  "source": {
+    "artifact_id": 13988945201,
+    "created_at": "2026-11-12T21:59:02Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-10T21:58:46Z",
+    "key": "actions-13988945201",
+    "name": "t3-b3-zenodo-vs-actions-verified-file-crosswalk-run43315500255.zip",
+    "run_id": 43315500255,
+    "size_bytes": 8142,
+    "source": "actions",
+    "stage": "provenance",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13988945201/zip"
+  }
+}

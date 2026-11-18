@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "80040afd734cc4f0baf580869644a9a5",
+  "parts": [
+    {
+      "bytes": 5105,
+      "name": "part-00001.lfs",
+      "sha256": "72ab93de685d016bec044c738778b7eb8a97ad38f3efb957bb5e10d85624ea2a"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "72ab93de685d016bec044c738778b7eb8a97ad38f3efb957bb5e10d85624ea2a",
+  "size_bytes": 5105,
+  "source": {
+    "artifact_id": 13895000641,
+    "created_at": "2026-11-11T21:49:14Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-09T21:32:36Z",
+    "key": "actions-13895000641",
+    "name": "t3-b3-post-rw-parent-profiles-invgauss-b04-run43103963144.zip",
+    "run_id": 43103963144,
+    "size_bytes": 5105,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13895000641/zip"
+  }
+}
