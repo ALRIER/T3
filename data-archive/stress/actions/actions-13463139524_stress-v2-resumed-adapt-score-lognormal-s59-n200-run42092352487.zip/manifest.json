@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "052c79037e6977c7cdf02c4b6cff2c13",
+  "parts": [
+    {
+      "bytes": 2916032,
+      "name": "part-00001.lfs",
+      "sha256": "08fb0fc94b97c6885d98f720d3e7f8ebc19b0cf2e0a61eadc5296f412773731c"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "08fb0fc94b97c6885d98f720d3e7f8ebc19b0cf2e0a61eadc5296f412773731c",
+  "size_bytes": 2916032,
+  "source": {
+    "artifact_id": 13463139524,
+    "created_at": "2026-11-05T23:58:12Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463139524",
+    "name": "stress-v2-resumed-adapt-score-lognormal-s59-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2916032,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463139524/zip"
+  }
+}

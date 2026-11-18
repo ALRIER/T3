@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "2f45a8e5c7ec6993c9e7eb996f5dd3c2",
+  "parts": [
+    {
+      "bytes": 2944552,
+      "name": "part-00001.lfs",
+      "sha256": "b0fdbb49c0354062643b49b3257ceaa505a23f5359d51f00a755420406cec98b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "b0fdbb49c0354062643b49b3257ceaa505a23f5359d51f00a755420406cec98b",
+  "size_bytes": 2944552,
+  "source": {
+    "artifact_id": 13463344548,
+    "created_at": "2026-11-06T00:01:30Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463344548",
+    "name": "stress-v2-resumed-adapt-score-exwald-s57-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2944552,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463344548/zip"
+  }
+}

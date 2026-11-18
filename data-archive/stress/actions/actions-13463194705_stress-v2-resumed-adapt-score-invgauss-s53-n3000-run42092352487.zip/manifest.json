@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "351c675bd75ff651aadd65d1111d16e2",
+  "parts": [
+    {
+      "bytes": 2940824,
+      "name": "part-00001.lfs",
+      "sha256": "e7116514ed4c6af6f3fbe352b5959c750ade62bd926aedac994afd22e82c0d5f"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e7116514ed4c6af6f3fbe352b5959c750ade62bd926aedac994afd22e82c0d5f",
+  "size_bytes": 2940824,
+  "source": {
+    "artifact_id": 13463194705,
+    "created_at": "2026-11-05T23:59:58Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463194705",
+    "name": "stress-v2-resumed-adapt-score-invgauss-s53-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2940824,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463194705/zip"
+  }
+}

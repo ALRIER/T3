@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "e04d434070133f93f26026246282e47c",
+  "parts": [
+    {
+      "bytes": 2930901,
+      "name": "part-00001.lfs",
+      "sha256": "58784e925f18f6e6ab04f5b2331a77fd54646d6afae55e16b6a88bceefa3d323"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "58784e925f18f6e6ab04f5b2331a77fd54646d6afae55e16b6a88bceefa3d323",
+  "size_bytes": 2930901,
+  "source": {
+    "artifact_id": 13463449422,
+    "created_at": "2026-11-06T00:01:12Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13463449422",
+    "name": "stress-v2-resumed-adapt-score-exwald-s51-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 2930901,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13463449422/zip"
+  }
+}
