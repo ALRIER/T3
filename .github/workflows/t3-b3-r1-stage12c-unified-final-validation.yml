@@ -1,0 +1,122 @@
+name: R1 Q1 — Complete Stage 12 independent inference calibration
+run-name: "R1 Q1 Stage 12C | 18-way independent holdout | calibrated CI and FWER"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/t3-b3-r1-stage12c-unified-final-validation.yml
+      - scripts/t3_b3_r1_stage12c_independent_calibration.py
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-q1-stage12c-independent-final-main
+  cancel-in-progress: false
+
+jobs:
+  verify-frozen-null-calibration-and-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install numerical toolkit
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2'
+      - name: Verify provenance, compilation and independent calibration statistical tests
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_b3_r1_stage12_unified_calibration.py scripts/t3_b3_r1_stage12c_independent_calibration.py
+          python scripts/t3_b3_r1_stage12c_independent_calibration.py selftest
+          test -s R1/runs/44340092503/STAGE12B_SHA256_MANIFEST.json
+          test -s R1/runs/44331514516/stage5b/RUNTIME_SCOPE.json
+          test -s R1/runs/44331514516/stage12a/STAGE12A_FEASIBILITY.json
+
+  independent-4096-fold-holdout-for-18-blocks:
+    needs: verify-frozen-null-calibration-and-source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install scientific stack
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2'
+      - name: Independent global-null, mixed-null, nonnull holdout validation
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_r1_stage12c_independent_calibration.py block \
+            --family '${{ matrix.family }}' --n '${{ matrix.n }}' \
+            --output 'out/blocks/${{ matrix.family }}-n${{ matrix.n }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r1-q1-stage12c-holdout-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  compute-global-results-and-preserve-in-repo:
+    needs: [verify-frozen-null-calibration-and-source, independent-4096-fold-holdout-for-18-blocks]
+    if: ${{ always() && needs.verify-frozen-null-calibration-and-source.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, persist-credentials: true}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-q1-stage12c-holdout-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Install inference and figure dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'scipy>=1.12,<2' 'matplotlib>=3.8,<4'
+      - name: Validate independent nominal error and calibrated Holm, BH, minP, 95pct coverage
+        id: final_calibration
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_r1_stage12c_independent_calibration.py finalize \
+            --root 'R1/runs/${{ github.run_id }}'
+      - name: Commit verified or explicitly incomplete immutable scientific results
+        run: |
+          set -euo pipefail
+          mkdir -p 'R1/runs/${{ github.run_id }}'
+          printf '# R1 Q1 Stage 12C — Independent statistical calibration validation\n\n' > 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Workflow run: %s\n' '${{ github.run_id }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf '18 parallel independent holdout partitions: %s\n' \
+            '${{ needs.independent-4096-fold-holdout-for-18-blocks.result }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'Global inference calibration synthesis: %s\n' \
+            '${{ steps.final_calibration.outcome }}' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf '\nUses the archived Stage 12B 4096-calibration set and newly seeded 4096 independent holdout validations per mode.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          printf 'This is only conditional known-truth SURROGATE calibration; original HPO and optimizer selection were not replayed.\n' >> 'R1/runs/${{ github.run_id }}/RUN_STATUS.md'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'R1/runs/${{ github.run_id }}'
+          git commit -m 'Archive independent Q1 Stage 12C known-truth CI, Holm, BH and minP validation run ${{ github.run_id }}'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-q1-stage12c-permanent-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
+      - name: Fail visibly if any holdout partition or global synthesis failed
+        if: ${{ needs.independent-4096-fold-holdout-for-18-blocks.result != 'success' || steps.final_calibration.outcome != 'success' }}
+        run: exit 1
