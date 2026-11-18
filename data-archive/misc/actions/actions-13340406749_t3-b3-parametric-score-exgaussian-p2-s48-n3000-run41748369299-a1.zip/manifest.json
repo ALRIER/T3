@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "92e0333635eb199ad76e6dc1deb1b3b7",
+  "parts": [
+    {
+      "bytes": 39344,
+      "name": "part-00001.lfs",
+      "sha256": "c77cea68708c03d5ff1e453b40e6c0a19594edceba28b831a00e87ebf61e7054"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "c77cea68708c03d5ff1e453b40e6c0a19594edceba28b831a00e87ebf61e7054",
+  "size_bytes": 39344,
+  "source": {
+    "artifact_id": 13340406749,
+    "created_at": "2026-11-04T15:52:29Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-02T00:38:48Z",
+    "key": "actions-13340406749",
+    "name": "t3-b3-parametric-score-exgaussian-p2-s48-n3000-run41748369299-a1.zip",
+    "run_id": 41748369299,
+    "size_bytes": 39344,
+    "source": "actions",
+    "stage": "misc",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13340406749/zip"
+  }
+}
