@@ -1,0 +1,6 @@
+Independent base-R recalculation of 36 original method x metric x size contrasts.
+Independent unit: heldout evaluation seed (10), with correlated frozen candidates averaged within each seed.
+Original parametric p, CI, mean and exact sign-flip sensitivity were independently reproduced.
+All sign-flip tests are supplementary sensitivity checks, not a selection-aware error calibration.
+Preserves original R1 evidence; no resimulation, retuning, retraining or weight modification.
+The GHCR digest is frozen in config/T3_DEFAULT_ANALYSIS_RUNTIME.env.

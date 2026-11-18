@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "input_original_r1": "44307352615",
+  "input_discovery_heldout_synthesis": "44310024979",
+  "original_comparisons": 216,
+  "independent_r_reaudited": 216,
+  "globally_holm_supported_original": 216,
+  "globally_holm_supported_exact_signflip_sensitivity": 0,
+  "repeated_original_training": false,
+  "repeated_heldout_scoring": false,
+  "source_hashes": {
+    "reviewer/normal/independent_r_paired_reaudit.csv": "a0c67a0caf56697efb562720a824600b29cf59397a1a7e33e9be0f8b45f7b304",
+    "reviewer/lognormal/independent_r_paired_reaudit.csv": "b0c2a44ceed16c1a31123d718b6b04ceca4198934ab502f7f181b6e8cda2349a",
+    "reviewer/weibull/independent_r_paired_reaudit.csv": "93fc409e469410491da8a9f06c6904986fe1ffa4446ab22e3acab190ebe086dd",
+    "reviewer/invgauss/independent_r_paired_reaudit.csv": "e23a2b49ec4db40eec36490001b5d351e4f98a3469e1c9e5220f81d6adc3f76d",
+    "reviewer/exgaussian/independent_r_paired_reaudit.csv": "1b938e58c28d88d5b118325779e1d4f4b5674803e0aedbbad49f4e898809dced",
+    "reviewer/exwald/independent_r_paired_reaudit.csv": "604ffef807cd553df24ecf1590c54d0e7c39c45f94cea180dfe0848c5f2425a3",
+    "scientific_gate/family_reviewer_evidence.csv": "1cd5df00be11017615008c8452a18cdebee709806a13f19491dc4b8315bb80be",
+    "scientific_gate/README_R1_REVIEWER_GATE.md": "613d70f69cf120691aeacf6694784f93a5185d1b12bb43aaf821ec6cd0cafbd5"
+  }
+}

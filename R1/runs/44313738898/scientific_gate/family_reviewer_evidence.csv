@@ -1,0 +1,7 @@
+family,contrasts,paired_t_global_holm_supported,exact_signflip_global_holm_supported,lower_mse_method_a
+normal,36,36,0,12
+lognormal,36,36,0,10
+weibull,36,36,0,12
+invgauss,36,36,0,11
+exgaussian,36,36,0,9
+exwald,36,36,0,11
