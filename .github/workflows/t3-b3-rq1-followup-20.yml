@@ -1,0 +1,149 @@
+name: R1 — RQ1 complete follow-up (Discovery, stability, tradeoffs, reviewer controls)
+run-name: "R1 RQ1 follow-up | max-parallel 20 | archived Discovery and Held Out"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-rq1-followup-20.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-followup-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.create.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: create
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json,pathlib
+          root=pathlib.Path("R1/runs/44307352615")
+          assert (root/"all_pairwise_global_holm.csv").is_file()
+          families=("normal","lognormal","weibull","invgauss","exgaussian","exwald")
+          sizes=(200,1000,3000)
+          work=[]
+          for family in families:
+              for n in sizes:
+                  assert (root/"heldout"/f"{family}-n{n}"/"seed_metrics.csv").is_file()
+                  work.append({"mode":"heldout","family":family,"n":n})
+          for n in sizes:
+              work.append({"mode":"discovery","family":"all","n":n})
+          assert len(work)==21
+          print("matrix="+json.dumps({"include":work},separators=(",",":")))
+          PY
+  analyze:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install statistical dependencies
+        run: python -m pip install --disable-pip-version-check numpy pandas scipy
+      - name: Hydrate 10 original Held Out backup shards only
+        if: matrix.mode == 'heldout'
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git lfs pull --include="data-archive/heldout/actions/actions-*_t3-b3-heldout-${FAMILY}-s*-n${SAMPLE_N}-run*.zip/part-*.lfs" --exclude=""
+          python3 - <<'PY'
+          import os,pathlib
+          root=pathlib.Path("data-archive/heldout/actions")
+          ds=list(root.glob("actions-*_t3-b3-heldout-"+os.environ["FAMILY"]+"-s*-n"+os.environ["SAMPLE_N"]+"-run*.zip"))
+          assert len(ds)==10, f"Expected 10 original Held Out shards, got {len(ds)}"
+          for d in ds:
+              chunks=list(d.glob("part-*.lfs"))
+              assert chunks and all(p.stat().st_size>200 for p in chunks), f"Unhydrated backup: {d}"
+          PY
+      - name: RQ1 Held Out candidate variability and prior-run reproducibility
+        if: matrix.mode == 'heldout'
+        run: |
+          python3 scripts/t3_b3_rq1_followup.py heldout-block \
+            --archive-root data-archive/heldout/actions \
+            --family "${{ matrix.family }}" --n "${{ matrix.n }}" \
+            --prior R1/runs/44307352615 \
+            --output "out/heldout/${{ matrix.family }}-n${{ matrix.n }}"
+      - name: Hydrate frozen Discovery training RDS bundle
+        if: matrix.mode == 'discovery'
+        env:
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git lfs pull --include="data-archive/discovery/actions/actions-*_t3-b3-discovery-bundle-n${SAMPLE_N}-run41487091262.zip/part-*.lfs" --exclude=""
+          python3 - <<'PY'
+          import os,pathlib
+          dirs=list(pathlib.Path("data-archive/discovery/actions").glob("actions-*_t3-b3-discovery-bundle-n"+os.environ["SAMPLE_N"]+"-run41487091262.zip"))
+          assert len(dirs)==1, f"Expected one frozen Discovery bundle, got {len(dirs)}"
+          for p in dirs[0].glob("part-*.lfs"): assert p.stat().st_size>200
+          PY
+      - name: Restore and check Discovery archive SHA256
+        if: matrix.mode == 'discovery'
+        run: |
+          python3 scripts/t3_b3_rq1_followup.py restore-discovery \
+            --archive-root data-archive/discovery/actions \
+            --n "${{ matrix.n }}" --output incoming/discovery
+      - uses: r-lib/actions/setup-r@v2
+        if: matrix.mode == 'discovery'
+      - name: Extract training-only rankings, frozen weights, controls and budgets
+        if: matrix.mode == 'discovery'
+        run: |
+          Rscript scripts/t3_b3_rq1_discovery_extract.R incoming/discovery \
+            "${{ matrix.n }}" "out/discovery/n${{ matrix.n }}"
+          cp incoming/discovery/R1_SOURCE_MANIFEST.json "out/discovery/n${{ matrix.n }}/source_manifest.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-followup-${{ matrix.mode }}-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 90
+  synthesize-and-backup:
+    needs: analyze
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-followup-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: RQ1 ranking preservation, Pareto, bootstrap, exact sign-flip, costs, synthesis
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy pandas scipy matplotlib
+          python3 scripts/t3_b3_rq1_followup.py finalize \
+            --root "R1/runs/${{ github.run_id }}" --prior R1/runs/44307352615
+      - name: Commit immutable R1 backups, publication figures and SHA256 file manifest
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "R1/runs/${{ github.run_id }}"
+          git commit -m "Archive R1 full Q1 analysis run ${{ github.run_id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-followup-complete-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
