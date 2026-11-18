@@ -60,7 +60,7 @@ khi<-min(R,as.integer(qbinom(.975,R,.95)+1L))
 if(klo>=khi)stop('Invalid binomial order-statistic interval')
 summ<-list();examples<-list()
 for(s in 10:19) {
- path<-root_seeds[as.character(s)]
+ path<-root_seeds[[s-9L]]
  z<-readRDS(path)
  if(!identical(as.character(z$role),'heldout')||
     !identical(as.character(z$family),family)||
