@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b53cdbe3ac19ccf4036c148eb65b0c07",
+  "parts": [
+    {
+      "bytes": 2989268,
+      "name": "part-00001.lfs",
+      "sha256": "5ef94e499d5dbbafa4a231a25b8b0aae7eb219f511fd96e98da0100d0c694863"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "5ef94e499d5dbbafa4a231a25b8b0aae7eb219f511fd96e98da0100d0c694863",
+  "size_bytes": 2989268,
+  "source": {
+    "artifact_id": 13538580067,
+    "created_at": "2026-11-06T20:14:44Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T20:11:49Z",
+    "key": "actions-13538580067",
+    "name": "t3-rw-v3-destination-reduced-normal-b15-run42286256315.zip",
+    "run_id": 42286256315,
+    "size_bytes": 2989268,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13538580067/zip"
+  }
+}
