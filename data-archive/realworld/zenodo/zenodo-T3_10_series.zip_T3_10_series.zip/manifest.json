@@ -1,0 +1,80 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "26cc641529f06672fc8920d3206de49f",
+  "parts": [
+    {
+      "bytes": 33554432,
+      "name": "part-00001.lfs",
+      "sha256": "658f9f67a705b0c54dde240d87bb7c2e1f771a21d3a5b9114f60b2994cf613f6"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00002.lfs",
+      "sha256": "ac6d5e39b63a6d9138d5a3cf9be426277bfd14a522f55c3305af96792190cc82"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00003.lfs",
+      "sha256": "ab9075dfd8b4b2cabe04208ef0d7fe9387459c08da98a8607a6acd7ed5dd1cc1"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00004.lfs",
+      "sha256": "317c0f0a7e794cae9c34230b1a398576f99a70dfe42518652fe2ce69f3059773"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00005.lfs",
+      "sha256": "bfbd1d908e4eb5ee2a78242bbdaa687de741303ee80d8598728e411154f05f59"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00006.lfs",
+      "sha256": "926825073048783d1d77859ed6cf471eebc7614cd4e44b17b1681342c9eb750c"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00007.lfs",
+      "sha256": "37593e087af7b7dfb6b0dcbdf582e7711d685ab2db33a00b7cf2f4670ee47749"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00008.lfs",
+      "sha256": "92acb2eff8e9a4af970758609908a2eda071756d41f993835fd313478e9c3f46"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00009.lfs",
+      "sha256": "126ddaf7b76902a25d667a6eaa2cbbc95b815be93f1ca0c3047b9b5893e45725"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00010.lfs",
+      "sha256": "d94253e8b3f209cb68c609f7ac93c93c36e1b327284b8e075c7e786d6317dbf3"
+    },
+    {
+      "bytes": 33554432,
+      "name": "part-00011.lfs",
+      "sha256": "a50487ff7cefc8fc5aa69906d803dbb408e14f37c5412983391e27f87dc6d758"
+    },
+    {
+      "bytes": 14868534,
+      "name": "part-00012.lfs",
+      "sha256": "c8c29e62c56597e0e57367e40f02d129db0f450300eb748a8cb792ecddc691e1"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "fc445798b0508ed1078adf7edf3002c9b2d83d4bcfa65dcd0eba1b144cb1bbc7",
+  "size_bytes": 383967286,
+  "source": {
+    "checksum": "md5:26cc641529f06672fc8920d3206de49f",
+    "key": "zenodo-T3_10_series.zip",
+    "name": "T3_10_series.zip",
+    "record_id": 24174965,
+    "size_bytes": 383967286,
+    "source": "zenodo",
+    "stage": "realworld",
+    "url": "https://zenodo.org/api/records/24174965/files/T3_10_series.zip/content"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "843eaf905322d65f4664bcaa56cd79f6",
+  "parts": [
+    {
+      "bytes": 999,
+      "name": "part-00001.lfs",
+      "sha256": "db69fd9aa1ca3ab4f0d9c51320874d51c0eb051d09940dbe1af6d5f5a4bdd8ce"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "db69fd9aa1ca3ab4f0d9c51320874d51c0eb051d09940dbe1af6d5f5a4bdd8ce",
+  "size_bytes": 999,
+  "source": {
+    "checksum": "md5:843eaf905322d65f4664bcaa56cd79f6",
+    "key": "zenodo-file_manifest.csv",
+    "name": "file_manifest.csv",
+    "record_id": 24174965,
+    "size_bytes": 999,
+    "source": "zenodo",
+    "stage": "provenance",
+    "url": "https://zenodo.org/api/records/24174965/files/file_manifest.csv/content"
+  }
+}
