@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "eca28f39729e34d4ddeb1ecd1efcb609",
+  "parts": [
+    {
+      "bytes": 295804,
+      "name": "part-00001.lfs",
+      "sha256": "a2f026d3fc133c38616242bcff8617836e943634ba8c87ee37eaf578147f3072"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a2f026d3fc133c38616242bcff8617836e943634ba8c87ee37eaf578147f3072",
+  "size_bytes": 295804,
+  "source": {
+    "artifact_id": 13705004142,
+    "created_at": "2026-11-09T19:59:16Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-05T16:14:24Z",
+    "key": "actions-13705004142",
+    "name": "t3-rw-pub-validated-lognormal-b04-n3000-g2-run42390283887.zip",
+    "run_id": 42390283887,
+    "size_bytes": 295804,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13705004142/zip"
+  }
+}
