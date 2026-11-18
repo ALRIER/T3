@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "fe0ec99b3af2154e1194759522a4bad1",
+  "parts": [
+    {
+      "bytes": 8626208,
+      "name": "part-00001.lfs",
+      "sha256": "9077a719acee67d50592764e9ff19fc57d144ef6e0ed300aeef1e99f2e604b63"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "9077a719acee67d50592764e9ff19fc57d144ef6e0ed300aeef1e99f2e604b63",
+  "size_bytes": 8626208,
+  "source": {
+    "artifact_id": 13449580137,
+    "created_at": "2026-11-05T19:53:29Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13449580137",
+    "name": "stress-v2-confirm-lognormal-s56-n200-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 8626208,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13449580137/zip"
+  }
+}

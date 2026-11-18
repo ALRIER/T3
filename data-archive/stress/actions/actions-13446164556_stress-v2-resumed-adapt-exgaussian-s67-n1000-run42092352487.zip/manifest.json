@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "137c1874218db7b318d724f6e689c45a",
+  "parts": [
+    {
+      "bytes": 138490,
+      "name": "part-00001.lfs",
+      "sha256": "3b14f06d583c1affd3d96ed7b4b530f5e31b97fe9012360f5b693fc6a33c1fb3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "3b14f06d583c1affd3d96ed7b4b530f5e31b97fe9012360f5b693fc6a33c1fb3",
+  "size_bytes": 138490,
+  "source": {
+    "artifact_id": 13446164556,
+    "created_at": "2026-11-05T19:47:37Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13446164556",
+    "name": "stress-v2-resumed-adapt-exgaussian-s67-n1000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 138490,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13446164556/zip"
+  }
+}

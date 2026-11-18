@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "9961d48f3d2a6b0cda2be1a8819bb8aa",
+  "parts": [
+    {
+      "bytes": 8905351,
+      "name": "part-00001.lfs",
+      "sha256": "e4c6cf70041f64930118049a9dfc0cea3abdc00dd464ba025080b8d76c52532f"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "e4c6cf70041f64930118049a9dfc0cea3abdc00dd464ba025080b8d76c52532f",
+  "size_bytes": 8905351,
+  "source": {
+    "artifact_id": 13447557349,
+    "created_at": "2026-11-05T19:45:32Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-03T19:16:48Z",
+    "key": "actions-13447557349",
+    "name": "stress-v2-confirm-normal-s52-n3000-run42092352487.zip",
+    "run_id": 42092352487,
+    "size_bytes": 8905351,
+    "source": "actions",
+    "stage": "stress",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13447557349/zip"
+  }
+}
