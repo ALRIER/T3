@@ -1,0 +1,63 @@
+name: R1 — Isolated Stage 5B historical Actions timing recovery
+run-name: "R1 Stage 5B only | fix GitHub API truncation | retain all 900-fold Stage 5A"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-stage5b-timing-recovery.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-stage5b-repair
+  cancel-in-progress: false
+jobs:
+  recover-original-timestamps-and-finalize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - name: Verify prior archived HPO and calibration work
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_b3_r1_stages5_12a.py
+          test -s R1/runs/44331514516/stage12a/STAGE12A_FEASIBILITY.json
+          test "$(find R1/runs/44331514516/stage5a -name CHECK.json | wc -l)" -eq 18
+      - name: Recover only the historically observed Actions job and step durations
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_b3_r1_stages5_12a.py timing             --output R1/runs/44331514516/stage5b
+      - name: Build integrated 900-fold HPO cost summary and R1 integrity manifest
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_b3_r1_stages5_12a.py finalize             --root R1/runs/44331514516
+          printf '\n## Isolated Stage 5B recovery\n\n' >> R1/runs/44331514516/RUN_STATUS.md
+          printf 'Recovered by GitHub Actions run %s after original GitHub API response truncation.\n' '${{ github.run_id }}' >> R1/runs/44331514516/RUN_STATUS.md
+          printf 'The 18 original Stage 5A source partitions and Stage 12A were not rerun.\n' >> R1/runs/44331514516/RUN_STATUS.md
+          printf 'Stage 12B empirical selection-aware CI coverage remains scientifically outstanding.\n' >> R1/runs/44331514516/RUN_STATUS.md
+      - name: Commit final R1 audit with provenance to main
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add R1/runs/44331514516
+          git commit -m 'Complete recovered R1 stage 5B timing and 900 original HPO cost synthesis run ${{ github.run_id }}'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-stage5b-recovery-run${{ github.run_id }}
+          path: |
+            R1/runs/44331514516/stage5b/
+            R1/runs/44331514516/stage5_hpo_cost_global_by_engine.csv
+            R1/runs/44331514516/stage5_cost_by_family_n_engine.csv
+            R1/runs/44331514516/R1_STAGE5_12A_SHA256_MANIFEST.json
+            R1/runs/44331514516/RUN_STATUS.md
+          if-no-files-found: error
+          retention-days: 90
