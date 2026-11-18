@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "cb6164f7a9e46708e8dedce799d0383f",
+  "parts": [
+    {
+      "bytes": 193554,
+      "name": "part-00001.lfs",
+      "sha256": "7f2445e528a5b00d6df905f4950d5e6d460655127896be116f768917a131c0af"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7f2445e528a5b00d6df905f4950d5e6d460655127896be116f768917a131c0af",
+  "size_bytes": 193554,
+  "source": {
+    "artifact_id": 13259230479,
+    "created_at": "2026-11-03T18:26:49Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-01T18:18:30Z",
+    "key": "actions-13259230479",
+    "name": "t3-b3-realworld-pairwise-reduced-13200361430-run41692539132.zip",
+    "run_id": 41692539132,
+    "size_bytes": 193554,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13259230479/zip"
+  }
+}
