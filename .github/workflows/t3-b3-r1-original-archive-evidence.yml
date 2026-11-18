@@ -1,0 +1,120 @@
+name: R1 — Original independent controls, Q95 precision, cost and calibration
+run-name: "R1 reviewer evidence from original archives | 39 jobs, max-parallel 20"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-original-archive-evidence.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  packages: read
+  actions: read
+concurrency:
+  group: r1-original-archive-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-original-sources-and-plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Hydrate only two source samples for primary archive-format validation
+        run: |
+          git lfs install --local
+          git lfs pull --include='data-archive/heldout/actions/actions-*_t3-b3-heldout-normal-s10-n200-run41208513291.zip/part-*.lfs' --exclude=''
+          git lfs pull --include='data-archive/montecarlo/actions/actions-*_b3-mc-heldout-normal-s10-n200-run40239277660.zip/part-*.lfs' --exclude=''
+      - name: Verify 180 original Held Out, 180 MC sources, all 3 Discovery bundles, sample ZIP contents
+        id: plan
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_b3_r1_original_preflight.py scripts/t3_b3_r1_restore_sources.py scripts/t3_b3_r1_deterministic_from_original.py scripts/t3_b3_r1_archive_synthesis.py
+          python3 scripts/t3_b3_r1_original_preflight.py
+          printf 'matrix=%s\n' "$(cat /tmp/r1_original_matrix.json)" >> "$GITHUB_OUTPUT"
+
+  analyze-original-immutable-evidence:
+    needs: verify-original-sources-and-plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.verify-original-sources-and-plan.outputs.matrix) }}
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install analysis dependencies (R work reuses the existing pinned GHCR container)
+        run: python -m pip install --disable-pip-version-check numpy pandas scipy
+      - name: Authenticate existing T3 scientific R image
+        if: matrix.mode == 'q95' || matrix.mode == 'cost'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Recover checked original source data and run only the requested analysis
+        run: |
+          bash scripts/t3_b3_r1_original_archive_worker.sh \
+            "${{ matrix.mode }}" "${{ matrix.family }}" "${{ matrix.n }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r1-original-${{ matrix.mode }}-${{ matrix.family }}-n${{ matrix.n }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 90
+
+  synthesize-and-permanently-preserve:
+    needs: analyze-original-immutable-evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r1-original-*
+          path: R1/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Validate all 288 original deterministic-control comparisons, globally Holm-corrected
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check numpy pandas scipy
+          python scripts/t3_b3_r1_deterministic_from_original.py finalize \
+            --root "R1/runs/${{ github.run_id }}" \
+            --output "R1/runs/${{ github.run_id }}/reviewer_synthesis"
+      - name: Consolidate original 500-replicate Q95 precision, 720 optimizer costs, inferential limits and every source digest
+        run: |
+          python scripts/t3_b3_r1_archive_synthesis.py "R1/runs/${{ github.run_id }}"
+      - name: Commit scientifically complete original-archive reviewer analysis into R1
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "R1/runs/${{ github.run_id }}"
+          git commit -m "Archive R1 original independent deterministic controls, MC Q95 precision, and optimizer cost analysis run ${{ github.run_id }}"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-original-reviewer-complete-run${{ github.run_id }}
+          path: R1/runs/${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 90
