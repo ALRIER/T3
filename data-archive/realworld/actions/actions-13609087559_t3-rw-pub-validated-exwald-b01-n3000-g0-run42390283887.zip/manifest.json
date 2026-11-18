@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "b070da162fd05840b0c71e9f1b8118b5",
+  "parts": [
+    {
+      "bytes": 294154,
+      "name": "part-00001.lfs",
+      "sha256": "7865c4cf2c1f9540183131d32400dc619640f1a26df4581493840202e5b604b0"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "7865c4cf2c1f9540183131d32400dc619640f1a26df4581493840202e5b604b0",
+  "size_bytes": 294154,
+  "source": {
+    "artifact_id": 13609087559,
+    "created_at": "2026-11-08T07:36:34Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-05T16:14:24Z",
+    "key": "actions-13609087559",
+    "name": "t3-rw-pub-validated-exwald-b01-n3000-g0-run42390283887.zip",
+    "run_id": 42390283887,
+    "size_bytes": 294154,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13609087559/zip"
+  }
+}
