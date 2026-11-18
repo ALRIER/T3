@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "524efd1eeea44f8479a78185da7466f6",
+  "parts": [
+    {
+      "bytes": 2988584,
+      "name": "part-00001.lfs",
+      "sha256": "454b1a6d923ad4426b0b6107749e938935cc275f89d0d779b662045265b7628b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "454b1a6d923ad4426b0b6107749e938935cc275f89d0d779b662045265b7628b",
+  "size_bytes": 2988584,
+  "source": {
+    "artifact_id": 13521060874,
+    "created_at": "2026-11-06T16:18:09Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:10:59Z",
+    "key": "actions-13521060874",
+    "name": "t3-rw-v2-reduced-exwald-b31-run42249952933.zip",
+    "run_id": 42249952933,
+    "size_bytes": 2988584,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13521060874/zip"
+  }
+}

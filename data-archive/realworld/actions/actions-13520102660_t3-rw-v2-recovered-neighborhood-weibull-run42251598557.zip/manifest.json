@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "7d26d00459c8cc9d5907e6ebb3e14807",
+  "parts": [
+    {
+      "bytes": 1778308,
+      "name": "part-00001.lfs",
+      "sha256": "a61b431cc12b2c6a1e178cb8ce684921e63715d31d4e03a3e5de35159ffedf94"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "a61b431cc12b2c6a1e178cb8ce684921e63715d31d4e03a3e5de35159ffedf94",
+  "size_bytes": 1778308,
+  "source": {
+    "artifact_id": 13520102660,
+    "created_at": "2026-11-06T16:21:55Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:21:22Z",
+    "key": "actions-13520102660",
+    "name": "t3-rw-v2-recovered-neighborhood-weibull-run42251598557.zip",
+    "run_id": 42251598557,
+    "size_bytes": 1778308,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13520102660/zip"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "1ac72be4b70ab58e213c9a6de167ece3",
+  "parts": [
+    {
+      "bytes": 399265,
+      "name": "part-00001.lfs",
+      "sha256": "89e2d52576c5c725b29faf4611117dd65f8b1c1cb256d2fd2000996ff1de0b79"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "89e2d52576c5c725b29faf4611117dd65f8b1c1cb256d2fd2000996ff1de0b79",
+  "size_bytes": 399265,
+  "source": {
+    "artifact_id": 13520956504,
+    "created_at": "2026-11-06T16:20:50Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:10:59Z",
+    "key": "actions-13520956504",
+    "name": "t3-rw-v2-family-parent-exgaussian-run42249952933.zip",
+    "run_id": 42249952933,
+    "size_bytes": 399265,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13520956504/zip"
+  }
+}

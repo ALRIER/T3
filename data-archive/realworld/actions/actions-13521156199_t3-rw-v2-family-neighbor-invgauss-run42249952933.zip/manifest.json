@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "92468833695552c35a5e6b94391b7729",
+  "parts": [
+    {
+      "bytes": 2061090,
+      "name": "part-00001.lfs",
+      "sha256": "716ea587449fd7635b7ff542b667b8b35d3a1fee9f81cd4ff34b9da319e0eaa3"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "716ea587449fd7635b7ff542b667b8b35d3a1fee9f81cd4ff34b9da319e0eaa3",
+  "size_bytes": 2061090,
+  "source": {
+    "artifact_id": 13521156199,
+    "created_at": "2026-11-06T16:20:20Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:10:59Z",
+    "key": "actions-13521156199",
+    "name": "t3-rw-v2-family-neighbor-invgauss-run42249952933.zip",
+    "run_id": 42249952933,
+    "size_bytes": 2061090,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13521156199/zip"
+  }
+}

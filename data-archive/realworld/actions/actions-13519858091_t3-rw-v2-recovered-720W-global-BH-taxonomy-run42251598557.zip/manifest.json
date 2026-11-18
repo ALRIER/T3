@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "65f8bb17f85c0fe99f302c2ad49bc031",
+  "parts": [
+    {
+      "bytes": 2877173,
+      "name": "part-00001.lfs",
+      "sha256": "01dd67cce8879c2b2b665bd88f1baf18df14a71a8bc7429cbab1b9ee5bf5e678"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "01dd67cce8879c2b2b665bd88f1baf18df14a71a8bc7429cbab1b9ee5bf5e678",
+  "size_bytes": 2877173,
+  "source": {
+    "artifact_id": 13519858091,
+    "created_at": "2026-11-06T16:24:10Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T16:21:22Z",
+    "key": "actions-13519858091",
+    "name": "t3-rw-v2-recovered-720W-global-BH-taxonomy-run42251598557.zip",
+    "run_id": 42251598557,
+    "size_bytes": 2877173,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13519858091/zip"
+  }
+}
