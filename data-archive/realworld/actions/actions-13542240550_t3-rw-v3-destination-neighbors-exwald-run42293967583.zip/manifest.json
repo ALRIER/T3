@@ -1,0 +1,28 @@
+{
+  "chunk_size": 33554432,
+  "complete": true,
+  "md5": "2b016c690fca754e68ffa522f8754c53",
+  "parts": [
+    {
+      "bytes": 2062749,
+      "name": "part-00001.lfs",
+      "sha256": "601094c32e869b2cb0e2fc76d044db680e1c5fdd78cea2c60b7526f837b23d5b"
+    }
+  ],
+  "schema_version": 1,
+  "sha256": "601094c32e869b2cb0e2fc76d044db680e1c5fdd78cea2c60b7526f837b23d5b",
+  "size_bytes": 2062749,
+  "source": {
+    "artifact_id": 13542240550,
+    "created_at": "2026-11-06T21:13:51Z",
+    "expired_at_inventory": false,
+    "expires_at": "2027-02-04T21:06:34Z",
+    "key": "actions-13542240550",
+    "name": "t3-rw-v3-destination-neighbors-exwald-run42293967583.zip",
+    "run_id": 42293967583,
+    "size_bytes": 2062749,
+    "source": "actions",
+    "stage": "realworld",
+    "url": "https://api.github.com/repos/ALRIER/T3/actions/artifacts/13542240550/zip"
+  }
+}
