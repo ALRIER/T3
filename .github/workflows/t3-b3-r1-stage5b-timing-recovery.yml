@@ -36,11 +36,11 @@ jobs:
       - name: Build integrated 900-fold HPO cost summary and R1 integrity manifest
         run: |
           set -euo pipefail
-          python3 scripts/t3_b3_r1_stages5_12a.py finalize             --root R1/runs/44331514516
           printf '\n## Isolated Stage 5B recovery\n\n' >> R1/runs/44331514516/RUN_STATUS.md
           printf 'Recovered by GitHub Actions run %s after original GitHub API response truncation.\n' '${{ github.run_id }}' >> R1/runs/44331514516/RUN_STATUS.md
           printf 'The 18 original Stage 5A source partitions and Stage 12A were not rerun.\n' >> R1/runs/44331514516/RUN_STATUS.md
           printf 'Stage 12B empirical selection-aware CI coverage remains scientifically outstanding.\n' >> R1/runs/44331514516/RUN_STATUS.md
+          python3 scripts/t3_b3_r1_stages5_12a.py finalize             --root R1/runs/44331514516
       - name: Commit final R1 audit with provenance to main
         run: |
           set -euo pipefail
