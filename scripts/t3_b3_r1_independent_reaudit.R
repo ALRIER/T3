@@ -59,7 +59,10 @@ for(n in c(200L,1000L,3000L)) {
   flips <- abs(drop(flip_signs%*%delta)/10)
   observed <- abs(avg)
   exact_p <- mean(flips>=observed-1e-12*max(1,observed))
-  rs <- sensitivity[keys,,drop=FALSE]
+  sensitivity_keys <- sensitivity$family==family&sensitivity$sample_n==n&
+      sensitivity$method_a==pair[[1L]]&sensitivity$method_b==pair[[2L]]&
+      sensitivity$metric==metric
+  rs <- sensitivity[sensitivity_keys,,drop=FALSE]
   if(nrow(rs)!=1L)stop("Missing original reviewer contrast")
   tol(exact_p,rs$p_signflip_exact_two_sided,"exact sign flip sensitivity")
   leave_one <- vapply(seq_along(delta),function(i)mean(delta[-i]),numeric(1))
