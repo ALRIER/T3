@@ -1,0 +1,44 @@
+{
+  "audit_run_id": 44220954147,
+  "audit_url": "https://github.com/ALRIER/T3/actions/runs/44220954147",
+  "source_inventory": "frozen catalog",
+  "sources_total": 7994,
+  "actions_sources": 7983,
+  "zenodo_files": 11,
+  "manifests_verified": 7994,
+  "lfs_pointers_verified": 8187,
+  "original_bytes": 45354058307,
+  "structural_errors": 0,
+  "live_actions_artifacts_missing_from_frozen_catalog": 0,
+  "frozen_actions_artifacts_absent_from_live": 0,
+  "live_expired": 0,
+  "sampled_full_reconstructions_with_SHA256_and_ZIP_pass": 7,
+  "sampled_categories": [
+    "discovery",
+    "heldout",
+    "misc",
+    "montecarlo",
+    "provenance",
+    "realworld",
+    "stress"
+  ],
+  "status": "PASS for complete published artifact inventory, NOT yet full byte-by-byte verification of all 45.35GB",
+  "out_of_scope": [
+    "GitHub Actions job logs",
+    "GitHub caches",
+    "files never uploaded as Actions artifacts",
+    "other repositories or unreferenced remote datasets",
+    "unvalidated scientific semantic completeness"
+  ],
+  "checked_primary_run_artifact_counts": {
+    "40239277660": 540,
+    "41113724413": 231,
+    "41487091262": 3,
+    "42045005791": 20,
+    "42050564002": 1,
+    "42062234485": 20,
+    "42092352487": 550,
+    "42390283887": 1249,
+    "43098925126": 21
+  }
+}
