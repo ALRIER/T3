@@ -1,0 +1,110 @@
+name: R1 — Recover and publish completed staged reviewer artifacts only
+run-name: "R1 publish recovery only | source run 44318493492 | no recomputation"
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/t3-b3-r1-crossed-artifact-publish-recovery.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: r1-crossed-publish-recovery-44318493492
+  cancel-in-progress: false
+jobs:
+  publish-existing-results:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - name: Download original 18 completed blocks and synthesis without recalculating
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: '44318493492'
+          github-token: ${{ github.token }}
+          pattern: r1-crossed-*
+          path: incoming/crossed
+          merge-multiple: true
+      - name: Download 3 already completed original backup inspections
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: '44318493492'
+          github-token: ${{ github.token }}
+          pattern: r1-archive-inspection-*
+          path: incoming/archive_inspection
+          merge-multiple: true
+      - name: Correct artifact directory layout, audit 18 + 3 completed blocks, SHA256 inputs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv,hashlib,json,pathlib,shutil
+          source=pathlib.Path('incoming/crossed')
+          target=pathlib.Path('R1/runs/44318493492')
+          if target.exists():
+              raise RuntimeError('Refusing to overwrite already published immutable R1 results')
+          target.mkdir(parents=True)
+          (target/'analysis').mkdir()
+          shutil.copytree(source/'blocks',target/'blocks')
+          filenames=('crossed_hierarchical_inference_216.csv',
+                     'two_metric_joint_practical_216_directions.csv',
+                     'R1_REVIEWER_SCOPE.md','SUMMARY.json')
+          for fn in filenames:
+              origin=source/fn
+              if not origin.is_file() or origin.stat().st_size==0:
+                  raise RuntimeError('Missing completed synthesis output '+fn)
+              shutil.copy2(origin,target/'analysis'/fn)
+          shutil.copytree('incoming/archive_inspection/archive_probe',target/'archive_probe')
+          families=('normal','lognormal','weibull','invgauss','exgaussian','exwald')
+          for family in families:
+              for n in (200,1000,3000):
+                  b=target/'blocks'/f'{family}-n{n}'
+                  for fn in ('crossed_inference.csv','joint_mse_q95.csv','provenance.json'):
+                      assert (b/fn).is_file() and (b/fn).stat().st_size>0
+          for mode in ('deterministic','q95','cost'):
+              b=target/'archive_probe'/mode
+              for fn in ('ASSESSMENT.md','PROBE_META.json'):
+                  assert (b/fn).is_file() and (b/fn).stat().st_size>0
+          for fn in filenames:
+              assert (target/'analysis'/fn).stat().st_size>0
+          def check_csv(name,expected):
+              with (target/'analysis'/name).open(newline='') as f:
+                  actual=sum(1 for _ in csv.DictReader(f))
+              assert actual==expected,(name,actual,expected)
+          check_csv('crossed_hierarchical_inference_216.csv',216)
+          check_csv('two_metric_joint_practical_216_directions.csv',216)
+          overview=json.loads((target/'analysis'/'SUMMARY.json').read_text())
+          assert overview['strata']==18
+          assert overview['compared_metric_contrasts']==216
+          assert overview['joint_pair_directions']==216
+          files=sorted(x for x in target.rglob('*') if x.is_file())
+          manifest={'source_analysis_workflow':44318493492,
+            'source_results_recomputed':False,
+            'publication_recovery_run':int('${{ github.run_id }}'),
+            'source_completed_jobs':'18 crossed blocks, scientific synthesis, 3 archival inspections',
+            'source_original_R1_runs':[44307352615,44310024979,44313738898],
+            'no_new_simulation':True,'no_optimizer_training':True,'no_heldout_rescoring':True,
+            'files':[{'path':str(x.relative_to(target)),'bytes':x.stat().st_size,
+                      'sha256':hashlib.sha256(x.read_bytes()).hexdigest()} for x in files]}
+          (target/'R1_STAGED_FOLLOWUP_MANIFEST.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print('R1_STAGED_PUBLISH_RECOVERY_VERIFIED_PASS',len(files),flush=True)
+          PY
+      - name: Permanently preserve original results under their original R1 run ID
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add R1/runs/44318493492
+          git commit -m "Recover and permanently archive finished R1 reviewer and original source inspections from run 44318493492"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-crossed-reviewed-archived-run44318493492
+          path: R1/runs/44318493492
+          if-no-files-found: error
+          retention-days: 90
