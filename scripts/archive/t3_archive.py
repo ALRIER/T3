@@ -250,9 +250,40 @@ def main():
             # Continue recovering other sources rather than letting one expired or
             # inaccessible file interrupt the remainder of the entire experiment.
             continue
+    # Once the normal queue is exhausted, retry previously blocked original
+    # artifact IDs individually. Preserve prior error history, limit attempts,
+    # and never recreate successful archives.
+    available=[i for i in cat["sources"] if not (item_dir(i)/"manifest.json").exists()
+               and not i.get("expired_at_inventory") and i["key"] not in failures]
+    if not available and failures:
+        tried=0
+        for key,entry in list(failures.items()):
+            if tried>=3:break
+            item=next((i for i in cat["sources"] if i["key"]==key),None)
+            if item is None or (item_dir(item)/"manifest.json").exists():
+                failures.pop(key,None)
+                continue
+            if int(entry.get("retry_attempts",0))>=3:continue
+            tried+=1
+            print("RETRY_ORIGINAL_ARCHIVE",key,flush=True)
+            try:
+                if stream_parts(item):
+                    n+=1
+                    history=STORE/"catalog"/"resolved_failures.jsonl"
+                    with history.open("a") as f:
+                        f.write(json.dumps({"key":key,"original_failure":entry,
+                            "resolved_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())})+"\n")
+                failures.pop(key,None)
+            except Exception as e:
+                entry["retry_attempts"]=int(entry.get("retry_attempts",0))+1
+                entry["last_error"]=str(e)
+                entry["last_retry_utc"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
+                print("RETRY_STILL_BLOCKED",key,repr(e),file=sys.stderr,flush=True)
+        FAILURES.write_text(json.dumps(failures,indent=2,sort_keys=True)+"\n")
     info=status(cat)
     print("ARCHIVE_STATUS",json.dumps(info),flush=True)
-    if (n or attempts) and info["pending_sources"]>info["expired_unarchived"]+info["failed_unarchived"]:
+    if (n or attempts) and (info["pending_sources"]>info["expired_unarchived"]+info["failed_unarchived"]
+          or any(int(x.get("retry_attempts",0))<3 for x in failures.values())):
         (REPORT/"next.txt").write_text("publish\n")
     elif info["complete"]:print("INVENTORIED_ARCHIVE_COMPLETE",flush=True)
     else:print("ARCHIVE_BLOCKED_OR_EXPIRED",flush=True)
