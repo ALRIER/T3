@@ -1,0 +1,24 @@
+{
+  "exact_known_truth_within_surrogate": true,
+  "full_original_pipeline_selection_aware_coverage_established": false,
+  "independent_synthetic_replications_per_mode": 4096,
+  "new_optimizer_fit": false,
+  "new_original_MC_simulations": false,
+  "new_synthetic_resamples": true,
+  "notes": [
+    "This replay samples new synthetic datasets from an additive empirical crossed-effects surrogate estimated from 10 original training and 10 evaluation seed cells per block.",
+    "Within this explicitly defined surrogate, true method effects are known by construction; all resampled random-effect component vectors are centered.",
+    "The synthetic training/evaluation component distributions and Gaussian t9 variance reference are not guaranteed to match the actual experiment's true data-generating process.",
+    "Independent synthetic repeats estimate nominal CI coverage and Holm/BH errors conditional on this surrogate and its cross-block independence assumption.",
+    "Candidate selection chooses the lowest training-only MSE among four ALREADY FROZEN engines on an independently generated synthetic training panel; this does NOT rerun nested 5x3 HPO, optimizer selection of weight vectors, or their original scientific selection pathway.",
+    "Therefore empirical fully selection-aware interval coverage of the original end-to-end optimization pipeline remains OUTSTANDING.",
+    "Original R1 comparisons, their p-values and all previously reported scientific outcomes remain unchanged.",
+    "The Stage 5A HPO cost and Stage 5B Actions runtime records are already permanently archived; they are reused, never recomputed."
+  ],
+  "null_type1_calibration_within_surrogate": true,
+  "original_family_n_blocks": 18,
+  "original_frozen_candidate_panels": 18,
+  "original_metric_contrasts": 216,
+  "source_stage5_cost_archive": "R1/runs/44331514516",
+  "status": "KNOWN_TRUTH_SURROGATE_REPLAY_COMPLETE"
+}

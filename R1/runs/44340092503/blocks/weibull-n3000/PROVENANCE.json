@@ -1,0 +1,45 @@
+{
+  "controlled_known_effects": true,
+  "cross_method_metric_dependence": "joint resampling of 8 dimensional original row, column and interaction residual vectors",
+  "family": "weibull",
+  "frozen_original_candidate_panel": "R1/runs/44310024979/heldout/weibull-n3000/candidate_by_eval.csv",
+  "independent_surrogate_replicates": true,
+  "modes": [
+    "global_null",
+    "mixed_null",
+    "observed_effect"
+  ],
+  "optimizer_HPO_fits_recomputed": false,
+  "original_eval_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_results_modified": false,
+  "original_training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "repetitions_per_mode": 4096,
+  "sample_n": 3000,
+  "scope": "empirical_crossed_effects_surrogate",
+  "selection_scope": "posthoc frozen-method candidate choice, not original nested HPO/W selection",
+  "sha256": "a252aacf97f7bac4affec2ae82490713d5d60ae38ac87364f0ec9f52aa824c0c",
+  "stage": "12B",
+  "trained_weights_reestimated": false
+}
