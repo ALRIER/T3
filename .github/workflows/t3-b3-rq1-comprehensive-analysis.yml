@@ -31,11 +31,11 @@ jobs:
           SAMPLE_N: ${{ matrix.n }}
         run: |
           git lfs install --local
-          git lfs pull --include="data-archive/heldout/actions/*heldout-${FAMILY}-s*-n${SAMPLE_N}-run*.zip/part-*.lfs" --exclude=""
+          git lfs pull --include="data-archive/heldout/actions/actions-*_t3-b3-heldout-${FAMILY}-s*-n${SAMPLE_N}-run*.zip/part-*.lfs" --exclude=""
           python3 - <<'PY'
           import os,pathlib
           root=pathlib.Path("data-archive/heldout/actions")
-          dirs=list(root.glob("*heldout-"+os.environ["FAMILY"]+"-s*-n"+os.environ["SAMPLE_N"]+"-run*.zip"))
+          dirs=list(root.glob("actions-*_t3-b3-heldout-"+os.environ["FAMILY"]+"-s*-n"+os.environ["SAMPLE_N"]+"-run*.zip"))
           assert len(dirs)==10, f"Expected 10 archived seeds; found {len(dirs)}"
           for d in dirs:
               for p in d.glob("part-*.lfs"):
