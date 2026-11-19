@@ -1,0 +1,58 @@
+{
+  "Q2_TABLE_LOCAL_NEIGHBOR_SENSITIVITY.csv": {
+    "sha256": "938cc573982039bf17c7fb170fb547f8dbb4498b9be14d88cc9379362ab64e57",
+    "bytes": 6717
+  },
+  "Q2_ALL_FACTOR_PROFILES.csv": {
+    "sha256": "1f3ef5daf8566e4b5e5ddd00c8adced7ab7bfc124c1f83660be2fa994607e247",
+    "bytes": 1679184
+  },
+  "Q2_ALL_TWO_WAY_BOOTSTRAP_EFFECTS.csv": {
+    "sha256": "ee0562b650ba424addc9f8eea52712a76070d559382f486bc98c605ba51e7547",
+    "bytes": 257139
+  },
+  "figure_Q2_DE_fraction_severity.svg": {
+    "sha256": "c8366513c262add03e1f767023a84c0835fdd89971b5a9f87d8af6c9824c7e15",
+    "bytes": 42899
+  },
+  "Q2_PRIMARY_DE_216_EXPLORATORY_CONTRASTS.csv": {
+    "sha256": "4aa874a835a5e7061cd62c4f24536bcb8d7b169a7768d13a01c1f2682262f3af",
+    "bytes": 30426
+  },
+  "Q2_SCIENTIFIC_AUDIT.json": {
+    "sha256": "5053d6bd64ad2725765d601c4d30dce3705d087d4943780895346830256d1b23",
+    "bytes": 18057
+  },
+  "Q2_TABLE_FAMILY_BY_SAMPLE_SIZE_DE_OWN.csv": {
+    "sha256": "35f1ed355ae4a30d3d15c64a2ed9df46868f0240deaabe00bc408dcc52dcbe84",
+    "bytes": 949
+  },
+  "figure_Q2_DE_family_mechanism.png": {
+    "sha256": "a5c2aee01dbacef6899fa84e55265a8dd5ed70fe9a629321988975ef2e6e74f7",
+    "bytes": 290731
+  },
+  "Q2_TABLE_FOUR_METHOD_BENCHMARK_SENSITIVITY.csv": {
+    "sha256": "77de1dd11fc82fc07445b35ad532d2f56f3c1c268d4f7d078c8c31dfcf83ceef",
+    "bytes": 488
+  },
+  "figure_Q2_DE_fraction_severity.png": {
+    "sha256": "ad5f3d1bd33397f4f209486f4ef686fb422a809269e87d031d2bb2622b50ea2f",
+    "bytes": 321046
+  },
+  "figure_Q2_DE_family_mechanism.svg": {
+    "sha256": "a180f85bbae2ae98b32656679df4a54acc8177600d3997a0bc594b069ce8503f",
+    "bytes": 50152
+  },
+  "Q2_ALL_OBSERVED_LOCAL_NEIGHBORS.csv": {
+    "sha256": "e16696f21dc54ac07ae1569d213884d2e0904cacf05201eb7c9bff85fcaa66cf",
+    "bytes": 2288008
+  },
+  "Q2_TABLE_FAMILY_BY_MECHANISM_DE_OWN.csv": {
+    "sha256": "40a7c0ded1ad5a3d17eae28550793ab376d2cb844be0d815cff2ffb219949edb",
+    "bytes": 2664
+  },
+  "Q2_RESULTS_AND_LIMITATIONS.md": {
+    "sha256": "829c3f9233a3094c2a568609efd53141fe123946fa3ffc26f97c40a466847628",
+    "bytes": 3835
+  }
+}
