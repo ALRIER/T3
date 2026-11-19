@@ -1,0 +1,9 @@
+method,benchmark_role,eligible_candidates,any_joint_candidates,within_Q2_support_universal,mean_joint_scenarios_per_candidate,median_largest_joint_component,total_neighbor_win_start_directions,total_neighbor_retained_win_directions,one_hop_retention_conditional
+de,mean,180,180,0,132.044444444,17.5,41084,37674,0.916999318469
+de,own,180,88,0,2.25555555556,0,717,126,0.175732217573
+dirichlet,mean,180,180,0,145.238888889,20.5,45354,42080,0.927812320854
+dirichlet,own,180,83,0,1.45,0,462,38,0.0822510822511
+ga,mean,180,180,0,134.583333333,18.5,41851,38434,0.918353205419
+ga,own,180,72,0,1.22222222222,0,369,26,0.070460704607
+nsga2,mean,180,180,0,134.827777778,18.5,41932,38522,0.918677859391
+nsga2,own,180,80,0,1.25555555556,0,389,30,0.0771208226221

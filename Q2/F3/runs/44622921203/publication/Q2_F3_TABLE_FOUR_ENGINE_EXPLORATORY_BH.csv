@@ -1,0 +1,9 @@
+method,benchmark_role,mechanism_tests,joint_CI,joint_BH_exploratory,MSE_BH_exploratory,Q95_BH_exploratory
+de,mean,108,39,39,39,48
+de,own,108,0,0,0,0
+dirichlet,mean,108,48,48,48,53
+dirichlet,own,108,0,0,0,0
+ga,mean,108,43,43,43,47
+ga,own,108,0,0,0,0
+nsga2,mean,108,43,43,43,47
+nsga2,own,108,0,0,0,0
