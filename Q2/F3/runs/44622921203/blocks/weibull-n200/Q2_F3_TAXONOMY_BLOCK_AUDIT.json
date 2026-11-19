@@ -1,0 +1,37 @@
+{
+  "candidate_scenario_rows": 19280,
+  "cross_stage_weight_sha_verified": false,
+  "engine_scenario_rows": 1928,
+  "fixed_frozen_candidate_key": "source_family|sample_n|method|training_seed",
+  "frozen_candidate_mechanism_rows": 480,
+  "frozen_candidate_policy_rows": 80,
+  "observed_within_family_support_only": true,
+  "original_Q2_AE": "44599590079",
+  "original_Q2_F3": "44613985618",
+  "original_crossed_score_rows": 192800,
+  "original_observed_neighbors_per_block": 205,
+  "original_source_archive_count": 10,
+  "sample_n": 200,
+  "source_F3_manifest_sha256": "825c97723884e7d486f60452f9df431969140b9b3871c183f6b18299fb97e8a7",
+  "source_Q2_manifest_sha256": "913c8b18c54781529ad519f47d098705ae0f9d1c7b2e6cf9ed930f3a9b2f2544",
+  "source_family": "weibull",
+  "source_files": {
+    "CANDIDATE_BREADTH_AND_UNIVERSALITY.csv": {
+      "bytes": 12133,
+      "sha256": "c012ee3a108f4e15b3a7f7aaf8b1a5d20f5f2c484b8ab5b5a61da2367f020fc8"
+    },
+    "CANDIDATE_MECHANISM_POCKETS.csv": {
+      "bytes": 39736,
+      "sha256": "ebd85b2a40a74622b8b597d06c18db0ad22aa41baf8ae7015c523a51f1a7e934"
+    },
+    "CANDIDATE_SCENARIO_TAXONOMY.csv.gz": {
+      "bytes": 1659782,
+      "sha256": "1d3574952520d03c55fc23c36c07e50e185d20030307d30d7e6c7d504aeced65"
+    },
+    "ENGINE_SCENARIO_TAXONOMY.csv": {
+      "bytes": 387930,
+      "sha256": "5872e2c4e78cbff2904c245dd906ee64fc39957fa7d58efcf49810435a1582ee"
+    }
+  },
+  "status": "PASS_Q2_F3_ALL_FOUR_ENGINES_CANDIDATE_TAXONOMY"
+}
