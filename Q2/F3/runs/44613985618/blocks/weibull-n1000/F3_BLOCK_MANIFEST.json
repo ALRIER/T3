@@ -1,0 +1,35 @@
+{
+  "crossed_heldout_seeds": 10,
+  "crossed_training_seeds": 10,
+  "family": "weibull",
+  "files": {
+    "DE_OWN_12_CONTRASTS_CROSSED.npz": {
+      "bytes": 9474,
+      "sha256": "ce57fec6f3da67c9596f564a5476808f957ea47b60195ee748c67d07be4450b9"
+    },
+    "ROBUST_MECHANISM_SUMMARY.csv": {
+      "bytes": 13475,
+      "sha256": "9aaf6cf64cdfbaca688199d934c6f230a679fc22af9e5bf7e833ad1e9203dd03"
+    },
+    "ROBUST_OBSERVED_NEIGHBORS.csv": {
+      "bytes": 226318,
+      "sha256": "2ccadac337a6fe16b42b3ccc51a006f9b3285d6a2be02987aa1ca05b3b525391"
+    },
+    "ROBUST_SCENARIO_EFFECTS.csv": {
+      "bytes": 738498,
+      "sha256": "f08737044a5a618cf6a0e2e90561edd1de9b166b1123f8ee675f34981a0960ba"
+    }
+  },
+  "full_factorial": false,
+  "mechanism_summaries": 56,
+  "observed_local_edges": 1640,
+  "original_paired_cells": 192800,
+  "original_q2_run": 44599590079,
+  "primary_contrast_matrices": 12,
+  "reconstructed_from_original_q2_shards": true,
+  "sample_n": 1000,
+  "scenario_summaries": 1928,
+  "source_manifest_git_path": "Q2/runs/44599590079/blocks/weibull-n1000/Q2_BLOCK_MANIFEST.json",
+  "source_manifest_sha256": "17896af84f5325f7a7aa71cf96bbd17bd2e29c3f9e0a093bd9d3a91161cc6c17",
+  "status": "PASS_F3_ROBUST_RECONSTRUCTION"
+}
