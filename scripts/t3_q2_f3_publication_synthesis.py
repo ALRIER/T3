@@ -53,6 +53,8 @@ def main(root):
         ca=pd.read_csv(d/"CANDIDATE_BREADTH_AND_UNIVERSALITY.csv")
         po=pd.read_csv(d/"CANDIDATE_MECHANISM_POCKETS.csv")
         must((len(en),len(ca),len(po))==(1928,80,480),"four-engine block dimensional gate")
+        en["family"]=f
+        en["sample_n"]=n
         engines.append(en);models.append(ca);pockets.append(po)
         blocks.append(dict(family=f,sample_n=n,sha256_of_block_manifest=sha(d/"Q2_F3_TAXONOMY_BLOCK_AUDIT.json")))
     e=pd.concat(engines,ignore_index=True)
