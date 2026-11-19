@@ -103,6 +103,14 @@ original training and independent evaluation seeds, and describe
 \emph{the observed supported scenario grid}. They do not establish a
 general-purpose rule for selecting estimators in unobserved regimes.
 
+Percentage reductions are computed relative to the independent frozen
+classical reference. When reference loss is small, an unfavorable ratio can
+become large in magnitude; reported mean percentages should therefore be
+read together with the signs, eligible counts, original loss differences and
+robustness diagnostics in the appendix. The benchmark is deliberately
+competitive, and DE's Q1 optimizer ranking does not imply positive gains
+over that reference in every supported scenario.
+
 Table~\ref{tab:q2_family_size} separates the six generating families and
 three sample sizes. Figure~\ref{fig:q2_family_mechanism} further distinguishes
 six contamination mechanisms for both loss outcomes. The most favorable
