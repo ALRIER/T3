@@ -1,0 +1,124 @@
+{
+  "schema": "Q2-v1",
+  "analysis": "Q2 A-D within-family independent confirmation",
+  "family": "exgaussian",
+  "sample_n": 1000,
+  "original_heldout_archive_count": 10,
+  "original_evaluation_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "original_frozen_candidates_per_block": 40,
+  "supported_scenarios": 241,
+  "paired_benchmark_metric_records": 192800,
+  "scenario_rows": 1928,
+  "local_neighbor_edges": 205,
+  "mechanisms": [
+    "clean",
+    "clustered_symmetric",
+    "clustered_upper",
+    "lower_tail",
+    "point_mass",
+    "symmetric_t",
+    "upper_tail"
+  ],
+  "design_is_incomplete_factorial": true,
+  "no_optimizer_training": true,
+  "no_new_monte_carlo": true,
+  "benchmark_lineage": {
+    "folder": "data-archive/discovery/actions/actions-13157714218_t3-b3-discovery-own-benchmark-map-run41478038812.zip",
+    "original_sha256": "cffb6032d71578ad9e66de2814e9bd1ddab1c98b5732e4fc5bd6560d53f73c0e"
+  },
+  "original_archive_lineage": [
+    {
+      "evaluation_seed": 10,
+      "archive": "data-archive/heldout/actions/actions-13098193384_t3-b3-heldout-exgaussian-s10-n1000-run41208513291.zip",
+      "sha256": "45e13a5bb23391baf9d7e89b8002174bb41dfc3a6c2afb00214e999cec3480e0"
+    },
+    {
+      "evaluation_seed": 11,
+      "archive": "data-archive/heldout/actions/actions-13099433945_t3-b3-heldout-exgaussian-s11-n1000-run41208513291.zip",
+      "sha256": "bf1f59e0d86646342dfe9d9a820f1726adcfd89a2cc50f2204f493f64c2ec567"
+    },
+    {
+      "evaluation_seed": 12,
+      "archive": "data-archive/heldout/actions/actions-13105714140_t3-b3-heldout-exgaussian-s12-n1000-run41208513291.zip",
+      "sha256": "fc42b3f76d9329b6724970501738d7d3151a02a5b85fac6429107e8ad397f631"
+    },
+    {
+      "evaluation_seed": 13,
+      "archive": "data-archive/heldout/actions/actions-13108360725_t3-b3-heldout-exgaussian-s13-n1000-run41208513291.zip",
+      "sha256": "b7cef188527269946e257459b023b05280fabd313d9d205dbab4eb92614035ef"
+    },
+    {
+      "evaluation_seed": 14,
+      "archive": "data-archive/heldout/actions/actions-13113506129_t3-b3-heldout-exgaussian-s14-n1000-run41208513291.zip",
+      "sha256": "ecc494f496827a5ff29c2032c60a986f689ff4339ed17aff7af7e3df29f95ddb"
+    },
+    {
+      "evaluation_seed": 15,
+      "archive": "data-archive/heldout/actions/actions-13116790866_t3-b3-heldout-exgaussian-s15-n1000-run41208513291.zip",
+      "sha256": "abeba024ccf7abd4d771d04c65609c64f9c5852a0fe8e98383379ec3fcd8904e"
+    },
+    {
+      "evaluation_seed": 16,
+      "archive": "data-archive/heldout/actions/actions-13116004598_t3-b3-heldout-exgaussian-s16-n1000-run41208513291.zip",
+      "sha256": "5e8162c50b80787f7049f0e48a6b943ec4f0d5c081bdc21a2fbf68ac6e7fa370"
+    },
+    {
+      "evaluation_seed": 17,
+      "archive": "data-archive/heldout/actions/actions-13116732189_t3-b3-heldout-exgaussian-s17-n1000-run41208513291.zip",
+      "sha256": "986f58107ebcbb5e776355d774ee4685a51e6a7159fad9c34673bee6f12fd0f5"
+    },
+    {
+      "evaluation_seed": 18,
+      "archive": "data-archive/heldout/actions/actions-13116294643_t3-b3-heldout-exgaussian-s18-n1000-run41208513291.zip",
+      "sha256": "3b3e2e02e6ebd345c49c7ffcffcace76cb621bc4057da4912caa53b1a2f83551"
+    },
+    {
+      "evaluation_seed": 19,
+      "archive": "data-archive/heldout/actions/actions-13115854565_t3-b3-heldout-exgaussian-s19-n1000-run41208513291.zip",
+      "sha256": "b2caa7e8f3a3ef2519d505f313ad4b7abb7cd9095bebbaa038b92c5490902507"
+    }
+  ],
+  "scientific_scope": "WITHIN-family original frozen weights, 241 supported scenarios; Q3 cross-family excluded",
+  "inference_scope": "Descriptive t9 flags are not multiplicity calibrated; no confirmatory claims.",
+  "outputs": {
+    "paired_seed_cells.csv.gz": {
+      "sha256": "7b51cda5f3c464e610ea61293056ce88bf922140b6724d338e0b8dec3421ecf1",
+      "bytes": 14688171
+    },
+    "scenario_effects.csv": {
+      "sha256": "d859dbc8f34e56bb688def62697a6bcb64566af66266eb77316c88f70e0a52b7",
+      "bytes": 298251
+    },
+    "local_neighbors.csv": {
+      "sha256": "ab677d4e314d73698dd5b6d283fa931c825bbc273c9163c3dcd71a0e28e6e4e3",
+      "bytes": 155051
+    },
+    "factor_profiles.csv": {
+      "sha256": "91df247b22f6c2a22e8454f50f0b2cb20d85956fad59c27ea0857330042c2180",
+      "bytes": 109521
+    }
+  }
+}
