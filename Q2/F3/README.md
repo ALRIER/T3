@@ -4,6 +4,16 @@ All F3 scientific computation runs in **ALRIER/T3**, branch **main**.
 The immutable primary Q2-A–E data remain at `Q2/runs/44599590079/`.
 No F3 action writes to `ALRIER/Genetic_Algorithms` or modifies any existing Q1/Q2 result.
 
+## Latest full Q2 taxonomy and manuscript-ready figure package — run 44622921203
+
+[Successful T3-only scientific workflow](https://github.com/ALRIER/T3/actions/runs/44622921203). All 18 frozen-candidate blocks passed independently; one failed synthesis attempt was corrected without rerunning those successful blocks, and the final synthesis passed. The [immutable publication directory](runs/44622921203/publication/) contains five SVG+PNG figures, all four-engine taxonomy and statistical evidence tables, candidate-level neighborhood robustness, exhaustive mechanism tables, an audit, and SHA-256 manifests.
+
+**Preserved counts:** 34,704 original engine-scenario/reference rows including clean; 347,040 candidate-scenario/reference rows; 1,440 candidate-reference breadth rows; 8,640 candidate-mechanism summaries. Descriptive joint MSE/Q95 gains versus the original Discovery-selected classical reference: GA 18, NSGA-II 18, DE 40, Dirichlet 13, out of 4,320 originally supported contaminated scenario summaries per engine. Versus the sample mean: GA 2,421, NSGA-II 2,421, DE 2,379, Dirichlet 2,615. These are distinct reference policies and descriptive estimands.
+
+The original Q2 mechanism-level bootstrap results were fully retained for all four engines and two policies, with separate exploratory BH correction across 864 effects per metric. **All selected-classical joint BH+CI counts are zero** in those complete exploratory 108-mechanism-per-engine panels; this does not establish a fully calibrated negative finding or imply every scenario individually fails. The fitted-null Q2 error-rate status remains unverified for the full optimizer/reselection pipeline. Zero frozen candidates met the strict criterion of beating the unchanged reference on both losses in all 240 within-family observed contaminated scenarios in their own family-size panel.
+
+The new manuscript-ready figures were copied byte-identically into the established canonical private paper directory `ALRIER/Genetic_Algorithms/main/manuscript/figures/`, with the Results and Q2 appendix integrated into the single `manuscript/main.tex` in commit `87e1b76456bd1ad704ee790674c9d2b3de32f4b5`. Canonical PDF recompilation is checked separately and must not be assumed complete from this scientific receipt.
+
 ## Q2 taxonomy and manuscript argumentation
 
 The agreed objective × evidence × breadth framework, observed-neighborhood extension rules, strict within-tested-support universality criterion, four-engine candidate identity and Q3/Q4 handoff are documented in [Q2 Scientific Argument and Taxonomy Blueprint](Q2_SCIENTIFIC_ARGUMENT_AND_TAXONOMY_BLUEPRINT.md). This is a planning document, **not** a new inference PASS or a launched workflow.
