@@ -14,12 +14,22 @@ synthesis were validated and saved in
 [`Q2/runs/44599590079/`](runs/44599590079/).
 The primary workflow's cross-repository Q2-F step lacked the private-repository
 `PUB1_MANUSCRIPT_TOKEN` secret and failed without modifying the paper.
-Q2-F was subsequently **recovered and completed** in the authorized canonical
-paper repository using
-[private paper Actions run 44601166188](https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44601166188).
-The updated 61-page PDF and one canonical `main.tex` were committed to
+Q2-F was subsequently **recovered, corrected for safe reruns, and completed**
+in the authorized canonical paper repository. The definitive SHA-verified
+[Q2-F recovery run 44605084265](https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44605084265)
+**passed** all original-source, existing-integration, figure-checksum, and
+LaTeX/PDF compilation gates. The 61-page, 3,485,347-byte canonical PDF
+(SHA-256 `971893a2e1406c3825c45fc14ef83b193764eb4d09864406f895e37e5b5f49bd`)
+and the one canonical `main.tex` are preserved on
 `ALRIER/Genetic_Algorithms/main` at
-`49a01d09634467f845acc00dbb2405e8d5e9853f`.
+`6874db70e27127a0a327ef5f67efd1df0ac385d6`.
+The initial recovery run 44601166188 succeeded on its first attempt,
+but its replay failed because the original one-time insertion was
+non-idempotent; the fixed paper-side workflow is at
+`33bf8074ea8dd00fabb4f03eee3b724d2a01281b`.
+The original T3 run remains historically marked failed at Q2-F due to
+its unavailable cross-repository secret; no scientific Q2-A–E blocks
+were rerun to correct the manuscript stage.
 
 See [Q2-F cross-repository completion receipt](runs/44599590079/Q2_F_MANUSCRIPT_INTEGRATION.json).
 The 18 scientific blocks and original archives were **not** rerun for this recovery.
