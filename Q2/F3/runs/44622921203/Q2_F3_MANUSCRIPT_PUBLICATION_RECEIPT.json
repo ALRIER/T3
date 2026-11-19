@@ -1,0 +1,56 @@
+{
+  "schema": "Q2_F3_MANUSCRIPT_PUBLICATION_RECEIPT_V1",
+  "status": "PASS_CANONICAL_PDF_COMPILED_AND_COMMITTED",
+  "scientific_repository": "ALRIER/T3",
+  "scientific_branch": "main",
+  "original_Q2_run": 44599590079,
+  "Q2_F3_reconstruction_run": 44613985618,
+  "Q2_F3_taxonomy_publication_run": 44622921203,
+  "original_source_provenance_verified": true,
+  "four_engines": [
+    "ga",
+    "nsga2",
+    "de",
+    "dirichlet"
+  ],
+  "benchmark_policies": [
+    "own",
+    "mean"
+  ],
+  "synthesis_audit_path": "Q2/F3/runs/44622921203/publication/Q2_F3_PUBLICATION_SCIENTIFIC_AUDIT.json",
+  "synthesis_sha256_inventory": "Q2/F3/runs/44622921203/publication/Q2_F3_PUBLICATION_SHA256_MANIFEST.json",
+  "canonical_private_repository": "ALRIER/Genetic_Algorithms",
+  "canonical_branch": "main",
+  "canonical_manuscript_path": "manuscript/main.tex",
+  "canonical_pdf_path": "manuscript/main.pdf",
+  "publication_source_commit": "87e1b76456bd1ad704ee790674c9d2b3de32f4b5",
+  "final_pdf_publication_commit": "46db0d6cddd568b6d8d2bca68b41346fc0515405",
+  "canonical_pdf_git_blob_sha": "e7ca4f1009218613c3aefaa6c5a29f9762aad62b",
+  "canonical_pdf_size_bytes": 3693213,
+  "canonical_pdf_pages": 69,
+  "private_actions_run": 44624356324,
+  "private_actions_conclusion": "success",
+  "new_png_count": 5,
+  "new_png_figures": [
+    "results_q2_f3_winner_taxonomy.png",
+    "results_q2_f3_four_engine_regimes.png",
+    "results_q2_f3_benchmark_sensitivity.png",
+    "results_q2_f3_neighborhood_breadth.png",
+    "results_q2_f3_exploratory_evidence.png"
+  ],
+  "supplementary_appendix_replaced_in_single_manuscript": true,
+  "scientific_results_computed_in_private_repository": false,
+  "scientific_caveats": [
+    "descriptive wins not independent discoveries",
+    "mechanism-level BH 864 per metric exploratory",
+    "conditional Q2 synthetic calibration not full optimizer reselection",
+    "no cross-family or realworld in Q2 scenario denominators",
+    "within-Q2 support universality only"
+  ],
+  "proof_urls": {
+    "t3_run": "https://github.com/ALRIER/T3/actions/runs/44622921203",
+    "private_pdf_run": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44624356324",
+    "canonical_source": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.tex",
+    "canonical_pdf": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.pdf"
+  }
+}
