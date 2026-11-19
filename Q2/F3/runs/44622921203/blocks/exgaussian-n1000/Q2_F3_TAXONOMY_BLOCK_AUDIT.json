@@ -1,0 +1,37 @@
+{
+  "candidate_scenario_rows": 19280,
+  "cross_stage_weight_sha_verified": false,
+  "engine_scenario_rows": 1928,
+  "fixed_frozen_candidate_key": "source_family|sample_n|method|training_seed",
+  "frozen_candidate_mechanism_rows": 480,
+  "frozen_candidate_policy_rows": 80,
+  "observed_within_family_support_only": true,
+  "original_Q2_AE": "44599590079",
+  "original_Q2_F3": "44613985618",
+  "original_crossed_score_rows": 192800,
+  "original_observed_neighbors_per_block": 205,
+  "original_source_archive_count": 10,
+  "sample_n": 1000,
+  "source_F3_manifest_sha256": "2eedc5228302e0a403830c91b3a1abd641b3ca9935ab09569c9630695d8f5698",
+  "source_Q2_manifest_sha256": "3df963ee98927b45bd6d5ee1ecf4928fd4df6fa82f434f1bf5dab4497cb0dfe7",
+  "source_family": "exgaussian",
+  "source_files": {
+    "CANDIDATE_BREADTH_AND_UNIVERSALITY.csv": {
+      "bytes": 12049,
+      "sha256": "c02699806bc343c01f8d3497d15d2f028a0e97b9b55ef4ad92e3286e7bb7fc2b"
+    },
+    "CANDIDATE_MECHANISM_POCKETS.csv": {
+      "bytes": 43621,
+      "sha256": "ee9727232f3f4378c3fa18104db4fb001c123944cccad067a41b0323a947424d"
+    },
+    "CANDIDATE_SCENARIO_TAXONOMY.csv.gz": {
+      "bytes": 1674309,
+      "sha256": "d60cc599a9272b3324d9e5c448d7f5804f35d49427f230aeb3545336492fa37f"
+    },
+    "ENGINE_SCENARIO_TAXONOMY.csv": {
+      "bytes": 394529,
+      "sha256": "9f569efd783f1b463b50a8f4ea2651b01f8ef5759514eb836a06300b3163d9e8"
+    }
+  },
+  "status": "PASS_Q2_F3_ALL_FOUR_ENGINES_CANDIDATE_TAXONOMY"
+}
