@@ -1,0 +1,35 @@
+{
+  "crossed_heldout_seeds": 10,
+  "crossed_training_seeds": 10,
+  "family": "lognormal",
+  "files": {
+    "DE_OWN_12_CONTRASTS_CROSSED.npz": {
+      "bytes": 9534,
+      "sha256": "2ad2a8aa4c1d22af73e8b4d8b0342c2125a223731f8165a682ce8db09ce3cc1e"
+    },
+    "ROBUST_MECHANISM_SUMMARY.csv": {
+      "bytes": 13867,
+      "sha256": "83226fec8411a971a60f26e3c82987863215627a2c3ff8c808a1d0bce1fc7d45"
+    },
+    "ROBUST_OBSERVED_NEIGHBORS.csv": {
+      "bytes": 229956,
+      "sha256": "06eb57b52c01c9753473e0271fef7b0c69b1d83f374e6bf7089b9edb1127bb4c"
+    },
+    "ROBUST_SCENARIO_EFFECTS.csv": {
+      "bytes": 758800,
+      "sha256": "c5a6433631cd483247dc84462be0aa719cb6f89f4cbb64bb23ccb2e9a608afa0"
+    }
+  },
+  "full_factorial": false,
+  "mechanism_summaries": 56,
+  "observed_local_edges": 1640,
+  "original_paired_cells": 192800,
+  "original_q2_run": 44599590079,
+  "primary_contrast_matrices": 12,
+  "reconstructed_from_original_q2_shards": true,
+  "sample_n": 1000,
+  "scenario_summaries": 1928,
+  "source_manifest_git_path": "Q2/runs/44599590079/blocks/lognormal-n1000/Q2_BLOCK_MANIFEST.json",
+  "source_manifest_sha256": "9f028e2e6ed70876785dbe9b059af4f50ebae4da00a708df3582770495d71a15",
+  "status": "PASS_F3_ROBUST_RECONSTRUCTION"
+}
