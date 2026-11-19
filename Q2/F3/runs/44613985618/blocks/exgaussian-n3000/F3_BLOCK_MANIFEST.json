@@ -1,0 +1,35 @@
+{
+  "crossed_heldout_seeds": 10,
+  "crossed_training_seeds": 10,
+  "family": "exgaussian",
+  "files": {
+    "DE_OWN_12_CONTRASTS_CROSSED.npz": {
+      "bytes": 9536,
+      "sha256": "c76e8062fd959b197026f4eb8d04c3f7176da41856accd0d9b7fca98284b169d"
+    },
+    "ROBUST_MECHANISM_SUMMARY.csv": {
+      "bytes": 14023,
+      "sha256": "f3194622b4eceb52a1f9e3a7c5c4883c67fa03a7b3ab36a8050d38ce82c45d09"
+    },
+    "ROBUST_OBSERVED_NEIGHBORS.csv": {
+      "bytes": 231168,
+      "sha256": "8b578fa2c803767568f14553f29d9a7a26be2d099ba7bd761f6ab06aa39c2527"
+    },
+    "ROBUST_SCENARIO_EFFECTS.csv": {
+      "bytes": 764030,
+      "sha256": "42e5a4d0008630856d6e5bf296bd25c2e7dc1cb4abe95f5369d5f7c71cb3a454"
+    }
+  },
+  "full_factorial": false,
+  "mechanism_summaries": 56,
+  "observed_local_edges": 1640,
+  "original_paired_cells": 192800,
+  "original_q2_run": 44599590079,
+  "primary_contrast_matrices": 12,
+  "reconstructed_from_original_q2_shards": true,
+  "sample_n": 3000,
+  "scenario_summaries": 1928,
+  "source_manifest_git_path": "Q2/runs/44599590079/blocks/exgaussian-n3000/Q2_BLOCK_MANIFEST.json",
+  "source_manifest_sha256": "bf0d628c824edae8320497a9a5f6878820a14f71b799c6a7c23f0a31a41a8a34",
+  "status": "PASS_F3_ROBUST_RECONSTRUCTION"
+}
