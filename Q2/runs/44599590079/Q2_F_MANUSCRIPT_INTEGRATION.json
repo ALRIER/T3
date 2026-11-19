@@ -10,12 +10,12 @@
   "q2_evidence_scope": "Original within-family support only, posthoc exploratory crossed-bootstrap; no new optimizer fitting",
   "q2_primary_workflow_q2_F": "failed_due_to_absent_PUB1_MANUSCRIPT_TOKEN_secret",
   "recovery": "Completed Q2-F safely using the canonical manuscript repository's own GitHub Actions token; SHA256 verified original T3 outputs",
-  "q2_f_recovery_actions_run_id": 44601166188,
-  "q2_f_recovery_actions_url": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44601166188",
-  "q2_f_recovery_status": "completed_success",
+  "q2_f_recovery_actions_run_id": 44605084265,
+  "q2_f_recovery_actions_url": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44605084265",
+  "q2_f_recovery_status": "completed_success; rerun-safe SHA256 checked canonical LaTeX and PDF build",
   "canonical_manuscript_repository": "ALRIER/Genetic_Algorithms",
   "canonical_manuscript_branch": "main",
-  "canonical_manuscript_commit_sha": "49a01d09634467f845acc00dbb2405e8d5e9853f",
+  "canonical_manuscript_commit_sha": "6874db70e27127a0a327ef5f67efd1df0ac385d6",
   "canonical_latex_path": "manuscript/main.tex",
   "canonical_pdf_path": "manuscript/main.pdf",
   "canonical_pdf_size_bytes": 3485347,
@@ -30,5 +30,9 @@
   ],
   "superseded_family_leader_figure_removed": true,
   "scientific_caveats": "Scenario-specific strong classical reference differs from Q1 convex-MSE control; calibrated Q1 Stage12 does not extend to Q2; percent ratios sensitive to small comparator losses.",
-  "future_full_single_run_dependency": "Configure T3 Actions secret PUB1_MANUSCRIPT_TOKEN with write access to private canonical paper repo if automatic cross-repo Q2-F is desired without manual recovery."
+  "future_full_single_run_dependency": "Configure T3 Actions secret PUB1_MANUSCRIPT_TOKEN with write access to private canonical paper repo if automatic cross-repo Q2-F is desired without manual recovery.",
+  "q2_f_idempotent_recovery_workflow_fix_commit": "33bf8074ea8dd00fabb4f03eee3b724d2a01281b",
+  "q2_f_previous_successful_recovery_run_id": 44601166188,
+  "q2_f_previous_recovery_run_latest_attempt": "failed_on_replay_due_to_non_idempotent_original_script; original attempt 1 succeeded",
+  "canonical_pdf_sha256": "971893a2e1406c3825c45fc14ef83b193764eb4d09864406f895e37e5b5f49bd"
 }
