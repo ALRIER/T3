@@ -1,0 +1,35 @@
+{
+  "crossed_heldout_seeds": 10,
+  "crossed_training_seeds": 10,
+  "family": "exwald",
+  "files": {
+    "DE_OWN_12_CONTRASTS_CROSSED.npz": {
+      "bytes": 9432,
+      "sha256": "ec3fd50c393197826d1d8aa20dcb21f682dcc514d3804d6c0d9ee45a8deb7a41"
+    },
+    "ROBUST_MECHANISM_SUMMARY.csv": {
+      "bytes": 13450,
+      "sha256": "4b6b054781cd2c4788ac4c4d050992f13b9324e52f13eb0937e95da740c26443"
+    },
+    "ROBUST_OBSERVED_NEIGHBORS.csv": {
+      "bytes": 219505,
+      "sha256": "90d7e0a447630d299eb977cec52dd0f2ad748c09cc8260cc968bfbf36ce729c1"
+    },
+    "ROBUST_SCENARIO_EFFECTS.csv": {
+      "bytes": 720725,
+      "sha256": "117038b2b9e09a19848663b1b37cbc59e44cfce816d8bc388245036b86249d3f"
+    }
+  },
+  "full_factorial": false,
+  "mechanism_summaries": 56,
+  "observed_local_edges": 1640,
+  "original_paired_cells": 192800,
+  "original_q2_run": 44599590079,
+  "primary_contrast_matrices": 12,
+  "reconstructed_from_original_q2_shards": true,
+  "sample_n": 1000,
+  "scenario_summaries": 1928,
+  "source_manifest_git_path": "Q2/runs/44599590079/blocks/exwald-n1000/Q2_BLOCK_MANIFEST.json",
+  "source_manifest_sha256": "623bdbe1d4e6b4a477bf9dea01ee9f82c139df850818e42c4e7cc59ecb8ba7f3",
+  "status": "PASS_F3_ROBUST_RECONSTRUCTION"
+}
