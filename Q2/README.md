@@ -7,6 +7,23 @@ frozen Discovery classical benchmarks. No Discovery, Monte Carlo, or optimizer
 retraining is performed. Q2 concerns within-family independently evaluated
 supported scenarios; cross-family/structural transfer remains Q3.
 
+## Latest verified run: 44599590079
+
+**Q2-A–E completed successfully:** all 18 original support blocks and the scientific
+synthesis were validated and saved in
+[`Q2/runs/44599590079/`](runs/44599590079/).
+The primary workflow's cross-repository Q2-F step lacked the private-repository
+`PUB1_MANUSCRIPT_TOKEN` secret and failed without modifying the paper.
+Q2-F was subsequently **recovered and completed** in the authorized canonical
+paper repository using
+[private paper Actions run 44601166188](https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44601166188).
+The updated 61-page PDF and one canonical `main.tex` were committed to
+`ALRIER/Genetic_Algorithms/main` at
+`49a01d09634467f845acc00dbb2405e8d5e9853f`.
+
+See [Q2-F cross-repository completion receipt](runs/44599590079/Q2_F_MANUSCRIPT_INTEGRATION.json).
+The 18 scientific blocks and original archives were **not** rerun for this recovery.
+
 ## Run outputs
 
 Each GitHub Actions execution commits **each** of its 18 family×sample-size
