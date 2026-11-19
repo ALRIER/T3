@@ -1,0 +1,124 @@
+{
+  "schema": "Q2-v1",
+  "analysis": "Q2 A-D within-family independent confirmation",
+  "family": "weibull",
+  "sample_n": 3000,
+  "original_heldout_archive_count": 10,
+  "original_evaluation_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "original_frozen_candidates_per_block": 40,
+  "supported_scenarios": 241,
+  "paired_benchmark_metric_records": 192800,
+  "scenario_rows": 1928,
+  "local_neighbor_edges": 205,
+  "mechanisms": [
+    "clean",
+    "clustered_symmetric",
+    "clustered_upper",
+    "lower_tail",
+    "point_mass",
+    "symmetric_t",
+    "upper_tail"
+  ],
+  "design_is_incomplete_factorial": true,
+  "no_optimizer_training": true,
+  "no_new_monte_carlo": true,
+  "benchmark_lineage": {
+    "folder": "data-archive/discovery/actions/actions-13157714218_t3-b3-discovery-own-benchmark-map-run41478038812.zip",
+    "original_sha256": "cffb6032d71578ad9e66de2814e9bd1ddab1c98b5732e4fc5bd6560d53f73c0e"
+  },
+  "original_archive_lineage": [
+    {
+      "evaluation_seed": 10,
+      "archive": "data-archive/heldout/actions/actions-13064696206_t3-b3-heldout-weibull-s10-n3000-run41208513291.zip",
+      "sha256": "395f4178a159afe5a3a3da28613abedd1ac3a1e2b3170336a8544fa36f8f4aa8"
+    },
+    {
+      "evaluation_seed": 11,
+      "archive": "data-archive/heldout/actions/actions-13066510969_t3-b3-heldout-weibull-s11-n3000-run41208513291.zip",
+      "sha256": "aaba81a43c48932309e733f6b81bf404461114134099c276afced2347ab2b6d4"
+    },
+    {
+      "evaluation_seed": 12,
+      "archive": "data-archive/heldout/actions/actions-13069521072_t3-b3-heldout-weibull-s12-n3000-run41208513291.zip",
+      "sha256": "c9de1578fcc19bbf21341b4fac4ea70a73d96665c103faa543666d9cc08a41a0"
+    },
+    {
+      "evaluation_seed": 13,
+      "archive": "data-archive/heldout/actions/actions-13072724384_t3-b3-heldout-weibull-s13-n3000-run41208513291.zip",
+      "sha256": "ee225a443714bea6475c449deb4045fac7adb273201297111de52f8fc1ee476c"
+    },
+    {
+      "evaluation_seed": 14,
+      "archive": "data-archive/heldout/actions/actions-13073583555_t3-b3-heldout-weibull-s14-n3000-run41208513291.zip",
+      "sha256": "2cdca227ddabbef82b8759fce1b5cf348451fe4423f2d78891cd0015be9f2f05"
+    },
+    {
+      "evaluation_seed": 15,
+      "archive": "data-archive/heldout/actions/actions-13075255449_t3-b3-heldout-weibull-s15-n3000-run41208513291.zip",
+      "sha256": "5dc12ffb0be733da6049c44b91051fcb2b99cd49b099515b518c790bc4db0f26"
+    },
+    {
+      "evaluation_seed": 16,
+      "archive": "data-archive/heldout/actions/actions-13075770688_t3-b3-heldout-weibull-s16-n3000-run41208513291.zip",
+      "sha256": "d02f7271f26ba48d33daf0156c85b2b8d566ff8f98e0c0a88ab1b7fce47b1c17"
+    },
+    {
+      "evaluation_seed": 17,
+      "archive": "data-archive/heldout/actions/actions-13075526807_t3-b3-heldout-weibull-s17-n3000-run41208513291.zip",
+      "sha256": "8ca96be6bd8670e6fcc74cad402eebad15125461aafab2f9b748ab8980e8088c"
+    },
+    {
+      "evaluation_seed": 18,
+      "archive": "data-archive/heldout/actions/actions-13077831136_t3-b3-heldout-weibull-s18-n3000-run41208513291.zip",
+      "sha256": "ed8fcd90d049df3a93e5fd3067979e54dcb98d6f929f01e4b04b9e8b776cbe03"
+    },
+    {
+      "evaluation_seed": 19,
+      "archive": "data-archive/heldout/actions/actions-13079180067_t3-b3-heldout-weibull-s19-n3000-run41208513291.zip",
+      "sha256": "8dcb07b87116f106e6e70162949649fbc0f705b9d56423f5f6608086043c95b6"
+    }
+  ],
+  "scientific_scope": "WITHIN-family original frozen weights, 241 supported scenarios; Q3 cross-family excluded",
+  "inference_scope": "Descriptive t9 flags are not multiplicity calibrated; no confirmatory claims.",
+  "outputs": {
+    "local_neighbors.csv": {
+      "sha256": "4efea919bcabeb2caa89cf6e6919cd7f119cc6a40ada22cc4fb45192752a4a23",
+      "bytes": 149240
+    },
+    "paired_seed_cells.csv.gz": {
+      "sha256": "697e62bb260d078716830418a886d3f625048f17e1c97f7e104d03da42149410",
+      "bytes": 14582458
+    },
+    "factor_profiles.csv": {
+      "sha256": "787d8522da8f0902385b38954415beb0b1b5ce66172ebc1188ab056358bb86c1",
+      "bytes": 107596
+    },
+    "scenario_effects.csv": {
+      "sha256": "897f58b3c2238d8da358c41bef621c3f795583e6edc20fedf12821b172c879c9",
+      "bytes": 289766
+    }
+  }
+}
