@@ -1,0 +1,124 @@
+{
+  "schema": "Q2-v1",
+  "analysis": "Q2 A-D within-family independent confirmation",
+  "family": "normal",
+  "sample_n": 200,
+  "original_heldout_archive_count": 10,
+  "original_evaluation_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "original_frozen_candidates_per_block": 40,
+  "supported_scenarios": 241,
+  "paired_benchmark_metric_records": 192800,
+  "scenario_rows": 1928,
+  "local_neighbor_edges": 205,
+  "mechanisms": [
+    "clean",
+    "clustered_symmetric",
+    "clustered_upper",
+    "lower_tail",
+    "point_mass",
+    "symmetric_t",
+    "upper_tail"
+  ],
+  "design_is_incomplete_factorial": true,
+  "no_optimizer_training": true,
+  "no_new_monte_carlo": true,
+  "benchmark_lineage": {
+    "folder": "data-archive/discovery/actions/actions-13157714218_t3-b3-discovery-own-benchmark-map-run41478038812.zip",
+    "original_sha256": "cffb6032d71578ad9e66de2814e9bd1ddab1c98b5732e4fc5bd6560d53f73c0e"
+  },
+  "original_archive_lineage": [
+    {
+      "evaluation_seed": 10,
+      "archive": "data-archive/heldout/actions/actions-13045082279_t3-b3-heldout-normal-s10-n200-run41208513291.zip",
+      "sha256": "b16c96917d556ece0384cfa8b6afaab66956c59c330408017b4ccd3a9993e4be"
+    },
+    {
+      "evaluation_seed": 11,
+      "archive": "data-archive/heldout/actions/actions-13045840354_t3-b3-heldout-normal-s11-n200-run41208513291.zip",
+      "sha256": "fbfaaba546f5364d4ad6a33b2a360f9e2076d7744c5223b438a1fa7a8f67bf22"
+    },
+    {
+      "evaluation_seed": 12,
+      "archive": "data-archive/heldout/actions/actions-13045054176_t3-b3-heldout-normal-s12-n200-run41208513291.zip",
+      "sha256": "bc878589a1f695f5dbc1630514636ab26ffe69a8d440896b3aab203f961b4887"
+    },
+    {
+      "evaluation_seed": 13,
+      "archive": "data-archive/heldout/actions/actions-13044992872_t3-b3-heldout-normal-s13-n200-run41208513291.zip",
+      "sha256": "baac82d93637197455a357e1ab81769099a9b793bf7967ab5ee69bcb47dd8a0a"
+    },
+    {
+      "evaluation_seed": 14,
+      "archive": "data-archive/heldout/actions/actions-13045411879_t3-b3-heldout-normal-s14-n200-run41208513291.zip",
+      "sha256": "3f7bb04038eec3ac5b7e8490c9eda66fc59259883c2fa0190b81cceb03bd6507"
+    },
+    {
+      "evaluation_seed": 15,
+      "archive": "data-archive/heldout/actions/actions-13045167503_t3-b3-heldout-normal-s15-n200-run41208513291.zip",
+      "sha256": "386421d57b2f676d1f312244243342f7dfd44d42013334ec58e085aaf743567f"
+    },
+    {
+      "evaluation_seed": 16,
+      "archive": "data-archive/heldout/actions/actions-13044804678_t3-b3-heldout-normal-s16-n200-run41208513291.zip",
+      "sha256": "c245f6f2c17e705e2fcc8157aa946f5559ebd05ea526c511d4d97dad8af39e33"
+    },
+    {
+      "evaluation_seed": 17,
+      "archive": "data-archive/heldout/actions/actions-13045328520_t3-b3-heldout-normal-s17-n200-run41208513291.zip",
+      "sha256": "8b192e0c21164c59922ac0b638fd826b4b09b903fbcf08cdeb57e8722f46f7d8"
+    },
+    {
+      "evaluation_seed": 18,
+      "archive": "data-archive/heldout/actions/actions-13045043937_t3-b3-heldout-normal-s18-n200-run41208513291.zip",
+      "sha256": "86c19f90a9d042bb8e3f55c6b89c91238b7d2ace9305edac397af9a02d90e8b2"
+    },
+    {
+      "evaluation_seed": 19,
+      "archive": "data-archive/heldout/actions/actions-13045088486_t3-b3-heldout-normal-s19-n200-run41208513291.zip",
+      "sha256": "317ca495404a0f6231bf8b913464d0efeade4f6c0346bc50420c03c3157c3622"
+    }
+  ],
+  "scientific_scope": "WITHIN-family original frozen weights, 241 supported scenarios; Q3 cross-family excluded",
+  "inference_scope": "Descriptive t9 flags are not multiplicity calibrated; no confirmatory claims.",
+  "outputs": {
+    "paired_seed_cells.csv.gz": {
+      "sha256": "3c1467b7362c4ffd2d3b39450c826d8d948623d84fb4dedce43ce509cb4162fa",
+      "bytes": 14429877
+    },
+    "scenario_effects.csv": {
+      "sha256": "e276473c3b811f5aa6232808ad75f49bd1795d66b958803764f0c2ef2cdbbaa7",
+      "bytes": 286107
+    },
+    "local_neighbors.csv": {
+      "sha256": "59fd6de6817db3c14705d7c2a87b658631c0d7b1e592162b05a72f3210fb5538",
+      "bytes": 146890
+    },
+    "factor_profiles.csv": {
+      "sha256": "6df557af2af00ba083f3f6ab163df9c3ff2d216f01883034ccbd4ff144c0a444",
+      "bytes": 104570
+    }
+  }
+}
