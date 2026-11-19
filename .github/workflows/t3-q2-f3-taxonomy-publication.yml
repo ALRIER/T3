@@ -1,0 +1,108 @@
+name: "T3 Q2 F3 — Full four-engine taxonomy and publication package"
+run-name: "T3 Q2 F3 publication | 18 frozen-candidate analyses + 5 figures + annex tables"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - "Q2/F3/START_PUBLICATION.md"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: t3-q2-f3-publication-main
+  cancel-in-progress: false
+env:
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONUNBUFFERED: "1"
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false, fetch-depth: 1 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python -m pip install --disable-pip-version-check "numpy==2.1.3" "pandas==2.2.3" "matplotlib==3.9.2"
+      - name: Verify source, code and dependencies before running all 18 blocks
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_q2_f3_taxonomy_block.py scripts/t3_q2_f3_publication_synthesis.py
+          python scripts/t3_q2_f3_taxonomy_block.py selftest
+          test "$(find Q2/runs/44599590079/blocks -name Q2_BLOCK_MANIFEST.json | wc -l)" -eq 18
+          test "$(find Q2/F3/runs/44613985618/blocks -name F3_BLOCK_MANIFEST.json | wc -l)" -eq 18
+          test -s Q2/runs/44599590079/synthesis/Q2_ALL_TWO_WAY_BOOTSTRAP_EFFECTS.csv
+          echo "Q2_F3_PUBLICATION_PREFLIGHT_PASS"
+  taxonomy:
+    name: "Q2-F3 candidate taxonomy | ${{ matrix.family }} n=${{ matrix.n }}"
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 18
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --disable-pip-version-check "numpy==2.1.3" "pandas==2.2.3"
+      - name: Compute full frozen-candidate taxonomy from original Held Out seed records
+        env:
+          RUN_ID: ${{ github.run_id }}
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          python scripts/t3_q2_f3_taxonomy_block.py block --family "$FAMILY" --n "$SAMPLE_N" \
+             --output "Q2/F3/runs/$RUN_ID/blocks/$FAMILY-n$SAMPLE_N"
+          test -s "Q2/F3/runs/$RUN_ID/blocks/$FAMILY-n$SAMPLE_N/Q2_F3_TAXONOMY_BLOCK_AUDIT.json"
+      - name: Preserve individual block and checksum manifests directly on T3 main
+        env:
+          RUN_ID: ${{ github.run_id }}
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/runs/$RUN_ID/blocks/$FAMILY-n$SAMPLE_N"
+  publication:
+    name: "Q2-F3 verified tables, five PNG/SVG figures, and scientific audit"
+    needs: [preflight,taxonomy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --disable-pip-version-check "numpy==2.1.3" "pandas==2.2.3" "matplotlib==3.9.2"
+      - name: Audit all 18 immutable candidate-level taxonomy blocks
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          test "$(find "Q2/F3/runs/$RUN_ID/blocks" -name Q2_F3_TAXONOMY_BLOCK_AUDIT.json | wc -l)" -eq 18
+      - name: Generate full Q2 four-engine taxonomy, statistical support, neighborhood and figures
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python scripts/t3_q2_f3_publication_synthesis.py --root "Q2/F3/runs/$RUN_ID"
+          test -s "Q2/F3/runs/$RUN_ID/publication/Q2_F3_PUBLICATION_SCIENTIFIC_AUDIT.json"
+          test -s "Q2/F3/runs/$RUN_ID/publication/results_q2_f3_winner_taxonomy.png"
+      - name: Commit ALL publication evidence and PNG/SVG to T3 main, no expiring Actions artifacts
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/runs/$RUN_ID/publication"
+          echo "Q2_F3_SCIENCE_AND_FIGURES_BACKED_UP_T3"
