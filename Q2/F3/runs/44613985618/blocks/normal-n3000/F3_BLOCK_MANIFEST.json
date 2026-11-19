@@ -1,0 +1,35 @@
+{
+  "crossed_heldout_seeds": 10,
+  "crossed_training_seeds": 10,
+  "family": "normal",
+  "files": {
+    "DE_OWN_12_CONTRASTS_CROSSED.npz": {
+      "bytes": 9526,
+      "sha256": "19ea250e9cabaa5284d2d3c069530bc14579ae18ca9b1c2f9fd6ac1e98b865e8"
+    },
+    "ROBUST_MECHANISM_SUMMARY.csv": {
+      "bytes": 13811,
+      "sha256": "45621af54419245e7b02a07b0f2c4213afe0a0e5044a361ea47c47a0b5c69467"
+    },
+    "ROBUST_OBSERVED_NEIGHBORS.csv": {
+      "bytes": 223394,
+      "sha256": "9b3d2b6feb07ed2f587951e2f49b8ffbb7b7c53d1ccffdefadeee604aa932534"
+    },
+    "ROBUST_SCENARIO_EFFECTS.csv": {
+      "bytes": 750009,
+      "sha256": "305e6aa3e13a51eafc69bd7c610555e44d2afff5562ca94c0eba04d5a557f384"
+    }
+  },
+  "full_factorial": false,
+  "mechanism_summaries": 56,
+  "observed_local_edges": 1640,
+  "original_paired_cells": 192800,
+  "original_q2_run": 44599590079,
+  "primary_contrast_matrices": 12,
+  "reconstructed_from_original_q2_shards": true,
+  "sample_n": 3000,
+  "scenario_summaries": 1928,
+  "source_manifest_git_path": "Q2/runs/44599590079/blocks/normal-n3000/Q2_BLOCK_MANIFEST.json",
+  "source_manifest_sha256": "0a1669020d1ea32e655ffb6f391731e5630aedb258e38b09a5fa811a049edbe4",
+  "status": "PASS_F3_ROBUST_RECONSTRUCTION"
+}
