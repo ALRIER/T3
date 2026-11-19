@@ -1,0 +1,37 @@
+{
+  "candidate_scenario_rows": 19280,
+  "cross_stage_weight_sha_verified": false,
+  "engine_scenario_rows": 1928,
+  "fixed_frozen_candidate_key": "source_family|sample_n|method|training_seed",
+  "frozen_candidate_mechanism_rows": 480,
+  "frozen_candidate_policy_rows": 80,
+  "observed_within_family_support_only": true,
+  "original_Q2_AE": "44599590079",
+  "original_Q2_F3": "44613985618",
+  "original_crossed_score_rows": 192800,
+  "original_observed_neighbors_per_block": 205,
+  "original_source_archive_count": 10,
+  "sample_n": 3000,
+  "source_F3_manifest_sha256": "f0b10cabda0cf16b8e6e2f1c8b8bd52816c69616b837bf9b52a63887c07ed231",
+  "source_Q2_manifest_sha256": "6c609caab7ff0111d917fac9cdc7d5f72b157ad5b0473d9615ab712260c21005",
+  "source_family": "lognormal",
+  "source_files": {
+    "CANDIDATE_BREADTH_AND_UNIVERSALITY.csv": {
+      "bytes": 11986,
+      "sha256": "06065464ce64a0bbfe396dfca123043ccc59a27cae113f3f4b517f2bf5fa6664"
+    },
+    "CANDIDATE_MECHANISM_POCKETS.csv": {
+      "bytes": 42666,
+      "sha256": "7333d18c2a961e6cc7ad6a0f20869dbff1e61faa18c470f05201a0c1746defbe"
+    },
+    "CANDIDATE_SCENARIO_TAXONOMY.csv.gz": {
+      "bytes": 1674244,
+      "sha256": "acf1fd930726b2f710992c70e37bbef5cf19d7aac250dfd8659e0afbe67ebdb9"
+    },
+    "ENGINE_SCENARIO_TAXONOMY.csv": {
+      "bytes": 394962,
+      "sha256": "1d89907ce3a211ae4adf2d7d2d7809ccaa6a30fc3e63b0282139a08918061ac8"
+    }
+  },
+  "status": "PASS_Q2_F3_ALL_FOUR_ENGINES_CANDIDATE_TAXONOMY"
+}
