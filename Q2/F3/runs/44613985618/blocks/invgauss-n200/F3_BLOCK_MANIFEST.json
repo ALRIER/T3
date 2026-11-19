@@ -1,0 +1,35 @@
+{
+  "crossed_heldout_seeds": 10,
+  "crossed_training_seeds": 10,
+  "family": "invgauss",
+  "files": {
+    "DE_OWN_12_CONTRASTS_CROSSED.npz": {
+      "bytes": 9473,
+      "sha256": "4ea55b9d305b446da562313ff70d1bf7c8863379bfd3ca449681accd3aba7c5b"
+    },
+    "ROBUST_MECHANISM_SUMMARY.csv": {
+      "bytes": 13614,
+      "sha256": "6ee86c4bda35ecad95c7d3bc168031fee87502aa1640f701fd06c05422317a41"
+    },
+    "ROBUST_OBSERVED_NEIGHBORS.csv": {
+      "bytes": 227415,
+      "sha256": "8b7c30a85c16316cf0031ff120accadfb0309873cee2d2ba74414168eaf9347c"
+    },
+    "ROBUST_SCENARIO_EFFECTS.csv": {
+      "bytes": 747133,
+      "sha256": "02c8c258bc8b0cbdb6676dc7f402af28da981479d0fadd23aaec9598d274617f"
+    }
+  },
+  "full_factorial": false,
+  "mechanism_summaries": 56,
+  "observed_local_edges": 1640,
+  "original_paired_cells": 192800,
+  "original_q2_run": 44599590079,
+  "primary_contrast_matrices": 12,
+  "reconstructed_from_original_q2_shards": true,
+  "sample_n": 200,
+  "scenario_summaries": 1928,
+  "source_manifest_git_path": "Q2/runs/44599590079/blocks/invgauss-n200/Q2_BLOCK_MANIFEST.json",
+  "source_manifest_sha256": "d2f82534b1e9ca0118b07652e51f3137fbb276d05ab2a125fdff3375b8db6afd",
+  "status": "PASS_F3_ROBUST_RECONSTRUCTION"
+}
