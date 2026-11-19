@@ -1,0 +1,211 @@
+name: "T3 Q2 A-F — Regime analysis, scientific audit, and canonical manuscript"
+run-name: "T3 Q2 full A-F | 18 original Held Out blocks | max-parallel 20"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/t3-b3-q2-regime-unified-full.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  packages: read
+  actions: read
+concurrency:
+  group: t3-b3-q2-regime-unified-main
+  cancel-in-progress: false
+env:
+  T3_R_IMAGE: 'ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16'
+  OPENBLAS_NUM_THREADS: '1'
+  OMP_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+jobs:
+  q2-a-preflight:
+    name: "Q2-A | Original source and complete design audit"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify exact pinned original scientific container
+        run: |
+          set -euo pipefail
+          docker pull "$T3_R_IMAGE"
+          docker run --rm "$T3_R_IMAGE" Rscript -e 'stopifnot(as.character(packageVersion("statmod"))=="1.5.2");cat("Q2_PINNED_T3_IMAGE_PASS\n")'
+      - name: Original score archive, benchmark map and scenario design preflight
+        run: |
+          set -euo pipefail
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/github/workspace" -w /github/workspace "$T3_R_IMAGE" \
+            python3 scripts/t3_b3_q2_regime_block.py selftest
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/github/workspace" -w /github/workspace "$T3_R_IMAGE" \
+            python3 scripts/t3_b3_q2_regime_block.py preflight
+          test -s Q2/README.md
+          test -s scripts/t3_b3_q2_synthesis.py
+          test -s scripts/t3_b3_q2_integrate_manuscript.py
+          echo "Q2_A_SOURCE_AND_DESIGN_GATE_PASS"
+  q2-bcd-18-original-blocks:
+    name: "Q2 B-D | ${{ matrix.family }} n=${{ matrix.n }}"
+    needs: q2-a-preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        family: [normal, lognormal, weibull, invgauss, exgaussian, exwald]
+        n: [200, 1000, 3000]
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - name: Switch to writable main with stable original source files
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Hydrate ten ORIGINAL score ZIPs plus frozen Discovery benchmark map
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          include="data-archive/heldout/actions/actions-*_t3-b3-heldout-$FAMILY-s*-n$SAMPLE_N-run41208513291.zip/part-*.lfs,data-archive/discovery/actions/actions-*_t3-b3-discovery-own-benchmark-map-run41478038812.zip/part-*.lfs"
+          git lfs pull --include="$include" --exclude=""
+          count="$(find data-archive/heldout/actions -path "*_t3-b3-heldout-$FAMILY-s*-n$SAMPLE_N-run41208513291.zip/part-*.lfs" -type f -size +200c | wc -l)"
+          test "$count" -eq 10 || { echo "::error::Expected 10 hydrated original score archives, found $count"; exit 1; }
+      - name: Q2-B/C/D paired two-loss gains, factors and observed local scenario neighbors
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/github/workspace" -w /github/workspace "$T3_R_IMAGE" \
+            python3 scripts/t3_b3_q2_regime_block.py block \
+              --family "$FAMILY" --n "$SAMPLE_N" \
+              --output "Q2/runs/$RUN_ID/blocks/$FAMILY-n$SAMPLE_N"
+      - name: Independently verify paired MSE and Q95 in pinned R/statmod
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$PWD:/github/workspace" -w /github/workspace "$T3_R_IMAGE" \
+            Rscript scripts/t3_b3_q2_r_audit.R \
+              "Q2/runs/$RUN_ID/blocks/$FAMILY-n$SAMPLE_N/paired_seed_cells.csv.gz"
+      - name: Permanently archive each completed block into Git on main (no Actions artifacts)
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/runs/$RUN_ID/blocks/$FAMILY-n$SAMPLE_N"
+  q2-e-scientific-synthesis:
+    name: "Q2-E | Scientific synthesis, two-way bootstrap, figures"
+    needs: [q2-a-preflight, q2-bcd-18-original-blocks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - name: Verify all 18 completed block outputs are committed permanently
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          count="$(find "Q2/runs/$RUN_ID/blocks" -name Q2_BLOCK_MANIFEST.json -type f | wc -l)"
+          test "$count" -eq 18 || { echo "::error::Expected 18 source-audited blocks; found $count"; exit 1; }
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Scientific numerical and figure dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy>=1.26,<3' 'pandas>=2,<3' 'matplotlib>=3.8,<4'
+      - name: Q2-E crossed 10x10 bootstrap, original source gates, scenario response and figures
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_b3_q2_synthesis.py scripts/t3_b3_q2_integrate_manuscript.py
+          python scripts/t3_b3_q2_synthesis.py "Q2/runs/$RUN_ID"
+          test -s "Q2/runs/$RUN_ID/synthesis/Q2_SCIENTIFIC_AUDIT.json"
+          test -s "Q2/runs/$RUN_ID/synthesis/figure_Q2_DE_family_mechanism.svg"
+          test -s "Q2/runs/$RUN_ID/synthesis/figure_Q2_DE_fraction_severity.png"
+      - name: Permanently commit audited Q2 tables and PNG/SVG figures to main
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: bash scripts/t3_b3_q2_commit.sh "Q2/runs/$RUN_ID/synthesis"
+  q2-f-canonical-manuscript:
+    name: "Q2-F | One canonical private manuscript on main, with appendix"
+    needs: q2-e-scientific-synthesis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      MANUSCRIPT_PUSH_TOKEN: ${{ secrets.PUB1_MANUSCRIPT_TOKEN }}
+      RUN_ID: ${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - name: Require write credentials for the separate PRIVATE canonical manuscript
+        run: |
+          set -euo pipefail
+          if [ -z "$MANUSCRIPT_PUSH_TOKEN" ]; then
+            echo "::error::Q2 A-E are preserved in T3/Q2; Q2-F requires T3 Actions secret PUB1_MANUSCRIPT_TOKEN with contents:write on ALRIER/Genetic_Algorithms."
+            exit 1
+          fi
+      - name: Checkout verified latest Q2 synthesis results from permanent T3 main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          test -s "Q2/runs/$RUN_ID/synthesis/Q2_SCIENTIFIC_AUDIT.json"
+      - name: Check out the existing canonical paper on main
+        run: |
+          set -euo pipefail
+          git clone --single-branch --branch main \
+            "https://x-access-token:$MANUSCRIPT_PUSH_TOKEN@github.com/ALRIER/Genetic_Algorithms.git" paper_canonical
+          test -s paper_canonical/manuscript/main.tex
+          test -s paper_canonical/manuscript/main.pdf
+      - name: Integrate Q2 Results and Methods/Appendix and replace SVG/PNG figures
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_b3_q2_integrate_manuscript.py \
+            --root "Q2/runs/$RUN_ID" --paper paper_canonical \
+            --report "Q2/runs/$RUN_ID/Q2_F_MANUSCRIPT_INTEGRATION.json"
+          git -C paper_canonical config user.name 'github-actions[bot]'
+          git -C paper_canonical config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C paper_canonical add -A manuscript/main.tex manuscript/figures/
+          if git -C paper_canonical diff --cached --quiet; then
+            echo "::error::No Q2 manuscript source changes";exit 1
+          fi
+          git -C paper_canonical commit -m "Integrate verified Q2 results and appendix from T3 run $RUN_ID"
+          git -C paper_canonical push origin HEAD:main
+      - name: Commit the canonical manuscript source commit receipt to T3 Q2
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,subprocess
+          from pathlib import Path
+          r=Path('Q2/runs')/os.environ['RUN_ID']/'Q2_F_MANUSCRIPT_INTEGRATION.json'
+          d=json.loads(r.read_text())
+          d['canonical_manuscript_git_commit']=subprocess.check_output(
+             ['git','-C','paper_canonical','rev-parse','HEAD'],text=True).strip()
+          d['canonical_PDF']='The existing paper repository workflow builds main.pdf after manuscript/main.tex is pushed.'
+          r.write_text(json.dumps(d,indent=2)+'\n')
+          PY
+          bash scripts/t3_b3_q2_commit.sh "Q2/runs/$RUN_ID"
