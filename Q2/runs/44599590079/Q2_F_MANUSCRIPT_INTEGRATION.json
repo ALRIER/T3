@@ -1,0 +1,34 @@
+{
+  "q2_source_repository": "ALRIER/T3",
+  "q2_primary_actions_run_id": 44599590079,
+  "q2_primary_actions_url": "https://github.com/ALRIER/T3/actions/runs/44599590079",
+  "q2_A_to_E": "completed_success; 18/18 source-checked analysis blocks; original scores and immutable references",
+  "q2_original_archived_scoring_zip_count": 180,
+  "q2_original_training_seeds": 10,
+  "q2_independent_heldout_evaluation_seeds": 10,
+  "q2_supported_scenarios": 241,
+  "q2_evidence_scope": "Original within-family support only, posthoc exploratory crossed-bootstrap; no new optimizer fitting",
+  "q2_primary_workflow_q2_F": "failed_due_to_absent_PUB1_MANUSCRIPT_TOKEN_secret",
+  "recovery": "Completed Q2-F safely using the canonical manuscript repository's own GitHub Actions token; SHA256 verified original T3 outputs",
+  "q2_f_recovery_actions_run_id": 44601166188,
+  "q2_f_recovery_actions_url": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44601166188",
+  "q2_f_recovery_status": "completed_success",
+  "canonical_manuscript_repository": "ALRIER/Genetic_Algorithms",
+  "canonical_manuscript_branch": "main",
+  "canonical_manuscript_commit_sha": "49a01d09634467f845acc00dbb2405e8d5e9853f",
+  "canonical_latex_path": "manuscript/main.tex",
+  "canonical_pdf_path": "manuscript/main.pdf",
+  "canonical_pdf_size_bytes": 3485347,
+  "canonical_pdf_pages": 61,
+  "new_figure_stems": [
+    "results_q2_DE_family_mechanism",
+    "results_q2_DE_fraction_severity"
+  ],
+  "figure_formats": [
+    "png",
+    "svg"
+  ],
+  "superseded_family_leader_figure_removed": true,
+  "scientific_caveats": "Scenario-specific strong classical reference differs from Q1 convex-MSE control; calibrated Q1 Stage12 does not extend to Q2; percent ratios sensitive to small comparator losses.",
+  "future_full_single_run_dependency": "Configure T3 Actions secret PUB1_MANUSCRIPT_TOKEN with write access to private canonical paper repo if automatic cross-repo Q2-F is desired without manual recovery."
+}
