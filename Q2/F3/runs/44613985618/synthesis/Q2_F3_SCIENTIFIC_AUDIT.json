@@ -1,0 +1,74 @@
+{
+  "benchmarks_are_comparable_only_within_original_matched_policy": true,
+  "conditional_null_calibration_synthetic_replicates": 4096,
+  "de_summary": {
+    "mean": {
+      "joint_scenario_ratio_wins": 2379,
+      "mse_median_ratio": 0.698527322446748,
+      "mse_ratio_of_pooled_losses": 0.10356757634770013,
+      "q95_median_ratio": 0.685747293333635,
+      "q95_ratio_of_pooled_losses": 0.11813127545111751,
+      "scenarios": 4320
+    },
+    "own": {
+      "joint_scenario_ratio_wins": 40,
+      "mse_median_ratio": 3.441564223983666,
+      "mse_ratio_of_pooled_losses": 4.45433931969031,
+      "q95_median_ratio": 2.609705695095005,
+      "q95_ratio_of_pooled_losses": 3.2767868071786017,
+      "scenarios": 4320
+    }
+  },
+  "factorial_design_complete": false,
+  "full_joint_dependency_and_selection_coverage_guarantee": false,
+  "global216_calibration_model_requires_independence_of_18_blocks": true,
+  "independent_global216_null_fwer_original_t9_cutoff_surrogate": 0.99365234375,
+  "independent_global216_null_fwer_surrogate": 0.05322265625,
+  "independent_null_validation_synthetic_replicates": 4096,
+  "local_neighbor_rows": 29520,
+  "method_reference_mechanism_block_rows": 1008,
+  "note": "Synthetic fitted crossed-seed null diagnostic; validates only this surrogate's fixed-candidate, fixed-scenario assumptions. The independent seeded validation cannot establish actual full-pipeline familywise error.",
+  "null_5pct_global216_maxT_threshold": 8.282529172797666,
+  "original_HPO_calibrated": false,
+  "original_optimizer_reselection_calibrated": false,
+  "original_paired_seed_metric_records": 3470400,
+  "original_scenario_or_optimizer_rerun": false,
+  "original_source_archives": 180,
+  "primary_de_own_effect_contrasts": 216,
+  "q1_comparator_crosswalk_rows": 144,
+  "scenario_summary_rows": 34704,
+  "source_blocks": 18,
+  "source_run": 44599590079,
+  "status": "PASS_Q2_F3_POINTS_1_AND_2_CONDITIONAL",
+  "synthesis_source_checksums": {
+    "Q2_F3_18_BLOCK_NULL_VALIDATION.csv": {
+      "bytes": 1230,
+      "sha256": "341eec7c35804f21b7d5f4c8e0c320a333ccf22d29f4a7bf897da65fc6072437"
+    },
+    "Q2_F3_BLOCK_INTEGRITY_AND_LINEAGE.csv": {
+      "bytes": 1742,
+      "sha256": "eb629d1c41502c30f08434c0873d51c652db86867265d3675bd27ed82b3bab8e"
+    },
+    "Q2_F3_LOCAL_NEIGHBOR_SENSITIVITY.csv": {
+      "bytes": 4063589,
+      "sha256": "b48ac3d12a7629292ddbcab8fb8801179410438216eb96162c7f36501043c550"
+    },
+    "Q2_F3_PRIMARY_216_CROSSED_SURROGATE_SENSITIVITY.csv": {
+      "bytes": 71316,
+      "sha256": "81e0cd5f3505f7d31b09e3331bcca20ea2438e96caf43b9f207620890ef3313c"
+    },
+    "Q2_F3_Q1_Q2_BENCHMARK_CROSSWALK.csv": {
+      "bytes": 49897,
+      "sha256": "799293b87311167d8e98c629ad6657ad8d03b871e4df3bfc42c8a0b52e88dfd2"
+    },
+    "Q2_F3_ROBUST_ALL_SCENARIOS.csv": {
+      "bytes": 13406601,
+      "sha256": "7290b43039e9ea67c961dfe3272a98628b3ba306b811cc2468ddf26b88ba0de2"
+    },
+    "Q2_F3_ROBUST_MECHANISM_BLOCKS.csv": {
+      "bytes": 240572,
+      "sha256": "8c421324cc219f909ffbceac5c309bcac8ddc8db91613d9b2409f2f1acaef762"
+    }
+  },
+  "uncertainty_limited_to_original_10x10_training_evaluation_seed_axes": true
+}

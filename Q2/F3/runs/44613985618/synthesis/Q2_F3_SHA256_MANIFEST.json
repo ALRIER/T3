@@ -1,0 +1,38 @@
+{
+  "Q2_F3_18_BLOCK_NULL_VALIDATION.csv": {
+    "bytes": 1230,
+    "sha256": "341eec7c35804f21b7d5f4c8e0c320a333ccf22d29f4a7bf897da65fc6072437"
+  },
+  "Q2_F3_BLOCK_INTEGRITY_AND_LINEAGE.csv": {
+    "bytes": 1742,
+    "sha256": "eb629d1c41502c30f08434c0873d51c652db86867265d3675bd27ed82b3bab8e"
+  },
+  "Q2_F3_LOCAL_NEIGHBOR_SENSITIVITY.csv": {
+    "bytes": 4063589,
+    "sha256": "b48ac3d12a7629292ddbcab8fb8801179410438216eb96162c7f36501043c550"
+  },
+  "Q2_F3_PRIMARY_216_CROSSED_SURROGATE_SENSITIVITY.csv": {
+    "bytes": 71316,
+    "sha256": "81e0cd5f3505f7d31b09e3331bcca20ea2438e96caf43b9f207620890ef3313c"
+  },
+  "Q2_F3_Q1_Q2_BENCHMARK_CROSSWALK.csv": {
+    "bytes": 49897,
+    "sha256": "799293b87311167d8e98c629ad6657ad8d03b871e4df3bfc42c8a0b52e88dfd2"
+  },
+  "Q2_F3_RESULTS_AND_LIMITATIONS.md": {
+    "bytes": 2940,
+    "sha256": "af3a5c1130e3722cad4b22fc8f8a6c5024a19f8e24919d3bac3950bb0635cc9f"
+  },
+  "Q2_F3_ROBUST_ALL_SCENARIOS.csv": {
+    "bytes": 13406601,
+    "sha256": "7290b43039e9ea67c961dfe3272a98628b3ba306b811cc2468ddf26b88ba0de2"
+  },
+  "Q2_F3_ROBUST_MECHANISM_BLOCKS.csv": {
+    "bytes": 240572,
+    "sha256": "8c421324cc219f909ffbceac5c309bcac8ddc8db91613d9b2409f2f1acaef762"
+  },
+  "Q2_F3_SCIENTIFIC_AUDIT.json": {
+    "bytes": 3156,
+    "sha256": "31432c019b9c3cf88b03c92f39e27d24f760cf21242d52f0fd0c0b8a399d395c"
+  }
+}
