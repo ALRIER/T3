@@ -4,6 +4,10 @@ All F3 scientific computation runs in **ALRIER/T3**, branch **main**.
 The immutable primary Q2-A–E data remain at `Q2/runs/44599590079/`.
 No F3 action writes to `ALRIER/Genetic_Algorithms` or modifies any existing Q1/Q2 result.
 
+## Q2 taxonomy and manuscript argumentation
+
+The agreed objective × evidence × breadth framework, observed-neighborhood extension rules, strict within-tested-support universality criterion, four-engine candidate identity and Q3/Q4 handoff are documented in [Q2 Scientific Argument and Taxonomy Blueprint](Q2_SCIENTIFIC_ARGUMENT_AND_TAXONOMY_BLUEPRINT.md). This is a planning document, **not** a new inference PASS or a launched workflow.
+
 ## Completed F3 run — 44613985618 (2026-11-19)
 
 **GitHub Actions workflow: SUCCESS**, including all 18 independently committed reconstruction blocks and final synthesis.
