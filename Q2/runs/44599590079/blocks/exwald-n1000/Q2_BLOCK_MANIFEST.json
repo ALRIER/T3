@@ -1,0 +1,124 @@
+{
+  "schema": "Q2-v1",
+  "analysis": "Q2 A-D within-family independent confirmation",
+  "family": "exwald",
+  "sample_n": 1000,
+  "original_heldout_archive_count": 10,
+  "original_evaluation_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "original_training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "original_frozen_candidates_per_block": 40,
+  "supported_scenarios": 241,
+  "paired_benchmark_metric_records": 192800,
+  "scenario_rows": 1928,
+  "local_neighbor_edges": 205,
+  "mechanisms": [
+    "clean",
+    "clustered_symmetric",
+    "clustered_upper",
+    "lower_tail",
+    "point_mass",
+    "symmetric_t",
+    "upper_tail"
+  ],
+  "design_is_incomplete_factorial": true,
+  "no_optimizer_training": true,
+  "no_new_monte_carlo": true,
+  "benchmark_lineage": {
+    "folder": "data-archive/discovery/actions/actions-13157714218_t3-b3-discovery-own-benchmark-map-run41478038812.zip",
+    "original_sha256": "cffb6032d71578ad9e66de2814e9bd1ddab1c98b5732e4fc5bd6560d53f73c0e"
+  },
+  "original_archive_lineage": [
+    {
+      "evaluation_seed": 10,
+      "archive": "data-archive/heldout/actions/actions-13116896679_t3-b3-heldout-exwald-s10-n1000-run41208513291.zip",
+      "sha256": "18771818bbad27523849c6825e678e3db1b2ad9c6c511892018c3a53c70f90ac"
+    },
+    {
+      "evaluation_seed": 11,
+      "archive": "data-archive/heldout/actions/actions-13116813089_t3-b3-heldout-exwald-s11-n1000-run41208513291.zip",
+      "sha256": "323f79937079dd6dd1d4b5bf77014df73176b3e5b2b6046082cd4280c8d2affa"
+    },
+    {
+      "evaluation_seed": 12,
+      "archive": "data-archive/heldout/actions/actions-13117590166_t3-b3-heldout-exwald-s12-n1000-run41208513291.zip",
+      "sha256": "e0145f03d0fc124a80cc03cd92482d7aa4d8680dd0a24336d32cfc511c97f20c"
+    },
+    {
+      "evaluation_seed": 13,
+      "archive": "data-archive/heldout/actions/actions-13117331675_t3-b3-heldout-exwald-s13-n1000-run41208513291.zip",
+      "sha256": "535175f6dfd337c65704c72dbc2c463422ab2ee2fff20e45e7ada5cbb8fa5695"
+    },
+    {
+      "evaluation_seed": 14,
+      "archive": "data-archive/heldout/actions/actions-13116444554_t3-b3-heldout-exwald-s14-n1000-run41208513291.zip",
+      "sha256": "5b4fb103e7877c6c4956d6a54b11b695e8f5ba21dac3d4ebad8b49849c4d6a96"
+    },
+    {
+      "evaluation_seed": 15,
+      "archive": "data-archive/heldout/actions/actions-13117475944_t3-b3-heldout-exwald-s15-n1000-run41208513291.zip",
+      "sha256": "bab8872f1b62ee77843db77c96ea82834dfa5c52ac0e47309d6394b3096585e8"
+    },
+    {
+      "evaluation_seed": 16,
+      "archive": "data-archive/heldout/actions/actions-13116444990_t3-b3-heldout-exwald-s16-n1000-run41208513291.zip",
+      "sha256": "3dc1db5ed478bebc565ad23ed57f0feb8ad7105adbda9d50ed273e0014d69d00"
+    },
+    {
+      "evaluation_seed": 17,
+      "archive": "data-archive/heldout/actions/actions-13117242928_t3-b3-heldout-exwald-s17-n1000-run41208513291.zip",
+      "sha256": "27c13c0e5c37916a475409d1a1a91f3eb3e29893e2fe8dea712e07512948dafa"
+    },
+    {
+      "evaluation_seed": 18,
+      "archive": "data-archive/heldout/actions/actions-13117412482_t3-b3-heldout-exwald-s18-n1000-run41208513291.zip",
+      "sha256": "a7f552faf5b4f394ef835a4f91a711bc8e3be26335dca1fa4035a9908da3057e"
+    },
+    {
+      "evaluation_seed": 19,
+      "archive": "data-archive/heldout/actions/actions-13117088580_t3-b3-heldout-exwald-s19-n1000-run41208513291.zip",
+      "sha256": "421216a1d52585e9293ca8783791ff4112fdf69a572fa2da0b555031454616eb"
+    }
+  ],
+  "scientific_scope": "WITHIN-family original frozen weights, 241 supported scenarios; Q3 cross-family excluded",
+  "inference_scope": "Descriptive t9 flags are not multiplicity calibrated; no confirmatory claims.",
+  "outputs": {
+    "paired_seed_cells.csv.gz": {
+      "sha256": "0a7c2f0170f97d767703b683088eeda71c9644f1abef486b3ba804f85a42a442",
+      "bytes": 14467162
+    },
+    "scenario_effects.csv": {
+      "sha256": "9d5a14ca85b23c87d70b6d4e6102f909478c6e1dabe9a80bace5f1fb88330b10",
+      "bytes": 282536
+    },
+    "local_neighbors.csv": {
+      "sha256": "68500a5beb18f8215335e6c67c9e4d2d153a03251c2a898d2c7ffdc93b525e6f",
+      "bytes": 147649
+    },
+    "factor_profiles.csv": {
+      "sha256": "28209e179d053859a574cf6acb6da4adf1ce0647abd2333b8dcbb28d247a14f8",
+      "bytes": 106475
+    }
+  }
+}
