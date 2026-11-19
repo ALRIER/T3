@@ -1,0 +1,37 @@
+{
+  "candidate_scenario_rows": 19280,
+  "cross_stage_weight_sha_verified": false,
+  "engine_scenario_rows": 1928,
+  "fixed_frozen_candidate_key": "source_family|sample_n|method|training_seed",
+  "frozen_candidate_mechanism_rows": 480,
+  "frozen_candidate_policy_rows": 80,
+  "observed_within_family_support_only": true,
+  "original_Q2_AE": "44599590079",
+  "original_Q2_F3": "44613985618",
+  "original_crossed_score_rows": 192800,
+  "original_observed_neighbors_per_block": 205,
+  "original_source_archive_count": 10,
+  "sample_n": 3000,
+  "source_F3_manifest_sha256": "ffc48678fcd62713fc9e8e836e072dbe81bf31d2c6d27d483a4f4bde5520b2e9",
+  "source_Q2_manifest_sha256": "c915702b53eefe1998e16e57fdb2d6c9d897fff54553896c37e74b7daddcdfbb",
+  "source_family": "exwald",
+  "source_files": {
+    "CANDIDATE_BREADTH_AND_UNIVERSALITY.csv": {
+      "bytes": 11623,
+      "sha256": "7a2c84674e183052b18ee3be5e27c33eb54fc877aae26325e3e51660e6c76427"
+    },
+    "CANDIDATE_MECHANISM_POCKETS.csv": {
+      "bytes": 39816,
+      "sha256": "af168d62443fc85ad99583d6f505ece2154cd830d7b8fd5aaa5e813658f0a0c3"
+    },
+    "CANDIDATE_SCENARIO_TAXONOMY.csv.gz": {
+      "bytes": 1673635,
+      "sha256": "ce92033824f02702be1d0288353f0958f12c9e0314bd825445644252a2ca3fa0"
+    },
+    "ENGINE_SCENARIO_TAXONOMY.csv": {
+      "bytes": 384084,
+      "sha256": "d5c6704dcaf0e0dde59e41aac82bb64d6d25fc0b114051547afbbfbc69d41fed"
+    }
+  },
+  "status": "PASS_Q2_F3_ALL_FOUR_ENGINES_CANDIDATE_TAXONOMY"
+}
