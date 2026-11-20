@@ -6,6 +6,7 @@ name: "Q3 code and one-run readiness smoke (no computation)"
       - scripts/q3_build_plan.py
       - scripts/q3_recover_shard.py
       - scripts/q3_complete_science.py
+      - scripts/q3_fixture_selftest.py
       - .github/workflows/t3-q3-one-run-a-g.yml
       - .github/workflows/t3-q3-smoke.yml
   workflow_dispatch:
@@ -58,6 +59,11 @@ jobs:
           python scripts/q3_complete_science.py unpack --manifest /tmp/q3-archive/manifest.json --out /tmp/q3-recovered
           cmp /tmp/q3-fixture/primary/fixture.csv /tmp/q3-recovered/primary/fixture.csv
           echo 'Q3_SHA256_ARCHIVE_PACK_RESTORE_PASS'
+      - name: Test full original-schema statistical aggregation and graphics with DISPOSABLE synthetic data
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check matplotlib==3.9.2
+          python scripts/q3_fixture_selftest.py
       - name: Validate complete one-run workflow shape and 20-parallel design
         run: |
           set -euo pipefail
