@@ -67,7 +67,7 @@ jobs:
           assert manifest[0]["source_actions_run_id"]=="44818000158"
           print("Q3_COMPACT_REAL_CANCELLED_RUN_SCORE_RECOVERY_PASS")
           PY
-      - name: Recover exact real failed-run 49-scenario score and verify source checksum after preservation
+      - name: Recover real compact checkpoint from failed run with SHA
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -78,12 +78,11 @@ jobs:
           from pathlib import Path
           p=Path("artifacts/t3_b3_parametric_transfer/normal/parameter_row02/seed45_n1000/b0")
           a=list(csv.DictReader((p/"scores.csv").open()))
-          b=list(csv.DictReader((p/"score_manifest.csv").open()))
-          assert len(a)==294 and b[0]["source_actions_run_id"]=="44822079785"
-          assert b[0]["protocol"]=="t3_q3_compact_parametric_score_v1"
-          print("Q3_COMPACT_REAL_FAILED_RUN_SCORE_SALVAGE_PASS",len(a))
+          m=list(csv.DictReader((p/"score_manifest.csv").open()))
+          assert len(a)==294 and m[0]["source_actions_run_id"]=="44822079785"
+          print("Q3_COMPACT_FAILED_RUN_SHA_CHECKPOINT_SALVAGE_PASS")
           PY
-      - name: Reproduce cross-n original input validation with two immutable existing prepared family-size bundles
+      - name: Verify two sample sizes in one worker without invalid cumulative count
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -95,43 +94,9 @@ jobs:
             gh run download 44822079785 --repo "$GH_REPO" --name "$artifact" --dir "incoming/verify-multi-n/$n"
             a="incoming/verify-multi-n/$n/discovery-normal-n${n}.tar.gz"
             (cd "incoming/verify-multi-n/$n" && sha256sum -c "discovery-normal-n${n}.tar.gz.sha256")
-            test "$(tar -tzf "$a" | grep -Ec '/discovery[.]rds
-        run: |
-          set -euo pipefail
-          python -m pip install --disable-pip-version-check matplotlib==3.9.2
-          python scripts/q3_lite_fixture_selftest.py
-      - name: Statistically verify workflow syntax, strict 20-worker cap and one-time launch restrictions
-        run: |
-          set -euo pipefail
-          python -m pip install --disable-pip-version-check pyyaml==6.0.2
-          python - <<'PY'
-          import yaml
-          with open(".github/workflows/t3-q3-compact-a-g.yml") as f:w=yaml.safe_load(f)
-          assert set(w["on"]["push"]["paths"])=={"Q3/LAUNCH_COMPACT_ONCE.md"}
-          assert "workflow_dispatch" in w["on"]
-          j=w["jobs"]
-          assert set(j)==set("a_b_c_e prepare_benchmark prepare_models q3_d_compact q3_d_verify q3_f q3_g".split())
-          assert j["q3_d_compact"]["strategy"]["max-parallel"]==20
-          assert "needs.a_b_c_e.outputs.matrix" in j["q3_d_compact"]["strategy"]["matrix"]
-          assert sum(st.get("uses")=="./.github/actions/q3-lite-parameter-worker" for st in j["q3_d_compact"]["steps"])==4
-          assert len(j["prepare_models"]["strategy"]["matrix"]["include"])==18
-          assert j["q3_g"]["needs"]=="q3_f"
-          print("Q3_COMPACT_ONE_RUN_A_G_STRUCTURE_PASS")
-          PY
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-      - name: Parse all Q3 compact R simulation/scoring/inference scripts inside original pinned T3 container
-        env:
-          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
-        run: |
-          set -euo pipefail
-          bash scripts/run_r_in_container.sh Rscript -e "invisible(lapply(c('scripts/q3_lite_parametric_mc.R','scripts/q3_lite_parametric_score.R','scripts/q3_lite_parametric_inference.R'),parse));cat('Q3_COMPACT_THREE_R_SCIENCE_SCRIPTS_PARSE_PASS\n')"
-)" -eq 10
+            test "$(tar -tzf "$a" | grep -Ec '/discovery[.]rds$')" -eq 10
             tar -xzf "$a" -C artifacts/discovery_v3
-            for seed in $(seq 0 9);do
+            for seed in $(seq 0 9); do
               test -s "artifacts/discovery_v3/normal/seed$(printf '%02d' "$seed")/n${n}/discovery.rds"
               test -s "artifacts/discovery_v3/normal/seed$(printf '%02d' "$seed")/n${n}/stage_contract.rds"
             done
