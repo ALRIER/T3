@@ -1,0 +1,31 @@
+name: "Q3 emergency stop | Cancel obsolete exhaustive run only"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - "Q3/CANCEL_EXHAUSTIVE_ONCE.md"
+permissions:
+  contents: read
+  actions: write
+jobs:
+  cancel_obsolete:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Cancel only authorized obsolete Q3 run 44818000158
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          RUN_ID=44818000158
+          info="$(gh api "repos/$GH_REPO/actions/runs/$RUN_ID")"
+          name="$(jq -r '.name' <<<"$info")"
+          status="$(jq -r '.status' <<<"$info")"
+          test "$name" = "Q3 A-G | One-dispatch frozen-weight transfer, complete analysis and permanent backup"
+          if [[ "$status" == completed ]]; then
+            echo "Q3_EXHAUSTIVE_ALREADY_COMPLETED_SAFE_NOOP"
+            exit 0
+          fi
+          gh api -X POST "repos/$GH_REPO/actions/runs/$RUN_ID/cancel" --silent
+          echo "Q3_OBSOLETE_EXHAUSTIVE_RUN_CANCEL_REQUEST_ACCEPTED run=$RUN_ID"
