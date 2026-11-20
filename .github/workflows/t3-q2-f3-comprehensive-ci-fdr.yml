@@ -1,0 +1,63 @@
+name: Q2 F3 | Complete tournament, 95% confidence intervals and original BH-FDR
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/q2_f3_complete_competition_ci_bh.py'
+      - '.github/workflows/t3-q2-f3-comprehensive-ci-fdr.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: q2-f3-complete-competition-evidence-main
+  cancel-in-progress: false
+jobs:
+  original_evidence_matrix:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Audit all original paired 95 percent CI and original BH outcomes
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/q2_f3_complete_competition_ci_bh.py
+          python scripts/q2_f3_complete_competition_ci_bh.py
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('Q2/F3/leaderboards')
+          a=json.loads((p/'Q2_F3_COMPLETE_COMPETITION_CI_BH_AUDIT.json').read_text())
+          assert a['status']=='PASS_REUSE_COMPLETE_ORIGINAL_Q2_MECHANISM_INFERENCE'
+          assert a['complete_paired_metric_rows']==1728
+          assert a['complete_joint_mechanism_panels']==864
+          assert a['family_engine_reference_summary_rows']==48
+          assert a['full_BH_family_per_metric']==864
+          assert a['new_statistical_inference'] is False
+          m=json.loads((p/'Q2_F3_COMPLETE_COMPETITION_CI_BH_SHA256_MANIFEST.json').read_text())
+          assert len(m)==4
+          for name,info in m.items():
+            data=(p/name).read_bytes()
+            assert len(data)==info['bytes'] and hashlib.sha256(data).hexdigest()==info['sha256'],name
+          print('COMPLETE_ORIGINAL_Q2_COMPETITION_CI_FDR_AUDIT_PASS')
+          PY
+      - name: Permanently commit only new exhaustive table outputs, preserving original results
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            Q2/F3/leaderboards/Q2_F3_COMPLETE_864_TOURNAMENT_CI_BH_EVIDENCE.csv \
+            Q2/F3/leaderboards/Q2_F3_COMPLETE_48_FAMILY_ENGINE_REFERENCE_SUMMARY.csv \
+            Q2/F3/leaderboards/Q2_F3_COMPLETE_8_ENGINE_REFERENCE_EVIDENCE.csv \
+            Q2/F3/leaderboards/Q2_F3_COMPLETE_COMPETITION_CI_BH_AUDIT.json \
+            Q2/F3/leaderboards/Q2_F3_COMPLETE_COMPETITION_CI_BH_SHA256_MANIFEST.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish complete 864-panel Q2 CI, BH-FDR and family-model taxonomy matrices'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
