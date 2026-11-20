@@ -1,0 +1,483 @@
+name: "Q3 A-G | Compact prespecified independent parameter transfer and permanent scientific backup"
+"on":
+  workflow_dispatch:
+    inputs:
+      source_score_runs:
+        description: Original full parameter-score checkpoints and cancelled exhaustive Q3 run
+        required: false
+        default: "41748369299,44818000158"
+        type: string
+      discovery_bundle_run_id:
+        required: true
+        default: "41487091262"
+        type: string
+      benchmark_map_run_id:
+        required: true
+        default: "41478038812"
+        type: string
+  push:
+    branches: [main]
+    paths: ["Q3/LAUNCH_COMPACT_ONCE.md"]
+permissions:
+  contents: write
+  actions: read
+  packages: read
+concurrency:
+  group: ${{ format('q3-compact-{0}', github.ref) }}
+  cancel-in-progress: false
+jobs:
+  a_b_c_e:
+    name: "A B C E | Prior archive audit, prespecification and scientific synthesis"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      scenario_ids: ${{ steps.plan.outputs.scenario_ids }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Make sure only the old exhaustive Q3 has been stopped, not historic Q1/Q2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          state="$(gh api repos/${GITHUB_REPOSITORY}/actions/runs/44818000158 --jq .status)"
+          verdict="$(gh api repos/${GITHUB_REPOSITORY}/actions/runs/44818000158 --jq .conclusion)"
+          test "$state" = completed
+          test "$verdict" = cancelled
+          echo 'Q3_OLD_EXHAUSTIVE_CANCELLED_BEFORE_LITE_SCORING_PASS'
+      - id: plan
+        name: Freeze outcome-blind 49-scenario/three-parameter-row support; inventory original completed score artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCES: ${{ inputs.source_score_runs || '41748369299,44818000158' }}
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/q3_lite_plan.py scripts/q3_lite_recover.py scripts/q3_lite_coverage.py scripts/q3_lite_complete_science.py
+          python scripts/q3_lite_plan.py --self-test
+          python scripts/q3_lite_complete_science.py self-test
+          python scripts/q3_lite_plan.py --source-runs "$SOURCES" --out Q3/A_provenance/Q3_A_COMPACT_PRESPEC.json
+          python - <<'PY'
+          import json,os
+          o=json.load(open("Q3/A_provenance/Q3_A_COMPACT_PRESPEC.json"))
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write("matrix="+json.dumps(o["matrix"],separators=(",",":"))+"\n")
+              f.write("scenario_ids="+",".join(map(str,o["scenario_ids"]))+"\n")
+          print("Q3_COMPACT_REUSED_SCORES",o["reusable_preexisting_full_shards"],
+                "TO_COMPUTE",o["needed_shards"])
+          PY
+      - name: Independently audit original Held Out, Stress, and Real World evidence
+        run: python scripts/q3_lite_complete_science.py baseline --run-id '${{ github.run_id }}'
+      - name: Commit validated scientific source evidence and prespecified design
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Q3/A_provenance Q3/B_cross_family Q3/C_structural_stress Q3/E_real_world
+          if ! git diff --cached --quiet; then
+            git commit -m "Q3 compact A/B/C/E: frozen design, recovered original evidence and provenance"
+            git push origin HEAD:main
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-compact-original-source-audits-run${{ github.run_id }}
+          path: |
+            Q3/A_provenance/
+            Q3/B_cross_family/
+            Q3/C_structural_stress/
+            Q3/E_real_world/
+          if-no-files-found: error
+          retention-days: 90
+
+  prepare_benchmark:
+    name: "D | Original Discovery-selected classical comparator provenance"
+    needs: a_b_c_e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id || '41478038812' }}
+          run-id: ${{ inputs.benchmark_map_run_id || '41478038812' }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/frozen_map
+      - name: Verify unchanged 18 × 241 original reference map
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/original_map
+          mapfile -t MAPS < <(find incoming/frozen_map -name own_benchmark_map.csv -type f)
+          test "${#MAPS[@]}" -eq 1
+          cp "${MAPS[0]}" artifacts/original_map/own_benchmark_map.csv
+          python - <<'PY'
+          import csv
+          records=list(csv.DictReader(open("artifacts/original_map/own_benchmark_map.csv")))
+          keys={(r["evaluation_family"],r["sample_n"],r["scenario_id"]) for r in records}
+          assert len(records)==18*241 and len(keys)==len(records)
+          assert all(r["own_benchmark"] and r["own_benchmark"]!="mean" for r in records)
+          print("Q3_COMPACT_REFERENCE_MAP_ORIGINAL_18x241_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-compact-original-benchmark-map-${{ github.run_id }}
+          path: artifacts/original_map/own_benchmark_map.csv
+          retention-days: 90
+          if-no-files-found: error
+
+  prepare_models:
+    name: "D | Frozen models for ${{ matrix.family }} n=${{ matrix.n }}"
+    needs: [a_b_c_e, prepare_benchmark]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - {family: normal, n: 200}
+          - {family: normal, n: 1000}
+          - {family: normal, n: 3000}
+          - {family: lognormal, n: 200}
+          - {family: lognormal, n: 1000}
+          - {family: lognormal, n: 3000}
+          - {family: weibull, n: 200}
+          - {family: weibull, n: 1000}
+          - {family: weibull, n: 3000}
+          - {family: invgauss, n: 200}
+          - {family: invgauss, n: 1000}
+          - {family: invgauss, n: 3000}
+          - {family: exgaussian, n: 200}
+          - {family: exgaussian, n: 1000}
+          - {family: exgaussian, n: 3000}
+          - {family: exwald, n: 200}
+          - {family: exwald, n: 1000}
+          - {family: exwald, n: 3000}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run${{ inputs.discovery_bundle_run_id || '41487091262' }}
+          run-id: ${{ inputs.discovery_bundle_run_id || '41487091262' }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/frozen_discovery
+      - uses: actions/download-artifact@v5
+        with:
+          name: q3-compact-original-benchmark-map-${{ github.run_id }}
+          path: incoming/map
+      - uses: actions/download-artifact@v5
+        with:
+          name: q3-compact-original-source-audits-run${{ github.run_id }}
+          path: incoming/q3_plan
+      - name: SHA-verify ten immutable Discovery weights; freeze only the selected 49 scenario reference rows
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          cd incoming/frozen_discovery
+          sha256sum -c "discovery-n$SAMPLE_N.tar.gz.sha256"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          tar -xzf "discovery-n$SAMPLE_N.tar.gz" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          cd "$GITHUB_WORKSPACE"
+          test "$(find artifacts/discovery_v3 -name discovery.rds -type f | wc -l)" -eq 60
+          mkdir -p artifacts/parametric_input
+          cp -a "artifacts/discovery_v3/$FAMILY" artifacts/parametric_input/
+          python - <<'PY'
+          import csv,json,os
+          fam=os.environ["FAMILY"];n=int(os.environ["SAMPLE_N"])
+          v=json.load(open("incoming/q3_plan/A_provenance/Q3_A_COMPACT_PRESPEC.json"))
+          selected=set(v["scenario_ids"])
+          allrows=list(csv.DictReader(open("incoming/map/own_benchmark_map.csv")))
+          rows=[r for r in allrows if r["evaluation_family"]==fam and int(r["sample_n"])==n and int(r["scenario_id"]) in selected]
+          assert len(rows)==49 and {int(x["scenario_id"]) for x in rows}==selected
+          assert all(r["own_benchmark"]!="mean" for r in rows)
+          with open("artifacts/parametric_input/own_benchmark_map.csv","w",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=allrows[0].keys());w.writeheader();w.writerows(rows)
+          PY
+          test "$(find artifacts/parametric_input/$FAMILY -name discovery.rds -type f | wc -l)" -eq 10
+          cd artifacts/parametric_input
+          tar -czf "discovery-$FAMILY-n$SAMPLE_N.tar.gz" "$FAMILY" own_benchmark_map.csv
+          sha256sum "discovery-$FAMILY-n$SAMPLE_N.tar.gz" > "discovery-$FAMILY-n$SAMPLE_N.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/parametric_input/discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz*
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_d_compact:
+    name: "D | 540 full original-frozen 49-scenario compact score shards, 20 workers"
+    needs: [a_b_c_e, prepare_models]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.a_b_c_e.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reuse originally verified unretuned full-score checkpoint 0 without new Monte Carlo
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_recover.py '${{ matrix.shard0_family }}' '${{ matrix.shard0_parameter_row }}' '${{ matrix.shard0_seed }}' '${{ matrix.shard0_n }}' '${{ matrix.shard0_reuse_run }}' '${{ matrix.shard0_reuse_name }}' '${{ matrix.shard0_reuse_kind }}'
+      - name: Compute only missing prespecified 49-scenario parameter shift 0 without retraining
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run == '' }}
+        uses: ./.github/actions/q3-lite-parameter-worker
+        with:
+          family: ${{ matrix.shard0_family }}
+          parameter_row: ${{ matrix.shard0_parameter_row }}
+          seed: ${{ matrix.shard0_seed }}
+          sample_n: ${{ matrix.shard0_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+
+      - name: Reuse originally verified unretuned full-score checkpoint 1 without new Monte Carlo
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_recover.py '${{ matrix.shard1_family }}' '${{ matrix.shard1_parameter_row }}' '${{ matrix.shard1_seed }}' '${{ matrix.shard1_n }}' '${{ matrix.shard1_reuse_run }}' '${{ matrix.shard1_reuse_name }}' '${{ matrix.shard1_reuse_kind }}'
+      - name: Compute only missing prespecified 49-scenario parameter shift 1 without retraining
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run == '' }}
+        uses: ./.github/actions/q3-lite-parameter-worker
+        with:
+          family: ${{ matrix.shard1_family }}
+          parameter_row: ${{ matrix.shard1_parameter_row }}
+          seed: ${{ matrix.shard1_seed }}
+          sample_n: ${{ matrix.shard1_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+
+      - name: Reuse originally verified unretuned full-score checkpoint 2 without new Monte Carlo
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_recover.py '${{ matrix.shard2_family }}' '${{ matrix.shard2_parameter_row }}' '${{ matrix.shard2_seed }}' '${{ matrix.shard2_n }}' '${{ matrix.shard2_reuse_run }}' '${{ matrix.shard2_reuse_name }}' '${{ matrix.shard2_reuse_kind }}'
+      - name: Compute only missing prespecified 49-scenario parameter shift 2 without retraining
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run == '' }}
+        uses: ./.github/actions/q3-lite-parameter-worker
+        with:
+          family: ${{ matrix.shard2_family }}
+          parameter_row: ${{ matrix.shard2_parameter_row }}
+          seed: ${{ matrix.shard2_seed }}
+          sample_n: ${{ matrix.shard2_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+
+      - name: Reuse originally verified unretuned full-score checkpoint 3 without new Monte Carlo
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_recover.py '${{ matrix.shard3_family }}' '${{ matrix.shard3_parameter_row }}' '${{ matrix.shard3_seed }}' '${{ matrix.shard3_n }}' '${{ matrix.shard3_reuse_run }}' '${{ matrix.shard3_reuse_name }}' '${{ matrix.shard3_reuse_kind }}'
+      - name: Compute only missing prespecified 49-scenario parameter shift 3 without retraining
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run == '' }}
+        uses: ./.github/actions/q3-lite-parameter-worker
+        with:
+          family: ${{ matrix.shard3_family }}
+          parameter_row: ${{ matrix.shard3_parameter_row }}
+          seed: ${{ matrix.shard3_seed }}
+          sample_n: ${{ matrix.shard3_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+
+      - name: Verify all four recovered/generated original-model science score hashes
+        env:
+          GROUP_JSON: ${{ toJSON(matrix) }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,hashlib,json,os
+          from pathlib import Path
+          cfg=json.loads(os.environ["GROUP_JSON"]);count=0
+          for slot in range(4):
+              fam=cfg.get(f"shard{slot}_family")
+              if not fam:continue
+              param=int(cfg[f"shard{slot}_parameter_row"]);seed=int(cfg[f"shard{slot}_seed"]);n=int(cfg[f"shard{slot}_n"])
+              p=Path("artifacts/t3_b3_parametric_transfer")/fam/f"parameter_row{param:02d}"/f"seed{seed:02d}_n{n}"/"b0"
+              score=p/"scores.csv"
+              with (p/"score_manifest.csv").open(newline="") as fd:rr=list(csv.DictReader(fd))
+              assert len(rr)==1 and rr[0]["protocol"]=="t3_q3_compact_parametric_score_v1"
+              assert rr[0]["scores_sha256"]==hashlib.sha256(score.read_bytes()).hexdigest()
+              assert int(rr[0]["scenario_count"])==49 and int(rr[0]["training_seed_count"])==10
+              count+=1
+          assert count==4
+          print("Q3_COMPACT_GROUP_SHA_PASS",count)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-compact-group-${{ matrix.group_index }}-run${{ github.run_id }}
+          path: artifacts/t3_b3_parametric_transfer/
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_d_verify:
+    name: "D | Validate and permanently archive all 540 completed original-model scores"
+    needs: q3_d_compact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: q3-compact-group-*-run${{ github.run_id }}
+          path: incoming/scored
+          merge-multiple: true
+      - name: Verify exact 540 identities × 49 prespecified scenarios, seed separation, and every SHA
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_coverage.py incoming/scored
+          python scripts/q3_lite_complete_science.py pack --input incoming/scored --out Q3/D_parameter_transfer/compact_v1/scored_archive --name q3_compact_original_frozen_scores --expected-scores 540
+      - name: Git LFS permanent backup: original/reused score CSVs and full SHA-256 seed/source lineage
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+          git fetch origin main
+          git checkout -B main origin/main
+          git add Q3/D_parameter_transfer/compact_v1/scored_archive
+          git commit -m "Q3 D compact: permanently back up 540 complete original frozen 49-scenario scores"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-compact-score-archive-source-index-${{ github.run_id }}
+          path: Q3/D_parameter_transfer/compact_v1/scored_archive/manifest.json
+          retention-days: 90
+          if-no-files-found: error
+
+  q3_f:
+    name: "F | Prespecified paired independent-seed inference, one global BH, full manuscript figures"
+    needs: [a_b_c_e, q3_d_verify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Recover the permanently committed complete 540-score SHA-256 source archive
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git fetch origin main
+          git checkout -B main origin/main
+          git lfs pull --include="Q3/D_parameter_transfer/compact_v1/**" --exclude=""
+          python scripts/q3_lite_complete_science.py unpack --manifest Q3/D_parameter_transfer/compact_v1/scored_archive/manifest.json --out incoming/scored
+          python scripts/q3_lite_coverage.py incoming/scored
+      - uses: actions/download-artifact@v5
+        with:
+          name: q3-compact-original-benchmark-map-${{ github.run_id }}
+          path: incoming/reference
+      - uses: actions/download-artifact@v5
+        with:
+          name: q3-compact-original-source-audits-run${{ github.run_id }}
+          path: incoming/q3_plan
+      - name: Generate exact original classical reference subset for all family-size panels
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,json
+          v=json.load(open("incoming/q3_plan/A_provenance/Q3_A_COMPACT_PRESPEC.json"))
+          ids=set(v["scenario_ids"])
+          original=list(csv.DictReader(open("incoming/reference/own_benchmark_map.csv")))
+          panel=[r for r in original if int(r["scenario_id"]) in ids]
+          assert len(panel)==6*3*49
+          with open("incoming/reference/compact_own_benchmark_map.csv","w",newline="") as f:
+              wr=csv.DictWriter(f,fieldnames=original[0].keys());wr.writeheader();wr.writerows(panel)
+          PY
+      - name: Run original paired ten-seed tournament/CI code on the 54 complete prespecified parameter panels
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+        run: |
+          set -euo pipefail
+          bash scripts/run_r_in_container.sh Rscript scripts/q3_lite_parametric_inference.R incoming/scored incoming/reference/compact_own_benchmark_map.csv
+          test "$(find incoming/scored/aggregate/taxonomy_by_panel -name '*.csv.gz' | wc -l)" -eq 54
+      - name: Construct honest bounded-transfer taxonomies, original 95% CI, global BH, complete figures and inference archive
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check matplotlib==3.9.2
+          python scripts/q3_lite_complete_science.py summarize-parametric --input incoming/scored
+          python scripts/q3_lite_complete_science.py pack --input incoming/scored/aggregate --out Q3/D_parameter_transfer/compact_v1/inference_archive --name q3_compact_original_seed_CI_global_BH
+          python scripts/q3_lite_complete_science.py finalize --run-id '${{ github.run_id }}'
+          test -s Q3/G_publication_audit/Q3_G_COMPLETE_MANIFEST.json
+      - name: Permanently publish the original standalone inference panel, all Q3 A-G tables and manuscript-ready PNGs
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+          git add Q3/D_parameter_transfer/Q3_D_* Q3/D_parameter_transfer/compact_v1/inference_archive Q3/F_synthesis Q3/G_publication_audit
+          git commit -m "Q3 compact F/G: independent paired CI, global BH, original archive, all source matrices and PNGs"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-compact-complete-A-through-G-${{ github.run_id }}
+          path: |
+            Q3/A_provenance/
+            Q3/B_cross_family/
+            Q3/C_structural_stress/
+            Q3/D_parameter_transfer/Q3_D_*.csv
+            Q3/D_parameter_transfer/Q3_D_INFERENCE_AUDIT.json
+            Q3/E_real_world/
+            Q3/F_synthesis/
+            Q3/G_publication_audit/
+          retention-days: 90
+          if-no-files-found: error
+
+  q3_g:
+    name: "G | Independently verify new permanent Git LFS backup and complete publication science"
+    needs: q3_f
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Verify Q3 A-G source, full 540-score and full 54-inference-panel durable audit trail
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("Q3")
+          a=json.loads((root/"A_provenance/Q3_A_SOURCE_LINEAGE.json").read_text())
+          p=json.loads((root/"A_provenance/Q3_A_COMPACT_PRESPEC.json").read_text())
+          d=json.loads((root/"D_parameter_transfer/Q3_D_INFERENCE_AUDIT.json").read_text())
+          g=json.loads((root/"G_publication_audit/Q3_G_COMPLETE_MANIFEST.json").read_text())
+          m=json.loads((root/"D_parameter_transfer/compact_v1/scored_archive/manifest.json").read_text())
+          assert a["status"]=="SOURCE_AUDIT_PASS" and p["design_frozen_before_conditional_outcomes"]
+          assert p["full_design_shards"]==540 and len(p["scenario_ids"])==49
+          assert d["status"]=="ORIGINAL_FULL_PARAMETRIC_INFERENCE_COMPLETENESS_PASS"
+          assert d["distinct_parameter_sample_size_panels"]==54
+          assert m["original_scores"]==540 and m["status"]=="PASS_VERIFIED_UNCOMPRESSED_SCORES"
+          assert g["status"]=="COMPLETE_SCIENTIFIC_ANALYSIS_A_TO_G_PASS"
+          for rel,expected in g["files"].items():
+              if rel.endswith(".lfs"):continue
+              f=root/rel
+              assert f.is_file() and f.stat().st_size==expected["bytes"]
+              assert hashlib.sha256(f.read_bytes()).hexdigest()==expected["sha256"],rel
+          for fig in ("results_q3_original_synthetic_directed_transfer.png",
+                      "results_q3_parametric_transfer_joint_evidence.png",
+                      "results_q3_realworld_support_boundary.png"):
+              assert (root/"F_synthesis"/fig).is_file()
+          print("Q3_COMPACT_ALL_A_G_SCIENCE_PASS original_weights preserved, 540 independent scoring shards, 54 tested panels")
+          PY
+          git lfs ls-files | grep -F 'Q3/D_parameter_transfer/compact_v1/scored_archive'
+          git lfs ls-files | grep -F 'Q3/D_parameter_transfer/compact_v1/inference_archive'
+
