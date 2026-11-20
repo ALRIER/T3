@@ -1,0 +1,47 @@
+name: "T3 Q2 F3 — Reconcile original cross-family winner taxonomy"
+run-name: "Q2 F3 original HeldOut source→destination and empirical RealWorld parent transfer tiers"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - "Q2/F3/START_TRANSFER_SCIENTIFIC_SYNTHESIS.md"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: q2-f3-original-transfer-scientific-synthesis
+  cancel-in-progress: false
+jobs:
+  scientific-original-tiers:
+    name: "Original cross-family 6x6 BH matrix + independent empirical parent tiers"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - name: Retrieve the exact original global Held Out tournament (no re-scoring)
+        uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13178442769
+          run-id: 41502642569
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/heldout_global
+      - name: Independently replay original winner-label grouping, preserving each BH panel
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_q2_f3_crossfamily_final_synthesis.py
+          python3 scripts/t3_q2_f3_crossfamily_final_synthesis.py \
+            Q2/F3/transfer_recovery/runs/44746712466 \
+            "Q2/F3/transfer_recovery/synthesis/runs/$RUN_ID"
+          test -s "Q2/F3/transfer_recovery/synthesis/runs/$RUN_ID/CROSS_FAMILY_TRANSFER_SCIENTIFIC_AUDIT.json"
+      - name: Permanently commit the original-label science synthesis and provenance in T3
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/transfer_recovery/synthesis/runs/$RUN_ID"
+          echo "ORIGINAL_CROSS_FAMILY_FROZEN_W_TIER_EVIDENCE_PERMANENTLY_BACKED_UP_T3"
