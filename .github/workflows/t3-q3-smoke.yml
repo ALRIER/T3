@@ -11,6 +11,7 @@ name: "Q3 code and one-run readiness smoke (no computation)"
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   validate:
     runs-on: ubuntu-24.04
@@ -34,6 +35,29 @@ jobs:
           test -s Q3/B_cross_family/Q3_B_DIRECTED_288_ENGINE_TRANSFERS.csv
           test -s Q3/C_structural_stress/Q3_C_ORIGINAL_STRESS_TRANSFER_SCOPE.csv
           test -s Q3/E_real_world/Q3_E_ORIGINAL_8_POLICY_PARENT_LEVEL_EVIDENCE.csv
+      - name: Exercise original-run artifact discovery without retraining any model
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_build_plan.py --reuse-runs "41748369299" --output /tmp/q3_original_recovery_plan.json
+          python - <<'PY'
+          import json
+          v=json.load(open("/tmp/q3_original_recovery_plan.json"))
+          assert v["original_shard_identities"]==2490
+          assert v["reused_score_shards_from_explicit_prior_runs"]>0
+          assert all(len(v["matrices"][str(n)]["include"])==208 for n in (200,1000,3000))
+          print("Q3_ORIGINAL_CHECKPOINT_DISCOVERY_PASS",v["reused_score_shards_from_explicit_prior_runs"])
+          PY
+      - name: Test deterministic SHA-256 archive pack and safe recovery on a fixture
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/q3-fixture/primary
+          printf 'reference,source,destination,units\nown,normal,weibull,10\n' >/tmp/q3-fixture/primary/fixture.csv
+          python scripts/q3_complete_science.py pack --input /tmp/q3-fixture --out /tmp/q3-archive --name q3_fixture
+          python scripts/q3_complete_science.py unpack --manifest /tmp/q3-archive/manifest.json --out /tmp/q3-recovered
+          cmp /tmp/q3-fixture/primary/fixture.csv /tmp/q3-recovered/primary/fixture.csv
+          echo 'Q3_SHA256_ARCHIVE_PACK_RESTORE_PASS'
       - name: Validate complete one-run workflow shape and 20-parallel design
         run: |
           set -euo pipefail
