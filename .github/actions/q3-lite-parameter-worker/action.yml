@@ -32,7 +32,88 @@ runs:
         mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
         tar -xzf "$archive" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
         cd "$GITHUB_WORKSPACE"
-        test "$(find "artifacts/discovery_v3/${f}" -name discovery.rds -type f | wc -l)" -eq 10
+        # Each matrix runner processes up to four shards; later slots may use
+        # another n for the SAME family. Previously extracted verified bundles
+        # must remain available, and a cumulative count == 10 is incorrect.
+        # Verify exactly ten weights within the newly SHA-checked input tar,
+        # then require the ten target (family,n,seed) weights to be present.
+        test "$(tar -tzf "$archive" | grep -Ec '/discovery[.]rds
+        test -s artifacts/discovery_v3/own_benchmark_map.csv
+    - name: Generate independent complete 49-scenario Monte Carlo at 500 replicates per scenario
+      shell: bash
+      env:
+        T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        T3_TRANSFER_SCENARIO_BLOCK: "0"
+        T3_TRANSFER_SCENARIO_BLOCK_COUNT: "1"
+        OPENBLAS_NUM_THREADS: "1"
+        OMP_NUM_THREADS: "1"
+      run: |
+        set -euo pipefail
+        bash scripts/run_r_in_container.sh Rscript scripts/q3_lite_parametric_mc.R \
+          '${{ inputs.family }}' '${{ inputs.parameter_row }}' '${{ inputs.seed }}' 500 '${{ inputs.sample_n }}' '${{ inputs.scenario_ids }}'
+    - name: Hash-verify original scientific MC checkpoint before scoring
+      shell: bash
+      run: |
+        set -euo pipefail
+        mc="artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')/n${{ inputs.sample_n }}_r500/b0/canonical.rds"
+        test -s "$mc"
+        python - "$mc" <<'PY'
+        import csv,hashlib,sys
+        from pathlib import Path
+        p=Path(sys.argv[1])
+        with p.with_name("manifest.csv").open(newline="") as fd:
+            rows=list(csv.DictReader(fd))
+        assert len(rows)==1 and int(rows[0]["scenario_count"])==49
+        assert hashlib.sha256(p.read_bytes()).hexdigest()==rows[0]["sha256"]
+        print("Q3_COMPACT_ORIGINAL_MC_49_SCENARIO_SHA_PASS")
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: q3-lite-mc-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+        path: artifacts/t3_b3_parametric_transfer_mc/
+        if-no-files-found: warn
+        retention-days: 90
+    - name: Score four unchanged original frozen engines, mean and original frozen classical reference
+      shell: bash
+      env:
+        T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        OPENBLAS_NUM_THREADS: "1"
+        OMP_NUM_THREADS: "1"
+      run: |
+        set -euo pipefail
+        mc="artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')/n${{ inputs.sample_n }}_r500/b0/canonical.rds"
+        bash scripts/run_r_in_container.sh Rscript scripts/q3_lite_parametric_score.R \
+          '${{ inputs.family }}' '${{ inputs.parameter_row }}' '${{ inputs.seed }}' '${{ inputs.sample_n }}' "$mc" \
+          artifacts/discovery_v3 artifacts/discovery_v3/own_benchmark_map.csv
+    - name: Verify paired losses and 49-scenario score checkpoint identity
+      shell: bash
+      run: |
+        set -euo pipefail
+        root="artifacts/t3_b3_parametric_transfer/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')_n${{ inputs.sample_n }}/b0"
+        test -s "$root/scores.csv"
+        test -s "$root/score_manifest.csv"
+        python - "$root" <<'PY'
+        import csv,hashlib,sys
+        from pathlib import Path
+        p=Path(sys.argv[1]);m=list(csv.DictReader((p/"score_manifest.csv").open()))
+        assert len(m)==1 and m[0]["protocol"]=="t3_q3_compact_parametric_score_v1"
+        assert int(m[0]["scenario_count"])==49 and int(m[0]["training_seed_count"])==10
+        assert hashlib.sha256((p/"scores.csv").read_bytes()).hexdigest()==m[0]["scores_sha256"]
+        print("Q3_COMPACT_FROZEN_SCORE_SHA_PASS",m[0]["scores_sha256"])
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: q3-lite-score-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+        path: artifacts/t3_b3_parametric_transfer/
+        if-no-files-found: warn
+        retention-days: 90
+)" -eq 10
+        for seed in $(seq 0 9); do
+          test -s "artifacts/discovery_v3/${f}/seed$(printf '%02d' "$seed")/n${n}/discovery.rds"
+          test -s "artifacts/discovery_v3/${f}/seed$(printf '%02d' "$seed")/n${n}/stage_contract.rds"
+        done
         test -s artifacts/discovery_v3/own_benchmark_map.csv
     - name: Generate independent complete 49-scenario Monte Carlo at 500 replicates per scenario
       shell: bash
