@@ -1,0 +1,58 @@
+name: Q2 F3 | 720 frozen-candidate leaderboards and PNG publication figures
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/q2_f3_candidate_leaderboards.py'
+      - '.github/workflows/t3-q2-f3-candidate-leaderboards.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: q2-f3-candidate-leaderboards-main
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse original 720 frozen-candidate and 8640 mechanism observations
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet 'numpy==2.1.3' 'matplotlib==3.9.2'
+          python -m py_compile scripts/q2_f3_candidate_leaderboards.py
+          python scripts/q2_f3_candidate_leaderboards.py
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          r=Path("Q2/F3/leaderboards")
+          audit=json.loads((r/"Q2_F3_CANDIDATE_LEADERBOARD_AUDIT.json").read_text())
+          assert audit["status"]=="PASS_REUSE_ORIGINAL_FROZEN_CANDIDATE_EVIDENCE"
+          assert audit["candidate_benchmark_rows"]==1440
+          assert audit["mechanism_block_leaders"]==216
+          assert audit["physical_cross_stage_weight_SHA_identity"]=="NOT_VERIFIED_BY_THIS_ANALYSIS"
+          for f,d in json.loads((r/"Q2_F3_CANDIDATE_SHA256_MANIFEST.json").read_text()).items():
+              b=(r/f).read_bytes()
+              assert len(b)==d["bytes"] and hashlib.sha256(b).hexdigest()==d["sha256"],f
+          pngs=list(r.glob("results_q2_f3_candidate_*.png"))
+          assert len(pngs)==3 and all(x.stat().st_size>8000 for x in pngs)
+          print("PASS_VERIFIED_Q2_CANDIDATE_RANKINGS_AND_THREE_PNGS")
+          PY
+      - name: Commit immutable source-derived results into public T3, no artifact expiry
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Q2/F3/leaderboards/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish audited Q2 720-candidate taxonomic rankings and unique PNG figures'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+          test -s Q2/F3/leaderboards/Q2_F3_CANDIDATE_SHA256_MANIFEST.json
