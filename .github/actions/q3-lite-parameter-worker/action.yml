@@ -66,7 +66,7 @@ runs:
       if: always()
       with:
         name: q3-lite-mc-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
-        path: artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row${{ format('{0:00}', inputs.parameter_row) }}/seed${{ format('{0:00}', inputs.seed) }}/n${{ inputs.sample_n }}_r500/b0/
+        path: artifacts/t3_b3_parametric_transfer_mc/
         if-no-files-found: warn
         retention-days: 90
     - name: Score four unchanged original frozen engines, mean and original frozen classical reference
@@ -101,6 +101,6 @@ runs:
       if: always()
       with:
         name: q3-lite-score-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
-        path: artifacts/t3_b3_parametric_transfer/${{ inputs.family }}/parameter_row${{ format('{0:00}', inputs.parameter_row) }}/seed${{ format('{0:00}', inputs.seed) }}_n${{ inputs.sample_n }}/b0/
+        path: artifacts/t3_b3_parametric_transfer/
         if-no-files-found: warn
         retention-days: 90
