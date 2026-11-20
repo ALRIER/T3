@@ -1,0 +1,48 @@
+name: "T3 Q2 F3 — Original Real World paired source/destination policy recovery"
+run-name: "Original 720-W empirical transfer | benchmark source versus destination, both frozen"
+"on":
+  push:
+    branches: [main]
+    paths: ["Q2/F3/START_RW_TWO_POLICY_AUDIT.md"]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: t3-f3-realworld-original-two-policy-audit
+  cancel-in-progress: false
+jobs:
+  two_original_policies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13519858091
+          run-id: 42251598557
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/source
+      - uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13542889733
+          run-id: 42299685581
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/destination
+      - name: Reconcile both original policies without re-fitting or computing new BH
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_q2_f3_rw_two_policy_recovery.py
+          python3 scripts/t3_q2_f3_rw_two_policy_recovery.py "Q2/F3/transfer_recovery/two_policy/runs/$RUN_ID"
+          test -s "Q2/F3/transfer_recovery/two_policy/runs/$RUN_ID/REALWORLD_TWO_POLICY_SCIENTIFIC_AUDIT.json"
+      - name: Preserve original science and complete SHA provenance in T3 main
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/transfer_recovery/two_policy/runs/$RUN_ID"
