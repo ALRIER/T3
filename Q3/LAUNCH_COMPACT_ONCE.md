@@ -26,3 +26,24 @@ using Git LFS, with explicit limitations and 90-day raw-RDS artifact retention.
 This file is the **one-time launch trigger** for
 .github/workflows/t3-q3-compact-a-g.yml.
 DO NOT edit this launch marker again.
+
+
+## Owner-authorized targeted recovery relaunch — November 20, 2026
+
+The original compact workflow run 44822079785 failed in the Q3-D four-shard
+matrix because a worker counted Discovery files across sample sizes instead
+of validating the ten frozen model files for each (family, sample-size) bundle.
+This was a workflow assertion error after successful simulated scores, not an
+invalidation of original scientific evidence.
+
+The worker validation has been corrected in commit 27c6d6fc3a467177a04a82f371795473cfcdf175.
+The exact source-run recovery list was extended to
+41748369299,44818000158,44822079785. A real-sources readiness test
+https://github.com/ALRIER/T3/actions/runs/44837051791 succeeded: 420 SHA
+verifiable reusable score identities, only 120 score shards outstanding,
+source-artifact recovery from failed run, two distinct n bundles in one
+worker, original-schema 54-panel statistical figures and all R scripts.
+
+This explicit owner-authorized one-time update of the launch marker triggers
+the corrected complete Q3 A–G workflow. Historical run checkpoints and
+previously committed Q1, Q2, Q3 evidence must be preserved, not overwritten.
