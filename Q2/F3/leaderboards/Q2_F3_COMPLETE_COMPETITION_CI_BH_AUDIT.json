@@ -1,0 +1,33 @@
+{
+  "MSE_Q95_objectives": "lower_synthetic_loss_is_better; positive_gain_pct_favors_candidate",
+  "complete_joint_mechanism_panels": 864,
+  "complete_paired_metric_rows": 1728,
+  "cross_stage_exact_frozen_weight_RDS_SHA_matching": "NOT_PROVED_BY_THIS_OUTPUT",
+  "distinct_original_single_candidate_rank_rows": 1440,
+  "engine_reference_summary_rows": 8,
+  "exploratory_BH_CI_logic": "favorable_95CI_and_original_BH_q_at_most_0.05",
+  "family_engine_reference_summary_rows": 48,
+  "favorable_CI_logic": "lower_effect_95CI_bound_strictly_greater_than_zero",
+  "fixed_observed_scenarios_per_mechanism": 40,
+  "full_BH_family_per_metric": 864,
+  "full_selection_aware_calibration": "UNVERIFIED",
+  "independent_heldout_seed_axis": 10,
+  "independent_training_seed_axis": 10,
+  "individual_candidate_inference_intervals_available": "NO; do not reassign engine_mechanism_intervals_to_individual_weight",
+  "new_BH_multiplicity_correction": false,
+  "new_contamination_scenarios": false,
+  "new_optimizer_training": false,
+  "new_statistical_inference": false,
+  "original_mechanism_inferential_unit": "10_crossed_training_by_10_heldout_seeds_conditional_on_40_original_scenarios",
+  "point_estimate_class_logic": "MSE>0,Q95>0 => joint; only one positive => corresponding only; neither => neither",
+  "schema": "PUB1_Q2_F3_COMPREHENSIVE_TOURNAMENT_CI_BH_V1",
+  "source_SHA256": {
+    "Q2_F3_ALL_1728_EXPLORATORY_BH_METRICS.csv": "11dfe6dc1506ad1579969c3877abe028c798d67d4a2e82aa577fdf286124369f",
+    "Q2_F3_ALL_864_MECHANISM_EVIDENCE.csv": "aead9cef49fa3f931723a58e294856236064d2b3c8ddc67d44d8b8d7c189c3bf",
+    "Q2_F3_TABLE_FOUR_ENGINE_EXPLORATORY_BH.csv": "29ecf26ebe24408aa43748c8ab88184dae1195b393c23fc20a80119433fc8486"
+  },
+  "source_claim_reconciliation": "Matched original flags for all 864 units and original 8-row BH summary",
+  "source_run": 44622921203,
+  "status": "PASS_REUSE_COMPLETE_ORIGINAL_Q2_MECHANISM_INFERENCE",
+  "surrogate_null_rejection_at_nominal_5_pct": "5.3223%"
+}

@@ -1,0 +1,18 @@
+{
+  "Q2_F3_COMPLETE_48_FAMILY_ENGINE_REFERENCE_SUMMARY.csv": {
+    "bytes": 7001,
+    "sha256": "7508f72ea82c1ef558dcce8fe50e09cb7e4dc6ba60f01d6144b4020ad72c5e7d"
+  },
+  "Q2_F3_COMPLETE_864_TOURNAMENT_CI_BH_EVIDENCE.csv": {
+    "bytes": 274985,
+    "sha256": "a258e88524df4dc6384597a913b30d3092f0626478e5ec05d2d086ba03015b1e"
+  },
+  "Q2_F3_COMPLETE_8_ENGINE_REFERENCE_EVIDENCE.csv": {
+    "bytes": 427,
+    "sha256": "e5fb3156aef9012e5c88fbc080f4867eb3ea06b8d3445c7ac8727d0a4f25a82a"
+  },
+  "Q2_F3_COMPLETE_COMPETITION_CI_BH_AUDIT.json": {
+    "bytes": 1986,
+    "sha256": "30de223a8b5eeae559dc58c491afaa007b39ac871774476cf97b53a9f95aa0cd"
+  }
+}

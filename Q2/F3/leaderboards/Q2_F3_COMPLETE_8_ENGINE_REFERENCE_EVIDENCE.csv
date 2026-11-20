@@ -1,0 +1,9 @@
+engine,reference,mechanism_panels,joint_point,MSE_only_point,Q95_only_point,neither_point,joint_conditional_CI,joint_exploratory_BH_CI,MSE_BH_CI,Q95_BH_CI
+de,mean,108,41,0,8,59,39,39,39,48
+de,own,108,0,0,0,108,0,0,0,0
+dirichlet,mean,108,49,0,4,55,48,48,48,53
+dirichlet,own,108,0,0,0,108,0,0,0,0
+ga,mean,108,43,0,7,58,43,43,43,47
+ga,own,108,0,0,0,108,0,0,0,0
+nsga2,mean,108,43,0,6,59,43,43,43,47
+nsga2,own,108,0,0,0,108,0,0,0,0
