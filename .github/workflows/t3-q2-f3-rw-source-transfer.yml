@@ -1,0 +1,41 @@
+name: "T3 Q2 F3 — Original Real World source-policy cross-family audit"
+run-name: "Real World original source-family frozen W BH and descriptive cross-family evidence"
+"on":
+  push:
+    branches: [main]
+    paths: ["Q2/F3/START_RW_SOURCE_TRANSFER_AUDIT.md"]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: t3-q2-f3-rw-source-policy-audit
+  cancel-in-progress: false
+jobs:
+  original-realworld-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13519858091
+          run-id: 42251598557
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/realworld_source
+      - name: Audit and preserve 720-W Real World source-policy parent-level original labels
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_q2_f3_rw_source_policy_audit.py
+          python3 scripts/t3_q2_f3_rw_source_policy_audit.py "Q2/F3/transfer_recovery/source_policy/runs/$RUN_ID"
+          test -s "Q2/F3/transfer_recovery/source_policy/runs/$RUN_ID/REALWORLD_SOURCE_VS_DESTINATION_POLICY_AUDIT.json"
+      - name: Permanently commit the original source-policy and destination-policy separate audit
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/transfer_recovery/source_policy/runs/$RUN_ID"
