@@ -339,7 +339,7 @@ jobs:
           set -euo pipefail
           python scripts/q3_lite_coverage.py incoming/scored
           python scripts/q3_lite_complete_science.py pack --input incoming/scored --out Q3/D_parameter_transfer/compact_v1/scored_archive --name q3_compact_original_frozen_scores --expected-scores 540
-      - name: Git LFS permanent backup: original/reused score CSVs and full SHA-256 seed/source lineage
+      - name: "Git LFS permanent backup: original/reused score CSVs and full SHA-256 seed/source lineage"
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
