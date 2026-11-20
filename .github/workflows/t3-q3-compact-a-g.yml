@@ -3,9 +3,9 @@ name: "Q3 A-G | Compact prespecified independent parameter transfer and permanen
   workflow_dispatch:
     inputs:
       source_score_runs:
-        description: Original full parameter-score checkpoints and cancelled exhaustive Q3 run
+        description: Original full parameter-score checkpoints, cancelled exhaustive Q3, and salvaged partial compact run
         required: false
-        default: "41748369299,44818000158"
+        default: "41748369299,44818000158,44822079785"
         type: string
       discovery_bundle_run_id:
         required: true
@@ -52,7 +52,7 @@ jobs:
         name: Freeze outcome-blind 49-scenario/three-parameter-row support; inventory original completed score artifacts
         env:
           GH_TOKEN: ${{ github.token }}
-          SOURCES: ${{ inputs.source_score_runs || '41748369299,44818000158' }}
+          SOURCES: ${{ inputs.source_score_runs || '41748369299,44818000158,44822079785' }}
         run: |
           set -euo pipefail
           python -m py_compile scripts/q3_lite_plan.py scripts/q3_lite_recover.py scripts/q3_lite_coverage.py scripts/q3_lite_complete_science.py
