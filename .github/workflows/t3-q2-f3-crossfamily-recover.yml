@@ -1,0 +1,45 @@
+name: "T3 Q2 F3 — Recover original cross-family Held Out and Real World evidence"
+run-name: "Cross-family original archival recovery | Held Out + 2 Real World independent panels"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - "Q2/F3/START_TRANSFER_RECOVERY.md"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: t3-q2-f3-original-transfer-recovery
+  cancel-in-progress: false
+jobs:
+  verify-and-recover:
+    name: "Recover original three SHA-pinned cross-family archives and inventory data contracts"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false, fetch-depth: 0, persist-credentials: true }
+      - name: Verify original archived catalog and recovery script
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_q2_f3_transfer_source_recovery.py
+          test -s data-archive/catalog/status.json
+          test -s data-archive/realworld/actions/actions-13542889733_t3-rw-v3-destination-global-taxonomy-run42299685581.zip/manifest.json
+          test -s data-archive/realworld/actions/actions-13901031141_t3-rw-pub-four-module-global-validation-run43098925126.zip/manifest.json
+          test -s data-archive/heldout/actions/actions-13178442769_t3-b3-pairwise-global-heldout-run41502642569.zip/manifest.json
+      - name: Download original source archives, verify each SHA, scan internal file contracts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_q2_f3_transfer_source_recovery.py "Q2/F3/transfer_recovery/runs/$RUN_ID"
+          test -s "Q2/F3/transfer_recovery/runs/$RUN_ID/TRANSFER_SOURCE_RECOVERY_AUDIT.json"
+      - name: Permanently archive audit and provenance directly in public T3/main
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/transfer_recovery/runs/$RUN_ID"
+          echo "T3_CROSS_FAMILY_ARCHIVE_SOURCE_VERIFIED_AND_SAVED"
