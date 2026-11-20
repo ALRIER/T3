@@ -1,0 +1,29 @@
+{
+  "status": "PASS_REVISED_NEIGHBORHOOD_ARGUMENT_CANONICAL_PDF",
+  "date": "2026-11-20",
+  "scientific_repository": "ALRIER/T3",
+  "science_run": 44622921203,
+  "science_source": "Q2/F3/runs/44622921203/publication/",
+  "scientific_data_unchanged": true,
+  "canonical_repository": "ALRIER/Genetic_Algorithms",
+  "canonical_source_path": "manuscript/main.tex",
+  "canonical_pdf_path": "manuscript/main.pdf",
+  "manuscript_revision_commit": "edfb3698a21b84b54bbaa5609b3f3fb6fdc3773a",
+  "completed_pdf_commit": "3da0651cea0d728149aedb71bf462a4136ed2eca",
+  "canonical_pdf_pages": 71,
+  "canonical_pdf_bytes": 3697865,
+  "actions_run": 44743481157,
+  "actions_conclusion": "success",
+  "assertions": [
+    "none of the 720 frozen candidate keys wins both losses in all 240 own-family-size tested contaminated scenarios under either frozen reference policy",
+    "neighbor-retention selected classical GA 7.0%, NSGA-II 7.7%, DE 17.6%, Dirichlet 8.2%",
+    "neighbor-retention mean policy GA 91.8%, NSGA-II 91.9%, DE 91.7%, Dirichlet 92.8%",
+    "main text promotes Q2 neighborhood figure and table from supplementary to Results",
+    "Discussion explains regime specificity and relationship/limits of formal No Free Lunch theorems",
+    "Conclusion emphasizes conditional transfer and does not infer cross-family failures from Q2",
+    "candidate training-seed identity verified only within original Q2; cross-stage weight SHA matching remains separate"
+  ],
+  "canonical_pdf_url": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.pdf",
+  "canonical_source_url": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.tex",
+  "build_url": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44743481157"
+}
