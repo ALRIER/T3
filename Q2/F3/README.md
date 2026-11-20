@@ -1,5 +1,13 @@
 # Q2 / F3 — Independent robust reconstruction and calibration follow-up
 
+## Audited 720-candidate individual leaderboard (2026-11-20)
+
+Original-data candidate-level evidence was reconstructed and permanently committed in [the single F3 leaderboards folder](leaderboards/) by successful [GitHub Actions run 44763334662](https://github.com/ALRIER/T3/actions/runs/44763334662). The new source script is [scripts/q2_f3_candidate_leaderboards.py](../../scripts/q2_f3_candidate_leaderboards.py); it reads the original SHA-256-checked F3 candidate-breadth and mechanism-pocket CSVs, does not rerun the four optimizers or held-out scoring, and emits exactly three publication-ready PNG figures directly inside the leaderboards folder.
+
+The archive preserves 1,440 per-candidate-per-benchmark descriptive rank rows across 720 original frozen identities, 36 family-size-reference joint leader summaries, 180 objective-specific block leader rows, 216 family-size-mechanism-reference leader rows, and 10 overall taxonomy extrema, plus a machine-readable source/output SHA-256 audit. Scientific ties and the distinction between own-classical versus sample-mean references are preserved. The highest observed single-weight joint-win coverage is 11/240 (four tied vectors) versus own classical and 217/240 (four tied) versus the mean; 0/720 candidates win all 240 scenarios under either policy.
+
+These are descriptive, within-original-support comparisons. Cross-family Held Out, Stress and Real World inference is retained in the separate original [transfer recovery](transfer_recovery/) folder. The candidate key preserves family, sample size, search engine and training seed, but this source-derived publication does **not** certify byte-identical RDS weights across every test stage. The full nested optimizer-selection-aware error-rate calibration remains unresolved; the Q2 fitted-null 5.3223% estimated rejection at nominal 5% did not pass the stringent point-estimate gate. All figures and 18-block/mechanism leader tables are incorporated or explicitly indexed in the **existing single canonical private** \`manuscript/main.tex\`, with verified PNG copies under its existing \`manuscript/figures/\` folder.
+
 All F3 scientific computation runs in **ALRIER/T3**, branch **main**.
 The immutable primary Q2-A–E data remain at `Q2/runs/44599590079/`.
 No F3 action writes to `ALRIER/Genetic_Algorithms` or modifies any existing Q1/Q2 result.
