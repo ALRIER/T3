@@ -1,0 +1,13 @@
+panel,reference,transfer_scope,eligible_contrasts,original_tier1_joint_BH_CI,original_CI_both_favorable,original_descriptive_joint_both_negative
+primary,mean,cross_family_transfer,600,0,0,40
+primary,mean,within_family_neighborhood,720,0,0,74
+primary,mean,within_regime,720,0,0,161
+primary,own,cross_family_transfer,600,0,0,591
+primary,own,within_family_neighborhood,720,0,0,667
+primary,own,within_regime,720,0,0,694
+secondary,mean,cross_family_transfer,2040,0,0,200
+secondary,mean,within_family_neighborhood,2400,0,0,74
+secondary,mean,within_regime,3000,0,0,241
+secondary,own,cross_family_transfer,2040,0,0,1661
+secondary,own,within_family_neighborhood,2400,0,0,1279
+secondary,own,within_regime,3000,0,0,2317

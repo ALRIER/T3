@@ -1,0 +1,25 @@
+{
+  "destination_policy_original_scoped_rows": 12,
+  "destination_policy_tier1_total": 0,
+  "distinct_source_and_destination_classical_benchmark_policy_BH_scope": true,
+  "empirical_family_labels_true_generating_distribution": false,
+  "full_nested_optimizer_null_selection_calibration": false,
+  "no_new_BH_or_pvalues_computed": true,
+  "original_source_classical_policy": {
+    "primary": {
+      "distinct_frozen_candidates": 720,
+      "file": "primary_parent_BH_taxonomy.csv.gz",
+      "rows": 4080,
+      "sha256": "f6afd9b1411d5093d026250bde29e0f517a6ab413e8b909eafc4bd7098180bf6"
+    },
+    "secondary": {
+      "distinct_frozen_candidates": 720,
+      "file": "secondary_family_transfer_BH_taxonomy.csv.gz",
+      "rows": 14880,
+      "sha256": "d123091155653c924a6f57077d8ab9678fbb2893bae2fe9fd4c9fbc7dccf4ced"
+    }
+  },
+  "original_source_level_642_independent_parent_datasets": true,
+  "original_source_policy_joint_descriptive_total": 7999,
+  "original_source_policy_tier1_total": 0
+}
