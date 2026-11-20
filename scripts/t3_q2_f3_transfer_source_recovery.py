@@ -8,7 +8,7 @@ No optimizer fitting, retuning, outcome selection, or statistical testing.
 import csv,gzip,hashlib,io,json,sys
 from pathlib import Path
 SOURCES=(
-("heldout_global",13178442769,"17b8501d7017d7b131bb6ec81b9b483df3782e315f94d7df6591f55847066a4a",
+("heldout_global",13178442769,"17b8501d7017d7b131bb6ec81b9b483df3782e315c94d7df6591f55847066a4a",
  "data-archive/heldout/actions/actions-13178442769_t3-b3-pairwise-global-heldout-run41502642569.zip/manifest.json"),
 ("realworld_destination",13542889733,"3e7c28d685a8778cc4d70391e5b8433b14b97178e015bcb262e9280a6611e132",
  "data-archive/realworld/actions/actions-13542889733_t3-rw-v3-destination-global-taxonomy-run42299685581.zip/manifest.json"),
