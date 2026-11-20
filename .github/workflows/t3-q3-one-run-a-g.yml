@@ -1,5 +1,12 @@
 name: "Q3 A-G | One-dispatch frozen-weight transfer, complete analysis and permanent backup"
 "on":
+  # Authorized one-time launch through an explicitly created marker, because the
+  # linked GitHub integration cannot call workflow_dispatch. Do not include
+  # generated output paths here, or the run would recursively relaunch itself.
+  push:
+    branches: [main]
+    paths:
+      - "Q3/LAUNCH_A_G_ONCE.md"
   workflow_dispatch:
     inputs:
       reuse_original_parametric_runs:
@@ -43,7 +50,7 @@ jobs:
         name: Verify full factorial 2490-shard plan and inspect original recoverable Actions archives
         env:
           GH_TOKEN: ${{ github.token }}
-          REUSE_RUNS: ${{ inputs.reuse_original_parametric_runs }}
+          REUSE_RUNS: ${{ inputs.reuse_original_parametric_runs || '41748369299' }}
         run: |
           set -euo pipefail
           python -m py_compile scripts/q3_build_plan.py scripts/q3_recover_shard.py scripts/q3_complete_science.py
@@ -89,8 +96,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v5
         with:
-          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id }}
-          run-id: ${{ inputs.benchmark_map_run_id }}
+          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id || '41478038812' }}
+          run-id: ${{ inputs.benchmark_map_run_id || '41478038812' }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: incoming/old-benchmark
@@ -150,8 +157,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v5
         with:
-          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run${{ inputs.discovery_bundle_run_id }}
-          run-id: ${{ inputs.discovery_bundle_run_id }}
+          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run${{ inputs.discovery_bundle_run_id || '41487091262' }}
+          run-id: ${{ inputs.discovery_bundle_run_id || '41487091262' }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
           path: incoming/discovery
