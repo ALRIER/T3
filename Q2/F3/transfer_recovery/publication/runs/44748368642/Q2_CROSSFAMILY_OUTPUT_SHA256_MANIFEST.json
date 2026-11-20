@@ -1,0 +1,22 @@
+{
+  "Q2_CROSSFAMILY_PUBLICATION_AUDIT.json": {
+    "bytes": 1434,
+    "sha256": "61e45657cd596115e54b6740dfd5c28fa989ba730955402f031cc43f8762b110"
+  },
+  "REALWORLD_ORIGINAL_CROSSFAMILY_8_POLICY_PANELS.csv": {
+    "bytes": 783,
+    "sha256": "7205a56e3c0777ce405086a3fe4db9b7a0d89882a9d636882eb3bac134bbd760"
+  },
+  "REALWORLD_ORIGINAL_SOURCE_DESTINATION_FIGURE_CELLS.csv": {
+    "bytes": 2130,
+    "sha256": "5bbbd16b22cb79cec1ff00eac33487024cac1ff58d1e85b3e30c0d80adc184e7"
+  },
+  "results_q2_crossfamily_realworld_original_profiles.png": {
+    "bytes": 199260,
+    "sha256": "e6c71de3308be6f4afeea2309f112d2580d5a3dcd32eef90401f11bb9510b290"
+  },
+  "results_q2_crossfamily_realworld_original_profiles.svg": {
+    "bytes": 84972,
+    "sha256": "9fbe6989094ebe88e50df398e3e05d6d5c16e6528e0fb471a49e2a47e9c981fb"
+  }
+}

@@ -1,0 +1,9 @@
+benchmark_policy,original_inferential_panel,comparator,transfer_scope,eligible,descriptive_joint_mean_loss_contrasts,both_conditional_CI_favorable,both_BH_and_CI_favorable,independent_parent_count_min,empirical_destination_family_is_true_DGP
+destination,primary,mean,cross_family_transfer,600,40,0,0,238,False
+destination,primary,own,cross_family_transfer,600,591,0,0,238,False
+destination,secondary,mean,cross_family_transfer,2040,200,0,0,6,False
+destination,secondary,own,cross_family_transfer,2040,1563,0,0,6,False
+source,primary,mean,cross_family_transfer,600,40,0,0,238,False
+source,primary,own,cross_family_transfer,600,591,0,0,238,False
+source,secondary,mean,cross_family_transfer,2040,200,0,0,6,False
+source,secondary,own,cross_family_transfer,2040,1661,0,0,6,False

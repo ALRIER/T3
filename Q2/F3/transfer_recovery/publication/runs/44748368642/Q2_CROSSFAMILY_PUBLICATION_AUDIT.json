@@ -1,0 +1,38 @@
+{
+  "descriptive_count_is_independent_parents": false,
+  "figure_cells": 34,
+  "files": {
+    "REALWORLD_ORIGINAL_CROSSFAMILY_8_POLICY_PANELS.csv": {
+      "bytes": 783,
+      "sha256": "7205a56e3c0777ce405086a3fe4db9b7a0d89882a9d636882eb3bac134bbd760"
+    },
+    "REALWORLD_ORIGINAL_SOURCE_DESTINATION_FIGURE_CELLS.csv": {
+      "bytes": 2130,
+      "sha256": "5bbbd16b22cb79cec1ff00eac33487024cac1ff58d1e85b3e30c0d80adc184e7"
+    },
+    "results_q2_crossfamily_realworld_original_profiles.png": {
+      "bytes": 199260,
+      "sha256": "e6c71de3308be6f4afeea2309f112d2580d5a3dcd32eef90401f11bb9510b290"
+    },
+    "results_q2_crossfamily_realworld_original_profiles.svg": {
+      "bytes": 84972,
+      "sha256": "9fbe6989094ebe88e50df398e3e05d6d5c16e6528e0fb471a49e2a47e9c981fb"
+    }
+  },
+  "independent_unit": "642 empirical parent clusters",
+  "no_original_optimizer_or_score_rerun": true,
+  "original_BH_favorable_CI_counts_recomputed": false,
+  "original_empirical_destination_is_true_DGP": false,
+  "original_reference_policies": [
+    "source_classical",
+    "destination_classical",
+    "mean"
+  ],
+  "original_stages": [
+    "primary",
+    "secondary"
+  ],
+  "original_two_policy_audit_sha256": "42fc37759b3c9ee8f074b5fea5b93ffcb68c6afbaea982651022c986e1c851e2",
+  "source_original_realworld_full_science": "Q2/F3/transfer_recovery/two_policy/runs/44748009646",
+  "status": "PASS_ORIGINAL_CROSSFAMILY_PUBLICATION_PANELS"
+}
