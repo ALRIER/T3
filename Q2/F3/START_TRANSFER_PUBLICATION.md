@@ -1,0 +1,2 @@
+# Original Real World source to empirical-destination transfer publication figure
+Generate ONLY from prior audited archived source/destination classical benchmark policy result outputs T3 Q2/F3/transfer_recovery/two_policy/runs/44748009646/. Respect 642 independent empirical parent units, incomplete cross-family profile support, and approximate empirical family assignments. Produce one PNG+SVG plus checksum backed source cell tables in T3. No private scientific computations.
