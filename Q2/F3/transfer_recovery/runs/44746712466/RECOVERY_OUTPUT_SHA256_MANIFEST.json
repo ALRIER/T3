@@ -1,0 +1,22 @@
+{
+  "ORIGINAL_CROSS_FAMILY_ARCHIVE_FILES.csv": {
+    "bytes": 10275,
+    "sha256": "b8ac7443725423e1c3e7cb3e3aa2c51775d57c060a5912fb90176877bb380949"
+  },
+  "ORIGINAL_REPORTED_SCOPE_TIER_COUNTS.csv": {
+    "bytes": 88449,
+    "sha256": "3e3f10b89ca6ad9fc35361afcf1b0b3bc2de3a052d041e6e98ff0922504fa38a"
+  },
+  "SCIENCE_CROSS_FAMILY_SOURCE_TABLES.csv": {
+    "bytes": 6520,
+    "sha256": "fa137909444f1ab4262a71a958e95d0bf5e068ec367ff3da87bd6bff12af78fe"
+  },
+  "SCIENCE_REALWORLD_PARENT_TABLES.csv": {
+    "bytes": 3712,
+    "sha256": "f243dfa9985cfc990d57b56202db666bb944c6470504902a86d0d880489782f7"
+  },
+  "TRANSFER_RECOVERY_AUDIT.json": {
+    "bytes": 2523,
+    "sha256": "7b1f5af21de367db5c3cf2be83997d0d4e5ecec626c5ebf3ad6a960ad944e81c"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "archived_original_source_sha256_claim": "T3 original archival inventory, not independently rehashed on re-download",
+  "extracted_source_files": 17,
+  "inventory_not_full_inference_reproduction": true,
+  "no_retraining_or_simulation": true,
+  "original_archive_backups_preserved": true,
+  "original_archive_zip_hash_independently_reverified": false,
+  "original_scope_tier_aggregate_rows": 632,
+  "realworld_parent_scientific_files": 3,
+  "source_archives": [
+    {
+      "artifact": "heldout_global",
+      "artifact_id": 13178442769,
+      "download_authenticity": "GitHub Actions original artifact ID and preserved catalog checksum",
+      "downloaded_via": "actions/download-artifact@v5",
+      "extracted_file_count": 7,
+      "original_catalog_path": "data-archive/heldout/actions/actions-13178442769_t3-b3-pairwise-global-heldout-run41502642569.zip/manifest.json",
+      "original_catalog_size_bytes": 154853622,
+      "original_catalog_zip_sha256": "17b8501d7017d7b131bb6ec81b9b483df3782e315c94d7df6591f55847066a4a",
+      "original_zip_sha256_independently_rechecked": false
+    },
+    {
+      "artifact": "realworld_destination",
+      "artifact_id": 13542889733,
+      "download_authenticity": "GitHub Actions original artifact ID and preserved catalog checksum",
+      "downloaded_via": "actions/download-artifact@v5",
+      "extracted_file_count": 4,
+      "original_catalog_path": "data-archive/realworld/actions/actions-13542889733_t3-rw-v3-destination-global-taxonomy-run42299685581.zip/manifest.json",
+      "original_catalog_size_bytes": 4375999,
+      "original_catalog_zip_sha256": "3e7c28d685a8778cc4d70391e5b8433b14b97178e015bcb262e9280a6611e132",
+      "original_zip_sha256_independently_rechecked": false
+    },
+    {
+      "artifact": "realworld_final_four_module",
+      "artifact_id": 13901031141,
+      "download_authenticity": "GitHub Actions original artifact ID and preserved catalog checksum",
+      "downloaded_via": "actions/download-artifact@v5",
+      "extracted_file_count": 6,
+      "original_catalog_path": "data-archive/realworld/actions/actions-13901031141_t3-rw-pub-four-module-global-validation-run43098925126.zip/manifest.json",
+      "original_catalog_size_bytes": 122810174,
+      "original_catalog_zip_sha256": "c10edf560c8e1f8f6ccec910f6f8185d667df807900cbbcea2687b6615151f34",
+      "original_zip_sha256_independently_rechecked": false
+    }
+  ],
+  "source_family_transfer_data_files": 5,
+  "status": "PASS_ARCHIVED_ORIGINAL_ARTIFACT_IDENTITIES_AND_SCHEMA_INVENTORY"
+}
