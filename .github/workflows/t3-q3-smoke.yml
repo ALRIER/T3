@@ -1,0 +1,60 @@
+name: "Q3 code and one-run readiness smoke (no computation)"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - scripts/q3_build_plan.py
+      - scripts/q3_recover_shard.py
+      - scripts/q3_complete_science.py
+      - .github/workflows/t3-q3-one-run-a-g.yml
+      - .github/workflows/t3-q3-smoke.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Static Python syntax and original 2490-shard identities
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/q3_build_plan.py scripts/q3_complete_science.py scripts/q3_recover_shard.py
+          python scripts/q3_build_plan.py --self-test
+          python scripts/q3_complete_science.py self-test
+      - name: Validate actual original source CSVs and published SHA-256 references
+        run: |
+          set -euo pipefail
+          python scripts/q3_complete_science.py baseline --run-id 'SMOKE-NO-SCIENCE'
+          test -s Q3/A_provenance/Q3_A_SOURCE_LINEAGE.json
+          test -s Q3/B_cross_family/Q3_B_DIRECTED_288_ENGINE_TRANSFERS.csv
+          test -s Q3/C_structural_stress/Q3_C_ORIGINAL_STRESS_TRANSFER_SCOPE.csv
+          test -s Q3/E_real_world/Q3_E_ORIGINAL_8_POLICY_PARENT_LEVEL_EVIDENCE.csv
+      - name: Validate complete one-run workflow shape and 20-parallel design
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyyaml==6.0.2
+          python - <<'PY'
+          import yaml
+          p=".github/workflows/t3-q3-one-run-a-g.yml"
+          with open(p) as fh:d=yaml.safe_load(fh)
+          assert "workflow_dispatch" in d["on"] and "push" not in d["on"]
+          jobs=d["jobs"]
+          expected=["a_b_c_e","prepare_benchmark","prepare_models","q3_d_200","q3_verify_200","q3_d_1000","q3_verify_1000","q3_d_3000","q3_verify_3000","q3_f","q3_g"]
+          assert set(jobs)==set(expected),(set(jobs)^set(expected))
+          for n in (200,1000,3000):
+              st=jobs[f"q3_d_{n}"]["strategy"]
+              assert st["max-parallel"]==20
+              assert "needs.a_b_c_e.outputs.matrix" in st["matrix"]
+              assert sum(v.get("uses")=="./.github/actions/t3-b3-parametric-transfer-worker" for v in jobs[f"q3_d_{n}"]["steps"])==4
+              assert jobs[f"q3_verify_{n}"]["needs"]==f"q3_d_{n}"
+          assert "q3_verify_200" in jobs["q3_d_1000"]["needs"]
+          assert "q3_verify_1000" in jobs["q3_d_3000"]["needs"]
+          assert jobs["q3_g"]["needs"]=="q3_f"
+          assert len(jobs["prepare_models"]["strategy"]["matrix"]["include"])==18
+          print("Q3_SINGLE_DISPATCH_11_JOBS_3x208_RUNNERS_MAX_PARALLEL20_SMOKE_PASS")
+          PY
