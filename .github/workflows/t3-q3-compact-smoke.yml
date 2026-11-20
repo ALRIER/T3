@@ -38,7 +38,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          python scripts/q3_lite_plan.py --source-runs "41748369299,44818000158" --out /tmp/q3-prespec-test.json
+          python scripts/q3_lite_plan.py --source-runs "41748369299,44818000158,44822079785" --out /tmp/q3-prespec-test.json
           python - <<'PY'
           import json
           p=json.load(open("/tmp/q3-prespec-test.json"))
@@ -67,6 +67,77 @@ jobs:
           assert manifest[0]["source_actions_run_id"]=="44818000158"
           print("Q3_COMPACT_REAL_CANCELLED_RUN_SCORE_RECOVERY_PASS")
           PY
+      - name: Recover exact real failed-run 49-scenario score and verify source checksum after preservation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_recover.py normal 2 45 1000 44822079785 q3-lite-score-normal-p2-s45-n1000-run44822079785-a1 lite
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          p=Path("artifacts/t3_b3_parametric_transfer/normal/parameter_row02/seed45_n1000/b0")
+          a=list(csv.DictReader((p/"scores.csv").open()))
+          b=list(csv.DictReader((p/"score_manifest.csv").open()))
+          assert len(a)==294 and b[0]["source_actions_run_id"]=="44822079785"
+          assert b[0]["protocol"]=="t3_q3_compact_parametric_score_v1"
+          print("Q3_COMPACT_REAL_FAILED_RUN_SCORE_SALVAGE_PASS",len(a))
+          PY
+      - name: Reproduce cross-n original input validation with two immutable existing prepared family-size bundles
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for n in 200 1000; do
+            artifact="t3-b3-parametric-input-normal-n${n}-run44822079785"
+            mkdir -p "incoming/verify-multi-n/$n" artifacts/discovery_v3
+            gh run download 44822079785 --repo "$GH_REPO" --name "$artifact" --dir "incoming/verify-multi-n/$n"
+            a="incoming/verify-multi-n/$n/discovery-normal-n${n}.tar.gz"
+            (cd "incoming/verify-multi-n/$n" && sha256sum -c "discovery-normal-n${n}.tar.gz.sha256")
+            test "$(tar -tzf "$a" | grep -Ec '/discovery[.]rds
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check matplotlib==3.9.2
+          python scripts/q3_lite_fixture_selftest.py
+      - name: Statistically verify workflow syntax, strict 20-worker cap and one-time launch restrictions
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyyaml==6.0.2
+          python - <<'PY'
+          import yaml
+          with open(".github/workflows/t3-q3-compact-a-g.yml") as f:w=yaml.safe_load(f)
+          assert set(w["on"]["push"]["paths"])=={"Q3/LAUNCH_COMPACT_ONCE.md"}
+          assert "workflow_dispatch" in w["on"]
+          j=w["jobs"]
+          assert set(j)==set("a_b_c_e prepare_benchmark prepare_models q3_d_compact q3_d_verify q3_f q3_g".split())
+          assert j["q3_d_compact"]["strategy"]["max-parallel"]==20
+          assert "needs.a_b_c_e.outputs.matrix" in j["q3_d_compact"]["strategy"]["matrix"]
+          assert sum(st.get("uses")=="./.github/actions/q3-lite-parameter-worker" for st in j["q3_d_compact"]["steps"])==4
+          assert len(j["prepare_models"]["strategy"]["matrix"]["include"])==18
+          assert j["q3_g"]["needs"]=="q3_f"
+          print("Q3_COMPACT_ONE_RUN_A_G_STRUCTURE_PASS")
+          PY
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Parse all Q3 compact R simulation/scoring/inference scripts inside original pinned T3 container
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: |
+          set -euo pipefail
+          bash scripts/run_r_in_container.sh Rscript -e "invisible(lapply(c('scripts/q3_lite_parametric_mc.R','scripts/q3_lite_parametric_score.R','scripts/q3_lite_parametric_inference.R'),parse));cat('Q3_COMPACT_THREE_R_SCIENCE_SCRIPTS_PARSE_PASS\n')"
+)" -eq 10
+            tar -xzf "$a" -C artifacts/discovery_v3
+            for seed in $(seq 0 9);do
+              test -s "artifacts/discovery_v3/normal/seed$(printf '%02d' "$seed")/n${n}/discovery.rds"
+              test -s "artifacts/discovery_v3/normal/seed$(printf '%02d' "$seed")/n${n}/stage_contract.rds"
+            done
+          done
+          test "$(find artifacts/discovery_v3/normal -name discovery.rds | wc -l)" -eq 20
+          echo "Q3_COMPACT_CROSS_SAMPLE_N_BUNDLE_ISOLATION_PASS"
       - name: Exercise 54 original-schema paired BH/CI result panels and all publication figures on disposable fixtures only
         run: |
           set -euo pipefail
