@@ -1,0 +1,106 @@
+name: Q3 compact original-frozen complete-score worker
+description: Generate independent parameter-shift Monte Carlo on the prespecified 49-scenario panel, verify original weights, preserve checkpoints
+inputs:
+  family: {required: true, description: Original statistical family}
+  parameter_row: {required: true, description: Prespecified first/middle/last nonbase parameter row}
+  seed: {required: true, description: Reserved parametric evaluation seed 40-49}
+  sample_n: {required: true, description: 200,1000,3000}
+  scenario_ids: {required: true, description: Original clean plus exactly eight mechanism cells per six supported mechanisms}
+runs:
+  using: composite
+  steps:
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+    - uses: actions/download-artifact@v5
+      with:
+        name: t3-b3-parametric-input-${{ inputs.family }}-n${{ inputs.sample_n }}-run${{ github.run_id }}
+        run-id: ${{ github.run_id }}
+        repository: ${{ github.repository }}
+        github-token: ${{ github.token }}
+        path: incoming/q3_compact_input/${{ inputs.family }}_n${{ inputs.sample_n }}
+    - name: Verify ten unchanged Discovery weight files and frozen 49-cell benchmark map
+      shell: bash
+      run: |
+        set -euo pipefail
+        f='${{ inputs.family }}';n='${{ inputs.sample_n }}'
+        cd "incoming/q3_compact_input/${f}_n${n}"
+        archive="discovery-${f}-n${n}.tar.gz"
+        sha256sum -c "$archive.sha256"
+        mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+        tar -xzf "$archive" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+        cd "$GITHUB_WORKSPACE"
+        test "$(find "artifacts/discovery_v3/${f}" -name discovery.rds -type f | wc -l)" -eq 10
+        test -s artifacts/discovery_v3/own_benchmark_map.csv
+    - name: Generate independent complete 49-scenario Monte Carlo at 500 replicates per scenario
+      shell: bash
+      env:
+        T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        T3_TRANSFER_SCENARIO_BLOCK: "0"
+        T3_TRANSFER_SCENARIO_BLOCK_COUNT: "1"
+        OPENBLAS_NUM_THREADS: "1"
+        OMP_NUM_THREADS: "1"
+      run: |
+        set -euo pipefail
+        bash scripts/run_r_in_container.sh Rscript scripts/q3_lite_parametric_mc.R \
+          '${{ inputs.family }}' '${{ inputs.parameter_row }}' '${{ inputs.seed }}' 500 '${{ inputs.sample_n }}' '${{ inputs.scenario_ids }}'
+    - name: Hash-verify original scientific MC checkpoint before scoring
+      shell: bash
+      run: |
+        set -euo pipefail
+        mc="artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')/n${{ inputs.sample_n }}_r500/b0/canonical.rds"
+        test -s "$mc"
+        python - "$mc" <<'PY'
+        import csv,hashlib,sys
+        from pathlib import Path
+        p=Path(sys.argv[1])
+        with p.with_name("manifest.csv").open(newline="") as fd:
+            rows=list(csv.DictReader(fd))
+        assert len(rows)==1 and int(rows[0]["scenario_count"])==49
+        assert hashlib.sha256(p.read_bytes()).hexdigest()==rows[0]["sha256"]
+        print("Q3_COMPACT_ORIGINAL_MC_49_SCENARIO_SHA_PASS")
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: q3-lite-mc-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+        path: artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row${{ format('{0:00}', inputs.parameter_row) }}/seed${{ format('{0:00}', inputs.seed) }}/n${{ inputs.sample_n }}_r500/b0/
+        if-no-files-found: warn
+        retention-days: 90
+    - name: Score four unchanged original frozen engines, mean and original frozen classical reference
+      shell: bash
+      env:
+        T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        OPENBLAS_NUM_THREADS: "1"
+        OMP_NUM_THREADS: "1"
+      run: |
+        set -euo pipefail
+        mc="artifacts/t3_b3_parametric_transfer_mc/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')/n${{ inputs.sample_n }}_r500/b0/canonical.rds"
+        bash scripts/run_r_in_container.sh Rscript scripts/q3_lite_parametric_score.R \
+          '${{ inputs.family }}' '${{ inputs.parameter_row }}' '${{ inputs.seed }}' '${{ inputs.sample_n }}' "$mc" \
+          artifacts/discovery_v3 artifacts/discovery_v3/own_benchmark_map.csv
+    - name: Verify paired losses and 49-scenario score checkpoint identity
+      shell: bash
+      run: |
+        set -euo pipefail
+        root="artifacts/t3_b3_parametric_transfer/${{ inputs.family }}/parameter_row$(printf '%02d' '${{ inputs.parameter_row }}')/seed$(printf '%02d' '${{ inputs.seed }}')_n${{ inputs.sample_n }}/b0"
+        test -s "$root/scores.csv"
+        test -s "$root/score_manifest.csv"
+        python - "$root" <<'PY'
+        import csv,hashlib,sys
+        from pathlib import Path
+        p=Path(sys.argv[1]);m=list(csv.DictReader((p/"score_manifest.csv").open()))
+        assert len(m)==1 and m[0]["protocol"]=="t3_q3_compact_parametric_score_v1"
+        assert int(m[0]["scenario_count"])==49 and int(m[0]["training_seed_count"])==10
+        assert hashlib.sha256((p/"scores.csv").read_bytes()).hexdigest()==m[0]["scores_sha256"]
+        print("Q3_COMPACT_FROZEN_SCORE_SHA_PASS",m[0]["scores_sha256"])
+        PY
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: q3-lite-score-${{ inputs.family }}-p${{ inputs.parameter_row }}-s${{ inputs.seed }}-n${{ inputs.sample_n }}-run${{ github.run_id }}-a${{ github.run_attempt }}
+        path: artifacts/t3_b3_parametric_transfer/${{ inputs.family }}/parameter_row${{ format('{0:00}', inputs.parameter_row) }}/seed${{ format('{0:00}', inputs.seed) }}_n${{ inputs.sample_n }}/b0/
+        if-no-files-found: warn
+        retention-days: 90
