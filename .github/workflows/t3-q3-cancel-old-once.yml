@@ -4,6 +4,12 @@ name: "Q3 emergency stop | Cancel obsolete exhaustive run only"
     branches: [main]
     paths:
       - "Q3/CANCEL_EXHAUSTIVE_ONCE.md"
+      - "Q3/CANCEL_EXHAUSTIVE_CONCURRENCY_ONCE.md"
+concurrency:
+  # Match precisely the original exhaustive Q3 concurrency group. The GitHub
+  # scheduler cancels the obsolete run before a runner becomes available.
+  group: ${{ format('q3-a-g-{0}', github.ref) }}
+  cancel-in-progress: true
 permissions:
   contents: read
   actions: write
