@@ -1,3 +1,27 @@
+# Q3 CURRENT PLAN — Prespecified compact A–G (supersedes exhaustive Q3-D)
+
+**Status (2026-11-20):** The original exhaustive run `44818000158` was explicitly canceled at the owner's request. Its successful source audits and uploaded original-score checkpoints remain intact. The replacement workflow is `.github/workflows/t3-q3-compact-a-g.yml` and is triggered once by `Q3/LAUNCH_COMPACT_ONCE.md`. The older workflow is historical and **must not be relaunched** unless specifically requested.
+
+## Scientifically controlled, outcome-blind reduction
+
+- Six original training families, three sample sizes, all four original frozen search engines, the original Discovery-selected classical comparator and sample mean.
+- **Three** alternative parameter-grid rows per family, fixed as the first alternative, middle alternative, and final alternative **by grid index** (not selected by observed success). The result is a targeted parameter-perturbation sensitivity study, not exhaustive parameter-space coverage.
+- **49** supported contamination settings: one clean and **eight maximin-spaced settings from each of the six original mechanisms**, selected using contamination fraction and MAD severity only, without accessing performance outcomes. The original 80 Stress-only bimodal settings remain in their independent structural-Stress panel.
+- All **ten** independent reserved evaluation seeds 40–49; each selected setting retains **500** original Monte Carlo replications and evaluates **original frozen weights with no retuning**.
+- Exactly **540** complete score identities instead of 2,490, each with 49 instead of 241 scenarios: **13.23 million** simulation replications at full completion versus ~300 million under the canceled exhaustive protocol, reducing intended raw simulation work by ~22.7× (before the reuse of older checkpoints).
+- The recovery audit found **148** original completed full-score identities within the new predeclared support, including original sources and the just-canceled run, leaving **392** new compact score identities. These are filtered to the precise 49 fixed scenario IDs with original scores and SHA-256 provenance intact, never rescored or selected by performance.
+- Original paired independent-seed 95% CIs, one globally corrected BH panel, full MSE/$Q_{.95}$ joint-versus-partial taxonomy, source–destination transfer tables, and external parent-level evidence are preserved. The exact source, benchmark, independent seed, reference target and inferential unit are recorded.
+
+**Claim boundary:** This is a scientifically interpretable **prespecified compact sensitivity analysis**, not an assertion that all 83 possible alternative parameter rows or all 240 contaminated original scenarios have been exhaustively checked. It does not establish complete optimizer-selection-aware FDR calibration. Historic Held Out/Stress and Real World inference are retained separately, not pooled with the new parameter tests.
+
+**Backup:** Verified original score CSVs, lineage/score manifests, analytical outputs, CI/BH panels, PNGs, and part-level hashes are committed permanently under `Q3/D_parameter_transfer/compact_v1/`, with existing `data-archive/` retained. Regenerated raw MC RDS files are archived as 90-day Actions artifacts unless separately copied to permanent large-volume storage; do not conflate that retention with the permanent score archive.
+
+**Relevant Actions:** [Compact workflow](https://github.com/ALRIER/T3/actions/workflows/t3-q3-compact-a-g.yml) · [Passing prespecification/real recovered-score/R syntax readiness check](https://github.com/ALRIER/T3/actions/runs/44821804859) · [Canceled obsolete exhaustive run](https://github.com/ALRIER/T3/actions/runs/44818000158).
+
+---
+
+## Historical documentation below: superseded exhaustive workflow (retained for reproducibility only)
+
 # Q3 — Independent transfer, changed regimes, and original-frozen estimator generalization
 
 ## Single-dispatch scientific workflow
