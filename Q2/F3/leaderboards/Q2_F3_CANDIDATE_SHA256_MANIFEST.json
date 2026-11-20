@@ -1,0 +1,38 @@
+{
+  "Q2_F3_10_OVERALL_CANDIDATE_EXTREMA.csv": {
+    "bytes": 3120,
+    "sha256": "4112a16b39fb0f4f296c6674da5ee86ab4b479fe2bbcb5ff527fcd5107a5f224"
+  },
+  "Q2_F3_180_BLOCK_TAXONOMY_LEADERS.csv": {
+    "bytes": 38462,
+    "sha256": "aa69c156acc08f20341e86e8c5d9b4508651fba6b0a02a3cb73b6011eed2cb09"
+  },
+  "Q2_F3_216_MECHANISM_BLOCK_LEADERS.csv": {
+    "bytes": 46465,
+    "sha256": "2a90d9aedc446616e22da3d25a2987713d80c84d02f0df35d2facb41277fe599"
+  },
+  "Q2_F3_36_FAMILY_SIZE_BENCHMARK_LEADERS.csv": {
+    "bytes": 5564,
+    "sha256": "0ad0717d0d70d2fa098e9b6d80bfe6307f0232947adf381f64c7c59e2005730a"
+  },
+  "Q2_F3_ALL_1440_CANDIDATE_DESCRIPTIVE_RANKS.csv": {
+    "bytes": 155683,
+    "sha256": "6bcae8c2f919af8346b87e588d616e421088cb277436c8c083712974b7baa8bc"
+  },
+  "Q2_F3_CANDIDATE_LEADERBOARD_AUDIT.json": {
+    "bytes": 2271,
+    "sha256": "b3414a56e3adf5d3aab0abd964bfb19bfd1c633ef82eee94233ed03c2895adf0"
+  },
+  "results_q2_f3_candidate_block_maxima.png": {
+    "bytes": 232903,
+    "sha256": "e1947dfc87eaa72caef570e92ef9b0e44b8376cde8da9d90e10aebdd537533a5"
+  },
+  "results_q2_f3_candidate_pockets.png": {
+    "bytes": 196524,
+    "sha256": "16ae8892faee4c365e8e431bbf579b3bcd8e53633a503da008a37ae4bc689671"
+  },
+  "results_q2_f3_candidate_top12.png": {
+    "bytes": 167392,
+    "sha256": "9b75aae9b084db9e928356cd4aa54cc7e4fa202edf9f5e510354a80ea82bdc89"
+  }
+}
