@@ -1,0 +1,39 @@
+{
+  "existing_Q2_F3_source_untouched": true,
+  "heldout": {
+    "original_global_matrix_rows_scanned": 208224,
+    "original_own_cross_count": {
+      "eligible_original_contrasts": 86760,
+      "original_tier1_joint_BH_CI": 357,
+      "rate_pct": 0.4114799446749654,
+      "reference": "own",
+      "scope": "cross_family"
+    },
+    "original_own_policy_matched_published_manuscript": false,
+    "original_own_within_count": {
+      "eligible_original_contrasts": 17352,
+      "original_tier1_joint_BH_CI": 73,
+      "rate_pct": 0.4207007837713232,
+      "reference": "own",
+      "scope": "within_family"
+    },
+    "read_without_recomputing_original_adjusted_pvalues": true,
+    "row_level_source_sha256": "3a467208a9f21827127da79f30b7a958b57c43e52cb8b58a42dfc7624a74204b"
+  },
+  "heldout_and_realworld_original_BH_values_preserved": true,
+  "no_optimizer_rerun_or_new_statistical_testing": true,
+  "original_empirical_destination_family_labels_are_approximations": true,
+  "original_frozen_discovery_training_only": true,
+  "realworld_destination_policy": {
+    "BH_recomputed": false,
+    "original_empirical_destination_labels_are_true_distributions": false,
+    "original_primary_contrasts": 4080,
+    "original_primary_vs_destination_policy": "destination archived panel only; primary/source and destination-classical benchmark policies remain distinct",
+    "original_secondary_contrasts": 14880,
+    "original_tiers_seen": [
+      "tier4_retained_no_bh_win"
+    ],
+    "scientific_units": "642 original independent empirical parents; model-level comparisons are aggregated across parent clusters"
+  },
+  "status": "PASS_ORIGINAL_TRANSFER_REPORTED_TIER_RECOVERY"
+}
