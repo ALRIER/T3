@@ -1,0 +1,103 @@
+name: "Q3 compact readiness | full source lineage and disposable 54-panel science"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/t3-q3-compact-a-g.yml"
+      - ".github/workflows/t3-q3-compact-smoke.yml"
+      - "scripts/q3_lite_*.py"
+      - "scripts/q3_lite_*.R"
+      - ".github/actions/q3-lite-parameter-worker/action.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  packages: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile scripts, validate deterministic outcome-blind 49 scenario selection, 18 parameter rows and 540 shards
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/q3_lite_plan.py scripts/q3_lite_recover.py scripts/q3_lite_coverage.py scripts/q3_lite_complete_science.py scripts/q3_lite_fixture_selftest.py
+          python scripts/q3_lite_plan.py --self-test
+          python scripts/q3_lite_complete_science.py self-test
+      - name: Audit original Q2 original-source public SHA and all cross-stage science
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_complete_science.py baseline --run-id COMPACT_SMOKE_NO_PUBLICATION
+      - name: Inventory all salvaged original frozen-scoring archives and exact 135-runner matrix
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_plan.py --source-runs "41748369299,44818000158" --out /tmp/q3-prespec-test.json
+          python - <<'PY'
+          import json
+          p=json.load(open("/tmp/q3-prespec-test.json"))
+          assert len(p["scenario_ids"])==49
+          assert len(p["matrix"]["include"])==135
+          assert p["reusable_preexisting_full_shards"]>0
+          assert p["full_design_shards"]==540
+          assert len(p["selected_parameter_rows"])==6
+          assert all(len(x)==3 for x in p["selected_parameter_rows"].values())
+          print("Q3_COMPACT_ORIGINAL_CHECKPOINT_SALVAGE_PLAN_PASS",p["reusable_preexisting_full_shards"])
+          PY
+      - name: Recover ONE real original complete score checkpoint and verify its exact 49 supported scenarios
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_lite_recover.py normal 8 44 200 44818000158 t3-b3-parametric-score-normal-p8-s44-n200-run44818000158-a1 original
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          p=Path("artifacts/t3_b3_parametric_transfer/normal/parameter_row08/seed44_n200/b0")
+          rows=list(csv.DictReader((p/"scores.csv").open()))
+          assert len(rows)==49*6
+          manifest=list(csv.DictReader((p/"score_manifest.csv").open()))
+          assert manifest[0]["scenario_count"]=="49"
+          assert manifest[0]["source_actions_run_id"]=="44818000158"
+          print("Q3_COMPACT_REAL_CANCELLED_RUN_SCORE_RECOVERY_PASS")
+          PY
+      - name: Exercise 54 original-schema paired BH/CI result panels and all publication figures on disposable fixtures only
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check matplotlib==3.9.2
+          python scripts/q3_lite_fixture_selftest.py
+      - name: Statistically verify workflow syntax, strict 20-worker cap and one-time launch restrictions
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pyyaml==6.0.2
+          python - <<'PY'
+          import yaml
+          with open(".github/workflows/t3-q3-compact-a-g.yml") as f:w=yaml.safe_load(f)
+          assert set(w["on"]["push"]["paths"])=={"Q3/LAUNCH_COMPACT_ONCE.md"}
+          assert "workflow_dispatch" in w["on"]
+          j=w["jobs"]
+          assert set(j)==set("a_b_c_e prepare_benchmark prepare_models q3_d_compact q3_d_verify q3_f q3_g".split())
+          assert j["q3_d_compact"]["strategy"]["max-parallel"]==20
+          assert "needs.a_b_c_e.outputs.matrix" in j["q3_d_compact"]["strategy"]["matrix"]
+          assert sum(st.get("uses")=="./.github/actions/q3-lite-parameter-worker" for st in j["q3_d_compact"]["steps"])==4
+          assert len(j["prepare_models"]["strategy"]["matrix"]["include"])==18
+          assert j["q3_g"]["needs"]=="q3_f"
+          print("Q3_COMPACT_ONE_RUN_A_G_STRUCTURE_PASS")
+          PY
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Parse all Q3 compact R simulation/scoring/inference scripts inside original pinned T3 container
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+        run: |
+          set -euo pipefail
+          bash scripts/run_r_in_container.sh Rscript -e "invisible(lapply(c('scripts/q3_lite_parametric_mc.R','scripts/q3_lite_parametric_score.R','scripts/q3_lite_parametric_inference.R'),parse));cat('Q3_COMPACT_THREE_R_SCIENCE_SCRIPTS_PARSE_PASS\n')"
