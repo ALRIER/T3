@@ -1,0 +1,755 @@
+name: "Q3 A-G | One-dispatch frozen-weight transfer, complete analysis and permanent backup"
+"on":
+  workflow_dispatch:
+    inputs:
+      reuse_original_parametric_runs:
+        description: "Comma-separated prior original T3 parameter-transfer runs with completed score checkpoints"
+        required: false
+        default: "41748369299"
+        type: string
+      discovery_bundle_run_id:
+        description: "Original immutable Discovery bundle"
+        required: true
+        default: "41487091262"
+        type: string
+      benchmark_map_run_id:
+        description: "Original Discovery-selected classical benchmark map"
+        required: true
+        default: "41478038812"
+        type: string
+permissions:
+  contents: write
+  actions: read
+  packages: read
+concurrency:
+  group: ${{ format('q3-a-g-{0}', github.ref) }}
+  cancel-in-progress: false
+jobs:
+  a_b_c_e:
+    name: "A B C E | Verify original sources and analyze prior transfer observations"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      matrix200: ${{ steps.plan.outputs.matrix200 }}
+      matrix1000: ${{ steps.plan.outputs.matrix1000 }}
+      matrix3000: ${{ steps.plan.outputs.matrix3000 }}
+      scenario_ids: ${{ steps.plan.outputs.scenario_ids }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - id: plan
+        name: Verify full factorial 2490-shard plan and inspect original recoverable Actions archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REUSE_RUNS: ${{ inputs.reuse_original_parametric_runs }}
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/q3_build_plan.py scripts/q3_recover_shard.py scripts/q3_complete_science.py
+          python scripts/q3_build_plan.py --self-test
+          python scripts/q3_complete_science.py self-test
+          python scripts/q3_build_plan.py --reuse-runs "$REUSE_RUNS" --output Q3/A_provenance/Q3_A_REUSE_PLAN.json
+          python - <<'PY'
+          import json,os
+          v=json.load(open("Q3/A_provenance/Q3_A_REUSE_PLAN.json"))
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              for n in ("200","1000","3000"):
+                  f.write("matrix"+n+"="+json.dumps(v["matrices"][n],separators=(",",":"))+"\n")
+              f.write("scenario_ids="+v["scenario_ids"]+"\n")
+          print("Q3_REUSE",v["reused_score_shards_from_explicit_prior_runs"],"MISSING",v["missing_shard_identities"])
+          PY
+      - name: Reconcile original family transfer, Stress, empirical parent test policies and SHA-256 source provenance
+        run: python scripts/q3_complete_science.py baseline --run-id '${{ github.run_id }}'
+      - name: Commit complete A B C E science and audit before launching parameter simulation
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Q3/A_provenance Q3/B_cross_family Q3/C_structural_stress Q3/E_real_world
+          git commit -m "Q3 A B C E: audited independent source, destination, Stress and Real World evidence"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-existing-original-evidence-run${{ github.run_id }}
+          path: |
+            Q3/A_provenance/
+            Q3/B_cross_family/
+            Q3/C_structural_stress/
+            Q3/E_real_world/
+          if-no-files-found: error
+          retention-days: 90
+
+  prepare_benchmark:
+    name: "D | Original frozen classical reference map"
+    needs: a_b_c_e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-own-benchmark-map-run${{ inputs.benchmark_map_run_id }}
+          run-id: ${{ inputs.benchmark_map_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/old-benchmark
+      - name: Independently validate all 18 by 241 benchmark map entries
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/discovery_v3
+          mapfile -t MAPS < <(find incoming/old-benchmark -type f -name own_benchmark_map.csv)
+          test "${#MAPS[@]}" -eq 1
+          cp "${MAPS[0]}" artifacts/discovery_v3/own_benchmark_map.csv
+          python - <<'PY'
+          import csv
+          rows=list(csv.DictReader(open("artifacts/discovery_v3/own_benchmark_map.csv")))
+          keys={(r["evaluation_family"],int(r["sample_n"]),int(r["scenario_id"])) for r in rows}
+          assert len(rows)==18*241 and len(keys)==len(rows)
+          assert all(r["own_benchmark"] and r["own_benchmark"]!="mean" for r in rows)
+          assert {r["evaluation_family"] for r in rows}==set("normal lognormal weibull invgauss exgaussian exwald".split())
+          assert {int(r["sample_n"]) for r in rows}=={200,1000,3000}
+          print("Q3_BENCHMARK_MAP_PASS",len(rows))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-benchmark-map-run${{ github.run_id }}
+          path: artifacts/discovery_v3/own_benchmark_map.csv
+          if-no-files-found: error
+          retention-days: 90
+
+  prepare_models:
+    name: "D | Frozen Discovery bundles for ${{ matrix.family }}, n=${{ matrix.n }}"
+    needs: prepare_benchmark
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - {family: normal, n: 200}
+          - {family: normal, n: 1000}
+          - {family: normal, n: 3000}
+          - {family: lognormal, n: 200}
+          - {family: lognormal, n: 1000}
+          - {family: lognormal, n: 3000}
+          - {family: weibull, n: 200}
+          - {family: weibull, n: 1000}
+          - {family: weibull, n: 3000}
+          - {family: invgauss, n: 200}
+          - {family: invgauss, n: 1000}
+          - {family: invgauss, n: 3000}
+          - {family: exgaussian, n: 200}
+          - {family: exgaussian, n: 1000}
+          - {family: exgaussian, n: 3000}
+          - {family: exwald, n: 200}
+          - {family: exwald, n: 1000}
+          - {family: exwald, n: 3000}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          name: t3-b3-discovery-bundle-n${{ matrix.n }}-run${{ inputs.discovery_bundle_run_id }}
+          run-id: ${{ inputs.discovery_bundle_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: incoming/discovery
+      - uses: actions/download-artifact@v5
+        with:
+          name: q3-benchmark-map-run${{ github.run_id }}
+          path: incoming/map
+      - name: Verify original Discovery SHA-256 and prepare ten immutable source weights
+        env:
+          FAMILY: ${{ matrix.family }}
+          SAMPLE_N: ${{ matrix.n }}
+        run: |
+          set -euo pipefail
+          cd incoming/discovery
+          sha256sum -c "discovery-n$SAMPLE_N.tar.gz.sha256"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          tar -xzf "discovery-n$SAMPLE_N.tar.gz" -C "$GITHUB_WORKSPACE/artifacts/discovery_v3"
+          cd "$GITHUB_WORKSPACE"
+          test "$(find artifacts/discovery_v3 -name discovery.rds -type f | wc -l)" -eq 60
+          mkdir -p artifacts/parametric_input
+          cp -a "artifacts/discovery_v3/$FAMILY" artifacts/parametric_input/
+          python - <<'PY'
+          import csv,os
+          family=os.environ["FAMILY"];n=int(os.environ["SAMPLE_N"])
+          original=list(csv.DictReader(open("incoming/map/own_benchmark_map.csv")))
+          subset=[r for r in original if r["evaluation_family"]==family and int(r["sample_n"])==n]
+          assert len(subset)==241 and len({r["scenario_id"] for r in subset})==241
+          assert all(r["own_benchmark"]!="mean" for r in subset)
+          with open("artifacts/parametric_input/own_benchmark_map.csv","w",newline="") as fh:
+              w=csv.DictWriter(fh,fieldnames=original[0].keys());w.writeheader();w.writerows(subset)
+          PY
+          test "$(find artifacts/parametric_input/$FAMILY -name discovery.rds -type f | wc -l)" -eq 10
+          cd artifacts/parametric_input
+          tar -czf "discovery-$FAMILY-n$SAMPLE_N.tar.gz" "$FAMILY" own_benchmark_map.csv
+          sha256sum "discovery-$FAMILY-n$SAMPLE_N.tar.gz" > "discovery-$FAMILY-n$SAMPLE_N.tar.gz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t3-b3-parametric-input-${{ matrix.family }}-n${{ matrix.n }}-run${{ github.run_id }}
+          path: artifacts/parametric_input/discovery-${{ matrix.family }}-n${{ matrix.n }}.tar.gz*
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_d_200:
+    name: "D | Full original frozen-score transfer n=200; maximum 20 runners"
+    needs: [a_b_c_e, prepare_models]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.a_b_c_e.outputs.matrix200) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover SHA-verified prior original shard 0
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard0_family }}' '${{ matrix.shard0_parameter_row }}' '${{ matrix.shard0_seed }}' '${{ matrix.shard0_n }}' '${{ matrix.shard0_reuse_run }}' '${{ matrix.shard0_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 0
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard0_family }}
+          parameter_row: ${{ matrix.shard0_parameter_row }}
+          seed: ${{ matrix.shard0_seed }}
+          sample_n: ${{ matrix.shard0_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 1
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard1_family }}' '${{ matrix.shard1_parameter_row }}' '${{ matrix.shard1_seed }}' '${{ matrix.shard1_n }}' '${{ matrix.shard1_reuse_run }}' '${{ matrix.shard1_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 1
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard1_family }}
+          parameter_row: ${{ matrix.shard1_parameter_row }}
+          seed: ${{ matrix.shard1_seed }}
+          sample_n: ${{ matrix.shard1_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 2
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard2_family }}' '${{ matrix.shard2_parameter_row }}' '${{ matrix.shard2_seed }}' '${{ matrix.shard2_n }}' '${{ matrix.shard2_reuse_run }}' '${{ matrix.shard2_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 2
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard2_family }}
+          parameter_row: ${{ matrix.shard2_parameter_row }}
+          seed: ${{ matrix.shard2_seed }}
+          sample_n: ${{ matrix.shard2_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 3
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard3_family }}' '${{ matrix.shard3_parameter_row }}' '${{ matrix.shard3_seed }}' '${{ matrix.shard3_n }}' '${{ matrix.shard3_reuse_run }}' '${{ matrix.shard3_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 3
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard3_family }}
+          parameter_row: ${{ matrix.shard3_parameter_row }}
+          seed: ${{ matrix.shard3_seed }}
+          sample_n: ${{ matrix.shard3_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Validate all four distinct complete-score SHA manifests
+        env:
+          GROUP_JSON: ${{ toJSON(matrix) }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,hashlib,json,os
+          from pathlib import Path
+          g=json.loads(os.environ["GROUP_JSON"]);count=0
+          for i in range(4):
+              f=g.get(f"shard{i}_family")
+              if not f:continue
+              row=g[f"shard{i}_parameter_row"];seed=g[f"shard{i}_seed"];n=g[f"shard{i}_n"]
+              p=Path("artifacts/t3_b3_parametric_transfer")/f/f"parameter_row{row:02d}"/f"seed{seed:02d}_n{n}"/"b0"
+              scores=p/"scores.csv";mp=p/"score_manifest.csv"
+              assert scores.is_file() and mp.is_file()
+              with mp.open(newline="") as fh:r=list(csv.DictReader(fh))
+              assert len(r)==1 and r[0]["scores_sha256"]==hashlib.sha256(scores.read_bytes()).hexdigest()
+              assert r[0]["family"]==f
+              assert all(int(r[0][k])==v for k,v in [
+                  ("parameter_row",row),("seed",seed),("n",n),
+                  ("scenario_count",241),("scenario_block_count",1),("training_seed_count",10)])
+              count+=1
+          assert 1<=count<=4
+          print("Q3_PARAMETRIC_GROUP_SHA_PASS",count)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-parametric-group-200-${{ matrix.group_index }}-run${{ github.run_id }}
+          path: artifacts/t3_b3_parametric_transfer/
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_verify_200:
+    name: "D | Permanent original source-score backup of all 830 n=200 shards"
+    needs: q3_d_200
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: q3-parametric-group-200-*-run${{ github.run_id }}
+          path: incoming/scores
+          merge-multiple: true
+      - name: Assert all 830 original complete-shard hashes, package all source scores and manifests
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_parametric_transfer_coverage.py incoming/scores '200'
+          python scripts/q3_complete_science.py pack --input incoming/scores --out Q3/D_parameter_transfer/n200/archive --name 'q3_parameter_scores_n200' --expected-scores 830
+      - name: Permanently commit complete score checkpoints as existing-repository Git LFS archives
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+          git fetch origin main
+          git checkout -B main origin/main
+          git add Q3/D_parameter_transfer/n200/archive
+          git commit -m "Q3 D: verified complete n=200 830-shard original transfer-scoring archive"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-score-backup-n200-run${{ github.run_id }}
+          path: Q3/D_parameter_transfer/n200/archive/manifest.json
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_d_1000:
+    name: "D | Full original frozen-score transfer n=1000; maximum 20 runners"
+    needs: [a_b_c_e, q3_verify_200]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.a_b_c_e.outputs.matrix1000) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover SHA-verified prior original shard 0
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard0_family }}' '${{ matrix.shard0_parameter_row }}' '${{ matrix.shard0_seed }}' '${{ matrix.shard0_n }}' '${{ matrix.shard0_reuse_run }}' '${{ matrix.shard0_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 0
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard0_family }}
+          parameter_row: ${{ matrix.shard0_parameter_row }}
+          seed: ${{ matrix.shard0_seed }}
+          sample_n: ${{ matrix.shard0_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 1
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard1_family }}' '${{ matrix.shard1_parameter_row }}' '${{ matrix.shard1_seed }}' '${{ matrix.shard1_n }}' '${{ matrix.shard1_reuse_run }}' '${{ matrix.shard1_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 1
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard1_family }}
+          parameter_row: ${{ matrix.shard1_parameter_row }}
+          seed: ${{ matrix.shard1_seed }}
+          sample_n: ${{ matrix.shard1_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 2
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard2_family }}' '${{ matrix.shard2_parameter_row }}' '${{ matrix.shard2_seed }}' '${{ matrix.shard2_n }}' '${{ matrix.shard2_reuse_run }}' '${{ matrix.shard2_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 2
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard2_family }}
+          parameter_row: ${{ matrix.shard2_parameter_row }}
+          seed: ${{ matrix.shard2_seed }}
+          sample_n: ${{ matrix.shard2_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 3
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard3_family }}' '${{ matrix.shard3_parameter_row }}' '${{ matrix.shard3_seed }}' '${{ matrix.shard3_n }}' '${{ matrix.shard3_reuse_run }}' '${{ matrix.shard3_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 3
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard3_family }}
+          parameter_row: ${{ matrix.shard3_parameter_row }}
+          seed: ${{ matrix.shard3_seed }}
+          sample_n: ${{ matrix.shard3_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Validate all four distinct complete-score SHA manifests
+        env:
+          GROUP_JSON: ${{ toJSON(matrix) }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,hashlib,json,os
+          from pathlib import Path
+          g=json.loads(os.environ["GROUP_JSON"]);count=0
+          for i in range(4):
+              f=g.get(f"shard{i}_family")
+              if not f:continue
+              row=g[f"shard{i}_parameter_row"];seed=g[f"shard{i}_seed"];n=g[f"shard{i}_n"]
+              p=Path("artifacts/t3_b3_parametric_transfer")/f/f"parameter_row{row:02d}"/f"seed{seed:02d}_n{n}"/"b0"
+              scores=p/"scores.csv";mp=p/"score_manifest.csv"
+              assert scores.is_file() and mp.is_file()
+              with mp.open(newline="") as fh:r=list(csv.DictReader(fh))
+              assert len(r)==1 and r[0]["scores_sha256"]==hashlib.sha256(scores.read_bytes()).hexdigest()
+              assert r[0]["family"]==f
+              assert all(int(r[0][k])==v for k,v in [
+                  ("parameter_row",row),("seed",seed),("n",n),
+                  ("scenario_count",241),("scenario_block_count",1),("training_seed_count",10)])
+              count+=1
+          assert 1<=count<=4
+          print("Q3_PARAMETRIC_GROUP_SHA_PASS",count)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-parametric-group-1000-${{ matrix.group_index }}-run${{ github.run_id }}
+          path: artifacts/t3_b3_parametric_transfer/
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_verify_1000:
+    name: "D | Permanent original source-score backup of all 830 n=1000 shards"
+    needs: q3_d_1000
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: q3-parametric-group-1000-*-run${{ github.run_id }}
+          path: incoming/scores
+          merge-multiple: true
+      - name: Assert all 830 original complete-shard hashes, package all source scores and manifests
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_parametric_transfer_coverage.py incoming/scores '1000'
+          python scripts/q3_complete_science.py pack --input incoming/scores --out Q3/D_parameter_transfer/n1000/archive --name 'q3_parameter_scores_n1000' --expected-scores 830
+      - name: Permanently commit complete score checkpoints as existing-repository Git LFS archives
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+          git fetch origin main
+          git checkout -B main origin/main
+          git add Q3/D_parameter_transfer/n1000/archive
+          git commit -m "Q3 D: verified complete n=1000 830-shard original transfer-scoring archive"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-score-backup-n1000-run${{ github.run_id }}
+          path: Q3/D_parameter_transfer/n1000/archive/manifest.json
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_d_3000:
+    name: "D | Full original frozen-score transfer n=3000; maximum 20 runners"
+    needs: [a_b_c_e, q3_verify_1000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.a_b_c_e.outputs.matrix3000) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover SHA-verified prior original shard 0
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard0_family }}' '${{ matrix.shard0_parameter_row }}' '${{ matrix.shard0_seed }}' '${{ matrix.shard0_n }}' '${{ matrix.shard0_reuse_run }}' '${{ matrix.shard0_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 0
+        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard0_family }}
+          parameter_row: ${{ matrix.shard0_parameter_row }}
+          seed: ${{ matrix.shard0_seed }}
+          sample_n: ${{ matrix.shard0_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 1
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard1_family }}' '${{ matrix.shard1_parameter_row }}' '${{ matrix.shard1_seed }}' '${{ matrix.shard1_n }}' '${{ matrix.shard1_reuse_run }}' '${{ matrix.shard1_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 1
+        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard1_family }}
+          parameter_row: ${{ matrix.shard1_parameter_row }}
+          seed: ${{ matrix.shard1_seed }}
+          sample_n: ${{ matrix.shard1_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 2
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard2_family }}' '${{ matrix.shard2_parameter_row }}' '${{ matrix.shard2_seed }}' '${{ matrix.shard2_n }}' '${{ matrix.shard2_reuse_run }}' '${{ matrix.shard2_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 2
+        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard2_family }}
+          parameter_row: ${{ matrix.shard2_parameter_row }}
+          seed: ${{ matrix.shard2_seed }}
+          sample_n: ${{ matrix.shard2_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Recover SHA-verified prior original shard 3
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/q3_recover_shard.py '${{ matrix.shard3_family }}' '${{ matrix.shard3_parameter_row }}' '${{ matrix.shard3_seed }}' '${{ matrix.shard3_n }}' '${{ matrix.shard3_reuse_run }}' '${{ matrix.shard3_reuse_name }}'
+      - name: Generate missing unretuned frozen-score shard 3
+        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run == '' }}
+        uses: ./.github/actions/t3-b3-parametric-transfer-worker
+        with:
+          family: ${{ matrix.shard3_family }}
+          parameter_row: ${{ matrix.shard3_parameter_row }}
+          seed: ${{ matrix.shard3_seed }}
+          sample_n: ${{ matrix.shard3_n }}
+          scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
+          prepared_inputs_run_id: ""
+      - name: Validate all four distinct complete-score SHA manifests
+        env:
+          GROUP_JSON: ${{ toJSON(matrix) }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,hashlib,json,os
+          from pathlib import Path
+          g=json.loads(os.environ["GROUP_JSON"]);count=0
+          for i in range(4):
+              f=g.get(f"shard{i}_family")
+              if not f:continue
+              row=g[f"shard{i}_parameter_row"];seed=g[f"shard{i}_seed"];n=g[f"shard{i}_n"]
+              p=Path("artifacts/t3_b3_parametric_transfer")/f/f"parameter_row{row:02d}"/f"seed{seed:02d}_n{n}"/"b0"
+              scores=p/"scores.csv";mp=p/"score_manifest.csv"
+              assert scores.is_file() and mp.is_file()
+              with mp.open(newline="") as fh:r=list(csv.DictReader(fh))
+              assert len(r)==1 and r[0]["scores_sha256"]==hashlib.sha256(scores.read_bytes()).hexdigest()
+              assert r[0]["family"]==f
+              assert all(int(r[0][k])==v for k,v in [
+                  ("parameter_row",row),("seed",seed),("n",n),
+                  ("scenario_count",241),("scenario_block_count",1),("training_seed_count",10)])
+              count+=1
+          assert 1<=count<=4
+          print("Q3_PARAMETRIC_GROUP_SHA_PASS",count)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-parametric-group-3000-${{ matrix.group_index }}-run${{ github.run_id }}
+          path: artifacts/t3_b3_parametric_transfer/
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_verify_3000:
+    name: "D | Permanent original source-score backup of all 830 n=3000 shards"
+    needs: q3_d_3000
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: q3-parametric-group-3000-*-run${{ github.run_id }}
+          path: incoming/scores
+          merge-multiple: true
+      - name: Assert all 830 original complete-shard hashes, package all source scores and manifests
+        run: |
+          set -euo pipefail
+          python scripts/t3_b3_parametric_transfer_coverage.py incoming/scores '3000'
+          python scripts/q3_complete_science.py pack --input incoming/scores --out Q3/D_parameter_transfer/n3000/archive --name 'q3_parameter_scores_n3000' --expected-scores 830
+      - name: Permanently commit complete score checkpoints as existing-repository Git LFS archives
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+          git fetch origin main
+          git checkout -B main origin/main
+          git add Q3/D_parameter_transfer/n3000/archive
+          git commit -m "Q3 D: verified complete n=3000 830-shard original transfer-scoring archive"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-score-backup-n3000-run${{ github.run_id }}
+          path: Q3/D_parameter_transfer/n3000/archive/manifest.json
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_f:
+    name: "F | Original-seed statistical inference; source-aware full-panel global BH"
+    needs: [a_b_c_e, prepare_benchmark, q3_verify_3000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore the immutable original scored input from permanent SHA-256 Git LFS backups
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git fetch origin main
+          git checkout -B main origin/main
+          git lfs pull --include="Q3/D_parameter_transfer/**" --exclude=""
+          python scripts/q3_complete_science.py unpack --manifest Q3/D_parameter_transfer/n200/archive/manifest.json --out incoming/scored/n200
+          python scripts/q3_complete_science.py unpack --manifest Q3/D_parameter_transfer/n1000/archive/manifest.json --out incoming/scored/n1000
+          python scripts/q3_complete_science.py unpack --manifest Q3/D_parameter_transfer/n3000/archive/manifest.json --out incoming/scored/n3000
+          test "$(find incoming/scored -name scores.csv -type f | wc -l)" -eq 2490
+          test "$(find incoming/scored -name score_manifest.csv -type f | wc -l)" -eq 2490
+      - uses: actions/download-artifact@v5
+        with:
+          name: q3-benchmark-map-run${{ github.run_id }}
+          path: incoming/benchmark
+      - name: Run originally authored conditional inference and one global original-design BH correction
+        env:
+          T2_R_IMAGE: ghcr.io/alrier/t3-r@sha256:658e61478909fe688bc2d47837f7e09d64b4724ba1ff84bc807e901bf7931e16
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+        run: |
+          set -euo pipefail
+          test -s incoming/benchmark/own_benchmark_map.csv
+          bash scripts/run_r_in_container.sh Rscript scripts/t3_b3_parametric_transfer_inference.R incoming/scored incoming/benchmark/own_benchmark_map.csv
+          test "$(find incoming/scored/aggregate/taxonomy_by_panel -type f -name '*.csv.gz' | wc -l)" -eq 249
+      - name: Audit all 249 panel outputs; generate 1992 parameter records, 144 summary groups, journal figures and archive
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check matplotlib==3.9.2
+          python scripts/q3_complete_science.py summarize-parametric --input incoming/scored
+          python scripts/q3_complete_science.py pack --input incoming/scored/aggregate --out Q3/D_parameter_transfer/inference_archive --name q3_full_parametric_original_global_BH_inference
+          python scripts/q3_complete_science.py finalize --run-id '${{ github.run_id }}'
+          test -s Q3/G_publication_audit/Q3_G_COMPLETE_MANIFEST.json
+      - name: Commit complete original parameter-transfer inference and all scientific Q3 figures/tables
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+          git add Q3/D_parameter_transfer/Q3_D_* Q3/D_parameter_transfer/inference_archive Q3/F_synthesis Q3/G_publication_audit
+          git commit -m "Q3 F G: full original-design BH inference, scientific tables and manuscript-ready figures"
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q3-a-through-g-full-science-${{ github.run_id }}
+          path: |
+            Q3/A_provenance/Q3_A_SOURCE_LINEAGE.json
+            Q3/B_cross_family/
+            Q3/C_structural_stress/
+            Q3/D_parameter_transfer/Q3_D_*.csv
+            Q3/D_parameter_transfer/Q3_D_INFERENCE_AUDIT.json
+            Q3/E_real_world/
+            Q3/F_synthesis/
+            Q3/G_publication_audit/
+          if-no-files-found: error
+          retention-days: 90
+
+  q3_g:
+    name: "G | Final independent integrity gate, permanent publication readiness"
+    needs: q3_f
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Verify all scientific outputs persist in public T3 after the final Git push
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("Q3")
+          a=json.loads((root/"A_provenance/Q3_A_SOURCE_LINEAGE.json").read_text())
+          d=json.loads((root/"D_parameter_transfer/Q3_D_INFERENCE_AUDIT.json").read_text())
+          g=json.loads((root/"G_publication_audit/Q3_G_COMPLETE_MANIFEST.json").read_text())
+          assert a["status"]=="SOURCE_AUDIT_PASS"
+          assert d["status"]=="ORIGINAL_FULL_PARAMETRIC_INFERENCE_COMPLETENESS_PASS"
+          assert g["status"]=="COMPLETE_SCIENTIFIC_ANALYSIS_A_TO_G_PASS"
+          for n in (200,1000,3000):
+              m=json.loads((root/f"D_parameter_transfer/n{n}/archive/manifest.json").read_text())
+              assert m["status"]=="PASS_VERIFIED_UNCOMPRESSED_SCORES" and m["original_scores"]==830
+              assert len(m["parts"])>0
+          for rel,expect in g["files"].items():
+              if rel.endswith(".lfs"):continue
+              p=root/rel
+              assert p.is_file() and p.stat().st_size==expect["bytes"] and hashlib.sha256(p.read_bytes()).hexdigest()==expect["sha256"],rel
+          for fig in ("results_q3_original_synthetic_directed_transfer.png",
+                      "results_q3_parametric_transfer_joint_evidence.png",
+                      "results_q3_realworld_support_boundary.png"):
+              assert (root/"F_synthesis"/fig).is_file()
+          print("Q3_A_G_COMPLETE_PUBLICATION_READY_CI_BH_SOURCE_SHA_AND_FIGURE_GATE_PASS")
+          PY
+          git lfs ls-files | grep -F 'Q3/D_parameter_transfer/n3000/archive'
+          git lfs ls-files | grep -F 'Q3/D_parameter_transfer/inference_archive'
+
