@@ -28,7 +28,28 @@ jobs:
           test -s data-archive/realworld/actions/actions-13542889733_t3-rw-v3-destination-global-taxonomy-run42299685581.zip/manifest.json
           test -s data-archive/realworld/actions/actions-13901031141_t3-rw-pub-four-module-global-validation-run43098925126.zip/manifest.json
           test -s data-archive/heldout/actions/actions-13178442769_t3-b3-pairwise-global-heldout-run41502642569.zip/manifest.json
-      - name: Download original source archives, verify each SHA, scan internal file contracts
+      - uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13178442769
+          run-id: 41502642569
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/heldout_global
+      - uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13542889733
+          run-id: 42299685581
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/realworld_destination
+      - uses: actions/download-artifact@v5
+        with:
+          artifact-ids: 13901031141
+          run-id: 43098925126
+          github-token: ${{ github.token }}
+          repository: ALRIER/T3
+          path: incoming/realworld_final_four_module
+      - name: Inventory original cross-family Held Out and Real World source tables with catalog checks
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.run_id }}
