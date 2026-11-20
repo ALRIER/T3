@@ -1,0 +1,37 @@
+name: "T3 Q2 F3 — Cross-family publication figure from original Real World evidence"
+run-name: "Original Real World six-source by empirical destination map | no new inference"
+"on":
+  push:
+    branches: [main]
+    paths: ["Q2/F3/START_TRANSFER_PUBLICATION.md"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: q2-f3-original-transfer-publication-map
+  cancel-in-progress: false
+jobs:
+  source_destination_figure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {lfs: false, fetch-depth: 0, persist-credentials: true}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install --disable-pip-version-check "numpy==2.1.3" "matplotlib==3.9.2"
+      - name: Generate one original two-policy empirical cross-family table and figure
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/t3_q2_f3_crossfamily_publication.py
+          python scripts/t3_q2_f3_crossfamily_publication.py --out "Q2/F3/transfer_recovery/publication/runs/$RUN_ID"
+          test -s "Q2/F3/transfer_recovery/publication/runs/$RUN_ID/results_q2_crossfamily_realworld_original_profiles.png"
+          test -s "Q2/F3/transfer_recovery/publication/runs/$RUN_ID/Q2_CROSSFAMILY_PUBLICATION_AUDIT.json"
+      - name: Back up all original-data figure and scientific tables directly in public T3
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          bash scripts/t3_b3_q2_commit.sh "Q2/F3/transfer_recovery/publication/runs/$RUN_ID"
