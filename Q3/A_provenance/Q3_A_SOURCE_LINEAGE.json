@@ -1,0 +1,69 @@
+{
+  "already_archived_original_bytes_in_T3": 45354058307,
+  "external_empirical_parent_ids": 642,
+  "fresh_stress_evaluation_seeds": "50:59",
+  "heldout_evaluation_seeds": "10:19",
+  "historical_stress_evaluation_seeds": "25:29",
+  "original_immutable_archive_scope": "7994 enumerated archive sources; not all 45GB is copied into Q3",
+  "original_training_seeds": "0:9",
+  "run_id": "44818000158",
+  "schema": "T3_Q3_SINGLE_RUN_ORIGINAL_SOURCE_AUDIT_V1",
+  "science": "No new optimization or original Held Out/Stress/RealWorld test inference",
+  "scope_limits": "Distinct inference units, benchmark scopes and null calibrations never pooled",
+  "status": "SOURCE_AUDIT_PASS",
+  "training_model_count": 720,
+  "verified_source_files": {
+    "Q2/F3/transfer_recovery/CROSS_FAMILY_RECOVERY_FINDINGS.md": {
+      "bytes": 6651,
+      "sha256": "e3ab335aeb661b4fd1d2c917d9c746740d36522ded79ef99369adb83794dcce8"
+    },
+    "Q2/F3/transfer_recovery/Q2_CROSSFAMILY_PUBLICATION_RECEIPT.json": {
+      "bytes": 4450,
+      "sha256": "7b9297f6161350370c931b3970523e766874e069866e547617a09c9d37b89377"
+    },
+    "Q2/F3/transfer_recovery/publication/runs/44748368642/Q2_CROSSFAMILY_PUBLICATION_AUDIT.json": {
+      "bytes": 1434,
+      "sha256": "61e45657cd596115e54b6740dfd5c28fa989ba730955402f031cc43f8762b110"
+    },
+    "Q2/F3/transfer_recovery/publication/runs/44748368642/REALWORLD_ORIGINAL_CROSSFAMILY_8_POLICY_PANELS.csv": {
+      "bytes": 783,
+      "sha256": "7205a56e3c0777ce405086a3fe4db9b7a0d89882a9d636882eb3bac134bbd760"
+    },
+    "Q2/F3/transfer_recovery/publication/runs/44748368642/REALWORLD_ORIGINAL_SOURCE_DESTINATION_FIGURE_CELLS.csv": {
+      "bytes": 2130,
+      "sha256": "5bbbd16b22cb79cec1ff00eac33487024cac1ff58d1e85b3e30c0d80adc184e7"
+    },
+    "Q2/F3/transfer_recovery/publication/runs/44748368642/results_q2_crossfamily_realworld_original_profiles.png": {
+      "bytes": 199260,
+      "sha256": "e6c71de3308be6f4afeea2309f112d2580d5a3dcd32eef90401f11bb9510b290"
+    },
+    "Q2/F3/transfer_recovery/synthesis/runs/44747159779/CROSS_FAMILY_TRANSFER_SCIENTIFIC_AUDIT.json": {
+      "bytes": 1675,
+      "sha256": "e30c9ac833b95844bf28ba0b945644acf6eb4a8254b4492a54d6bdc80dc630b6"
+    },
+    "Q2/F3/transfer_recovery/synthesis/runs/44747159779/HELDOUT_ORIGINAL_CROSSFAMILY_SUMMARY.csv": {
+      "bytes": 274,
+      "sha256": "4e0bebad55351bde3197c3970b2e020aa6a1ed23280b0d5ab5834463455ed6cf"
+    },
+    "Q2/F3/transfer_recovery/synthesis/runs/44747159779/HELDOUT_ORIGINAL_DIRECTED_FAMILY_ENGINE_MATRIX.csv": {
+      "bytes": 14958,
+      "sha256": "ce482108267e9267363d9b61b1d05dc6358af1b3ceb7a1b7d1c764c5d068c3c2"
+    },
+    "Q2/F3/transfer_recovery/synthesis/runs/44747159779/REALWORLD_ORIGINAL_TRANSFER_SCOPE_BH_SUMMARY.csv": {
+      "bytes": 1823,
+      "sha256": "f068d5166dc25b4832f92a830bf880c414c8b81b1214bea0cfd10722579a504c"
+    },
+    "Q2/F3/transfer_recovery/two_policy/runs/44748009646/REALWORLD_TWO_ORIGINAL_CLASSICAL_POLICIES_SCOPE_TABLE.csv": {
+      "bytes": 1843,
+      "sha256": "262b4275d2d2ff79e846441537ebcd0a69179c8062628591ada0c10f5253243a"
+    },
+    "Q2/F3/transfer_recovery/two_policy/runs/44748009646/REALWORLD_TWO_ORIGINAL_POLICIES_ENGINE_SOURCE_DEST_TABLE.csv": {
+      "bytes": 95900,
+      "sha256": "8260b5297084b6445294ad83f12aa623b83b510ae1e6abe0a8182050ad9c42bc"
+    },
+    "Q2/F3/transfer_recovery/two_policy/runs/44748009646/REALWORLD_TWO_POLICY_SCIENTIFIC_AUDIT.json": {
+      "bytes": 1550,
+      "sha256": "42fc37759b3c9ee8f074b5fea5b93ffcb68c6afbaea982651022c986e1c851e2"
+    }
+  }
+}

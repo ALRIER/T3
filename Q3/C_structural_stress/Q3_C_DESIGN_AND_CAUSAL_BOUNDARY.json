@@ -1,0 +1,10 @@
+{
+  "adaptation": "original_and_adapted_frozen_cohorts_analysed_in_original_paper_not_relabelled_as_causal",
+  "causal_interpretation": "DO_NOT_ATTRIBUTE_HISTORICAL_VS_FRESH_DIFFERENCE_TO_ONE_FACTOR",
+  "fresh_evaluation": "independent_seeds_50_59_altered_generating_parameters",
+  "full_source_stress_bytes": "data-archive/stress/actions_and_zenodo_LFS_original",
+  "historical_evaluation": "independent_seeds_25_29_fixed_classical_selected_20_24",
+  "original_counts_reference": "Q2/F3/transfer_recovery/CROSS_FAMILY_RECOVERY_FINDINGS.md",
+  "reserved_bimodal_mechanisms": 80,
+  "status": "PRESERVED_ORIGINAL_STRESS_CONTRAST_TOTALS"
+}

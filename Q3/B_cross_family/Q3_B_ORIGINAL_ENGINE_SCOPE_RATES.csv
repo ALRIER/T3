@@ -1,0 +1,5 @@
+reference,scope,eligible_original_contrasts,original_tier1_joint_BH_CI,rate_pct,unit
+own,within_family,17352,73,0.4207007837713232,pooled_engine_by_source_destination_scenario
+own,cross_family,86760,357,0.4114799446749654,pooled_engine_by_source_destination_scenario
+mean,within_family,17352,9672,55.73997233748271,pooled_engine_by_source_destination_scenario
+mean,cross_family,86760,48377,55.759566620562474,pooled_engine_by_source_destination_scenario

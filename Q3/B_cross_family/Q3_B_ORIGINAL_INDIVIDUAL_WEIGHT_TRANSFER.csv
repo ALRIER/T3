@@ -1,0 +1,3 @@
+panel,reference,scope,supported_joint_BH_CI,eligible,supported_pct,unit
+original_Held_Out,discovery_selected_classical,within_family,877,173520,0.50541724,candidate_by_destination_family_by_scenario
+original_Held_Out,discovery_selected_classical,cross_family,5069,867600,0.58425542,candidate_by_destination_family_by_scenario

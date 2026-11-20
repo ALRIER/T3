@@ -1,0 +1,9 @@
+benchmark_policy,original_inferential_panel,comparator,transfer_scope,eligible,descriptive_joint_mean_loss_contrasts,both_conditional_CI_favorable,both_BH_and_CI_favorable,independent_parent_count_min,empirical_destination_family_is_true_DGP,descriptive_joint_pct,joint_supported_pct,independent_inferential_unit,original_parent_inventory,target
+destination,primary,mean,cross_family_transfer,600,40,0,0,238,False,6.666667,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+destination,primary,own,cross_family_transfer,600,591,0,0,238,False,98.500000,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+destination,secondary,mean,cross_family_transfer,2040,200,0,0,6,False,9.803922,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+destination,secondary,own,cross_family_transfer,2040,1563,0,0,6,False,76.617647,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+source,primary,mean,cross_family_transfer,600,40,0,0,238,False,6.666667,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+source,primary,own,cross_family_transfer,600,591,0,0,238,False,98.500000,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+source,secondary,mean,cross_family_transfer,2040,200,0,0,6,False,9.803922,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
+source,secondary,own,cross_family_transfer,2040,1661,0,0,6,False,81.421569,0.000000,parent_dataset_not_child_or_candidate_contrast,642,observed_empirical_mean_proxy
