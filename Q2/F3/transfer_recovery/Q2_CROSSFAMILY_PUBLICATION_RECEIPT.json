@@ -1,0 +1,95 @@
+{
+  "schema": "PUB1_Q2_CROSSFAMILY_ORIGINAL_EVIDENCE_PUBLICATION_RECEIPT_V1",
+  "date": "2026-11-20",
+  "status": "PASS_ORIGINAL_CROSSFAMILY_GENERALIZATION_RECOVERED_AND_CANONICAL_PDF_COMPILED",
+  "scientific_public_repository": "ALRIER/T3",
+  "original_heldout_source_run": 41502642569,
+  "original_realworld_source_policy_run": 42251598557,
+  "original_realworld_destination_policy_run": 42299685581,
+  "scientific_recovery_runs": {
+    "archive_inventory": 44746712466,
+    "heldout_engine_and_destination_scope": 44747159779,
+    "realworld_source_policy": 44747630238,
+    "realworld_two_policy_reconciliation": 44748009646,
+    "realworld_figure": 44748368642
+  },
+  "t3_source_report": "Q2/F3/transfer_recovery/CROSS_FAMILY_RECOVERY_FINDINGS.md",
+  "t3_original_realworld_figures": "Q2/F3/transfer_recovery/publication/runs/44748368642",
+  "heldout_original_individual_candidate_synthetic_transfer": {
+    "selected_classical_within": {
+      "joint_BH_CI": 877,
+      "eligible": 173520
+    },
+    "selected_classical_out_of_source_family": {
+      "joint_BH_CI": 5069,
+      "eligible": 867600
+    },
+    "inference": "conditional_original_candidate_level_BH_CI_not_universally_calibrated"
+  },
+  "heldout_original_four_engine_pooled_transfer": {
+    "selected_classical_within": {
+      "joint_BH_CI": 73,
+      "eligible": 17352
+    },
+    "selected_classical_out_of_source_family": {
+      "joint_BH_CI": 357,
+      "eligible": 86760
+    },
+    "inference": "original_engine_level_not_interchangeable_with_candidate_level"
+  },
+  "realworld_original_parent_level_transfer": {
+    "independent_parent_datasets": 642,
+    "candidate_ids": 720,
+    "primary_cross_family_scope": {
+      "eligible_candidate_inference_contrasts": 600,
+      "selected_source_classical_descriptive_joint": 591,
+      "sample_mean_descriptive_joint": 40,
+      "original_joint_BH_CI": 0
+    },
+    "secondary_empirical_destination_cross_family_scope": {
+      "eligible_candidate_inference_contrasts": 2040,
+      "source_classical_descriptive_joint": 1661,
+      "destination_classical_descriptive_joint": 1563,
+      "sample_mean_descriptive_joint": 200,
+      "original_joint_BH_CI": 0
+    },
+    "empirical_destination_family_known_true_dgp": false,
+    "unit": "parent_dataset_id"
+  },
+  "manuscript_private_repository": "ALRIER/Genetic_Algorithms",
+  "manuscript_revision_commit": "d85f3ddba73f5e2bc3dfbe48d11177db58c63b3b",
+  "canonical_pdf_commit": "b4c731b7b0aba511bc5991610d5d735d6279f86b",
+  "canonical_pdf_pages": 74,
+  "canonical_pdf_size_bytes": 3868708,
+  "canonical_compilation_run": 44749669402,
+  "canonical_compilation_result": "success",
+  "figure_path": "manuscript/figures/results_q2_crossfamily_realworld_original_profiles.png",
+  "figure_original_t3_source_path": "Q2/F3/transfer_recovery/publication/runs/44748368642/results_q2_crossfamily_realworld_original_profiles.png",
+  "figure_identical_git_blob_sha": "15e0593ea8f244c0a3eb26f2aa3cc5164c02d868",
+  "manuscript_sections_amended": [
+    "Abstract",
+    "Q2 Results",
+    "Generalization Beyond the Training Conditions",
+    "Discussion",
+    "Limitations",
+    "Conclusion",
+    "Q2 Appendix"
+  ],
+  "scientific_distinctions": [
+    "Original source weight cross-family test is truly independent synthetically",
+    "Within Q2 tested-support lack of universal winners does NOT negate selective crossfamily transfer",
+    "Original candidate-level and pooled-engine contrasts have different denominators",
+    "Real World empirical destination family is a profile approximation",
+    "Real World inference at parent-cluster level, not 600 independent parents",
+    "Real World cross-family has descriptive gains but zero original joint CI+BH conclusions",
+    "original test guarantees remain conditional and full optimizer selection-aware error control unverified"
+  ],
+  "all_scientific_computation_executed_in_private_repo": false,
+  "links": {
+    "t3_evidence": "https://github.com/ALRIER/T3/blob/main/Q2/F3/transfer_recovery/CROSS_FAMILY_RECOVERY_FINDINGS.md",
+    "t3_figures": "https://github.com/ALRIER/T3/tree/main/Q2/F3/transfer_recovery/publication/runs/44748368642",
+    "canonical_pdf": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.pdf",
+    "canonical_source": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.tex",
+    "canonical_build": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44749669402"
+  }
+}
