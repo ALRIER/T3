@@ -1,0 +1,2 @@
+# Original Real World paired frozen benchmark policies
+Retrieve original source-policy artifact 13519858091 and destination-policy artifact 13542889733. Preserve exact candidate keys (720 frozen W), original 4080+14880 per policy hypothesis records, independently-parent-aggregated BH, and verify raw sample mean effects do not change across benchmark-policy reclassification. No optimizer training, no new BH. Commit validated outputs under Q2/F3/transfer_recovery/two_policy/runs/<run_id> on public T3/main.
