@@ -1,0 +1,51 @@
+{
+  "schema": "PUB1_Q2_F3_CANDIDATE_CANONICAL_PUBLICATION_RECEIPT_V1",
+  "date": "2026-11-20",
+  "status": "PASS_SCIENTIFIC_LEADERBOARDS_PERMANENT_AND_SINGLE_CANONICAL_PDF_COMPILED",
+  "public_scientific_repository": "ALRIER/T3",
+  "scientific_workflow_run_id": 44763334662,
+  "public_scientific_folder": "Q2/F3/leaderboards/",
+  "source_analysis_script": "scripts/q2_f3_candidate_leaderboards.py",
+  "source_candidate_benchmark_rows": 1440,
+  "unique_frozen_candidate_keys": 720,
+  "source_candidate_mechanism_rows": 8640,
+  "block_joint_leaders": 36,
+  "block_taxonomy_leaders": 180,
+  "mechanism_block_leaders": 216,
+  "original_scoring_repeated": false,
+  "new_inference_or_BH_correction": false,
+  "private_canonical_repository": "ALRIER/Genetic_Algorithms",
+  "canonical_article_source": "manuscript/main.tex",
+  "canonical_pdf": "manuscript/main.pdf",
+  "canonical_figures_folder": "manuscript/figures/",
+  "canonical_pdf_commit": "27ffe6da718af2961633b61f866241e56cdc9e67",
+  "canonical_latex_blob_sha": "265490559cf2722375a68bbbc6a56a65767e4b61",
+  "canonical_pdf_bytes": 4406684,
+  "canonical_pdf_pages": 80,
+  "canonical_compilation_run_id": 44765459893,
+  "canonical_compilation_result": "success",
+  "unique_added_png_files": [
+    "results_q2_f3_candidate_top12.png",
+    "results_q2_f3_candidate_pockets.png",
+    "results_q2_f3_candidate_block_maxima.png"
+  ],
+  "q2_figures_count": 3,
+  "main_manuscript_additions": [
+    "Individual candidate taxonomy extrema",
+    "Frozen-candidate family-size leaderboard",
+    "Mechanism-specific extrema",
+    "Candidate breadth and pocket PNGs",
+    "Selection-aware calibration status",
+    "Discussion and Conclusion"
+  ],
+  "selection_aware_full_pipeline_error_calibration_complete": false,
+  "cross_stage_exact_weight_file_sha_reconciliation_complete": false,
+  "source_data_integrity": "Source CSV SHA256 and output audit verified in public workflow",
+  "links": {
+    "scientific_run": "https://github.com/ALRIER/T3/actions/runs/44763334662",
+    "scientific_results": "https://github.com/ALRIER/T3/tree/main/Q2/F3/leaderboards",
+    "manuscript_compile": "https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44765459893",
+    "manuscript": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.tex",
+    "pdf": "https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.pdf"
+  }
+}
