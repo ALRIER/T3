@@ -37,10 +37,34 @@ def peek(path):
                 return cols,sample
             return "",f.readline().strip()[:1200]
     except (OSError,ValueError,EOFError,UnicodeError) as e:return "","ERROR:"+str(e)[:150]
+def score_file_scientific_summary(path,artifact,columns):
+    """Aggregate original existing tier labels, never recompute BH or simulate.
+    Only original source-labelled taxonomy files receive these summaries.
+    """
+    h=columns.split("|")
+    if not {"source_family","highest_tier"}.issubset(h):
+        return []
+    if not ("transfer_scope" in h or "evaluation_family" in h):
+        return []
+    if not path.name.endswith((".csv",".csv.gz")):return []
+    reader=gzip.open if path.name.endswith(".gz") else open
+    groups={}
+    with reader(path,"rt",newline="",encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            if not row.get("source_family"):continue
+            cols=("source_family","evaluation_family","transfer_scope","benchmark_role","engine","highest_tier")
+            key=tuple(row.get(k,"") for k in cols)
+            groups[key]=groups.get(key,0)+1
+    return [dict(artifact=artifact,file_name=path.name,
+          source_family=k[0],evaluation_family=k[1],
+          transfer_scope=k[2],benchmark_role=k[3],
+          engine=k[4],original_highest_tier=k[5],contrasts=v)
+          for k,v in sorted(groups.items())]
+
 def main(output):
     out=Path(output);require(not out.exists(),"append-only original-source recovery")
     out.mkdir(parents=True)
-    original=[];contents=[]
+    original=[];contents=[];scoped_tiers=[]
     for label,aid,digest,manifest in SOURCES:
         a=check_manifest(manifest,label,aid,digest)
         folder=Path("incoming")/label
@@ -57,6 +81,8 @@ def main(output):
             cols,sample=peek(f)
             contents.append(dict(artifact=label,artifact_id=aid,file_name=str(f.relative_to(folder)),
                 original_extracted_file_bytes=f.stat().st_size,fields=cols,example=sample))
+            if cols:
+                scoped_tiers.extend(score_file_scientific_summary(f,label,cols))
         print("ORIGINAL_GITHUB_ARTIFACT_CATALOG_ID_VERIFIED",label,aid,"files",len(fs),flush=True)
     def dump(name,rows,fields):
         with (out/name).open("w",newline="",encoding="utf-8") as f:
@@ -67,10 +93,14 @@ def main(output):
     parents=[r for r in contents if "parent_dataset_id" in r["fields"] or "independent_parent_datasets" in r["fields"]]
     dump("SCIENCE_CROSS_FAMILY_SOURCE_TABLES.csv",cross,cols)
     dump("SCIENCE_REALWORLD_PARENT_TABLES.csv",parents,cols)
+    tier_cols=["artifact","file_name","source_family","evaluation_family","transfer_scope","benchmark_role",
+               "engine","original_highest_tier","contrasts"]
+    dump("ORIGINAL_REPORTED_SCOPE_TIER_COUNTS.csv",scoped_tiers,tier_cols)
     audit=dict(status="PASS_ARCHIVED_ORIGINAL_ARTIFACT_IDENTITIES_AND_SCHEMA_INVENTORY",
                source_archives=original,extracted_source_files=len(contents),
                source_family_transfer_data_files=len(cross),
                realworld_parent_scientific_files=len(parents),
+               original_scope_tier_aggregate_rows=len(scoped_tiers),
                original_archive_zip_hash_independently_reverified=False,
                inventory_not_full_inference_reproduction=True,
                original_archive_backups_preserved=True,
