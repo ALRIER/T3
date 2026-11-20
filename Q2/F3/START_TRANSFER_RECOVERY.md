@@ -7,3 +7,5 @@ Scientific source tables will be inventoried with exact file schemas and origina
 Recovery attempt 2: Use supported GitHub Actions artifact download by original artifact ID; preserve SHA validation qualification. Initial attempt 44745863916 failed at remote redirect authentication before obtaining any data.
 
 Recovery attempt 3: Correct a single SHA-256 transcription error in the Held Out catalog literal; original source manifest and GitHub artifact digest agree. Previous attempt downloaded all three original artifacts successfully but the strict catalog gate stopped on the typo before scanning them.
+
+Recovery attempt 4: Original GitHub Actions artifact download passed and all 3 original artifact IDs and catalog digests matched. The strict script passed inventory (5 cross-family tables, 3 parent tables), but a workflow output filename check was misspelled; corrected to TRANSFER_RECOVERY_AUDIT.json. Additional original tier row aggregation is now included. Preserve original artifacts and prior analysis.
