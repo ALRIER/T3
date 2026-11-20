@@ -180,6 +180,44 @@ def baseline(run_id):
         if int(r["original_joint_BH_CI"])!=0:raise RuntimeError("Original BH panel has changed")
     csvout(BASE/"E_real_world/Q3_E_ORIGINAL_EMPIRICAL_DIRECTED_FAMILY_PROFILES.csv",profiles)
 
+    # Full recovered source-family × assigned destination × engine taxonomy,
+    # with all original three evidence scopes and both benchmark-indexing
+    # policies. Every detail row must reconcile to original full 24-policy scope.
+    two_dir=REC/"two_policy/runs/44748009646"
+    original.update(source_gate(two_dir,"REALWORLD_TWO_POLICY_SHA256_MANIFEST.json",[
+        "REALWORLD_TWO_ORIGINAL_CLASSICAL_POLICIES_SCOPE_TABLE.csv",
+        "REALWORLD_TWO_ORIGINAL_POLICIES_ENGINE_SOURCE_DEST_TABLE.csv",
+        "REALWORLD_TWO_POLICY_SCIENTIFIC_AUDIT.json"]))
+    full_scope=rows(two_dir/"REALWORLD_TWO_ORIGINAL_CLASSICAL_POLICIES_SCOPE_TABLE.csv")
+    full_engine=rows(two_dir/"REALWORLD_TWO_ORIGINAL_POLICIES_ENGINE_SOURCE_DEST_TABLE.csv")
+    if len(full_scope)!=24 or len(full_engine)<24:
+        raise RuntimeError("The complete original 2×2×2×3 Real World scope taxonomy is incomplete")
+    totals=defaultdict(lambda:Counter())
+    for r in full_engine:
+        key=(r["benchmark_policy"],r["original_inferential_panel"],r["comparator"],r["transfer_scope"])
+        if key[0] not in ("source","destination") or key[1] not in ("primary","secondary") or key[2] not in ("own","mean") or key[3] not in ("within_regime","within_family_neighborhood","cross_family_transfer"):
+            raise RuntimeError("Original empirical detailed engine stratum unknown")
+        if r["engine"] not in ENGINES or r["source_family"] not in FAMS:
+            raise RuntimeError("Original empirical source/engine identity not in design")
+        if r["empirical_destination_family"] and r["empirical_destination_family"] not in FAMS:
+            raise RuntimeError("Unknown assigned (not true) empirical destination")
+        t=totals[key]
+        for k,c in (("eligible","eligible"),("original_descriptive_joint","joint"),
+                    ("original_joint_conditional_CI","joint_ci"),
+                    ("original_joint_BH_CI","joint_bh")):
+            t[c]+=int(r[k])
+    if len(totals)!=24:raise RuntimeError("One or more original empirical four-dimensional panels missing")
+    for r in full_scope:
+        k=(r["benchmark_policy"],r["original_inferential_panel"],r["comparator"],r["transfer_scope"])
+        totals_k=totals[k]
+        for col,expect in (("eligible","eligible"),("descriptive_joint_mean_loss_contrasts","joint"),
+                           ("both_conditional_CI_favorable","joint_ci"),
+                           ("both_BH_and_CI_favorable","joint_bh")):
+            if int(r[col])!=totals_k[expect]:
+                raise RuntimeError("Full original empirical engine taxonomy disagrees with verified 24-scope inference at "+str(k)+" "+col)
+    csvout(BASE/"E_real_world/Q3_E_COMPLETE_ORIGINAL_24_COMPARATOR_SCOPE_TABLE.csv",full_scope)
+    csvout(BASE/"E_real_world/Q3_E_COMPLETE_ORIGINAL_ENGINE_SOURCE_DESTINATION.csv",full_engine)
+
     jsonout(BASE/"A_provenance/Q3_A_SOURCE_LINEAGE.json",{
         "schema":"T3_Q3_SINGLE_RUN_ORIGINAL_SOURCE_AUDIT_V1",
         "run_id":str(run_id),
