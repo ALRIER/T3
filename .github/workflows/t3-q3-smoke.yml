@@ -72,7 +72,9 @@ jobs:
           import yaml
           p=".github/workflows/t3-q3-one-run-a-g.yml"
           with open(p) as fh:d=yaml.safe_load(fh)
-          assert "workflow_dispatch" in d["on"] and "push" not in d["on"]
+          assert "workflow_dispatch" in d["on"]
+          assert d["on"]["push"]["branches"]==["main"]
+          assert d["on"]["push"]["paths"]==["Q3/LAUNCH_A_G_ONCE.md"]
           jobs=d["jobs"]
           expected=["a_b_c_e","prepare_benchmark","prepare_models","q3_d_200","q3_verify_200","q3_d_1000","q3_verify_1000","q3_d_3000","q3_verify_3000","q3_f","q3_g"]
           assert set(jobs)==set(expected),(set(jobs)^set(expected))
