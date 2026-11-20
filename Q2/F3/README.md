@@ -4,6 +4,14 @@ All F3 scientific computation runs in **ALRIER/T3**, branch **main**.
 The immutable primary Q2-A–E data remain at `Q2/runs/44599590079/`.
 No F3 action writes to `ALRIER/Genetic_Algorithms` or modifies any existing Q1/Q2 result.
 
+## Recovered original cross-family generalization and canonical correction (2026-11-20)
+
+The complete original source-versus-evaluation-family transfer validation was recovered and audited without retraining or changing existing inference. See [scientific findings](transfer_recovery/CROSS_FAMILY_RECOVERY_FINDINGS.md), [original source/destination Real World panels](transfer_recovery/two_policy/runs/44748009646/), [verified Real World PNG and source tables](transfer_recovery/publication/runs/44748368642/), and the [canonical publication audit receipt](transfer_recovery/Q2_CROSSFAMILY_PUBLICATION_RECEIPT.json).
+
+Original synthetic Held Out source-unseen-family wins **do exist**. Source-selected-classical candidate-level BH+CI: 5,069/867,600 cross-family versus 877/173,520 within-family; the original pooled four-engine matrix is a distinct estimand (357/86,760 cross and 73/17,352 within). Empirical Real World preserves 642 independent parent datasets, 720 original frozen W, and separate source/destination classical-reference policies. Cross-family Real World descriptive comparisons exist, but no recovered cross-family panel passes joint original CI/BH criteria. Within-family Q2 240/240 universal winners remain absent. These claims are complementary, not contradictory.
+
+The corresponding revised manuscript and new transfer PNG are in the canonical private paper repo; the permanent 74-page PDF was verified in [publication Actions 44749669402](https://github.com/ALRIER/Genetic_Algorithms/actions/runs/44749669402). All analysis and figures were computed in public T3.
+
 ## Latest full Q2 taxonomy and manuscript-ready figure package — run 44622921203
 
 [Successful T3-only scientific workflow](https://github.com/ALRIER/T3/actions/runs/44622921203). All 18 frozen-candidate blocks passed independently; one failed synthesis attempt was corrected without rerunning those successful blocks, and the final synthesis passed. The [immutable publication directory](runs/44622921203/publication/) contains five SVG+PNG figures, all four-engine taxonomy and statistical evidence tables, candidate-level neighborhood robustness, exhaustive mechanism tables, an audit, and SHA-256 manifests.
