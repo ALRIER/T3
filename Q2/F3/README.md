@@ -1,5 +1,15 @@
 # Q2 / F3 — Independent robust reconstruction and calibration follow-up
 
+## Comprehensive tournament 95% confidence intervals and BH-FDR, final Q2 tabulation (2026-11-20)
+
+The complete six-family, three-sample-size, four-engine, two-reference, six-mechanism original crossed-seed evidence has been independently audited and committed in the **same permanent [Q2/F3/leaderboards/](leaderboards/) folder**, with no duplicate project structure. It was published by [GitHub Actions 44772172842](https://github.com/ALRIER/T3/actions/runs/44772172842) using [scripts/q2_f3_complete_competition_ci_bh.py](../../scripts/q2_f3_complete_competition_ci_bh.py).
+
+- **864-row complete table:** \`Q2_F3_COMPLETE_864_TOURNAMENT_CI_BH_EVIDENCE.csv\` provides original MSE and Q95 percentage gains, separate 95% CI endpoints, original bootstrap p, original BH q, joint/MSE-only/Q95-only/neither categories, and favorable-interval/BH-plus-CI evidence; all original 40 observed contamination cells per mechanism are retained as fixed support.
+- **48-row family–engine–reference table:** \`Q2_F3_COMPLETE_48_FAMILY_ENGINE_REFERENCE_SUMMARY.csv\` provides the original 18 mechanism effects per family/method/benchmark, mutually exclusive objective outcomes, median original percentage gains, joint confidence interval counts, and BH-plus-CI supported proportions for each metric and jointly. It is integrated in the main Results of the one canonical private manuscript (label \`tab:q2_f3_complete_tournament_matrix\`).
+- **8-row control summary:** \`Q2_F3_COMPLETE_8_ENGINE_REFERENCE_EVIDENCE.csv\`, with an independent audit and standalone SHA-256 manifest \`Q2_F3_COMPLETE_COMPETITION_CI_BH_SHA256_MANIFEST.json\`.
+
+The source script checks SHA-256 hashes of the original 1,728 metric-level and 864 joint mechanism-level files, reconciles **all** 864 original CI/BH evidence flags and the full eight-row original BH summary, and reuses the original multiple-testing decisions without recalculating p/q values. Here **BH-positive percentage is the fraction of mechanism contrasts with positive CI and adjusted q**, not an observed rate of type-I false positives. The full nested HPO/reselection correction remains separately unverified and is disclosed in the manuscript; individual 720 model weights are covered by the separate identity-level ranks and are not assigned engine-level mechanism confidence intervals. This closes the scientific *reporting* gap in Q2 without changing the original experiment.
+
 ## Audited 720-candidate individual leaderboard (2026-11-20)
 
 Original-data candidate-level evidence was reconstructed and permanently committed in [the single F3 leaderboards folder](leaderboards/) by successful [GitHub Actions run 44763334662](https://github.com/ALRIER/T3/actions/runs/44763334662). The new source script is [scripts/q2_f3_candidate_leaderboards.py](../../scripts/q2_f3_candidate_leaderboards.py); it reads the original SHA-256-checked F3 candidate-breadth and mechanism-pocket CSVs, does not rerun the four optimizers or held-out scoring, and emits exactly three publication-ready PNG figures directly inside the leaderboards folder.
