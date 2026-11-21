@@ -72,3 +72,11 @@ The single-run workflow creates **scientific results and manuscript-ready figure
 ## How to launch
 
 Open [T3 GitHub Actions](https://github.com/ALRIER/T3/actions/workflows/t3-q3-one-run-a-g.yml), choose **Run workflow** on \`main\`, confirm original source run IDs, and launch once. Inspect the final \`q3_g\` PASS gate before relying on an integrated Q3 conclusion.
+
+## Q3-D interrupted-artifact recovery correction (2026-11-20)
+
+- Failed compact Actions run `44837231497` did **not** invalidate the frozen scientific scores. The error was in the recovery gate: some earlier `actions/upload-artifact if: always()` uploads were named after an intended shard even though the corresponding `scores.csv`/manifest had not finished.
+- Artifact filenames alone are now **candidates, not proof of a valid completed scientific shard**. Every reused shard must contain exactly one matching score manifest, identity, 49 scenario IDs, six models, and the correct SHA-256. Full original 241-scenario checkpoints take priority when both are present.
+- All four Q3-D runner slots now use **nonfatal SHA-verified recovery followed by mandatory recomputation of that exact shard on recovery failure**. A failed recovery cannot terminate an otherwise healthy four-shard runner or be treated as statistical evidence.
+- The earlier inventory of 420 is a **count of candidate checkpoint identities**, not a count of independently verified valid scores. The number actually requiring recomputation can be greater than 120. Exact final coverage is enforced at the 540-shard independent science gate before any inference or permanent publication.
+- The corrected workflow and a real historical false-artifact rejection test were validated in [smoke run 44856994178](https://github.com/ALRIER/T3/actions/runs/44856994178).
