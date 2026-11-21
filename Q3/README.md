@@ -1,3 +1,19 @@
+# Q3 PRIMARY PUBLICATION EVIDENCE — completed-source transfer analysis (2026-11-21)
+
+**Current manuscript question:** To what extent do the original Discovery-frozen composite estimators retain their MSE and $Q_{.95}$ advantages in source-unseen generating families and withheld contamination structures, and how do source/destination regime and unchanged comparator matter?
+
+**Primary publication evidence is now complete from preexisting tests, without running a new simulation:** 288 original directed Held Out four-engine cells, their source/destination and individual frozen-candidate summary panels, independent historical/fresh reserved Stress, and original conditional CI/BH evidence. The original complete data sources and verified retabulations are documented in [`reframed_RQ3/README.md`](reframed_RQ3/README.md), with derived 5-panel and 72 directed-cell CSVs under `Q3/reframed_RQ3/`.
+
+**Q4 is now separately answered by original external evaluation and reference-policy sensitivity:** the original 24 Real World policy/scope rows and all 1,264 engine/source/destination original summary rows were reconciled, retaining explicit parent-level labels. See [`Q4/reframed_RQ4/README.md`](../Q4/reframed_RQ4/README.md) and its auditable 24-row, 12 paired-row and source-hash files. The primary original empirical target is fixed; original joint CI/BH support is zero in all 24 recorded policy/scope cells. This is neither a failure of descriptive transfer nor a claim of confirmatory external superiority.
+
+**Canonical publication:** [`ALRIER/Genetic_Algorithms/main/manuscript/main.tex`](https://github.com/ALRIER/Genetic_Algorithms/blob/main/manuscript/main.tex) and the automatically compiled sole `manuscript/main.pdf`. Revised Q3 and Q4 Results, Discussion and Conclusions are in that file.
+
+**Scope boundary:** Isolated within-family parameter-transfer inference and opposite-half empirical target inference remain unverified supplementary/future experiments. The exhaustive and compact Q3-D workflows below are retained only for historical provenance and checkpoint recovery. **They are not required for the revised primary Q3/Q4 questions and should not be relaunched automatically.** No previously completed scientific checkpoint or backup has been erased. The source result is conditional on the original tests' inference assumptions, not a proven full-optimizer-selection FDR guarantee.
+
+---
+
+## Archived historical Q3 parameter-transfer workflow notes (not current publication requirements)
+
 # Q3 CURRENT PLAN — Prespecified compact A–G (supersedes exhaustive Q3-D)
 
 **Status (2026-11-20):** The original exhaustive run `44818000158` was explicitly canceled at the owner's request. Its successful source audits and uploaded original-score checkpoints remain intact. The replacement workflow is `.github/workflows/t3-q3-compact-a-g.yml` and is triggered once by `Q3/LAUNCH_COMPACT_ONCE.md`. The older workflow is historical and **must not be relaunched** unless specifically requested.
