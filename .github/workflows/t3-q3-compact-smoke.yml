@@ -82,6 +82,17 @@ jobs:
           assert len(a)==294 and m[0]["source_actions_run_id"]=="44822079785"
           print("Q3_COMPACT_FAILED_RUN_SHA_CHECKPOINT_SALVAGE_PASS")
           PY
+      - name: Reject a real prior incomplete checkpoint despite its plausible artifact name
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if python scripts/q3_lite_recover.py normal 2 41 200 44822079785 q3-lite-score-normal-p2-s41-n200-run44822079785-a1 lite; then
+            echo "ERROR: Known incomplete previous artifact was incorrectly trusted."
+            exit 1
+          fi
+          test ! -e artifacts/t3_b3_parametric_transfer/normal/parameter_row02/seed41_n200/b0/scores.csv
+          echo "Q3_COMPACT_FALSE_ARTIFACT_IS_REJECTED_AND_ELIGIBLE_FOR_RECOMPUTATION_PASS"
       - name: Verify two sample sizes in one worker without invalid cumulative count
         env:
           GH_TOKEN: ${{ github.token }}
@@ -122,6 +133,13 @@ jobs:
           assert j["q3_d_compact"]["strategy"]["max-parallel"]==20
           assert "needs.a_b_c_e.outputs.matrix" in j["q3_d_compact"]["strategy"]["matrix"]
           assert sum(st.get("uses")=="./.github/actions/q3-lite-parameter-worker" for st in j["q3_d_compact"]["steps"])==4
+          steps=j["q3_d_compact"]["steps"]
+          for i in range(4):
+              recover=next(x for x in steps if x.get("id")==f"recover_{i}")
+              compute=next(x for x in steps if x.get("uses")=="./.github/actions/q3-lite-parameter-worker" and x["with"]["seed"]==("${{ matrix.shard"+str(i)+"_seed }}"))
+              assert recover.get("continue-on-error") is True
+              assert f"steps.recover_{i}.outcome == 'failure'" in compute.get("if","")
+          print("Q3_COMPACT_INCOMPLETE_ARTIFACT_AUTOMATIC_RECOMPUTE_GATE_PASS")
           assert len(j["prepare_models"]["strategy"]["matrix"]["include"])==18
           assert j["q3_g"]["needs"]=="q3_f"
           print("Q3_COMPACT_ONE_RUN_A_G_STRUCTURE_PASS")
