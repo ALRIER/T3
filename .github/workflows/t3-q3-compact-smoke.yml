@@ -136,7 +136,7 @@ jobs:
           steps=j["q3_d_compact"]["steps"]
           for i in range(4):
               recover=next(x for x in steps if x.get("id")==f"recover_{i}")
-              compute=next(x for x in steps if x.get("uses")=="./.github/actions/q3-lite-parameter-worker" and x["with"]["seed"]==("${{ matrix.shard"+str(i)+"_seed }}"))
+              compute=next(x for x in steps if x.get("uses")=="./.github/actions/q3-lite-parameter-worker" and f"matrix.shard{i}_seed" in x["with"]["seed"])
               assert recover.get("continue-on-error") is True
               assert f"steps.recover_{i}.outcome == 'failure'" in compute.get("if","")
           print("Q3_COMPACT_INCOMPLETE_ARTIFACT_AUTOMATIC_RECOMPUTE_GATE_PASS")
