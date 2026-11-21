@@ -112,7 +112,13 @@ def recovery(runs):
                 if ident not in expected:continue
                 candidate={"run":runid,"name":name,"kind":kind_art,"artifact_id":art["id"]}
                 previous=recovered.get(ident)
-                if previous is None or (kind_art=="lite" and previous["kind"]!="lite") or previous["kind"]=="group":
+                # An artifact name is a recovery *candidate*, not verified scientific
+                # evidence. Prefer the original immutable full 241-scenario score
+                # over a later possibly incomplete 49-scenario always()-upload.
+                # The downstream worker verifies all score/manifests and recomputes
+                # only when the candidate does not pass that audit.
+                if (previous is None or previous["kind"]=="group" or
+                    (kind_art=="original" and previous["kind"]!="original")):
                     recovered[ident]=candidate
                 matches+=1
             if len(arr)<100:break
