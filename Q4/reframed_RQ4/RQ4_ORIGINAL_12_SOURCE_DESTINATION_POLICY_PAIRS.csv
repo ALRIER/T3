@@ -1,0 +1,13 @@
+original_panel,transfer_scope,comparator,eligible_parent_aggregated_candidate_contrasts,source_indexed_descriptive_joint,source_indexed_pct,destination_indexed_descriptive_joint,destination_indexed_pct,destination_minus_source_descriptive_count,min_independent_parents_per_stratum,source_joint_CI,destination_joint_CI,source_joint_BH_CI,destination_joint_BH_CI,denominator_unit,profile_truth
+primary,cross_family_transfer,own,600,591,98.500000,591,98.500000,0,238,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+primary,cross_family_transfer,mean,600,40,6.666667,40,6.666667,0,238,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+primary,within_family_neighborhood,own,720,667,92.638889,669,92.916667,2,101,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+primary,within_family_neighborhood,mean,720,74,10.277778,74,10.277778,0,101,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+primary,within_regime,own,720,694,96.388889,690,95.833333,-4,101,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+primary,within_regime,mean,720,161,22.361111,161,22.361111,0,101,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+secondary,cross_family_transfer,own,2040,1661,81.421569,1563,76.617647,-98,6,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+secondary,cross_family_transfer,mean,2040,200,9.803922,200,9.803922,0,6,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+secondary,within_family_neighborhood,own,2400,1279,53.291667,1268,52.833333,-11,14,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+secondary,within_family_neighborhood,mean,2400,74,3.083333,74,3.083333,0,14,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+secondary,within_regime,own,3000,2317,77.233333,2314,77.133333,-3,6,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
+secondary,within_regime,mean,3000,241,8.033333,241,8.033333,0,6,0,0,0,0,parent_aggregated_correlated_candidate_contrast,outcome_blind_proxy_not_known_DGP
