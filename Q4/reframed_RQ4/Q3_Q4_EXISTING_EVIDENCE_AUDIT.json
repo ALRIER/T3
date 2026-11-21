@@ -1,0 +1,99 @@
+{
+  "scope": "No new simulation, no refitting, no changed inference. Read-only retabulation of original GitHub evidence.",
+  "source_files": {
+    "b": {
+      "path": "Q3/B_cross_family/Q3_B_DIRECTED_288_ENGINE_TRANSFERS.csv",
+      "git_blob_sha": "5f0bbcbe73f4e969a76a20a46b755192dcfc6179"
+    },
+    "bs": {
+      "path": "Q3/B_cross_family/Q3_B_ORIGINAL_ENGINE_SCOPE_RATES.csv",
+      "git_blob_sha": "104dda8022b54141131a464e7a58ab5c9a4895eb"
+    },
+    "bi": {
+      "path": "Q3/B_cross_family/Q3_B_ORIGINAL_INDIVIDUAL_WEIGHT_TRANSFER.csv",
+      "git_blob_sha": "c56fef40d49b430a09c7f3be6faaa2277395f8d7"
+    },
+    "c": {
+      "path": "Q3/C_structural_stress/Q3_C_ORIGINAL_STRESS_TRANSFER_SCOPE.csv",
+      "git_blob_sha": "3465899ab743407a08759aacfce65d545429e96d"
+    },
+    "e": {
+      "path": "Q3/E_real_world/Q3_E_COMPLETE_ORIGINAL_24_COMPARATOR_SCOPE_TABLE.csv",
+      "git_blob_sha": "57948af1d12fb1580b4ad0a09012f7b7e5f05cae"
+    },
+    "d": {
+      "path": "Q3/E_real_world/Q3_E_COMPLETE_ORIGINAL_ENGINE_SOURCE_DESTINATION.csv",
+      "git_blob_sha": "6704a55eccb730871efb60bedab4de1da0454844"
+    },
+    "e8": {
+      "path": "Q3/E_real_world/Q3_E_ORIGINAL_8_POLICY_PARENT_LEVEL_EVIDENCE.csv",
+      "git_blob_sha": "8e5fc22216aa93c8f04599b00579a108df588f24"
+    },
+    "ep": {
+      "path": "Q3/E_real_world/Q3_E_ORIGINAL_EMPIRICAL_DIRECTED_FAMILY_PROFILES.csv",
+      "git_blob_sha": "f90fce8ca19a2848f184e2bea72d3f51616ea8f2"
+    },
+    "prov": {
+      "path": "Q3/A_provenance/Q3_A_SOURCE_LINEAGE.json",
+      "git_blob_sha": "5d7e8ed3c1315639b0ea91318665cdddb082e9b3"
+    }
+  },
+  "verified_original_input_counts": {
+    "heldout_directed_engine_rows": 288,
+    "heldout_engine_scope_rows": 4,
+    "heldout_individual_scope_rows": 2,
+    "structural_stress_scope_rows": 4,
+    "realworld_policy_scope_rows": 24,
+    "realworld_engine_source_destination_rows": 1264,
+    "realworld_original_parent_scope_rows": 8,
+    "realworld_directed_empirical_profiles": 34
+  },
+  "derived_output_counts": {
+    "RQ3_transfer_summary": 5,
+    "RQ3_directed_summary": 72,
+    "RQ4_policy_scope": 24,
+    "RQ4_matched_policy_pairs": 12
+  },
+  "Q3_synthesis_assertion": "All original 288 directed engine rows aggregate to four published Held Out policy-scope cells, with exactly four engines in each of 72 directed family/ref panels; candidate-level and pooled-engine units never merged.",
+  "Q4_synthesis_assertion": "All 1264 original engine/source/empirical-destination rows aggregate to the 24 policy-scope rows; 8 original parent scope rows agree exactly. Every 24-row panel has zero jointly favorable original CI or BH+CI; all original parent minima are at least 5.",
+  "inference_boundary": "Original BH-adjusted contrasts are conditional, dependent; no full optimizer-selection-aware FDR guarantee. Candidate contrast denominators must not be read as independent parent counts. Empirical assigned destination-family proxy is not known true generating family.",
+  "parent_inventory": 642,
+  "panel_min_independent_parents": {
+    "primary_cross_family": 238,
+    "primary_other_scopes": 101,
+    "secondary_cross_family": 6,
+    "secondary_neighborhood": 14,
+    "secondary_within_regime": 6
+  },
+  "original_target": "fixed observed subset arithmetic mean; not true population mean",
+  "unverified_analyses_excluded": [
+    "isolated within-family parameter-transfer inference",
+    "opposite-half empirical-target inference"
+  ],
+  "retab_conclusions": {
+    "heldout_original_individual_cross_classical": [
+      5069,
+      867600
+    ],
+    "heldout_original_pooled_cross_classical": [
+      357,
+      86760
+    ],
+    "heldout_original_pooled_cross_mean": [
+      48377,
+      86760
+    ],
+    "realworld_secondary_cross_source_classical": [
+      1661,
+      2040
+    ],
+    "realworld_secondary_cross_destination_classical": [
+      1563,
+      2040
+    ],
+    "realworld_secondary_cross_mean": [
+      200,
+      2040
+    ]
+  }
+}
