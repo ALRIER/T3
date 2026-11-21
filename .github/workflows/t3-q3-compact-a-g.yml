@@ -221,7 +221,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Reuse originally verified unretuned full-score checkpoint 0 without new Monte Carlo
+      - name: Recover and SHA-verify complete score checkpoint 0 (nonfatal if artifact is only a partial upload)
+        id: recover_0
+        continue-on-error: true
         if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -229,7 +231,9 @@ jobs:
           set -euo pipefail
           python scripts/q3_lite_recover.py '${{ matrix.shard0_family }}' '${{ matrix.shard0_parameter_row }}' '${{ matrix.shard0_seed }}' '${{ matrix.shard0_n }}' '${{ matrix.shard0_reuse_run }}' '${{ matrix.shard0_reuse_name }}' '${{ matrix.shard0_reuse_kind }}'
       - name: Compute only missing prespecified 49-scenario parameter shift 0 without retraining
-        if: ${{ matrix.shard0_family != '' && matrix.shard0_reuse_run == '' }}
+        # A name or artifact upload is NOT proof that its scored payload finished.
+        # A failed recovery is re-computed, never accepted as scientific evidence.
+        if: ${{ matrix.shard0_family != '' && (matrix.shard0_reuse_run == '' || steps.recover_0.outcome == 'failure') }}
         uses: ./.github/actions/q3-lite-parameter-worker
         with:
           family: ${{ matrix.shard0_family }}
@@ -238,7 +242,9 @@ jobs:
           sample_n: ${{ matrix.shard0_n }}
           scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
 
-      - name: Reuse originally verified unretuned full-score checkpoint 1 without new Monte Carlo
+      - name: Recover and SHA-verify complete score checkpoint 1 (nonfatal if artifact is only a partial upload)
+        id: recover_1
+        continue-on-error: true
         if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -246,7 +252,9 @@ jobs:
           set -euo pipefail
           python scripts/q3_lite_recover.py '${{ matrix.shard1_family }}' '${{ matrix.shard1_parameter_row }}' '${{ matrix.shard1_seed }}' '${{ matrix.shard1_n }}' '${{ matrix.shard1_reuse_run }}' '${{ matrix.shard1_reuse_name }}' '${{ matrix.shard1_reuse_kind }}'
       - name: Compute only missing prespecified 49-scenario parameter shift 1 without retraining
-        if: ${{ matrix.shard1_family != '' && matrix.shard1_reuse_run == '' }}
+        # A name or artifact upload is NOT proof that its scored payload finished.
+        # A failed recovery is re-computed, never accepted as scientific evidence.
+        if: ${{ matrix.shard1_family != '' && (matrix.shard1_reuse_run == '' || steps.recover_1.outcome == 'failure') }}
         uses: ./.github/actions/q3-lite-parameter-worker
         with:
           family: ${{ matrix.shard1_family }}
@@ -255,7 +263,9 @@ jobs:
           sample_n: ${{ matrix.shard1_n }}
           scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
 
-      - name: Reuse originally verified unretuned full-score checkpoint 2 without new Monte Carlo
+      - name: Recover and SHA-verify complete score checkpoint 2 (nonfatal if artifact is only a partial upload)
+        id: recover_2
+        continue-on-error: true
         if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -263,7 +273,9 @@ jobs:
           set -euo pipefail
           python scripts/q3_lite_recover.py '${{ matrix.shard2_family }}' '${{ matrix.shard2_parameter_row }}' '${{ matrix.shard2_seed }}' '${{ matrix.shard2_n }}' '${{ matrix.shard2_reuse_run }}' '${{ matrix.shard2_reuse_name }}' '${{ matrix.shard2_reuse_kind }}'
       - name: Compute only missing prespecified 49-scenario parameter shift 2 without retraining
-        if: ${{ matrix.shard2_family != '' && matrix.shard2_reuse_run == '' }}
+        # A name or artifact upload is NOT proof that its scored payload finished.
+        # A failed recovery is re-computed, never accepted as scientific evidence.
+        if: ${{ matrix.shard2_family != '' && (matrix.shard2_reuse_run == '' || steps.recover_2.outcome == 'failure') }}
         uses: ./.github/actions/q3-lite-parameter-worker
         with:
           family: ${{ matrix.shard2_family }}
@@ -272,7 +284,9 @@ jobs:
           sample_n: ${{ matrix.shard2_n }}
           scenario_ids: ${{ needs.a_b_c_e.outputs.scenario_ids }}
 
-      - name: Reuse originally verified unretuned full-score checkpoint 3 without new Monte Carlo
+      - name: Recover and SHA-verify complete score checkpoint 3 (nonfatal if artifact is only a partial upload)
+        id: recover_3
+        continue-on-error: true
         if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -280,7 +294,9 @@ jobs:
           set -euo pipefail
           python scripts/q3_lite_recover.py '${{ matrix.shard3_family }}' '${{ matrix.shard3_parameter_row }}' '${{ matrix.shard3_seed }}' '${{ matrix.shard3_n }}' '${{ matrix.shard3_reuse_run }}' '${{ matrix.shard3_reuse_name }}' '${{ matrix.shard3_reuse_kind }}'
       - name: Compute only missing prespecified 49-scenario parameter shift 3 without retraining
-        if: ${{ matrix.shard3_family != '' && matrix.shard3_reuse_run == '' }}
+        # A name or artifact upload is NOT proof that its scored payload finished.
+        # A failed recovery is re-computed, never accepted as scientific evidence.
+        if: ${{ matrix.shard3_family != '' && (matrix.shard3_reuse_run == '' || steps.recover_3.outcome == 'failure') }}
         uses: ./.github/actions/q3-lite-parameter-worker
         with:
           family: ${{ matrix.shard3_family }}
