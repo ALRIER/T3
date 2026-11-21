@@ -6,7 +6,7 @@
   "historical_stress_evaluation_seeds": "25:29",
   "original_immutable_archive_scope": "7994 enumerated archive sources; not all 45GB is copied into Q3",
   "original_training_seeds": "0:9",
-  "run_id": "44837231497",
+  "run_id": "44857115509",
   "schema": "T3_Q3_SINGLE_RUN_ORIGINAL_SOURCE_AUDIT_V1",
   "science": "No new optimization or original Held Out/Stress/RealWorld test inference",
   "scope_limits": "Distinct inference units, benchmark scopes and null calibrations never pooled",
