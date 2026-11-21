@@ -47,3 +47,16 @@ worker, original-schema 54-panel statistical figures and all R scripts.
 This explicit owner-authorized one-time update of the launch marker triggers
 the corrected complete Q3 A–G workflow. Historical run checkpoints and
 previously committed Q1, Q2, Q3 evidence must be preserved, not overwritten.
+
+
+## Owner-authorized Q3 A–G recovery relaunch after incomplete-artifact failure (November 20, 2026)
+
+The previous compact run 44837231497 failed during recovery of incompletely uploaded prior score archives. Those artifact *names* were incorrectly accepted as valid-science evidence without checking whether the target score actually existed in the archive. No original Q1/Q2/Q3 results were deleted.
+
+Corrected Q3-D workflow commit 6d4dc2701fe9c297e1655ae8008233af9a5d50b2 now treats all four artifact-recovery attempts as nonfatal and **computes the missing shard if SHA/identity verification fails**, rather than failing the entire matrix. Original complete historical scores are preferred. Original four frozen engines, one frozen classical comparator, sample mean, 49 outcome-blind prespecified support scenarios, 500 replications, ten evaluation seeds, global BH correction and permanent scientific backup remain unchanged.
+
+The real incomplete artifact was tested and rejected by the new recovery gate; valid original frozen checkpoints were recovered successfully. The exact corrected workflow, 54-panel inferential and publication fixtures, and all pinned T3 R syntax passed readiness workflow [44856994178](https://github.com/ALRIER/T3/actions/runs/44856994178).
+
+The **420** artifact identities previously inventoried are **candidate checkpoints**; their actual scientific validity is checked by SHA on recovery. The exact 540 complete-score identities are checked before inference. Preserve all successfully completed score artifacts from prior runs.
+
+This file is deliberately changed once more to launch the corrected complete Q3 A–G workflow. Do not modify it automatically.
