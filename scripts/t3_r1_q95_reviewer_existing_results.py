@@ -76,8 +76,6 @@ def main(out):
             prec=pr[f,n,"de"];ref=pr[f,n,"convex_mse"]
             require(abs(qgain-num(de["convex_mse_q95_relative_gain_pct"]))<1e-5,
                     "DE Q95 source crosscheck failed "+f+str(n))
-            require(abs(qdiff-(q-num(ref["average_q95_interval_width"])*0+qdiff))<1e-8,
-                    "numeric check")
             row={
                 "family":f,"sample_n":n,
                 "DE_Q95_heldout":q,"DE_vs_convex_Q95_gain_pct":qgain,
