@@ -1,0 +1,66 @@
+name: R1 Q95 — reviewer precision synthesis from existing original evidence
+run-name: "Q95 reviewer point 6 | archived results only | no new experiment"
+"on":
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/t3-r1-q95-reviewer-existing-reanalysis.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: r1-q95-existing-reviewer-synthesis-main
+  cancel-in-progress: false
+jobs:
+  q95-reviewer-existing-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout original immutable R1 evidence
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: true
+      - name: Validate Python analysis code
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/t3_r1_q95_reviewer_existing_results.py
+          test -s R1/runs/44322411124/reviewer_synthesis/q95_mc_uncertainty_all_108_method_strata.csv
+          test -s R1/runs/44324757704/synthesis/table_RQ1_72_method_family_sample_integrated.csv
+          test -s R1/runs/44322411124/reviewer_synthesis/deterministic_controls_original_heldout_global_holm.csv
+          test -s R1/runs/44344323290/synthesis/Q1_STAGE12_FINAL_original_216_frozen_contrasts_calibrated.csv
+      - name: Summarize ONLY original 500-replicate Q95 precision and paired uncertainty
+        run: |
+          set -euo pipefail
+          python3 scripts/t3_r1_q95_reviewer_existing_results.py \
+            --out R1/reviewer_q95_2026-11-25
+          python3 - <<'PY'
+          import csv,json
+          from pathlib import Path
+          p=Path("R1/reviewer_q95_2026-11-25")
+          x=json.loads((p/"Q95_REVIEWER_SUMMARY.json").read_text())
+          assert x["status"]=="PASS_ORIGINAL_ONLY_Q95_REVIEWER_REANALYSIS"
+          assert x["original_monte_carlo_runs"]==x["optimizer_refits"]==x["new_null_simulations"]==0
+          assert x["method_pair_q95_contrasts"]==108 and x["DE_vs_convex_blocks"]==18
+          for fn,n in (("Q95_DE_18_BLOCK_ORIGINAL_PRECISION_AND_PAIRED_EFFECTS.csv",18),
+                       ("Q95_108_METHOD_PAIRS_SURROGATE_CONDITIONAL_PRECISION.csv",108)):
+              with (p/fn).open() as f:
+                  assert len(list(csv.DictReader(f)))==n
+          print("Q95_ORIGINAL_ONLY_REVIEWER_GATE_PASS")
+          PY
+      - name: Preserve results as independent Action artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: R1-Q95-reviewer-original-only-${{ github.run_id }}
+          path: R1/reviewer_q95_2026-11-25/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Commit only new immutable review output directory
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add R1/reviewer_q95_2026-11-25/
+          git diff --cached --quiet && { echo 'Expected original-only review outputs missing'; exit 1; }
+          git commit -m 'Archive Q95 reviewer reanalysis from original R1 evidence only'
+          git push origin HEAD:main
