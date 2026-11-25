@@ -1,0 +1,22 @@
+{
+  "blocks_72": {
+    "path": "R1/runs/44324757704/synthesis/table_RQ1_72_method_family_sample_integrated.csv",
+    "rows": 72,
+    "sha256": "6ad1efe043e2c3c7848418a629862f4a16b060a68a49df3a1f750d6159cd906f"
+  },
+  "control_288": {
+    "path": "R1/runs/44322411124/reviewer_synthesis/deterministic_controls_original_heldout_global_holm.csv",
+    "rows": 288,
+    "sha256": "330bf0caeb479f1e83449a0ce0d73896866b544af606557751cd742db220c04b"
+  },
+  "method_216": {
+    "path": "R1/runs/44344323290/synthesis/Q1_STAGE12_FINAL_original_216_frozen_contrasts_calibrated.csv",
+    "rows": 216,
+    "sha256": "61769e67eff2a92956f58e02e2e902725eea82a3e0c2d7a0ef9b8ad0073886f4"
+  },
+  "precision_108": {
+    "path": "R1/runs/44322411124/reviewer_synthesis/q95_mc_uncertainty_all_108_method_strata.csv",
+    "rows": 108,
+    "sha256": "2056024da034e127d98d72527ca099082c4efa796d263f24296373190c6569dd"
+  }
+}

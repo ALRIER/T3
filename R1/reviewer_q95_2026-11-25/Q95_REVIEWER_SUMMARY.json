@@ -1,0 +1,37 @@
+{
+  "DE_Q95_gain_below_5pct_identifiers": [
+    "weibull/n1000",
+    "exgaussian/n200",
+    "exwald/n200",
+    "exwald/n1000",
+    "exwald/n3000"
+  ],
+  "DE_Q95_positive_gain_below_5pct": 5,
+  "DE_dual_descriptive_gains_vs_convex": 13,
+  "DE_original_288_panel_Holm_supported": 18,
+  "DE_original_conditional_Q95_CI_excludes_zero": 18,
+  "DE_vs_convex_blocks": 18,
+  "independent_original_heldout_eval_seeds": 10,
+  "method_pair_effect_size_groups": {
+    "at_least_5pct": {
+      "pairs": 79,
+      "surrogate_minP_flags": 42,
+      "surrogate_pointwise_CI_excludes_zero": 76,
+      "surrogate_simultaneous_216_CI_excludes_zero": 42
+    },
+    "smaller_than_5pct": {
+      "pairs": 29,
+      "surrogate_minP_flags": 0,
+      "surrogate_pointwise_CI_excludes_zero": 12,
+      "surrogate_simultaneous_216_CI_excludes_zero": 0
+    }
+  },
+  "method_pair_q95_contrasts": 108,
+  "n_original_mc_replicates_per_scenario": 500,
+  "new_null_simulations": 0,
+  "optimizer_refits": 0,
+  "original_monte_carlo_runs": 0,
+  "q95_precision_strata": 108,
+  "scope": "Q95 order-statistic 95pct interval widths quantify within-Monte-Carlo tail-loss precision, NOT the paired gain uncertainty; original t9/Holm and corrected crossed-effect surrogate are not full end-to-end selection-aware guarantees",
+  "status": "PASS_ORIGINAL_ONLY_Q95_REVIEWER_REANALYSIS"
+}
